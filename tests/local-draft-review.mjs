@@ -555,6 +555,40 @@ export async function run() {
     }, afterPublishList), true);
     assert.equal(afterPublishList.status, 200);
     assert.doesNotMatch(afterPublishList.body, /role="status"/);
+    // Opening a published puzzle with no working copy seeds one, whichever
+    // way the store says "missing": the page reads the working copy while it
+    // loads the category registry, and the seeding path, not the page, judges
+    // that read's failure.
+    await assert.rejects(() => draftStore.getDraft("energy-flow"));
+    const plainNotFoundStore = new Proxy(draftStore, {
+      get(target, property) {
+        if (property === "getDraft") {
+          return async id => {
+            try {
+              return await target.getDraft(id);
+            } catch (error) {
+              if (error?.name === "DraftNotFoundError" || /Unknown draft/.test(error?.message || "")) {
+                throw new Error(`Draft "${id}" not found`);
+              }
+              throw error;
+            }
+          };
+        }
+        const value = target[property];
+        return typeof value === "function" ? value.bind(target) : value;
+      }
+    });
+    const seededPage = createResponse();
+    assert.equal(await createLocalDraftReviewHandler({
+      draftStore: plainNotFoundStore,
+      contentService,
+      contentDocuments,
+      repositoryRoot,
+      publicationActor: { subject: "local" }
+    })({ method: "GET", url: "/admin/drafts/energy-flow" }, seededPage), true);
+    assert.equal(seededPage.status, 200, seededPage.body.slice(0, 300));
+    assert.equal((await draftStore.getDraft("energy-flow")).document.id, "energy-flow");
+    await draftStore.deleteDraft?.("energy-flow");
     assert.match(afterPublishGet.body, /Public play reads the published D1 snapshot/);
     assert.match(afterPublishGet.body, /badge-ok">published/);
     assert.match(afterPublishGet.body, />not cued for freeze</);
