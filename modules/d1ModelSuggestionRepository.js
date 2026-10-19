@@ -3,7 +3,8 @@
 
 import {
   AUTHORING_MODEL_SUGGESTIONS,
-  modelToHostSlug
+  modelToHostSlug,
+  sortModelSuggestionLabels
 } from "./authoringModelSuggestions.js";
 
 export class D1ModelSuggestionRepository {
@@ -13,17 +14,10 @@ export class D1ModelSuggestionRepository {
   }
 
   async list() {
-    // Keep later D1 additions newest-first before the curated migration seed.
-    // Freeze uses this same order so its offline snapshot matches the picker.
     const { results } = await this.database.prepare(
       `SELECT label
        FROM authoring_model_suggestions
-       ORDER BY
-         CASE WHEN created_by LIKE 'migration:%' THEN 1 ELSE 0 END ASC,
-         CASE WHEN created_by LIKE 'migration:%' THEN created_at END ASC,
-         CASE WHEN created_by NOT LIKE 'migration:%' OR created_by IS NULL
-              THEN created_at END DESC,
-         label ASC`
+       ORDER BY lower(label) ASC, label ASC`
     ).all();
     return (results || []).map(row => row.label);
   }
@@ -53,17 +47,11 @@ export class D1ModelSuggestionRepository {
     const merged = new Map(AUTHORING_MODEL_SUGGESTIONS
       .filter(label => !["auto", "custom model"].includes(label.toLowerCase()))
       .map(label => [modelToHostSlug(label), label]));
-    const seedSlugs = new Set(merged.keys());
-    const additions = [];
     for (const label of labels) {
       const slug = modelToHostSlug(label);
-      if (!slug) continue;
-      if (!seedSlugs.has(slug)) additions.push(label);
-      merged.set(slug, label);
+      if (slug) merged.set(slug, label);
     }
-    // The pre-catalog database is additive-only; keep its new labels ahead of
-    // the checked-in catalog just like a complete D1 catalog does.
-    return [...additions, ...merged.values()];
+    return sortModelSuggestionLabels([...merged.values()]);
   }
 
   async listForFreeze() {

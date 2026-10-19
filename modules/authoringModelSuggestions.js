@@ -71,8 +71,20 @@ function configuredModelLabels(labels = []) {
   return result;
 }
 
+function compareModelSuggestionLabels(left, right) {
+  const leftFolded = left.toLowerCase();
+  const rightFolded = right.toLowerCase();
+  if (leftFolded < rightFolded) return -1;
+  if (leftFolded > rightFolded) return 1;
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+export function sortModelSuggestionLabels(labels = []) {
+  return configuredModelLabels(labels).sort(compareModelSuggestionLabels);
+}
+
 export function modelSuggestionSnapshotLabels(labels = []) {
-  return ["auto", ...configuredModelLabels(labels), "Custom Model"];
+  return ["auto", ...sortModelSuggestionLabels(labels), "Custom Model"];
 }
 
 /**
