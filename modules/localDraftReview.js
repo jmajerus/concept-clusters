@@ -2152,15 +2152,12 @@ export function createLocalDraftReviewHandler({
         contentService,
         actor: publicationActor
       });
+      // The working copy is read while the registry loads, but only
+      // loadOrSeedPuzzleDraft awaits that read, so its own test of what
+      // counts as a missing working copy (one to seed) decides as before.
       let prefetchedDraft = draftStore.getDraft(draftId);
       prefetchedDraft.catch(() => {});
-      const [, categoryRegistry] = await Promise.all([prefetchedDraft, categoryRegistryLoad])
-        .catch(async error => {
-          // A missing working copy is opened below; only the registry's own
-          // failure is fatal here.
-          if (!isMissingDraft(error)) throw error;
-          return [null, await categoryRegistryLoad];
-        });
+      const categoryRegistry = await categoryRegistryLoad;
       const opened = await loadOrSeedPuzzleDraft({
         // The first read is the one already in flight; a retry after a
         // create race reads again.

@@ -305,9 +305,11 @@ edited, so a change undone by hand stops counting as unpublished. The
 comparison runs when the puzzle list is built, and that route reports its
 cost in a `Server-Timing` header. The local server remembers each row's
 comparison and layout check (`modules/derivedRowMemo.js`) under the revision,
-content hash, and `updated_at` of the working copy and its published puzzle,
-plus a fingerprint of the category registry, so a list load recomputes only
-the rows that changed. A restart, which any change to the comparison rules
+content hash, `updated_at`, withdrawal, and a fingerprint of the parsed layout
+of the working copy and of its published puzzle, plus a fingerprint of the
+category registry, so a list load recomputes only the rows that changed. The
+layout fingerprint covers a layout save, which changes only `updated_at`, even
+when two saves share a millisecond. A restart, which any change to the comparison rules
 needs, recomputes them all.
 
 `document_stale` is unrelated to publication. It marks the stored `document`
