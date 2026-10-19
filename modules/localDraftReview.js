@@ -405,9 +405,19 @@ function isMissingDraft(error) {
 async function publishedSnapshotsFor(contentDocuments, puzzleId, events) {
   const snapshots = {};
   if (typeof contentDocuments?.getPublishedAtRevision !== "function") return snapshots;
-  const revisions = [...new Set((events || [])
-    .filter(event => event.eventType === "rejected" && Number.isInteger(event.basePublishedRevision))
-    .map(event => event.basePublishedRevision))];
+  // A rejection is shown against the revision it was filed on; an acceptance
+  // against the revision it replaced.
+  const revisions = [...new Set((events || []).flatMap(event => {
+    if (event.eventType === "rejected" && Number.isInteger(event.basePublishedRevision)) {
+      return [event.basePublishedRevision];
+    }
+    if (event.eventType === "accepted" && Number.isInteger(event.publishedRevision)) {
+      return event.publishedRevision > 1
+        ? [event.publishedRevision - 1, event.publishedRevision]
+        : [];
+    }
+    return [];
+  }))];
   await Promise.all(revisions.map(async revision => {
     const snapshot = await contentDocuments.getPublishedAtRevision({
       kind: "puzzle",

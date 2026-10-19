@@ -2054,37 +2054,85 @@ function reviewEventTimeOrder(left, right) {
   return (Number(left.id) || 0) - (Number(right.id) || 0);
 }
 
+// A decision row carries no text of its own: what the agent did lives on the
+// proposal it decided, so the row borrows that proposal's notes and diff.
 function decisionEventDetail(event, publishedSnapshots, events = []) {
   const source = Number.isInteger(event.sourceEventId)
     ? events.find(item => item.id === event.sourceEventId)
     : null;
   const candidate = source ? `${reviewCandidateLabel(source)}'s proposal` : null;
+  const notes = source?.comments || null;
+  const snapshot = revision => publishedSnapshots?.[revision] || null;
   if (event.eventType === "proposed") {
     const against = event.basePublishedRevision
       ? ` against published revision ${event.basePublishedRevision}`
       : "";
-    return `Proposed by ${reviewCandidateLabel(event)}${against}.`;
+    return { summary: `Proposed by ${reviewCandidateLabel(event)}${against}.`, notes: null, diff: null };
   }
   if (event.eventType === "accepted") {
-    return candidate
-      ? `Accepted ${candidate} as published revision ${event.publishedRevision}.`
-      : `Accepted as published revision ${event.publishedRevision}.`;
+    const revision = event.publishedRevision;
+    const before = Number.isInteger(revision) ? snapshot(revision - 1) : null;
+    const after = Number.isInteger(revision) ? snapshot(revision) : null;
+    return {
+      summary: candidate
+        ? `Accepted ${candidate} as published revision ${revision}.`
+        : `Accepted as published revision ${revision}.`,
+      notes,
+      diff: before && after ? diffPublishedDraft(before, after) : null,
+      diffLabel: `Changes from published revision ${revision - 1}`
+    };
   }
-  if (event.eventType !== "rejected") return "";
-  const against = event.basePublishedRevision
-    ? ` against published revision ${event.basePublishedRevision}`
-    : "";
-  const baseline = publishedSnapshots?.[event.basePublishedRevision] || null;
+  if (event.eventType !== "rejected") return null;
+  const baseline = snapshot(event.basePublishedRevision);
   const diff = baseline && event.proposal
     ? diffPublishedDraft(baseline, event.proposal)
     : null;
-  const counts = diff
-    ? ` ${diff.counts.changed} changed, ${diff.counts.added} added, ${diff.counts.removed} removed.`
+  // Publish records the losing proposals in the same write as the winner, so
+  // they share its timestamp. Only Keep published leaves the live revision
+  // in place.
+  const winner = events.find(item =>
+    item.eventType === "accepted" && item.reviewedAt === event.reviewedAt);
+  const winnerSource = winner && Number.isInteger(winner.sourceEventId)
+    ? events.find(item => item.id === winner.sourceEventId)
+    : null;
+  const diffLabel = event.basePublishedRevision
+    ? `Proposed changes to published revision ${event.basePublishedRevision}`
+    : "Proposed changes";
+  if (winner) {
+    const winnerLabel = winnerSource ? reviewCandidateLabel(winnerSource) : null;
+    const chosen = !winnerLabel
+      ? "Another proposal"
+      : source && reviewCandidateLabel(source) === winnerLabel
+        ? `${winnerLabel}'s other proposal`
+        : `${winnerLabel}'s proposal`;
+    return {
+      summary: `Not chosen: ${chosen} was published as revision ${winner.publishedRevision}.`,
+      notes,
+      diff,
+      diffLabel
+    };
+  }
+  const against = event.basePublishedRevision
+    ? ` against published revision ${event.basePublishedRevision}`
     : "";
-  const kept = candidate
-    ? `Rejected ${candidate}, kept${against}`
-    : `Rejected proposal kept${against}`;
-  return `${kept}.${counts}`;
+  return {
+    summary: candidate
+      ? `Rejected ${candidate}, kept${against}.`
+      : `Rejected proposal kept${against}.`,
+    notes,
+    diff,
+    diffLabel
+  };
+}
+
+function renderDecisionChanges(detail) {
+  if (!detail?.diff) return "";
+  const lines = reviewCandidateLines(detail.diff);
+  if (!lines.length) return "";
+  const { changed, added, removed } = detail.diff.counts;
+  return `<details class="review-note"><summary>${escapeHtml(detail.diffLabel)}: ${changed} changed, ${added} added, ${removed} removed</summary>
+    <ul>${lines.map(line => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
+  </details>`;
 }
 
 export function renderPuzzleReviewIssuesPage({
@@ -2149,7 +2197,7 @@ export function renderPuzzleReviewIssuesPage({
     <h2>Completed review history</h2>
     ${completedEvents.length ? `<ol class="review-events">${completedEvents.map(event => {
       const decision = decisionEventDetail(event, publishedSnapshots, events);
-      return `<li><strong>${escapeHtml(reviewActorLabel(event))}</strong> · ${escapeHtml(event.reviewedAt)} · ${escapeHtml(event.eventType)}${event.outcome ? ` · ${escapeHtml(event.outcome)}` : ""}${decision ? ` · ${escapeHtml(decision)}` : ""}${!decision && event.draftRevision ? event.outcome === "changed" ? ` · changes recorded in draft revision ${escapeHtml(event.draftRevision)}` : ` · reviewed draft revision ${escapeHtml(event.draftRevision)}` : ""}${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}</li>`;
+      return `<li><strong>${escapeHtml(reviewActorLabel(event))}</strong> · ${escapeHtml(event.reviewedAt)} · ${escapeHtml(event.eventType)}${event.outcome ? ` · ${escapeHtml(event.outcome)}` : ""}${decision ? ` · ${escapeHtml(decision.summary)}` : ""}${!decision && event.draftRevision ? event.outcome === "changed" ? ` · changes recorded in draft revision ${escapeHtml(event.draftRevision)}` : ` · reviewed draft revision ${escapeHtml(event.draftRevision)}` : ""}${decision?.notes ? `<p class="review-note">${escapeHtml(decision.notes)}</p>` : ""}${renderDecisionChanges(decision)}${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}</li>`;
     }).join("")}</ol>` : '<p class="meta">No completed reviews recorded.</p>'}
     ${chronicleOnly ? `<p class="meta">This working copy was discarded. Accepted and rejected reviews remain on this record.</p>` : `<section class="submit-pr">
       <h2>Human review</h2>

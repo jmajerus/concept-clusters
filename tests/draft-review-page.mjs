@@ -1176,12 +1176,17 @@ export async function run() {
   const historyPage = renderPuzzleReviewIssuesPage({
     draft: { draftId: "review-fixture", title: "Review Fixture", document: { title: "Review Fixture" } },
     events: [
-      { id: 9, reviewerKind: "human", reviewedAt: "2026-10-02T02:48:32.869Z", issueId: null, eventType: "rejected", comments: null, outcome: null },
+      { id: 9, reviewerKind: "human", reviewedAt: "2026-10-02T02:48:32.869Z", issueId: null, eventType: "rejected", comments: null, outcome: null, sourceEventId: 4, basePublishedRevision: 7, proposal: { ...baseDraft.document, clusters: [{ ...baseDraft.document.clusters[0], fact: "Losing fact." }] } },
+      { id: 4, reviewerKind: "agent", reviewedAt: "2026-10-01T11:00:00.000Z", issueId: null, eventType: "proposed", comments: "Rival rewrite notes.", outcome: null, clientSystem: "codex" },
       { id: 7, reviewerKind: "agent", reviewedAt: "2026-10-01T15:02:30.229Z", issueId: null, eventType: "review", outcome: "changed", draftRevision: 26, comments: "Later pass." },
-      { id: 8, reviewerKind: "human", reviewedAt: "2026-10-02T02:48:32.869Z", issueId: null, eventType: "accepted", comments: null, outcome: null, publishedRevision: 8 },
+      { id: 8, reviewerKind: "human", reviewedAt: "2026-10-02T02:48:32.869Z", issueId: null, eventType: "accepted", comments: null, outcome: null, publishedRevision: 8, sourceEventId: 5 },
       { id: 6, reviewerKind: "agent", reviewedAt: "2026-10-01T13:26:11.071Z", issueId: null, eventType: "review", outcome: "changed", draftRevision: 8, comments: "Earlier pass." },
-      { id: 5, reviewerKind: "agent", reviewedAt: "2026-10-01T12:00:00.000Z", issueId: null, eventType: "proposed", comments: null, outcome: null }
-    ]
+      { id: 5, reviewerKind: "agent", reviewedAt: "2026-10-01T12:00:00.000Z", issueId: null, eventType: "proposed", comments: "Tightened the cluster facts.", outcome: null, clientSystem: "claude-code" }
+    ],
+    publishedSnapshots: {
+      7: baseDraft.document,
+      8: { ...baseDraft.document, clusters: [{ ...baseDraft.document.clusters[0], fact: "Winning fact." }] }
+    }
   });
   const earlierPass = historyPage.indexOf("Earlier pass.");
   const laterPass = historyPage.indexOf("Later pass.");
@@ -1191,6 +1196,14 @@ export async function run() {
   assert.ok(acceptedAt > laterPass);
   assert.ok(rejectedAt > acceptedAt);
   assert.doesNotMatch(historyPage, /· proposed/);
+  assert.match(historyPage, /Tightened the cluster facts\./);
+  assert.match(historyPage, /Rival rewrite notes\./);
+  assert.match(historyPage, /Not chosen: .*'s proposal was published as revision 8\./);
+  assert.doesNotMatch(historyPage, /kept against published revision 7/);
+  assert.match(historyPage, /Changes from published revision 7: 1 changed/);
+  assert.match(historyPage, /Winning fact\./);
+  assert.match(historyPage, /Proposed changes to published revision 7: 1 changed/);
+  assert.match(historyPage, /Losing fact\./);
 
   const publishedLocal = renderDraftPage({
     ...baseDraft,
