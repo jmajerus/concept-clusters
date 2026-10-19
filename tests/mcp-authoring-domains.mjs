@@ -254,6 +254,58 @@ export async function run() {
     });
     assert.equal(repairedContentSave.result.isError, undefined);
     assert.equal(repairedContentSave.result.structuredContent.repair.applied, true);
+
+    // A content save can retarget a bridge onto new cluster ids, but
+    // idealTerms is pedagogy and survives. The save still stores the draft;
+    // the success line has to name that leftover key.
+    const retargetCreated = await session.request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        draft_id: "retarget-bridge",
+        document: {
+          id: "retarget-bridge",
+          title: "Retarget",
+          category: "Science",
+          clusters: [
+            { id: "alpha", name: "Alpha", fact: "Alpha", seeds: ["a", "b"], floatingTerms: ["c"] },
+            { id: "beta", name: "Beta", fact: "Beta", seeds: ["d", "e"], floatingTerms: ["f"] },
+            { id: "gamma", name: "Gamma", fact: "Gamma", seeds: ["g", "h"], floatingTerms: ["i"] }
+          ],
+          bridges: [{
+            id: "shared",
+            term: "Shared",
+            clusters: ["alpha", "beta"],
+            fact: "Shared fact",
+            idealTerms: { alpha: "a", beta: "d" }
+          }]
+        }
+      }
+    });
+    assert.equal(retargetCreated.result.isError, undefined);
+    assert.doesNotMatch(retargetCreated.result.content[0].text, /Stored with inconsistency/);
+    const retargetRead = await session.request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "retarget-bridge", domain: "content" }
+    });
+    const retargetDraft = retargetRead.result.structuredContent.draft;
+    const retargetSave = await session.request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "retarget-bridge",
+        expected_revision: retargetDraft.revision,
+        domain: "content",
+        document: {
+          bridges: [{ id: "shared", clusters: ["alpha", "gamma"] }]
+        }
+      }
+    });
+    assert.equal(retargetSave.result.isError, undefined);
+    assert.equal(retargetSave.result.structuredContent.normalization.applied, false);
+    assert.ok(retargetSave.result.structuredContent.normalization.errors.some(error =>
+      error.includes("idealTerms") && error.includes("beta")
+    ));
+    assert.match(retargetSave.result.content[0].text, /Stored with inconsistency/);
+    assert.match(retargetSave.result.content[0].text, /idealTerms references "beta"/);
   } finally {
     await session.close();
     await rm(directory, { recursive: true, force: true });

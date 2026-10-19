@@ -15,6 +15,7 @@ import {
   LEGACY_REVIEW_LOG_RELATIVE
 } from "../modules/authoringWorkspacePaths.js";
 import { parseListenHost, parseLocalDevOptions } from "../modules/localDevHttp.js";
+import { ContentDocumentNotFoundError } from "../modules/contentDocumentRepository.js";
 import { runSuggest } from "../.agents/skills/review-puzzle/scripts/suggest-review.mjs";
 
 export const name = "Authoring workspace: data dir, review URL, LAN bind, review log";
@@ -92,9 +93,27 @@ export async function run() {
         authored: true
       }, { contentDocuments: { recordPuzzleAgentReview: async () => ({}) } });
       assert.equal(recorded.wrote, true);
+      assert.equal(recorded.durable, true);
       assert.equal(recorded.path, join(recordDir, "review-log.json"));
+      assert.match(recorded.where, /Wrote the local review log at/);
+      assert.match(recorded.where, /draft repository accepted the review/);
       const log = JSON.parse(readFileSync(recorded.path, "utf8"));
       assert.equal(log.puzzles["energy-flow"].outcome, "authored");
+      const missed = await runSuggest({
+        record: "not-a-published-puzzle",
+        authored: true
+      }, {
+        contentDocuments: {
+          recordPuzzleAgentReview: async () => {
+            throw new ContentDocumentNotFoundError("puzzle", "not-a-published-puzzle");
+          }
+        }
+      });
+      assert.equal(missed.durable, false);
+      assert.equal(missed.wrote, true);
+      assert.equal(missed.unpublished, true);
+      assert.ok(missed.where.includes(`Wrote the local review log at ${missed.path}`));
+      assert.match(missed.where, /draft repository did not accept the review/);
     } finally {
       if (previous === undefined) delete process.env.AUTHORING_DATA_DIR;
       else process.env.AUTHORING_DATA_DIR = previous;

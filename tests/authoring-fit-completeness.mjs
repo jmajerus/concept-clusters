@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -197,4 +197,47 @@ export async function run() {
     completeReport.blocking.find(gap => gap.id === "missing-category")?.message,
     "Document has no category."
   );
+
+  // The skill writes inventories/<id>.json beside working/, not
+  // working/<id>-inventory.json. Fit should read that file. A missing
+  // inventory is still inventory-missing, and that gap is what proves the
+  // fallback was actually loaded: the connection check only runs then.
+  const siblingDirectory = mkdtempSync(join(tmpdir(), "cc-fit-sibling-"));
+  try {
+    const working = join(siblingDirectory, "working");
+    const inventories = join(siblingDirectory, "inventories");
+    mkdirSync(working);
+    mkdirSync(inventories);
+    const boardPath = join(working, "fit-test.json");
+    writeFileSync(boardPath, JSON.stringify(board([]), null, 2));
+    writeFileSync(join(inventories, "fit-test.json"), JSON.stringify(inventory(), null, 2));
+    const ledgerPath = join(siblingDirectory, "fit-test-fit.json");
+    writeFileSync(ledgerPath, JSON.stringify(ledger([]), null, 2));
+    const sibling = spawnSync(
+      process.execPath,
+      [CHECKER, "--level", "fit", "--ledger", ledgerPath, boardPath],
+      { encoding: "utf8" }
+    );
+    const siblingReport = JSON.parse(sibling.stdout);
+    assert.equal(
+      siblingReport.advisory.some(gap => gap.id === "inventory-missing"),
+      false
+    );
+    assert.ok(siblingReport.blocking.some(gap => gap.id === "unaccounted-connection"));
+
+    rmSync(join(inventories, "fit-test.json"));
+    const absent = spawnSync(
+      process.execPath,
+      [CHECKER, "--level", "fit", "--ledger", ledgerPath, boardPath],
+      { encoding: "utf8" }
+    );
+    const absentReport = JSON.parse(absent.stdout);
+    assert.ok(absentReport.advisory.some(gap => gap.id === "inventory-missing"));
+    assert.equal(
+      absentReport.blocking.some(gap => gap.id === "unaccounted-connection"),
+      false
+    );
+  } finally {
+    rmSync(siblingDirectory, { recursive: true, force: true });
+  }
 }

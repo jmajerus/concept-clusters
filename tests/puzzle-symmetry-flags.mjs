@@ -49,6 +49,9 @@ export async function run() {
   assert.doesNotMatch(clusterFlags[0].message, /cluster count matches/);
   assert.match(clusterFlags[0].message, /concept-gathering pass/);
   assert.match(clusterFlags[0].message, /do not change bridges/i);
+  assert.match(clusterFlags[0].message, /An even count is not a reason to add or remove a bridge/);
+  assert.match(clusterFlags[0].message, /a board with no bridge is a reason to ask whether a real relationship was left off/);
+  assert.match(clusterFlags[0].message, /Do not add a bridge in order to change this flag/);
   // A partial match (3 of 4 clusters share a count, one doesn't) still
   // isn't the same signal as "every cluster".
   assert.deepEqual(computeAuthoringFlags({
@@ -218,7 +221,6 @@ export async function run() {
 
   const variedPath = {
     clusters: [cluster(3), cluster(4), cluster(5)],
-    lenses: [{ targets: ["a"] }, { targets: ["a", "b"] }],
     bridges: [
       { relationKind: "dynamic", clusters: [0, 1] },
       { relationKind: "contrast", clusters: [1, 2] }
@@ -347,4 +349,80 @@ export async function run() {
     }).some(flag => flag.id === "lens-reasons-coverage"),
     true
   );
+
+  // --- no-spanning-lens: every lens stays inside one cluster -----------
+  // Soft flag only. A board with no lenses, quiz mode, or one spanning
+  // lens stays quiet. A bridge term does not count as a second cluster.
+  const spanningBoard = {
+    clusters: [
+      { name: "Alpha", terms: ["a one", "a two", "a three"] },
+      { name: "Beta", terms: ["b one", "b two", "b three"] }
+    ],
+    bridges: [{ term: "shared idea", clusters: [0, 1] }]
+  };
+  const singleClusterLenses = [
+    { id: "a-cut", targets: ["a one", "a two"] },
+    { id: "b-cut", targets: ["b one", "b three"] }
+  ];
+  assert.equal(
+    computeAuthoringFlags({ ...spanningBoard, lenses: [] })
+      .some(flag => flag.id === "no-spanning-lens"),
+    false
+  );
+  assert.equal(
+    computeAuthoringFlags({
+      ...spanningBoard,
+      lensMode: "quiz",
+      lenses: singleClusterLenses
+    }).some(flag => flag.id === "no-spanning-lens"),
+    false
+  );
+  assert.equal(
+    computeAuthoringFlags({
+      ...spanningBoard,
+      lenses: [
+        ...singleClusterLenses,
+        { id: "across", targets: ["a one", "b two"] }
+      ]
+    }).some(flag => flag.id === "no-spanning-lens"),
+    false
+  );
+  const allSingle = computeAuthoringFlags({
+    ...spanningBoard,
+    lenses: singleClusterLenses
+  }).filter(flag => flag.id === "no-spanning-lens");
+  assert.equal(allSingle.length, 1);
+  assert.match(allSingle[0].message, /No lens draws its targets from more than one cluster/);
+  assert.match(allSingle[0].message, /Do not add targets, or join two questions, to clear this flag/);
+  assert.equal(
+    computeAuthoringFlags({
+      ...spanningBoard,
+      lenses: [{ id: "bridge-only-extra", targets: ["a one", "a two", "shared idea"] }]
+    }).some(flag => flag.id === "no-spanning-lens"),
+    true
+  );
+  const authoredSingle = {
+    id: "single-cluster-lenses",
+    title: "Single cluster lenses",
+    category: "Test",
+    clusters: ["a", "b"].map(id => ({
+      id,
+      name: id,
+      fact: "Fact.",
+      seeds: [`${id} one`, `${id} two`],
+      floatingTerms: [`${id} three`]
+    })),
+    bridges: [{
+      term: "shared idea",
+      fact: "Fact.",
+      clusters: ["a", "b"]
+    }],
+    lenses: [
+      { id: "a-cut", prompt: "A?", explanation: "A.", targets: ["a one", "a two"] },
+      { id: "b-cut", prompt: "B?", explanation: "B.", targets: ["b one"] }
+    ]
+  };
+  const { puzzle: authoredSinglePuzzle, errors: authoredSingleErrors } = puzzleFromAuthoredDocument(authoredSingle);
+  assert.deepEqual(authoredSingleErrors, []);
+  assert.ok(computeAuthoringFlags(authoredSinglePuzzle).some(flag => flag.id === "no-spanning-lens"));
 }

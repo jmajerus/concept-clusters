@@ -1276,6 +1276,9 @@ export async function run() {
     });
     assert.equal(brokenCreated.result.structuredContent.normalization.applied, false);
     assert.ok(brokenCreated.result.structuredContent.normalization.errors.some(e => e.includes("fact")));
+    assert.match(brokenCreated.result.content[0].text, /Stored with inconsistency/);
+    assert.match(brokenCreated.result.content[0].text, /fact/);
+    assert.doesNotMatch(simplifiedCreated.result.content[0].text, /Stored with inconsistency/);
     const brokenDraft = await request("tools/call", {
       name: "get_puzzle_draft",
       arguments: { draft_id: "mcp-broken-simplified-fixture" }
