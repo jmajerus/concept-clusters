@@ -160,10 +160,14 @@ export function createLocalPlayCorpusHandler({
   if (!contentDocuments) throw new Error("contentDocuments is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
 
+  // Concurrent first requests share one in-flight seed; a failed seed is
+  // forgotten so the next request tries again.
   async function ensureSeeded() {
     if (seedState.seeded) return;
-    await buildPlayCorpusPayload({ contentDocuments, contentService });
-    seedState.seeded = true;
+    seedState.pending ||= buildPlayCorpusPayload({ contentDocuments, contentService })
+      .then(() => { seedState.seeded = true; })
+      .finally(() => { seedState.pending = null; });
+    await seedState.pending;
   }
 
   return async function handleLocalPlayCorpus(req, res) {

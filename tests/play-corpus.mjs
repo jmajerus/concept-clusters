@@ -312,6 +312,38 @@ export async function run(page) {
   assert.ok(corpusCalls[0] > corpusCalls[1], `the first corpus request seeds: ${corpusCalls.join(", ")}`);
   assert.equal(corpusCalls[1], 3, "a later request only lists the three kinds it serves");
   assert.equal(seedState.seeded, true);
+  // Concurrent first requests share one seed rather than each running it.
+  const concurrentState = { seeded: false };
+  const concurrentHandler = () => createLocalPlayCorpusHandler({
+    contentDocuments: countingRepo,
+    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+    repositoryRoot: root,
+    seedState: concurrentState
+  });
+  const beforeConcurrent = listCalls;
+  const concurrent = [createResponse(), createResponse()];
+  await Promise.all(concurrent.map(response =>
+    concurrentHandler()({ method: "GET", url: "/play/corpus.json" }, response)
+  ));
+  assert.deepEqual(concurrent.map(response => response.status), [200, 200]);
+  assert.equal(listCalls - beforeConcurrent, corpusCalls[0] + corpusCalls[1],
+    "two concurrent first requests seeded once between them");
+  // A failed seed is not remembered as done.
+  const failingState = { seeded: false };
+  const failingRepo = new Proxy(repo, {
+    get(target, property) {
+      if (property === "listPublished") return async () => { throw new Error("D1 unavailable"); };
+      const value = target[property];
+      return typeof value === "function" ? value.bind(target) : value;
+    }
+  });
+  await assert.rejects(() => createLocalPlayCorpusHandler({
+    contentDocuments: failingRepo,
+    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+    repositoryRoot: root,
+    seedState: failingState
+  })({ method: "GET", url: "/play/corpus.json" }, createResponse()), /D1 unavailable/);
+  assert.deepEqual(failingState, { seeded: false, pending: null });
 
   const board = createResponse();
   assert.equal(await handleRequest({
