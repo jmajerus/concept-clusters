@@ -130,7 +130,8 @@ export async function run() {
     });
     assert.equal(contentSave.result.isError, undefined);
     const contentSaved = contentSave.result.structuredContent.draft;
-    assert.equal(contentSaved.document.title, "Content-edited MCP");
+    assert.equal(contentSaved.revision, contentDraft.revision + 1);
+    assert.equal(contentSaved.document, undefined);
 
     const pedagogySave = await session.request("tools/call", {
       name: "save_puzzle_draft",
@@ -178,7 +179,12 @@ export async function run() {
     );
     assert.deepEqual(patchSave.result.structuredContent.kept, []);
     assert.match(patchSave.result.content[0].text, /This save removed/);
-    const patched = patchSave.result.structuredContent.draft.document;
+    assert.equal(patchSave.result.structuredContent.draft.document, undefined);
+    const patchedRead = await session.request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "domain-mcp", domain: "pedagogy" }
+    });
+    const patched = patchedRead.result.structuredContent.draft.document;
     assert.equal(patched.bridges[0].relationKind, undefined);
     assert.deepEqual(patched.lenses, pedagogyDraft.document.lenses);
 

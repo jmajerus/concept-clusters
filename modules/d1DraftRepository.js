@@ -236,18 +236,14 @@ async function returnCommittedDraft(database, error, {
 
 async function rejectConflictUnlessCommitted(repository, {
   draftId,
-  actor,
   ownerSubject,
   expectedRevision,
   draftAt
 }) {
+  let revision;
   try {
-    const latest = await repository.get({ draftId, actor });
-    throw new DraftConflictError(
-      `Draft revision conflict: expected ${expectedRevision}, current revision is ${latest.revision}`
-    );
+    revision = await readCommittedRevision(repository.database, draftId, ownerSubject);
   } catch (error) {
-    if (error instanceof DraftConflictError) throw error;
     return returnCommittedDraft(repository.database, error, {
       draftId,
       ownerSubject,
@@ -255,19 +251,25 @@ async function rejectConflictUnlessCommitted(repository, {
       draftAt
     });
   }
+  if (revision == null) throw new DraftNotFoundError(draftId);
+  throw new DraftConflictError(
+    `Draft revision conflict: expected ${expectedRevision}, current revision is ${revision}`,
+    revision
+  );
 }
 
 async function loadCommittedDraft(repository, {
   draftId,
-  actor,
   ownerSubject,
   expectedRevision,
   draftAt,
   writeHistory = null
 }) {
+  let historyWritten = false;
   if (writeHistory) {
     try {
       await pushWorkingCopyHistory(repository.database, writeHistory);
+      historyWritten = true;
     } catch (error) {
       return returnCommittedDraft(repository.database, error, {
         draftId,
@@ -278,16 +280,18 @@ async function loadCommittedDraft(repository, {
       });
     }
   }
-  try {
-    return await repository.get({ draftId, actor });
-  } catch (error) {
-    return returnCommittedDraft(repository.database, error, {
-      draftId,
-      ownerSubject,
-      expectedRevision,
-      draftAt
-    });
-  }
+  // The caller already holds the document this write stored. changes === 1
+  // means the revision is expectedRevision + 1, so the success path does not
+  // read the row back.
+  const draft = draftAt(expectedRevision + 1);
+  if (!historyWritten) return draft;
+  return {
+    ...draft,
+    workingCopyHistoryCount: Math.min(
+      Number(draft.workingCopyHistoryCount || 0) + 1,
+      MAX_WORKING_COPY_HISTORY
+    )
+  };
 }
 
 async function pushWorkingCopyHistory(database, {
@@ -338,7 +342,9 @@ export class D1DraftRepository extends DraftRepository {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor);
     const current = await this.database.prepare(`
-      SELECT * FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+      SELECT *,
+        (SELECT COUNT(*) FROM puzzle_draft_history WHERE draft_id = puzzle_drafts.id) AS working_copy_history_count
+      FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
     `).bind(draftId, owner.subject).first();
     if (!current) throw new DraftNotFoundError(draftId);
     if (Number(current.revision) !== expectedRevision) {
@@ -734,11 +740,7 @@ export class D1DraftRepository extends DraftRepository {
       `).bind(...guardedIds).first();
       throw new PublishedIdConflictError(live?.id || guardedIds[1]);
     }
-    try {
-      return await this.get({ draftId, actor });
-    } catch (error) {
-      return returnCommittedDraft(this.database, error, committed);
-    }
+    return draftAt(1);
   }
 
   async get({ draftId, actor }) {
@@ -853,7 +855,9 @@ export class D1DraftRepository extends DraftRepository {
     }
     const owner = normalizeDraftActor(actor);
     const current = await this.database.prepare(`
-      SELECT * FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+      SELECT *,
+        (SELECT COUNT(*) FROM puzzle_draft_history WHERE draft_id = puzzle_drafts.id) AS working_copy_history_count
+      FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
     `).bind(draftId, owner.subject).first();
     if (!current) throw new DraftNotFoundError(draftId);
     if (Number(current.revision) !== expectedRevision) {
@@ -877,7 +881,7 @@ export class D1DraftRepository extends DraftRepository {
     const documentJson = serializeDraftDocument(materialized);
     const previousAssembled = serializeDraftDocument(currentDocument);
     if (previousAssembled === documentJson && Number(current.document_stale || 0) !== 1) {
-      return this.get({ draftId, actor });
+      return fullDraft(current);
     }
     const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(documentJson);
@@ -961,7 +965,9 @@ export class D1DraftRepository extends DraftRepository {
     }
     const owner = normalizeDraftActor(actor);
     const current = await this.database.prepare(`
-      SELECT * FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+      SELECT *,
+        (SELECT COUNT(*) FROM puzzle_draft_history WHERE draft_id = puzzle_drafts.id) AS working_copy_history_count
+      FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
     `).bind(draftId, owner.subject).first();
     if (!current) throw new DraftNotFoundError(draftId);
     if (Number(current.revision) !== expectedRevision) {
@@ -980,7 +986,7 @@ export class D1DraftRepository extends DraftRepository {
     const materialized = assembleStoredDomainDocuments({ document: nextDocument });
     const nextAssembled = serializeDraftDocument(materialized);
     if (previousAssembled === nextAssembled) {
-      return this.get({ draftId, actor });
+      return fullDraft(current);
     }
     const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(nextAssembled);

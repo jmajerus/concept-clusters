@@ -134,11 +134,13 @@ export async function run() {
     assert.match(saveTool.description, /A validation or ownership rejection did not commit/);
     assert.match(saveTool.description, /When the error names a current revision/);
     assert.match(saveTool.description, /merging a draft this session has not seen/);
+    assert.match(saveTool.description, /does not include the document/);
     assert.doesNotMatch(saveTool.description, /fetch failed|D1_ERROR|non-JSON/);
     const createTool = listed.result.tools.find(tool => tool.name === "create_puzzle_draft");
     assert.match(createTool.description, /A validation or ownership rejection did not commit/);
     assert.match(createTool.description, /When the error names a current revision/);
     assert.match(createTool.description, /merging a draft this session has not seen/);
+    assert.match(createTool.description, /does not include the document/);
     assert.doesNotMatch(createTool.description, /fetch failed|D1_ERROR|non-JSON/);
     const revisionField = saveTool.inputSchema.properties.expected_revision;
     assert.equal(revisionField.type, "integer");
@@ -1178,11 +1180,7 @@ export async function run() {
     });
     assert.equal(simplifiedCreated.result.structuredContent.normalization, undefined);
     assert.equal(simplifiedCreated.result.structuredContent.draft.revision, 1);
-    assert.equal(
-      simplifiedCreated.result.structuredContent.draft.document.category,
-      "science",
-      "creation should return the canonical category id at revision 1"
-    );
+    assert.equal(simplifiedCreated.result.structuredContent.draft.document, undefined);
     const simplifiedDraft = await request("tools/call", {
       name: "get_puzzle_draft",
       arguments: { draft_id: "mcp-simplified-fixture" }
@@ -1397,7 +1395,14 @@ export async function run() {
       }
     });
     assert.equal(freshUnpublished.result.isError, undefined);
-    assert.equal(freshUnpublished.result.structuredContent.draft.document.id, "never-published-board");
+    assert.equal(freshUnpublished.result.structuredContent.draft.draftId, "never-published-board");
+    assert.equal(freshUnpublished.result.structuredContent.draft.document, undefined);
+    const freshLoaded = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "never-published-board" }
+    });
+    const freshDocument = freshLoaded.result.structuredContent.draft.document;
+    assert.equal(freshDocument.id, "never-published-board");
 
     // A save never moves a draft's identity: the row would stay keyed by the
     // old id while a later Publish wrote to the new one. Renaming is a human
@@ -1408,7 +1413,7 @@ export async function run() {
         draft_id: "never-published-board",
         expected_revision: freshUnpublished.result.structuredContent.draft.revision,
         document: {
-          ...freshUnpublished.result.structuredContent.draft.document,
+          ...freshDocument,
           id: "renamed-behind-your-back"
         }
       }
@@ -1423,8 +1428,7 @@ export async function run() {
     // Dropping the id is drift too: the repository recomputes puzzle_id from
     // the document, so an omitted id would null it while the row stayed keyed
     // by draft_id.
-    const { id: _dropped, ...withoutId } =
-      freshUnpublished.result.structuredContent.draft.document;
+    const { id: _dropped, ...withoutId } = freshDocument;
     const dropAttempt = await request("tools/call", {
       name: "save_puzzle_draft",
       arguments: {
@@ -1443,14 +1447,20 @@ export async function run() {
         draft_id: "never-published-board",
         expected_revision: freshUnpublished.result.structuredContent.draft.revision,
         document: {
-          ...freshUnpublished.result.structuredContent.draft.document,
+          ...freshDocument,
           title: "Never published, retitled"
         }
       }
     });
     assert.equal(noDrift.result.isError, undefined);
-    assert.equal(noDrift.result.structuredContent.draft.document.title, "Never published, retitled");
-    assert.equal(noDrift.result.structuredContent.draft.document.id, "never-published-board");
+    assert.equal(noDrift.result.structuredContent.draft.revision, 2);
+    assert.equal(noDrift.result.structuredContent.draft.document, undefined);
+    const retitled = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "never-published-board" }
+    });
+    assert.equal(retitled.result.structuredContent.draft.document.title, "Never published, retitled");
+    assert.equal(retitled.result.structuredContent.draft.document.id, "never-published-board");
 
     // And the sanctioned route into a live puzzle still works.
     const seeded = await request("tools/call", {
@@ -1462,8 +1472,14 @@ export async function run() {
     });
     assert.equal(seeded.result.isError, undefined);
     assert.equal(seeded.result.structuredContent.created, true);
-    assert.equal(seeded.result.structuredContent.draft.document.id, "energy-flow");
-    assert.ok(seeded.result.structuredContent.draft.document.clusters.length > 0);
+    assert.equal(seeded.result.structuredContent.draft.draftId, "energy-flow");
+    assert.equal(seeded.result.structuredContent.draft.document, undefined);
+    const seededDraft = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "energy-flow" }
+    });
+    assert.equal(seededDraft.result.structuredContent.draft.document.id, "energy-flow");
+    assert.ok(seededDraft.result.structuredContent.draft.document.clusters.length > 0);
 
     const seededAgain = await request("tools/call", {
       name: "create_puzzle_draft",
@@ -1478,7 +1494,7 @@ export async function run() {
       seeded.result.structuredContent.draft.revision
     );
 
-    const beforeShelf = seeded.result.structuredContent.draft.document;
+    const beforeShelf = seededDraft.result.structuredContent.draft.document;
     const reassigned = await request("tools/call", {
       name: "reassign_puzzle_classifications",
       arguments: {

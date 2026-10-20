@@ -141,6 +141,9 @@ const WAIVER_DECISION_KEY = "waiver-decision";
 const RECOVER_AFTER_WRITE_ERROR =
   "A validation or ownership rejection did not commit, so retry the same expected_revision. When the error names a current revision, use that integer and the document you already have. Call get_puzzle_draft before another save when merging a draft this session has not seen.";
 
+const WRITE_RECEIPT =
+  "The response names draftId and revision and does not include the document. Call get_puzzle_draft to read the stored draft.";
+
 // How this client can ask its own user to decide a waiver in the chat, if
 // at all. 2026-07-28 clients declare capabilities on each request and answer
 // through an input-required round trip; 2025-era clients declared them at
@@ -398,6 +401,14 @@ function linkCheckSummary(report, where) {
     ? " Inconclusive means the check could not tell, not that the link is wrong."
     : "";
   return `${wiki} ${web}${caveat}`;
+}
+
+function draftWriteReceipt(draft) {
+  return {
+    draftId: draft.draftId,
+    revision: draft.revision,
+    ...(draft.status ? { status: draft.status } : {})
+  };
 }
 
 function success(summary, output) {
@@ -1233,7 +1244,7 @@ export function createAuthoringMcpServer({
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a private durable draft from a supplied complete document or a minimal skeleton. The server canonicalizes the supplied document before assigning revision 1, and the response is already in that canonical authoring shape; no follow-up normalization save is needed. A complete simplified puzzle may be authored and saved in this one call; get_authoring_schema and phased guidance are optional, never prerequisites. This input is deliberately permissive because drafts may also be incomplete. Set seed_from_published=true with puzzle_id to copy a published D1 snapshot into a working copy without overwriting an existing draft. Git is not a runtime fallback. " + RECOVER_AFTER_WRITE_ERROR,
+      "Create a private durable draft from a supplied complete document or a minimal skeleton. The server canonicalizes the supplied document before assigning revision 1; no follow-up normalization save is needed. A complete simplified puzzle may be authored and saved in this one call; get_authoring_schema and phased guidance are optional, never prerequisites. This input is deliberately permissive because drafts may also be incomplete. Set seed_from_published=true with puzzle_id to copy a published D1 snapshot into a working copy without overwriting an existing draft. Git is not a runtime fallback. " + WRITE_RECEIPT + " " + RECOVER_AFTER_WRITE_ERROR,
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
@@ -1296,7 +1307,7 @@ export function createAuthoringMcpServer({
           ? `Opened working copy ${draftId} from the published snapshot.`
           : `Working copy ${draftId} already exists.`,
         {
-          draft: draftForMcp(draft, { categoryRegistry: await categoryRegistry() }),
+          draft: draftWriteReceipt(draft),
           created
         }
       );
@@ -1346,7 +1357,7 @@ export function createAuthoringMcpServer({
       { analytics, recordStamp }
     );
     return success(`Created draft ${draftId}.` + storedInconsistencyNote(normalization), {
-      draft: draftForMcp(draft, { categoryRegistry: null }),
+      draft: draftWriteReceipt(draft),
       ...(normalization && !normalization.document
         ? { normalization: { applied: false, errors: normalization.errors } }
         : {})
@@ -1475,7 +1486,7 @@ export function createAuthoringMcpServer({
     title: "Save puzzle draft",
     description:
       "Every save requires expected_revision, copied from draft.revision on the latest create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for this draft_id. A draft that has never been created uses create_puzzle_draft. " +
-      "Replace the complete agent-authored document, or write only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. Every focused domain save (domain=content, domain=pedagogy, domain=classification) is a JSON Merge Patch (RFC 7396) over that domain: send only the fields you change; omitted fields are kept, null removes a field, and objects merge. Lists of identified items merge item by item, as in a Kubernetes strategic merge patch: clusters match by id (or name), bridges by id (or term), and lenses, lens options, and relatedPuzzles entries by id. A list entry patches the item it names, an unknown one is appended, and items left out are kept. Remove an item with {\"id\": \"...\", \"$patch\": \"delete\"}; put {\"$patch\": \"replace\"} in a list to replace it whole, for example to reorder. Every other list (terms, tags, categories, citations, links, lens targets) replaces whole. When a patch moves a term off a cluster, that term's termInfo note goes too unless the patch sets it. Every domain save response lists what it removed in `cleared` (fields, list items such as clusters[beta] or clusters[alpha].seeds[two], and fields inside kept items) and, in `kept`, keyed items left in place although the patch named most of their list. With domain=content, domain=classification, or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. The first save of a draft that predates classification rewrites the content, pedagogy, and classification columns together so category fields are not stored twice. Pedagogy receives content and classification as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. This tool does not publish a puzzle. A person publishes the working copy, and that publish is what players see. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for classification or pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently. Content owns a bridge's term, clusters, fact, and info; pedagogy owns relationKind, direction, idealTerms, and conceptId; idealTerms is a map, a merge patch keeps keys the patch does not mention, and after retargeting a bridge a pedagogy save must set each stale cluster id to null. " + RECOVER_AFTER_WRITE_ERROR,
+      "Replace the complete agent-authored document, or write only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. Every focused domain save (domain=content, domain=pedagogy, domain=classification) is a JSON Merge Patch (RFC 7396) over that domain: send only the fields you change; omitted fields are kept, null removes a field, and objects merge. Lists of identified items merge item by item, as in a Kubernetes strategic merge patch: clusters match by id (or name), bridges by id (or term), and lenses, lens options, and relatedPuzzles entries by id. A list entry patches the item it names, an unknown one is appended, and items left out are kept. Remove an item with {\"id\": \"...\", \"$patch\": \"delete\"}; put {\"$patch\": \"replace\"} in a list to replace it whole, for example to reorder. Every other list (terms, tags, categories, citations, links, lens targets) replaces whole. When a patch moves a term off a cluster, that term's termInfo note goes too unless the patch sets it. Every domain save response lists what it removed in `cleared` (fields, list items such as clusters[beta] or clusters[alpha].seeds[two], and fields inside kept items) and, in `kept`, keyed items left in place although the patch named most of their list. With domain=content, domain=classification, or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. The first save of a draft that predates classification rewrites the content, pedagogy, and classification columns together so category fields are not stored twice. Pedagogy receives content and classification as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. This tool does not publish a puzzle. A person publishes the working copy, and that publish is what players see. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for classification or pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently. Content owns a bridge's term, clusters, fact, and info; pedagogy owns relationKind, direction, idealTerms, and conceptId; idealTerms is a map, a merge patch keeps keys the patch does not mention, and after retargeting a bridge a pedagogy save must set each stale cluster id to null. " + WRITE_RECEIPT + " " + RECOVER_AFTER_WRITE_ERROR,
     inputSchema: puzzleDraftSaveSchema({
       draft_id: draftIdSchema,
       expected_revision: z.number({ error: EXPECTED_REVISION_CONTRACT }).int().positive().describe(
@@ -1605,9 +1616,7 @@ export function createAuthoringMcpServer({
         storedInconsistencyNote(normalization) + repairNote + clearedNote + keptNote,
       {
         ...(domain !== "complete" ? { cleared, kept } : {}),
-        draft: domain === "complete"
-          ? draftForMcp(draft, { categoryRegistry: null })
-          : draftForMcpDomain(draft, domain, { categoryRegistry: null }),
+        draft: draftWriteReceipt(draft),
         ...(!normalization.document
           ? { normalization: { applied: false, errors: normalization.errors } }
           : {}),

@@ -171,17 +171,14 @@ export async function run() {
   for (const kind of ["fetch", "internal", "json"]) {
     const error = lostResponse(kind);
     const createdDb = createSqliteD1();
-    const created = openWrapped(
-      createdDb,
-      failOnce(entry => /SELECT puzzle_drafts\.\*/.test(entry.sql), error)
-    );
+    const created = openWrapped(createdDb, () => undefined);
     const draft = await created.repository.create({ draftId, document, actor });
     assert.equal(draft.revision, 1);
     assert.equal(draft.draftId, draftId);
     assert.equal(draft.document.title, "Lost response");
     assert.equal(draft.documentStale, false);
     assert.equal(Number(storedRevision(createdDb).revision), 1);
-    assertRevisionProbeOnly(created.calls, entry => /SELECT puzzle_drafts\.\*/.test(entry.sql));
+    assert.equal(created.calls.some(entry => /SELECT puzzle_drafts\.\*/.test(entry.sql)), false);
 
     const committedInsert = createSqliteD1();
     const insertFault = openWrapped(
@@ -211,9 +208,7 @@ export async function run() {
       entry => /INSERT INTO puzzle_drafts\b/.test(entry.sql)
     );
 
-    const trailing = await seeded(
-      failOnce(entry => /SELECT puzzle_drafts\.\*/.test(entry.sql), error)
-    );
+    const trailing = await seeded(() => undefined);
     const saved = await trailing.repository.save({
       draftId,
       document: savedDocument,
@@ -223,8 +218,9 @@ export async function run() {
     assert.equal(saved.revision, 2);
     assert.equal(saved.document.title, "Saved anyway");
     assert.equal(saved.documentStale, false);
+    assert.equal(saved.workingCopyHistoryCount, 1);
     assert.equal(storedRevision(trailing.database).title, "Saved anyway");
-    assertRevisionProbeOnly(trailing.calls, entry => /SELECT puzzle_drafts\.\*/.test(entry.sql));
+    assert.equal(trailing.calls.some(entry => /SELECT puzzle_drafts\.\*/.test(entry.sql)), false);
     assert.equal(
       trailing.calls.filter(entry => /INSERT INTO puzzle_draft_history\b/.test(entry.sql)).length,
       1
@@ -411,14 +407,10 @@ export async function run() {
     }),
     error => error instanceof DraftConflictError && error.revision === 4
   );
-  assertRevisionProbeOnly(
-    lostConflict.calls,
-    entry => /SELECT puzzle_drafts\.\*/.test(entry.sql)
-  );
+  assert.equal(lostConflict.calls.some(entry => /SELECT puzzle_drafts\.\*/.test(entry.sql)), false);
+  assert.ok(lostConflict.calls.some(entry => entry.sql.replace(/\s+/g, " ").trim() === REVISION_SQL));
 
-  const domain = await seeded(
-    failOnce(entry => /SELECT puzzle_drafts\.\*/.test(entry.sql), lostResponse("fetch"))
-  );
+  const domain = await seeded(() => undefined);
   const domainSaved = await domain.repository.saveDomain({
     draftId,
     domain: "content",
@@ -430,13 +422,15 @@ export async function run() {
   assert.equal(domainSaved.document.title, "Domain saved");
   assert.equal(domainSaved.document.category, "science");
   assert.equal(domainSaved.documentStale, true);
-  assertRevisionProbeOnly(domain.calls, entry => /SELECT puzzle_drafts\.\*/.test(entry.sql));
+  assert.equal(domain.calls.some(entry => /SELECT puzzle_drafts\.\*/.test(entry.sql)), false);
 
   const skill = readFileSync(join(root, ".agents/skills/author-puzzle/SKILL.md"), "utf8");
   assert.match(skill, /Call `get_puzzle_draft` before another save when merging a draft this session has not seen/);
+  assert.match(skill, /do not return the document/);
   assert.doesNotMatch(skill, /fetch failed|D1_ERROR|non-JSON/);
   const guidance = readFileSync(join(root, "modules/authoringGuidanceVersion.js"), "utf8");
   assert.match(guidance, /Call get_puzzle_draft only to merge a draft this/);
-  assert.match(guidance, /minor: 19/);
+  assert.match(guidance, /omit the document/);
+  assert.match(guidance, /minor: 20/);
   assert.doesNotMatch(guidance, /fetch failed|D1_ERROR|non-JSON/);
 }
