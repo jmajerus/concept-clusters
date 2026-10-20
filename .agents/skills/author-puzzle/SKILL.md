@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `9bf4536b` · 2026-10-19
+Skill rev `9db2f8df` · 2026-10-20
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. `save_puzzle_draft` writes the working copy only. The human
@@ -37,10 +37,11 @@ Never write those into `docs/`, `.agents/`, or `/tmp`.
 
 - No `draft.revision` for this id in this session: `create_puzzle_draft` with `draft_id` and `document`.
 - A revision in hand: `save_puzzle_draft` on the native tool, with that integer as its own `expected_revision` argument. Copy it from the latest `create_puzzle_draft`, `get_puzzle_draft`, or `save_puzzle_draft` result.
+- `create_puzzle_draft` and `save_puzzle_draft` name `draftId` and `revision` and do not return the document. Call `get_puzzle_draft` to read the stored draft, including a working copy opened from a published puzzle.
 - The working file is the document only. Pass `expected_revision` separately. Do not assemble the save body with `printf` or `cat`.
 - To save `working/<id>.json`, run `node tools/save-working-draft.mjs <id> --expected-revision <draft.revision>` with the revision this file was based on. The helper submits that token. If the draft has moved, it exits and writes nothing. After a successful save it records the new revision in `working/<id>.revision`, and a later save of that same baseline can omit the flag. It does not create a missing draft, and it does not adopt whatever revision is current.
 - Content owns a bridge's `term`, `clusters`, `fact`, and `info`. Pedagogy owns `relationKind`, `direction`, `idealTerms`, and `conceptId` (`PEDAGOGY_BRIDGE_FIELDS` in `modules/authoringFieldOwnership.js`). `idealTerms` is a map. A merge patch keeps keys the patch does not mention. After retargeting a bridge, a pedagogy save must set each stale cluster id to `null`.
-- A validation or ownership rejection did not commit, so retry the same `expected_revision`. When the error names a current revision, use that integer and the document you already have. Call `get_puzzle_draft` before another save when the error is `fetch failed`, `D1_ERROR`, or a non-JSON response, and when merging a draft this session has not seen.
+- A validation or ownership rejection did not commit, so retry the same `expected_revision`. When the error names a current revision, use that integer and the document you already have. Call `get_puzzle_draft` before another save when merging a draft this session has not seen.
 - A native `save_puzzle_draft` or `create_puzzle_draft` does not write `working/<id>.json`. Do not read that file as the current draft, and do not run `save-working-draft.mjs` on it, unless this session just wrote the file from the latest `get_puzzle_draft` and recorded that revision in `working/<id>.revision`.
 - `info.citations` replaces the whole list, so a partial list deletes the citations left out.
 - HTTP 403 from a link check is inconclusive, not missing. For a Supreme Court opinion, a Cornell LII volume/page URL can 404 while `/supremecourt/text/{docket}` returns 200. Prefer the URL the link checker marks ok.
