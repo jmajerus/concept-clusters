@@ -142,18 +142,53 @@ function changes(result) {
 // round trip (history insert, trailing read, or the conflict read) can fail
 // without rolling that write back. Read revision only — never the document
 // or the domain columns — and rebuild the success shape from the document
-// the caller already holds.
+// the caller already holds. The insert and the update are never retried.
+// A dropped response on this select is safe to try again.
+const REVISION_PROBE_ATTEMPTS = 3;
+
+async function readWithLostResponseRetry(read) {
+  let lastError;
+  for (let attempt = 1; attempt <= REVISION_PROBE_ATTEMPTS; attempt += 1) {
+    try {
+      return await read();
+    } catch (error) {
+      lastError = error;
+      if (!d1CommitOutcomeUnknown(error) || attempt === REVISION_PROBE_ATTEMPTS) throw error;
+    }
+  }
+  throw lastError;
+}
+
 async function readCommittedRevision(database, draftId, ownerSubject) {
-  const row = await database.prepare(`
-    SELECT revision, content_hash FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
-  `).bind(draftId, ownerSubject).first();
-  if (!row) return null;
-  const revision = Number(row.revision);
-  if (!Number.isInteger(revision) || revision <= 0) return null;
-  return {
-    revision,
-    contentHash: typeof row.content_hash === "string" ? row.content_hash : null
-  };
+  return readWithLostResponseRetry(async () => {
+    const row = await database.prepare(`
+      SELECT revision, content_hash FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+    `).bind(draftId, ownerSubject).first();
+    if (!row) return null;
+    const revision = Number(row.revision);
+    if (!Number.isInteger(revision) || revision <= 0) return null;
+    return {
+      revision,
+      contentHash: typeof row.content_hash === "string" ? row.content_hash : null
+    };
+  });
+}
+
+// materialize() does not bump revision. content_hash is already the assembled
+// document after a domain save, so the stale flag is what shows the cache write landed.
+async function readMaterializeMarker(database, draftId, ownerSubject) {
+  return readWithLostResponseRetry(async () => {
+    const row = await database.prepare(`
+      SELECT revision, document_stale FROM puzzle_drafts
+      WHERE id = ? AND owner_subject = ?
+    `).bind(draftId, ownerSubject).first();
+    if (!row) return null;
+    const revision = Number(row.revision);
+    return {
+      revision: Number.isInteger(revision) ? revision : null,
+      documentStale: Number(row.document_stale || 0) === 1
+    };
+  });
 }
 
 function committedDraftView({
@@ -239,7 +274,16 @@ async function returnCommittedDraft(database, error, {
       revision
     );
   }
-  if (revision === expectedRevision + 1) return draftAt(revision);
+  if (revision === expectedRevision + 1) {
+    // A different hash at the next revision belongs to another writer.
+    if (expectedContentHash == null || stored.contentHash === expectedContentHash) {
+      return draftAt(revision);
+    }
+    throw new DraftConflictError(
+      `Draft revision conflict: expected ${expectedRevision}, current revision is ${revision}`,
+      revision
+    );
+  }
   if (
     d1CommitOutcomeUnknown(error) &&
     revision != null &&
@@ -257,6 +301,7 @@ async function rejectConflictUnlessCommitted(repository, {
   draftId,
   ownerSubject,
   expectedRevision,
+  expectedContentHash = null,
   draftAt
 }) {
   let stored;
@@ -267,10 +312,15 @@ async function rejectConflictUnlessCommitted(repository, {
       draftId,
       ownerSubject,
       expectedRevision,
+      expectedContentHash,
       draftAt
     });
   }
   if (stored == null) throw new DraftNotFoundError(draftId);
+  // No reported row change conflicts with the stored revision. A matching
+  // hash can belong to another caller that stored the same document, as a
+  // double-submitted revoke does. The revision probe confirms a commit when
+  // the write throws, which is the lost-response path.
   throw new DraftConflictError(
     `Draft revision conflict: expected ${expectedRevision}, current revision is ${stored.revision}`,
     stored.revision
@@ -281,6 +331,7 @@ async function loadCommittedDraft(repository, {
   draftId,
   ownerSubject,
   expectedRevision,
+  expectedContentHash = null,
   draftAt,
   writeHistory = null
 }) {
@@ -294,6 +345,7 @@ async function loadCommittedDraft(repository, {
         draftId,
         ownerSubject,
         expectedRevision,
+        expectedContentHash,
         acceptDefiniteError: true,
         draftAt
       });
@@ -416,6 +468,7 @@ export class D1DraftRepository extends DraftRepository {
       actor,
       ownerSubject: owner.subject,
       expectedRevision,
+      expectedContentHash: contentHash,
       draftAt
     };
     let results;
@@ -755,9 +808,11 @@ export class D1DraftRepository extends DraftRepository {
         return returnCommittedDraft(this.database, error, committed);
       }
     }
-    // A UNIQUE violation throws above, so the only way to insert nothing is the
-    // shadow gate. Name which id is live, for an error worth reading.
+    // A UNIQUE violation throws above. changes === 0 is the shadow gate, unless
+    // the insert committed and the response omitted meta.changes.
     if (changes(result) !== 1) {
+      const stored = await readCommittedRevision(this.database, draftId, owner.subject);
+      if (stored?.revision === 1 && stored.contentHash === contentHash) return draftAt(1);
       const live = await this.database.prepare(`
         SELECT id FROM published_documents
         WHERE kind = 'puzzle' AND id IN (?, ?) LIMIT 1
@@ -924,6 +979,7 @@ export class D1DraftRepository extends DraftRepository {
       actor,
       ownerSubject: owner.subject,
       expectedRevision,
+      expectedContentHash: contentHash,
       draftAt
     };
     let result;
@@ -1033,6 +1089,7 @@ export class D1DraftRepository extends DraftRepository {
       actor,
       ownerSubject: owner.subject,
       expectedRevision,
+      expectedContentHash: contentHash,
       draftAt
     };
     let result;
@@ -1084,46 +1141,69 @@ export class D1DraftRepository extends DraftRepository {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor);
     const current = await this.database.prepare(`
-      SELECT * FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+      SELECT puzzle_drafts.*,
+        (SELECT COUNT(*) FROM puzzle_draft_history WHERE draft_id = puzzle_drafts.id) AS working_copy_history_count
+      FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
     `).bind(draftId, owner.subject).first();
     if (!current) throw new DraftNotFoundError(draftId);
-    if (Number(current.document_stale || 0) !== 1) {
-      return this.get({ draftId, actor });
-    }
+    if (Number(current.document_stale || 0) !== 1) return fullDraft(current);
     const materialized = assembleRowDocument(current);
     const documentJson = serializeDraftDocument(materialized);
     const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
-    const result = await runDraftWrite(this.database.prepare(`
-      UPDATE puzzle_drafts
-      SET document = ?, content_hash = ?, document_stale = 0,
-          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?,
-          updated_at = ?
-      WHERE id = ? AND owner_subject = ? AND revision = ? AND document_stale = 1
-    `).bind(
-      documentJson,
+    const revision = Number(current.revision);
+    // The caller already holds the assembled document. The cache write does
+    // not need a second read of the row it just stored.
+    const refreshed = () => ({
+      ...fullDraft(current),
       contentHash,
-      domains.content,
-      domains.pedagogy,
-      domains.classification,
-      domains.provenance,
-      domains.administration,
-      now,
-      draftId,
-      owner.subject,
-      Number(current.revision)
-    ));
-    if (changes(result) !== 1) {
-      const latest = await this.get({ draftId, actor });
-      if (latest.documentStale) {
-        throw new DraftConflictError(
-          `Draft materialization conflict: expected revision ${Number(current.revision)} while stale; current revision is ${latest.revision}`
-        );
+      updatedAt: now,
+      documentStale: false,
+      document: materialized
+    });
+    const markerConfirms = marker => Boolean(
+      marker && marker.revision === revision && marker.documentStale === false
+    );
+    let result;
+    try {
+      result = await runDraftWrite(this.database.prepare(`
+        UPDATE puzzle_drafts
+        SET document = ?, content_hash = ?, document_stale = 0,
+            content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?,
+            updated_at = ?
+        WHERE id = ? AND owner_subject = ? AND revision = ? AND document_stale = 1
+      `).bind(
+        documentJson,
+        contentHash,
+        domains.content,
+        domains.pedagogy,
+        domains.classification,
+        domains.provenance,
+        domains.administration,
+        now,
+        draftId,
+        owner.subject,
+        revision
+      ));
+    } catch (error) {
+      if (!d1CommitOutcomeUnknown(error)) throw error;
+      let marker;
+      try {
+        marker = await readMaterializeMarker(this.database, draftId, owner.subject);
+      } catch {
+        throw error;
       }
-      return latest;
+      if (markerConfirms(marker)) return refreshed();
+      throw error;
     }
-    return this.get({ draftId, actor });
+    if (changes(result) === 1) return refreshed();
+    const marker = await readMaterializeMarker(this.database, draftId, owner.subject);
+    if (!marker) throw new DraftNotFoundError(draftId);
+    if (markerConfirms(marker)) return refreshed();
+    throw new DraftConflictError(
+      `Draft materialization conflict: expected revision ${revision} while stale; current revision is ${marker.revision}`
+    );
   }
 
   async popWorkingCopy({ draftId, actor, expectedRevision }) {
@@ -1157,38 +1237,81 @@ export class D1DraftRepository extends DraftRepository {
     const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
-    const result = await runDraftWrite(this.database.prepare(`
-      UPDATE puzzle_drafts
-      SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
-          revision = revision + 1, validation_json = NULL, updated_at = ?,
-          document_stale = 0,
-          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
-      WHERE id = ? AND owner_subject = ? AND revision = ?
-    `).bind(
-      typeof materialized.id === "string" ? materialized.id : null,
-      typeof materialized.title === "string" ? materialized.title : null,
-      documentJson,
+    const nextRevision = expectedRevision + 1;
+    // The restored document is already in hand. Undo returns it, and the
+    // history delete travels in the same batch as the update so a lost
+    // response cannot leave the popped snapshot in place for a second undo.
+    const popped = revision => ({
+      ...current,
+      puzzleId: typeof materialized.id === "string" ? materialized.id : null,
+      title: typeof materialized.title === "string" ? materialized.title : null,
+      revision,
       contentHash,
-      now,
-      domains.content,
-      domains.pedagogy,
-      domains.classification,
-      domains.provenance,
-      domains.administration,
+      updatedAt: now,
+      documentStale: false,
+      validation: null,
+      workingCopyHistoryCount: Math.max(0, Number(current.workingCopyHistoryCount || 0) - 1),
+      document: materialized
+    });
+    const committed = {
       draftId,
-      owner.subject,
-      expectedRevision
-    ));
-    if (changes(result) !== 1) {
-      const latest = await this.get({ draftId, actor });
-      throw new DraftConflictError(
-        `Draft revision conflict: expected ${expectedRevision}, current revision is ${latest.revision}`
-      );
+      ownerSubject: owner.subject,
+      expectedRevision,
+      expectedContentHash: contentHash,
+      draftAt: popped
+    };
+    let results;
+    try {
+      results = await this.database.batch([
+        this.database.prepare(`
+          UPDATE puzzle_drafts
+          SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
+              revision = revision + 1, validation_json = NULL, updated_at = ?,
+              document_stale = 0,
+              content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
+          WHERE id = ? AND owner_subject = ? AND revision = ?
+        `).bind(
+          typeof materialized.id === "string" ? materialized.id : null,
+          typeof materialized.title === "string" ? materialized.title : null,
+          documentJson,
+          contentHash,
+          now,
+          domains.content,
+          domains.pedagogy,
+          domains.classification,
+          domains.provenance,
+          domains.administration,
+          draftId,
+          owner.subject,
+          expectedRevision
+        ),
+        this.database.prepare(`
+          DELETE FROM puzzle_draft_history
+          WHERE draft_id = ? AND seq = ?
+            AND EXISTS (
+              SELECT 1 FROM puzzle_drafts
+              WHERE id = ? AND owner_subject = ? AND revision = ? AND content_hash = ?
+            )
+        `).bind(
+          draftId,
+          previous.seq,
+          draftId,
+          owner.subject,
+          nextRevision,
+          contentHash
+        )
+      ]);
+    } catch (error) {
+      try {
+        rethrowMissingDomainColumn(error);
+      } catch (classified) {
+        return returnCommittedDraft(this.database, classified, committed);
+      }
     }
-    await this.database.prepare(`
-      DELETE FROM puzzle_draft_history WHERE draft_id = ? AND seq = ?
-    `).bind(draftId, previous.seq).run();
-    return this.get({ draftId, actor });
+    if (changes(results?.[0]) !== 1) {
+      return rejectConflictUnlessCommitted(this, committed);
+    }
+    return popped(nextRevision);
   }
 
   async list({ actor, status = null, limit = 100, includeDocument = false } = {}) {

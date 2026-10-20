@@ -36,6 +36,9 @@ function instrument(database, intercept) {
       if (decision instanceof Error) throw decision;
       const result = await bound[method]();
       if (decision?.after) throw decision.after;
+      if (decision?.zeroChanges) {
+        return { ...result, meta: { ...(result.meta || {}), changes: 0 } };
+      }
       return result;
     }
     return {
@@ -59,6 +62,11 @@ function instrument(database, intercept) {
       if (decision instanceof Error) throw decision;
       const result = await database.batch(statements.map(item => item.inner));
       if (decision?.after) throw decision.after;
+      if (decision?.zeroChanges) {
+        return result.map((entry, index) => index === 0
+          ? { ...entry, meta: { ...(entry.meta || {}), changes: 0 } }
+          : entry);
+      }
       return result;
     }
   };
@@ -70,6 +78,15 @@ function failOnce(predicate, error, { after = false } = {}) {
     if (fired || !predicate(entry)) return undefined;
     fired = true;
     return after ? { after: error } : error;
+  };
+}
+
+function zeroChangesOnce(predicate) {
+  let fired = false;
+  return entry => {
+    if (fired || !predicate(entry)) return undefined;
+    fired = true;
+    return { zeroChanges: true };
   };
 }
 
@@ -475,6 +492,172 @@ export async function run() {
   assert.equal(domainSaved.document.category, "science");
   assert.equal(domainSaved.documentStale, true);
   assert.equal(domain.calls.some(entry => /SELECT puzzle_drafts\.\*/.test(entry.sql)), false);
+
+  // changes === 0 with this hash is still a conflict. A concurrent writer can
+  // store the same document, and a lost meta.changes cannot be told apart from that.
+  const omittedChanges = await seeded(
+    zeroChangesOnce(entry => entry.method === "run" && /UPDATE puzzle_drafts\b/.test(entry.sql))
+  );
+  await assert.rejects(
+    () => omittedChanges.repository.save({
+      draftId,
+      document: savedDocument,
+      actor,
+      expectedRevision: 1
+    }),
+    error => error instanceof DraftConflictError && error.revision === 2
+  );
+  assert.equal(Number(storedRevision(omittedChanges.database).revision), 2);
+
+  const omittedInsert = openWrapped(
+    createSqliteD1(),
+    zeroChangesOnce(entry => /INSERT INTO puzzle_drafts\b/.test(entry.sql))
+  );
+  const insertedAnyway = await omittedInsert.repository.create({ draftId, document, actor });
+  assert.equal(insertedAnyway.revision, 1);
+  assert.equal(insertedAnyway.document.title, "Lost response");
+
+  let probes = 0;
+  const flakyProbe = await seeded(entry => {
+    if (/INSERT INTO puzzle_draft_history\b/.test(entry.sql)) return lostResponse("fetch");
+    if (entry.sql.replace(/\s+/g, " ").trim() === REVISION_SQL) {
+      probes += 1;
+      if (probes === 1) return lostResponse("json");
+    }
+    return undefined;
+  });
+  const retriedProbe = await flakyProbe.repository.save({
+    draftId,
+    document: savedDocument,
+    actor,
+    expectedRevision: 1
+  });
+  assert.equal(retriedProbe.revision, 2);
+  assert.equal(probes, 2);
+
+  let exhausted = 0;
+  const historyLostForProbe = lostResponse("internal");
+  const probeGiveUp = lostResponse("fetch");
+  const probeExhausted = await seeded(entry => {
+    if (/INSERT INTO puzzle_draft_history\b/.test(entry.sql)) return historyLostForProbe;
+    if (entry.sql.replace(/\s+/g, " ").trim() === REVISION_SQL) {
+      exhausted += 1;
+      return probeGiveUp;
+    }
+    return undefined;
+  });
+  await assert.rejects(
+    () => probeExhausted.repository.save({
+      draftId,
+      document: savedDocument,
+      actor,
+      expectedRevision: 1
+    }),
+    thrown => thrown === historyLostForProbe
+  );
+  assert.equal(exhausted, 3);
+
+  const poppedBase = await seeded(() => undefined);
+  await poppedBase.repository.save({
+    draftId,
+    document: savedDocument,
+    actor,
+    expectedRevision: 1
+  });
+  const poppedDb = poppedBase.database;
+  const poppedFault = openWrapped(
+    poppedDb,
+    failOnce(entry => entry.method === "batch" && /DELETE FROM puzzle_draft_history\b/.test(entry.sql), lostResponse("fetch"), {
+      after: true
+    })
+  );
+  const popped = await poppedFault.repository.popWorkingCopy({
+    draftId,
+    actor,
+    expectedRevision: 2
+  });
+  assert.equal(popped.revision, 3);
+  assert.equal(popped.document.title, "Lost response");
+  assert.equal(popped.workingCopyHistoryCount, 0);
+  assert.equal(
+    Number(poppedDb.sqlite.prepare(
+      "SELECT COUNT(*) AS n FROM puzzle_draft_history WHERE draft_id = ?"
+    ).get(draftId).n),
+    0
+  );
+  assert.equal(
+    poppedFault.calls.some(entry => /SELECT puzzle_drafts\.\*/.test(entry.sql) && entry.sql.includes("working_copy_history_count") && poppedFault.calls.indexOf(entry) > poppedFault.calls.findIndex(call => call.method === "batch")),
+    false
+  );
+  await assert.rejects(
+    () => poppedFault.repository.popWorkingCopy({
+      draftId,
+      actor,
+      expectedRevision: 3
+    }),
+    error => error.name === "DraftEmptyHistoryError"
+  );
+
+  const unpopped = await seeded(() => undefined);
+  await unpopped.repository.save({
+    draftId,
+    document: savedDocument,
+    actor,
+    expectedRevision: 1
+  });
+  const missedPopError = lostResponse("json");
+  const missedPop = openWrapped(
+    unpopped.database,
+    failOnce(entry => entry.method === "batch" && /DELETE FROM puzzle_draft_history\b/.test(entry.sql), missedPopError)
+  );
+  await assert.rejects(
+    () => missedPop.repository.popWorkingCopy({
+      draftId,
+      actor,
+      expectedRevision: 2
+    }),
+    thrown => thrown === missedPopError
+  );
+  assert.equal(Number(storedRevision(unpopped.database).revision), 2);
+  assert.equal(
+    Number(unpopped.database.sqlite.prepare(
+      "SELECT COUNT(*) AS n FROM puzzle_draft_history WHERE draft_id = ?"
+    ).get(draftId).n),
+    1
+  );
+
+  const stale = await seeded(() => undefined);
+  await stale.repository.saveDomain({
+    draftId,
+    domain: "content",
+    projection: { id: draftId, title: "Domain saved" },
+    actor,
+    expectedRevision: 1
+  });
+  const lostMaterialize = openWrapped(
+    stale.database,
+    failOnce(
+      entry => entry.method === "run"
+        && /document_stale = 0/.test(entry.sql)
+        && !/revision = revision \+ 1/.test(entry.sql),
+      lostResponse("fetch"),
+      { after: true }
+    )
+  );
+  const refreshed = await lostMaterialize.repository.materialize({ draftId, actor });
+  assert.equal(refreshed.documentStale, false);
+  assert.equal(refreshed.document.title, "Domain saved");
+  assert.equal(refreshed.revision, 2);
+  assert.equal(
+    lostMaterialize.calls.filter(entry => entry.method !== "batch" && /SELECT puzzle_drafts\.\*/.test(entry.sql)).length,
+    1
+  );
+  assert.equal(
+    Number(stale.database.sqlite.prepare(
+      "SELECT document_stale FROM puzzle_drafts WHERE id = ?"
+    ).get(draftId).document_stale),
+    0
+  );
 
   const skill = readFileSync(join(root, ".agents/skills/author-puzzle/SKILL.md"), "utf8");
   assert.match(skill, /Call `get_puzzle_draft` before another save when merging a draft this session has not seen/);
