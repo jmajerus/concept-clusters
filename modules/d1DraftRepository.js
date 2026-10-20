@@ -162,16 +162,34 @@ async function readWithLostResponseRetry(read) {
 async function readCommittedRevision(database, draftId, ownerSubject) {
   return readWithLostResponseRetry(async () => {
     const row = await database.prepare(`
-      SELECT revision, content_hash FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+      SELECT revision, content_hash, created_at FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
     `).bind(draftId, ownerSubject).first();
     if (!row) return null;
     const revision = Number(row.revision);
     if (!Number.isInteger(revision) || revision <= 0) return null;
     return {
       revision,
-      contentHash: typeof row.content_hash === "string" ? row.content_hash : null
+      contentHash: typeof row.content_hash === "string" ? row.content_hash : null,
+      createdAt: typeof row.created_at === "string" ? row.created_at : null
     };
   });
+}
+
+// Null means the column is not on this database yet. A present column tells a
+// fresh create from a seeded working copy that shares this millisecond's stamp.
+async function readOpenedFromPublished(database, draftId, ownerSubject) {
+  try {
+    return await readWithLostResponseRetry(async () => {
+      const row = await database.prepare(`
+        SELECT opened_from_published FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+      `).bind(draftId, ownerSubject).first();
+      if (!row) return false;
+      return Number(row.opened_from_published || 0) === 1;
+    });
+  } catch (error) {
+    if (sqliteMissingColumn(String(error?.message || error), "opened_from_published")) return null;
+    throw error;
+  }
 }
 
 // materialize() does not bump revision. content_hash is already the assembled
@@ -803,20 +821,26 @@ export class D1DraftRepository extends DraftRepository {
       }
     }
     // A UNIQUE violation throws above. changes === 0 is the shadow gate, unless
-    // the insert committed and the response omitted meta.changes. A live
-    // published id means the gate blocked this fresh create; a seeded working
-    // copy of that id can already sit at revision 1 with this same hash.
-    // The seeded route is the insert that may run beside a published id, so
-    // only that route can treat the hash match as its own omitted response.
+    // the insert committed and the response omitted meta.changes. This insert
+    // stamps created_at with `now` and opened_from_published for this route.
+    // An older row can share the hash. A publish that lands after this insert
+    // does not un-commit it, so the published row is consulted only when the
+    // stored stamp is not this statement's.
     if (changes(result) !== 1) {
+      const stored = await readCommittedRevision(this.database, draftId, owner.subject);
+      const openedFromPublished = await readOpenedFromPublished(this.database, draftId, owner.subject);
+      if (
+        stored?.revision === 1 &&
+        stored.contentHash === contentHash &&
+        stored.createdAt === now &&
+        (openedFromPublished == null || openedFromPublished === seededFromPublished)
+      ) {
+        return draftAt(1);
+      }
       const live = await this.database.prepare(`
         SELECT id FROM published_documents
         WHERE kind = 'puzzle' AND id IN (?, ?) LIMIT 1
       `).bind(...guardedIds).first();
-      if (!live || seededFromPublished) {
-        const stored = await readCommittedRevision(this.database, draftId, owner.subject);
-        if (stored?.revision === 1 && stored.contentHash === contentHash) return draftAt(1);
-      }
       throw new PublishedIdConflictError(live?.id || guardedIds[1]);
     }
     return draftAt(1);

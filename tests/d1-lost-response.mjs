@@ -26,7 +26,7 @@ const actor = { subject: "owner-1" };
 const draftId = "lost-draft";
 const document = { id: draftId, title: "Lost response", category: "science" };
 const savedDocument = { ...document, title: "Saved anyway" };
-const REVISION_SQL = "SELECT revision, content_hash FROM puzzle_drafts WHERE id = ? AND owner_subject = ?";
+const REVISION_SQL = "SELECT revision, content_hash, created_at FROM puzzle_drafts WHERE id = ? AND owner_subject = ?";
 
 function lostResponse(kind) {
   if (kind === "fetch") {
@@ -564,6 +564,26 @@ export async function run() {
   });
   assert.equal(seededAnyway.revision, 1);
   assert.equal(seededAnyway.openedFromPublished, true);
+
+  const publishedAfter = createSqliteD1();
+  let publishedAfterInsert = false;
+  const racedPublish = openWrapped(publishedAfter, entry => {
+    const sql = entry.sql.replace(/\s+/g, " ").trim();
+    if (!publishedAfterInsert && sql === REVISION_SQL) {
+      publishedAfterInsert = true;
+      publishPuzzle(publishedAfter, draftId);
+    }
+    if (/INSERT INTO puzzle_drafts\b/.test(entry.sql)) return { zeroChanges: true };
+    return undefined;
+  });
+  const committedBeforePublish = await racedPublish.repository.create({ draftId, document, actor });
+  assert.equal(committedBeforePublish.revision, 1);
+  assert.equal(
+    publishedAfter.sqlite.prepare(
+      "SELECT id FROM published_documents WHERE kind = 'puzzle' AND id = ?"
+    ).get(draftId).id,
+    draftId
+  );
 
   let probes = 0;
   const flakyProbe = await seeded(entry => {
