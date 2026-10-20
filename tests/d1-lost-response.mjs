@@ -73,9 +73,11 @@ function instrument(database, intercept) {
       const result = await database.batch(statements.map(item => item.inner));
       if (decision?.after) throw decision.after;
       if (decision?.zeroChanges) {
-        return result.map((entry, index) => index === 0
-          ? { ...entry, meta: { ...(entry.meta || {}), changes: 0 } }
-          : entry);
+        return result.map((entry, index) => {
+          const sql = statements[index]?.sql || "";
+          if (!/UPDATE puzzle_drafts\b/.test(sql)) return entry;
+          return { ...entry, meta: { ...(entry.meta || {}), changes: 0 } };
+        });
       }
       return result;
     }
@@ -98,6 +100,11 @@ function zeroChangesOnce(predicate) {
     fired = true;
     return { zeroChanges: true };
   };
+}
+
+function isDraftUpdate(entry) {
+  return /UPDATE puzzle_drafts\b/.test(entry.sql)
+    && /revision = revision \+ 1/.test(entry.sql);
 }
 
 function assertRevisionProbeOnly(calls, predicate) {
@@ -213,7 +220,7 @@ export async function run() {
     assert.equal(draft.revision, 1);
     assert.equal(draft.draftId, draftId);
     assert.equal(draft.document.title, "Lost response");
-    assert.equal(draft.documentStale, false);
+    assert.equal(draft.documentStale, true);
     assert.equal(Number(storedRevision(createdDb).revision), 1);
     assert.equal(created.calls.some(entry => /SELECT puzzle_drafts\.\*/.test(entry.sql)), false);
 
@@ -254,7 +261,7 @@ export async function run() {
     });
     assert.equal(saved.revision, 2);
     assert.equal(saved.document.title, "Saved anyway");
-    assert.equal(saved.documentStale, false);
+    assert.equal(saved.documentStale, true);
     assert.equal(saved.workingCopyHistoryCount, 1);
     assert.equal(storedRevision(trailing.database).title, "Saved anyway");
     assert.equal(trailing.calls.some(entry => /SELECT puzzle_drafts\.\*/.test(entry.sql)), false);
@@ -262,9 +269,18 @@ export async function run() {
       trailing.calls.filter(entry => /INSERT INTO puzzle_draft_history\b/.test(entry.sql)).length,
       1
     );
+    const snapshot = trailing.database.sqlite.prepare(`
+      SELECT document, content_json FROM puzzle_draft_history WHERE draft_id = ?
+    `).get(draftId);
+    assert.equal(snapshot.document, null);
+    assert.equal(JSON.parse(snapshot.content_json).title, "Lost response");
 
     const history = await seeded(
-      failOnce(entry => /INSERT INTO puzzle_draft_history\b/.test(entry.sql), error)
+      failOnce(
+        entry => entry.method === "batch" && /INSERT INTO puzzle_draft_history\b/.test(entry.sql),
+        error,
+        { after: true }
+      )
     );
     const afterHistory = await history.repository.save({
       draftId,
@@ -278,7 +294,7 @@ export async function run() {
       Number(history.database.sqlite.prepare(
         "SELECT COUNT(*) AS n FROM puzzle_draft_history WHERE draft_id = ?"
       ).get(draftId).n),
-      0
+      1
     );
     assert.equal(
       history.calls.filter(entry => /INSERT INTO puzzle_draft_history\b/.test(entry.sql)).length,
@@ -290,9 +306,7 @@ export async function run() {
     );
 
     const lostUpdate = await seeded(
-      failOnce(entry => entry.method === "run" && /UPDATE puzzle_drafts\b/.test(entry.sql), error, {
-        after: true
-      })
+      failOnce(isDraftUpdate, error, { after: true })
     );
     const recoveredUpdate = await lostUpdate.repository.save({
       draftId,
@@ -302,20 +316,17 @@ export async function run() {
     });
     assert.equal(recoveredUpdate.revision, 2);
     assert.equal(recoveredUpdate.document.title, "Saved anyway");
-    assertRevisionProbeOnly(
-      lostUpdate.calls,
-      entry => entry.method === "run" && /UPDATE puzzle_drafts\b/.test(entry.sql)
-    );
+    assertRevisionProbeOnly(lostUpdate.calls, isDraftUpdate);
     assert.equal(
-      lostUpdate.calls.filter(entry => /INSERT INTO puzzle_draft_history\b/.test(entry.sql)).length,
-      0
+      Number(lostUpdate.database.sqlite.prepare(
+        "SELECT COUNT(*) AS n FROM puzzle_draft_history WHERE draft_id = ?"
+      ).get(draftId).n),
+      1
     );
   }
 
   const unchanged = lostResponse("fetch");
-  const uncommitted = await seeded(
-    failOnce(entry => entry.method === "run" && /UPDATE puzzle_drafts\b/.test(entry.sql), unchanged)
-  );
+  const uncommitted = await seeded(failOnce(isDraftUpdate, unchanged));
   await assert.rejects(
     () => uncommitted.repository.save({
       draftId,
@@ -327,6 +338,12 @@ export async function run() {
   );
   assert.equal(Number(storedRevision(uncommitted.database).revision), 1);
   assert.equal(storedRevision(uncommitted.database).title, "Lost response");
+  assert.equal(
+    Number(uncommitted.database.sqlite.prepare(
+      "SELECT COUNT(*) AS n FROM puzzle_draft_history WHERE draft_id = ?"
+    ).get(draftId).n),
+    0
+  );
 
   const definite = new Error("D1_ERROR: NOT NULL constraint failed: puzzle_drafts.title");
   const rejectedCreate = openWrapped(
@@ -344,18 +361,23 @@ export async function run() {
 
   const fullHistory = new Error("SQLITE_FULL: database or disk is full");
   const historyFailed = await seeded(
-    failOnce(entry => /INSERT INTO puzzle_draft_history\b/.test(entry.sql), fullHistory)
+    failOnce(entry => entry.method === "batch" && /INSERT INTO puzzle_draft_history\b/.test(entry.sql), fullHistory)
   );
-  const kept = await historyFailed.repository.save({
-    draftId,
-    document: savedDocument,
-    actor,
-    expectedRevision: 1
-  });
-  assert.equal(kept.revision, 2);
+  await assert.rejects(
+    () => historyFailed.repository.save({
+      draftId,
+      document: savedDocument,
+      actor,
+      expectedRevision: 1
+    }),
+    thrown => thrown === fullHistory
+  );
+  assert.equal(Number(storedRevision(historyFailed.database).revision), 1);
   assert.equal(
-    historyFailed.calls.filter(entry => /INSERT INTO puzzle_draft_history\b/.test(entry.sql)).length,
-    1
+    Number(historyFailed.database.sqlite.prepare(
+      "SELECT COUNT(*) AS n FROM puzzle_draft_history WHERE draft_id = ?"
+    ).get(draftId).n),
+    0
   );
 
   const probeDown = new Error("D1 down");
@@ -447,7 +469,7 @@ export async function run() {
 
   let bumped = false;
   const raced = await seeded(entry => {
-    if (!bumped && entry.method === "run" && /UPDATE puzzle_drafts\b/.test(entry.sql)) {
+    if (!bumped && isDraftUpdate(entry)) {
       bumped = true;
       raced.database.sqlite.prepare(
         "UPDATE puzzle_drafts SET revision = 4 WHERE id = ?"
@@ -464,11 +486,35 @@ export async function run() {
     }),
     error => error instanceof DraftConflictError && /current revision is 4/.test(error.message)
   );
+  assert.equal(
+    Number(raced.database.sqlite.prepare(
+      "SELECT COUNT(*) AS n FROM puzzle_draft_history WHERE draft_id = ?"
+    ).get(draftId).n),
+    0
+  );
+
+  const capped = await seeded(() => undefined);
+  for (let index = 1; index <= 41; index += 1) {
+    const current = await capped.repository.get({ draftId, actor });
+    await capped.repository.save({
+      draftId,
+      document: { ...document, title: `Revision ${index}` },
+      actor,
+      expectedRevision: current.revision
+    });
+  }
+  const keptHistory = capped.database.sqlite.prepare(`
+    SELECT seq, content_json FROM puzzle_draft_history
+    WHERE draft_id = ? ORDER BY seq ASC
+  `).all(draftId);
+  assert.equal(keptHistory.length, 40);
+  assert.equal(JSON.parse(keptHistory[0].content_json).title, "Revision 1");
+  assert.equal(JSON.parse(keptHistory.at(-1).content_json).title, "Revision 40");
 
   const lostRead = lostResponse("json");
   let moved = false;
   const lostConflict = await seeded(entry => {
-    if (!moved && entry.method === "run" && /UPDATE puzzle_drafts\b/.test(entry.sql)) {
+    if (!moved && isDraftUpdate(entry)) {
       moved = true;
       lostConflict.database.sqlite.prepare(
         "UPDATE puzzle_drafts SET revision = 4 WHERE id = ?"
@@ -506,7 +552,7 @@ export async function run() {
   // changes === 0 with this hash is still a conflict. A concurrent writer can
   // store the same document, and a lost meta.changes cannot be told apart from that.
   const omittedChanges = await seeded(
-    zeroChangesOnce(entry => entry.method === "run" && /UPDATE puzzle_drafts\b/.test(entry.sql))
+    zeroChangesOnce(isDraftUpdate)
   );
   await assert.rejects(
     () => omittedChanges.repository.save({
@@ -586,8 +632,12 @@ export async function run() {
   );
 
   let probes = 0;
+  let lostBatch = false;
   const flakyProbe = await seeded(entry => {
-    if (/INSERT INTO puzzle_draft_history\b/.test(entry.sql)) return lostResponse("fetch");
+    if (!lostBatch && entry.method === "batch" && /INSERT INTO puzzle_draft_history\b/.test(entry.sql)) {
+      lostBatch = true;
+      return { after: lostResponse("fetch") };
+    }
     if (entry.sql.replace(/\s+/g, " ").trim() === REVISION_SQL) {
       probes += 1;
       if (probes === 1) return lostResponse("json");
@@ -607,7 +657,9 @@ export async function run() {
   const historyLostForProbe = lostResponse("internal");
   const probeGiveUp = lostResponse("fetch");
   const probeExhausted = await seeded(entry => {
-    if (/INSERT INTO puzzle_draft_history\b/.test(entry.sql)) return historyLostForProbe;
+    if (entry.method === "batch" && /INSERT INTO puzzle_draft_history\b/.test(entry.sql)) {
+      return { after: historyLostForProbe };
+    }
     if (entry.sql.replace(/\s+/g, " ").trim() === REVISION_SQL) {
       exhausted += 1;
       return probeGiveUp;
@@ -628,7 +680,7 @@ export async function run() {
   let conflictProbes = 0;
   const conflictProbeError = lostResponse("fetch");
   const conflictProbe = await seeded(entry => {
-    if (entry.method === "run" && /UPDATE puzzle_drafts\b/.test(entry.sql)) return { zeroChanges: true };
+    if (isDraftUpdate(entry)) return { zeroChanges: true };
     if (entry.sql.replace(/\s+/g, " ").trim() === REVISION_SQL) {
       conflictProbes += 1;
       return conflictProbeError;
@@ -655,10 +707,20 @@ export async function run() {
   });
   const currentUndo = await racedUndo.repository.get({ draftId, actor });
   const priorUndo = racedUndo.database.sqlite.prepare(`
-    SELECT document FROM puzzle_draft_history WHERE draft_id = ?
+    SELECT document, content_json, pedagogy_json, classification_json, provenance_json, administration_json
+    FROM puzzle_draft_history WHERE draft_id = ?
   `).get(draftId);
+  const restoredPrior = priorUndo.content_json == null && priorUndo.pedagogy_json == null
+    ? JSON.parse(priorUndo.document)
+    : assembleStoredDomainDocuments({
+      content: JSON.parse(priorUndo.content_json),
+      pedagogy: JSON.parse(priorUndo.pedagogy_json),
+      classification: priorUndo.classification_json == null ? null : JSON.parse(priorUndo.classification_json),
+      provenance: priorUndo.provenance_json == null ? null : JSON.parse(priorUndo.provenance_json),
+      administration: priorUndo.administration_json == null ? null : JSON.parse(priorUndo.administration_json)
+    });
   const restoredHash = draftContentHash(serializeDraftDocument(assembleStoredDomainDocuments({
-    document: JSON.parse(priorUndo.document),
+    document: restoredPrior,
     administration: partitionAuthoredDocument(currentUndo.document).administration ?? {}
   })));
   let planted = false;
@@ -766,29 +828,15 @@ export async function run() {
     actor,
     expectedRevision: 1
   });
-  const lostMaterialize = openWrapped(
-    stale.database,
-    failOnce(
-      entry => entry.method === "run"
-        && /document_stale = 0/.test(entry.sql)
-        && !/revision = revision \+ 1/.test(entry.sql),
-      lostResponse("fetch"),
-      { after: true }
-    )
-  );
-  const refreshed = await lostMaterialize.repository.materialize({ draftId, actor });
-  assert.equal(refreshed.documentStale, false);
+  const refreshed = await stale.repository.materialize({ draftId, actor });
+  assert.equal(refreshed.documentStale, true);
   assert.equal(refreshed.document.title, "Domain saved");
   assert.equal(refreshed.revision, 2);
-  assert.equal(
-    lostMaterialize.calls.filter(entry => entry.method !== "batch" && /SELECT puzzle_drafts\.\*/.test(entry.sql)).length,
-    1
-  );
   assert.equal(
     Number(stale.database.sqlite.prepare(
       "SELECT document_stale FROM puzzle_drafts WHERE id = ?"
     ).get(draftId).document_stale),
-    0
+    1
   );
 
   const skill = readFileSync(join(root, ".agents/skills/author-puzzle/SKILL.md"), "utf8");

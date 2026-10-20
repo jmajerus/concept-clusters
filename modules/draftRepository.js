@@ -108,9 +108,8 @@ export function draftContentHash(documentOrText) {
 // Distinct saves also push the previous blob onto a capped working-copy
 // stack; popWorkingCopy restores the latest and discards the current one.
 //
-// saveDomain() updates one agent write-domain column without rewriting the
-// materialized `document` cache (document_stale). materialize() refreshes
-// that cache from the durable domain columns.
+// saveDomain() updates one agent write-domain column. Domain columns are
+// authoritative. materialize() returns the assembled document.
 export class DraftRepository {
   async create(_input) { throw new Error("DraftRepository.create is not implemented"); }
   async get(_input) { throw new Error("DraftRepository.get is not implemented"); }

@@ -1175,7 +1175,7 @@ describe("hosted authoring Worker", () => {
     expect(stored.document.language).toBe("en");
   });
 
-  it("materializes authoring domains, reads legacy simplified rows, and rejects JSON-LD", async () => {
+  it("assembles authoring domains from columns, reads legacy simplified rows, and rejects JSON-LD", async () => {
     const repository = new D1DraftRepository(env.AUTHORING_DB);
     const document = {
       id: "domain-projection-fixture",
@@ -1226,25 +1226,26 @@ describe("hosted authoring Worker", () => {
     };
     const content = JSON.parse(row.content_json);
     const pedagogy = JSON.parse(row.pedagogy_json);
-    const stored = JSON.parse((await env.AUTHORING_DB.prepare(
+    const storedCache = (await env.AUTHORING_DB.prepare(
       "SELECT document FROM puzzle_drafts WHERE id = ?"
-    ).bind("domain-projection-fixture").first() as { document: string }).document);
+    ).bind("domain-projection-fixture").first() as { document: string }).document;
     expect(content.clusters).toHaveLength(2);
     expect(content.puzzleKind).toBe("trivia-quiz");
     expect(content.bridges[0].relationKind).toBeUndefined();
     expect(pedagogy.lenses).toHaveLength(1);
     expect(pedagogy.bridges[0].relationKind).toBe("contrast");
     expect(JSON.parse(row.provenance_json)).toEqual(document.provenance);
-    expect(stored.dateCreated).toBeUndefined();
-    expect(stored.dateModified).toBeUndefined();
-    expect(stored.version).toBeUndefined();
-    expect(stored.learningIntroduction.revision).toBeUndefined();
+    expect(storedCache).toBe("{}");
 
     const populated = await repository.get({
       draftId: "domain-projection-fixture",
       actor: { subject: "local-author" }
     });
     expect(populated.document).toEqual(document);
+    expect(populated.document.dateCreated).toBeUndefined();
+    expect(populated.document.dateModified).toBeUndefined();
+    expect(populated.document.version).toBeUndefined();
+    expect(populated.document.learningIntroduction.revision).toBeUndefined();
 
     const beforeDomainSave = await env.AUTHORING_DB.prepare(
       "SELECT document, document_stale FROM puzzle_drafts WHERE id = ?"
@@ -1252,7 +1253,7 @@ describe("hosted authoring Worker", () => {
       document: string;
       document_stale: number;
     };
-    expect(Number(beforeDomainSave.document_stale || 0)).toBe(0);
+    expect(Number(beforeDomainSave.document_stale || 0)).toBe(1);
     const contentProjection = JSON.parse(row.content_json);
     await repository.saveDomain({
       draftId: "domain-projection-fixture",
@@ -1282,7 +1283,7 @@ describe("hosted authoring Worker", () => {
       draftId: "domain-projection-fixture",
       actor: { subject: "local-author" }
     });
-    expect(materialized.documentStale).toBe(false);
+    expect(materialized.documentStale).toBe(true);
     expect(materialized.document.title).toBe("Domain column retitled");
     const afterMaterialize = await env.AUTHORING_DB.prepare(
       "SELECT document, document_stale FROM puzzle_drafts WHERE id = ?"
@@ -1290,8 +1291,8 @@ describe("hosted authoring Worker", () => {
       document: string;
       document_stale: number;
     };
-    expect(Number(afterMaterialize.document_stale)).toBe(0);
-    expect(JSON.parse(afterMaterialize.document).title).toBe("Domain column retitled");
+    expect(Number(afterMaterialize.document_stale)).toBe(1);
+    expect(afterMaterialize.document).toBe("{}");
 
     // Restore a fresh create-shaped row for the legacy-null-projection cases.
     await repository.save({
@@ -1306,10 +1307,11 @@ describe("hosted authoring Worker", () => {
     // authored document.
     await env.AUTHORING_DB.prepare(`
       UPDATE puzzle_drafts
-      SET content_json = NULL, pedagogy_json = NULL, classification_json = NULL,
+      SET document = ?, document_stale = 0,
+          content_json = NULL, pedagogy_json = NULL, classification_json = NULL,
           provenance_json = NULL
       WHERE id = ?
-    `).bind("domain-projection-fixture").run();
+    `).bind(JSON.stringify(document), "domain-projection-fixture").run();
     const legacy = await repository.get({
       draftId: "domain-projection-fixture",
       actor: { subject: "local-author" }

@@ -1786,9 +1786,6 @@ export function createAuthoringMcpServer({
     }),
     annotations: WRITE
   }, tracked("validate_puzzle_draft", safe(async ({ draft_id }) => {
-    if (await repositorySupports(draftRepository, "materialize")) {
-      await draftRepository.materialize({ draftId: draft_id, actor });
-    }
     const stored = await draftRepository.get({ draftId: draft_id, actor });
     const taxonomy = await taxonomyContext();
     const validation = withStorageCanonicalizeFlags(
