@@ -103,7 +103,16 @@ export function createHttpD1Database({
         { outcomeUnknown: true }
       );
     }
-    const text = await response.text();
+    let text;
+    try {
+      text = await response.text();
+    } catch (error) {
+      // The statement was sent. A body that never arrives can follow a commit.
+      throw new HttpD1Error(
+        `D1 request failed: ${error instanceof Error ? error.message : String(error)}`,
+        { outcomeUnknown: true }
+      );
+    }
     received.bytes = Buffer.byteLength(text, "utf8");
     let payload;
     try {

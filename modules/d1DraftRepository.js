@@ -145,11 +145,15 @@ function changes(result) {
 // the caller already holds.
 async function readCommittedRevision(database, draftId, ownerSubject) {
   const row = await database.prepare(`
-    SELECT revision FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+    SELECT revision, content_hash FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
   `).bind(draftId, ownerSubject).first();
   if (!row) return null;
   const revision = Number(row.revision);
-  return Number.isInteger(revision) && revision > 0 ? revision : null;
+  if (!Number.isInteger(revision) || revision <= 0) return null;
+  return {
+    revision,
+    contentHash: typeof row.content_hash === "string" ? row.content_hash : null
+  };
 }
 
 function committedDraftView({
@@ -198,27 +202,42 @@ function committedDraftView({
   };
 }
 
-// `expectedRevision` null is a create: any stored revision means the insert
-// landed. A save landed only at expectedRevision + 1. A history failure after
-// that confirmed update returns success even when the history error itself is
-// definite; the next save writes history from the document that is current then.
+// `expectedRevision` null is a create. The insert stores revision 1 and this
+// request's content hash, so a matching row is this insert (or an identical
+// draft already at revision 1). Any other row was already there and was not
+// overwritten. A save landed only at expectedRevision + 1. A history failure
+// after that confirmed update returns success even when the history error
+// itself is definite; the next save writes history from the document that is
+// current then.
 async function returnCommittedDraft(database, error, {
   draftId,
   ownerSubject,
   expectedRevision = null,
+  expectedContentHash = null,
   acceptDefiniteError = false,
   draftAt
 }) {
   if (!acceptDefiniteError && !d1CommitOutcomeUnknown(error)) throw error;
-  let revision;
+  let stored;
   try {
-    revision = await readCommittedRevision(database, draftId, ownerSubject);
+    stored = await readCommittedRevision(database, draftId, ownerSubject);
   } catch {
     throw error;
   }
+  const revision = stored?.revision ?? null;
   if (expectedRevision == null) {
+    if (
+      revision === 1 &&
+      stored.contentHash != null &&
+      stored.contentHash === expectedContentHash
+    ) {
+      return draftAt(revision);
+    }
     if (revision == null) throw error;
-    return draftAt(revision);
+    throw new DraftConflictError(
+      `Draft "${draftId}" already exists at revision ${revision}`,
+      revision
+    );
   }
   if (revision === expectedRevision + 1) return draftAt(revision);
   if (
@@ -240,9 +259,9 @@ async function rejectConflictUnlessCommitted(repository, {
   expectedRevision,
   draftAt
 }) {
-  let revision;
+  let stored;
   try {
-    revision = await readCommittedRevision(repository.database, draftId, ownerSubject);
+    stored = await readCommittedRevision(repository.database, draftId, ownerSubject);
   } catch (error) {
     return returnCommittedDraft(repository.database, error, {
       draftId,
@@ -251,10 +270,10 @@ async function rejectConflictUnlessCommitted(repository, {
       draftAt
     });
   }
-  if (revision == null) throw new DraftNotFoundError(draftId);
+  if (stored == null) throw new DraftNotFoundError(draftId);
   throw new DraftConflictError(
-    `Draft revision conflict: expected ${expectedRevision}, current revision is ${revision}`,
-    revision
+    `Draft revision conflict: expected ${expectedRevision}, current revision is ${stored.revision}`,
+    stored.revision
   );
 }
 
@@ -681,7 +700,12 @@ export class D1DraftRepository extends DraftRepository {
         ? basePublishedRevision
         : null
     });
-    const committed = { draftId, ownerSubject: owner.subject, draftAt };
+    const committed = {
+      draftId,
+      ownerSubject: owner.subject,
+      expectedContentHash: contentHash,
+      draftAt
+    };
     let result;
     try {
       result = await runDraftWrite(this.database.prepare(insert({

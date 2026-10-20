@@ -16,7 +16,7 @@ const actor = { subject: "owner-1" };
 const draftId = "lost-draft";
 const document = { id: draftId, title: "Lost response", category: "science" };
 const savedDocument = { ...document, title: "Saved anyway" };
-const REVISION_SQL = "SELECT revision FROM puzzle_drafts WHERE id = ? AND owner_subject = ?";
+const REVISION_SQL = "SELECT revision, content_hash FROM puzzle_drafts WHERE id = ? AND owner_subject = ?";
 
 function lostResponse(kind) {
   if (kind === "fetch") {
@@ -149,6 +149,16 @@ export async function run() {
   const notJson = await httpError(async () => new Response("upstream reset", { status: 502 }));
   assert.equal(notJson.outcomeUnknown, true);
   assert.match(notJson.message, /response was not JSON/);
+
+  const bodyDropped = await httpError(async () => ({
+    ok: true,
+    status: 200,
+    text: async () => {
+      throw new TypeError("terminated");
+    }
+  }));
+  assert.equal(bodyDropped.outcomeUnknown, true);
+  assert.match(bodyDropped.message, /terminated/);
 
   const internal = await httpError(async () => jsonResponse({
     success: false,
@@ -365,6 +375,48 @@ export async function run() {
       assert.equal(error.revision, 1);
     }
   );
+
+  const ambiguous = await seeded();
+  const ambiguousCreate = openWrapped(
+    ambiguous.database,
+    failOnce(entry => /INSERT INTO puzzle_drafts\b/.test(entry.sql), lostResponse("internal"))
+  );
+  await assert.rejects(
+    () => ambiguousCreate.repository.create({
+      draftId,
+      document: { ...document, title: "Not stored" },
+      actor
+    }),
+    error => error instanceof DraftConflictError
+      && /already exists at revision 1/.test(error.message)
+      && error.revision === 1
+  );
+  assert.equal(storedRevision(ambiguous.database).title, "Lost response");
+
+  const sameDocument = await seeded();
+  const sameCreate = openWrapped(
+    sameDocument.database,
+    failOnce(entry => /INSERT INTO puzzle_drafts\b/.test(entry.sql), lostResponse("internal"))
+  );
+  const recoveredSame = await sameCreate.repository.create({ draftId, document, actor });
+  assert.equal(recoveredSame.revision, 1);
+  assert.equal(recoveredSame.document.title, "Lost response");
+
+  const advanced = await seeded();
+  advanced.database.sqlite.prepare(
+    "UPDATE puzzle_drafts SET revision = 2 WHERE id = ?"
+  ).run(draftId);
+  const advancedCreate = openWrapped(
+    advanced.database,
+    failOnce(entry => /INSERT INTO puzzle_drafts\b/.test(entry.sql), lostResponse("internal"))
+  );
+  await assert.rejects(
+    () => advancedCreate.repository.create({ draftId, document, actor }),
+    error => error instanceof DraftConflictError
+      && /already exists at revision 2/.test(error.message)
+      && error.revision === 2
+  );
+  assert.equal(storedRevision(advanced.database).title, "Lost response");
 
   let bumped = false;
   const raced = await seeded(entry => {

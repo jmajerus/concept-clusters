@@ -449,9 +449,23 @@ describe("hosted authoring Worker", () => {
       }
     });
     const creation = await rpcJson(created) as {
+      result: { structuredContent: { draft: { draftId: string; revision: number } } };
+    };
+    expect(creation.result.structuredContent.draft.draftId).toBe("worker-mcp-fixture");
+    expect(creation.result.structuredContent.draft.revision).toBe(1);
+    const createdDraft = await rpc({
+      jsonrpc: "2.0",
+      id: "created-draft",
+      method: "tools/call",
+      params: {
+        name: "get_puzzle_draft",
+        arguments: { draft_id: "worker-mcp-fixture" }
+      }
+    });
+    const storedCreation = await rpcJson(createdDraft) as {
       result: { structuredContent: { draft: { contentHash: string } } };
     };
-    expect(creation.result.structuredContent.draft.contentHash).toMatch(/^fnv1a64:/);
+    expect(storedCreation.result.structuredContent.draft.contentHash).toMatch(/^fnv1a64:/);
 
     const validated = await rpc({
       jsonrpc: "2.0",
@@ -894,13 +908,26 @@ describe("hosted authoring Worker", () => {
       result: {
         structuredContent: {
           normalization?: unknown;
-          draft: { revision: number; document: { category: string } };
+          draft: { revision: number; document?: { category: string } };
         };
       };
     };
     expect(simplifiedCreation.result.structuredContent.normalization).toBeUndefined();
     expect(simplifiedCreation.result.structuredContent.draft.revision).toBe(1);
-    expect(simplifiedCreation.result.structuredContent.draft.document.category).toBe("science");
+    expect(simplifiedCreation.result.structuredContent.draft.document).toBeUndefined();
+    const simplifiedLoaded = await rpc({
+      jsonrpc: "2.0",
+      id: "simplified-draft",
+      method: "tools/call",
+      params: {
+        name: "get_puzzle_draft",
+        arguments: { draft_id: "worker-simplified-fixture" }
+      }
+    });
+    const simplifiedDraft = await rpcJson(simplifiedLoaded) as {
+      result: { structuredContent: { draft: { document: { category: string } } } };
+    };
+    expect(simplifiedDraft.result.structuredContent.draft.document.category).toBe("science");
 
     const simplifiedValidated = await rpc({
       jsonrpc: "2.0",
@@ -1112,9 +1139,23 @@ describe("hosted authoring Worker", () => {
     });
     expect(saved.status).toBe(200);
     const payload = await rpcJson(saved) as {
+      result: { structuredContent: { draft: { revision: number; document?: AgentDocument } } };
+    };
+    expect(payload.result.structuredContent.draft.revision).toBe(loadedDraft.revision + 1);
+    expect(payload.result.structuredContent.draft.document).toBeUndefined();
+    const savedLoaded = await rpc({
+      jsonrpc: "2.0",
+      id: "saved-draft",
+      method: "tools/call",
+      params: {
+        name: "get_puzzle_draft",
+        arguments: { draft_id: "retained-provenance-fixture" }
+      }
+    });
+    const savedPayload = await rpcJson(savedLoaded) as {
       result: { structuredContent: { draft: { document: AgentDocument } } };
     };
-    const returnedDocument = payload.result.structuredContent.draft.document;
+    const returnedDocument = savedPayload.result.structuredContent.draft.document;
     for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
       expect(returnedDocument[field]).toBeUndefined();
     }
