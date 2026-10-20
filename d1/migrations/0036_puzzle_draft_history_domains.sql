@@ -1,3 +1,4 @@
+-- 0035 is the authoring-model vocabulary seed. This history rebuild is 0036.
 -- Undo snapshots are copied from the live draft inside the save batch.
 -- Domain columns are that copy. `document` remains for snapshots taken
 -- before this migration; new snapshots leave it null so a stale cache blob
