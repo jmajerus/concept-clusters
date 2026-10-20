@@ -1,12 +1,20 @@
+import { d1CommitOutcomeUnknown } from "./d1CommitOutcome.js";
 import { recordD1Query } from "./d1RequestTiming.js";
 
 const DEFAULT_API_BASE = "https://api.cloudflare.com/client/v4";
 
 export class HttpD1Error extends Error {
-  constructor(message) {
+  constructor(message, options = {}) {
     super(message);
     this.name = "HttpD1Error";
+    if (options.outcomeUnknown) this.outcomeUnknown = true;
   }
+}
+
+function httpD1Error(message) {
+  return new HttpD1Error(message, {
+    outcomeUnknown: d1CommitOutcomeUnknown(message)
+  });
 }
 
 function queryPayload(body) {
@@ -89,8 +97,10 @@ export function createHttpD1Database({
         body: JSON.stringify(queryPayload(body))
       });
     } catch (error) {
+      // No response at all: the statement may already have committed.
       throw new HttpD1Error(
-        `D1 request failed: ${error instanceof Error ? error.message : String(error)}`
+        `D1 request failed: ${error instanceof Error ? error.message : String(error)}`,
+        { outcomeUnknown: true }
       );
     }
     const text = await response.text();
@@ -100,18 +110,17 @@ export function createHttpD1Database({
       payload = text ? JSON.parse(text) : {};
     } catch {
       throw new HttpD1Error(
-        `D1 HTTP ${response.status}: response was not JSON`
+        `D1 HTTP ${response.status}: response was not JSON`,
+        { outcomeUnknown: true }
       );
     }
     if (!response.ok || payload.success === false) {
-      throw new HttpD1Error(
-        errorMessage(payload, `D1 HTTP ${response.status}`)
-      );
+      throw httpD1Error(errorMessage(payload, `D1 HTTP ${response.status}`));
     }
     const results = Array.isArray(payload.result) ? payload.result.map(normalizeResult) : [];
     const failed = results.find(entry => entry.success === false);
     if (failed) {
-      throw new HttpD1Error(errorMessage(payload, "D1 query failed"));
+      throw httpD1Error(errorMessage(payload, "D1 query failed"));
     }
     return results;
   }

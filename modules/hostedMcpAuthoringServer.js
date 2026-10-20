@@ -135,10 +135,11 @@ const EXPECTED_REVISION_CONTRACT =
 const WAIVER_DECISION_KEY = "waiver-decision";
 
 // A lost response can leave the row ahead of the revision the agent holds.
-// Conflict and already-exists name that integer. A transport failure does
-// not, so those still need a read before another save.
+// The repository returns that revision on success, or names it on a conflict.
+// A validation or ownership rejection did not commit. get_puzzle_draft is how
+// to merge a draft this session has not seen.
 const RECOVER_AFTER_WRITE_ERROR =
-  "A validation or ownership rejection did not commit, so retry the same expected_revision. When the error names a current revision, use that integer and the document you already have. Call get_puzzle_draft before another save when the error is fetch failed, D1_ERROR, or a non-JSON response, and when merging a draft this session has not seen.";
+  "A validation or ownership rejection did not commit, so retry the same expected_revision. When the error names a current revision, use that integer and the document you already have. Call get_puzzle_draft before another save when merging a draft this session has not seen.";
 
 // How this client can ask its own user to decide a waiver in the chat, if
 // at all. 2026-07-28 clients declare capabilities on each request and answer

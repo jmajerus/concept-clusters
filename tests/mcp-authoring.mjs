@@ -132,9 +132,14 @@ export async function run() {
     const saveTool = listed.result.tools.find(tool => tool.name === "save_puzzle_draft");
     assert.match(saveTool.description, /^Every save requires expected_revision/);
     assert.match(saveTool.description, /A validation or ownership rejection did not commit/);
-    assert.match(saveTool.description, /fetch failed, D1_ERROR, or a non-JSON response/);
+    assert.match(saveTool.description, /When the error names a current revision/);
+    assert.match(saveTool.description, /merging a draft this session has not seen/);
+    assert.doesNotMatch(saveTool.description, /fetch failed|D1_ERROR|non-JSON/);
     const createTool = listed.result.tools.find(tool => tool.name === "create_puzzle_draft");
     assert.match(createTool.description, /A validation or ownership rejection did not commit/);
+    assert.match(createTool.description, /When the error names a current revision/);
+    assert.match(createTool.description, /merging a draft this session has not seen/);
+    assert.doesNotMatch(createTool.description, /fetch failed|D1_ERROR|non-JSON/);
     const revisionField = saveTool.inputSchema.properties.expected_revision;
     assert.equal(revisionField.type, "integer");
     assert.match(revisionField.description, /Copy draft\.revision/);

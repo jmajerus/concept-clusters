@@ -197,8 +197,8 @@
 // conversation until a person approves it. A checkout may store that same
 // map at inventories/<id>.json. A validation or ownership rejection did not
 // commit. An error that names a current revision is the next
-// expected_revision. fetch failed, D1_ERROR, and a non-JSON response may
-// mean the write landed.
+// expected_revision. Call get_puzzle_draft only to merge a draft this
+// session has not seen.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
   minor: 19

@@ -161,6 +161,7 @@ import * as mcpWaiverChatApproval from "./mcp-waiver-chat-approval.mjs";
 import * as legacyBoardLift from "./legacy-board-lift.mjs";
 import * as firstPublishedBackfill from "./first-published-backfill.mjs";
 import * as d1LargeColumnCache from "./d1-large-column-cache.mjs";
+import * as d1LostResponse from "./d1-lost-response.mjs";
 import * as derivedRowMemo from "./derived-row-memo.mjs";
 
 const allTests = [
@@ -178,7 +179,7 @@ const allTests = [
   geometryVisibleSegment, circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, layoutPassJobs, autoLayoutWatcher, singleClusterLayout,
   nonCryptographicHash,
   skillRevisionStamp,
-  wikiLinkCheck, d1LargeColumnCache, derivedRowMemo
+  wikiLinkCheck, d1LargeColumnCache, d1LostResponse, derivedRowMemo
 ];
 
 // Keep these lists intentional rather than making every new test quick or
@@ -196,7 +197,7 @@ const quickTests = [
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
   circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, layoutPassJobs, autoLayoutWatcher, singleClusterLayout,
-  categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck, d1LargeColumnCache, derivedRowMemo
+  categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck, d1LargeColumnCache, d1LostResponse, derivedRowMemo
 ];
 
 const standardTests = [
@@ -246,7 +247,7 @@ const sideTests = {
     authoringFieldOwnership, draftDomainColumns, localGitHubConfig,
     localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks,
     localDevHttp, localDevHousekeep, playCorpus, boardAdministration, domains, wikiLinkCheck,
-    boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, autoLayoutWatcher, legacyBoardLift, firstPublishedBackfill, d1LargeColumnCache, derivedRowMemo
+    boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, autoLayoutWatcher, legacyBoardLift, firstPublishedBackfill, d1LargeColumnCache, d1LostResponse, derivedRowMemo
   ]),
   shared: new Set([
     contentValidation,
