@@ -82,6 +82,67 @@ export function createD1WikiLinkCheckStore(database) {
   };
 }
 
+export function createPostgresWikiLinkCheckStore(pool) {
+  if (!pool) throw new Error("A Postgres pool is required");
+  return {
+    async readFresh(titles, { maxAgeMs, now }) {
+      const unique = [...new Set(titles.filter(title => typeof title === "string" && title.trim()))];
+      const fresh = new Map();
+      if (!unique.length) return fresh;
+      const since = new Date(now - maxAgeMs).toISOString();
+      const { rows } = await pool.query(`
+        SELECT title, page_exists, disambiguation, resolved_title
+        FROM wiki_link_checks
+        WHERE checked_at >= $1 AND title = ANY($2::text[])
+      `, [since, unique]);
+      for (const row of rows) fresh.set(row.title, rowToResolution(row));
+      return fresh;
+    },
+    async write(resolutions, { now }) {
+      if (!resolutions.size) return;
+      const checkedAt = new Date(now).toISOString();
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        for (const [title, resolution] of resolutions) {
+          await client.query(`
+            INSERT INTO wiki_link_checks (title, page_exists, disambiguation, resolved_title, checked_at)
+            VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (title) DO UPDATE SET
+              page_exists = excluded.page_exists,
+              disambiguation = excluded.disambiguation,
+              resolved_title = excluded.resolved_title,
+              checked_at = excluded.checked_at
+          `, [
+            title,
+            resolution.exists ? 1 : 0,
+            resolution.disambiguation ? 1 : 0,
+            resolution.resolvedTitle || null,
+            checkedAt
+          ]);
+        }
+        await client.query("COMMIT");
+      } catch (error) {
+        try { await client.query("ROLLBACK"); } catch { /* socket already gone */ }
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+    async readAll() {
+      const { rows } = await pool.query(`
+        SELECT title, page_exists, disambiguation, resolved_title, checked_at
+        FROM wiki_link_checks
+      `);
+      const all = new Map();
+      for (const row of rows) {
+        all.set(row.title, { ...rowToResolution(row), checkedAt: row.checked_at });
+      }
+      return all;
+    }
+  };
+}
+
 /** In-memory store with the same contract, for tests and D1-less runs. */
 export function createMemoryWikiLinkCheckStore() {
   const rows = new Map();

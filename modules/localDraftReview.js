@@ -2261,9 +2261,11 @@ export function createLocalDraftReviewHandler({
         publishedRowLoad,
         draftLoad,
         loadOrHydrateGithubProductionManifest({ repositoryRoot }),
-        contentDocuments?.database
-          ? new D1ModelSuggestionRepository(contentDocuments.database).listForRuntime()
-          : null,
+        contentDocuments?.modelSuggestions
+          ? contentDocuments.modelSuggestions.listForRuntime()
+          : contentDocuments?.database
+            ? new D1ModelSuggestionRepository(contentDocuments.database).listForRuntime()
+            : null,
         puzzleId && contentDocuments?.listPuzzleReviewEvents
           ? contentDocuments.listPuzzleReviewEvents({ id: puzzleId })
           : [],

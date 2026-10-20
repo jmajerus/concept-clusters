@@ -59,13 +59,21 @@ export async function run() {
   });
   assert.ok(marked.cuedForFreezeAt);
   assert.equal(marked.cuedForFreezeBy, "author-1");
-  const republished = await repo.publish({
+  const identical = await repo.publish({
     kind: "catalogue",
     id: "lab-docs",
     document: saved.document,
     actor
   });
-  assert.equal(republished.cuedForFreezeAt, null);
+  assert.equal(identical.revision, published.revision);
+  assert.equal(identical.cuedForFreezeAt, marked.cuedForFreezeAt);
+  const uncleared = await repo.setFreezeCue({
+    kind: "catalogue",
+    id: "lab-docs",
+    actor,
+    cued: false
+  });
+  assert.equal(uncleared.cuedForFreezeAt, null);
 
   await repo.saveDraft({
     kind: "catalogue",
@@ -569,7 +577,7 @@ export async function run() {
       }
     ]
   });
-  assert.equal(choice.revision, decided.revision + 1);
+  assert.equal(choice.revision, decided.revision);
   const choiceEvents = await repo.listPuzzleReviewEvents({ id: "old-git-puzzle", limit: 5 });
   assert.equal(choiceEvents.some(event =>
     event.eventType === "accepted" &&

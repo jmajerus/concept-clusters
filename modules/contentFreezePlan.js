@@ -165,9 +165,10 @@ export async function loadContentFreezePlan({
   gitCategoryRegistry = categoryRegistry
 } = {}) {
   if (!contentDocuments) return emptyContentFreezePlan();
-  const modelSuggestionRepository = contentDocuments.database
-    ? new D1ModelSuggestionRepository(contentDocuments.database)
-    : null;
+  const modelSuggestionRepository = contentDocuments.modelSuggestions
+    || (contentDocuments.database
+      ? new D1ModelSuggestionRepository(contentDocuments.database)
+      : null);
   const [publishedPuzzles, publishedCatalogues, publishedCategories, modelSuggestions] = await Promise.all([
     contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true }),
     contentDocuments.listPublished({ kind: "catalogue", includeWithdrawn: true }),

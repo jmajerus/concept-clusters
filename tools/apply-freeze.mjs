@@ -136,7 +136,9 @@ async function freezeFromOriginCheckout(additionalContext, githubConfig) {
   const github = new GitHubRepositoryClient(githubConfig);
   const publicationService = createFreezePublicationService({
     github,
-    repository: new D1FreezePublicationRepository(resolved.contentDocuments.database)
+    repository: resolved.freezeRepository
+      || resolved.contentDocuments.freezeRepository
+      || new D1FreezePublicationRepository(resolved.contentDocuments.database)
   });
   await publicationService.reconcile({ contentDocuments: resolved.contentDocuments });
 

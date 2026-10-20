@@ -42,6 +42,9 @@
     "authoring:deploy": "node tools/authoring-deploy.mjs",
     "authoring:d1:migrate:local": "wrangler d1 migrations apply concept-clusters-authoring --local -c wrangler.authoring.jsonc",
     "authoring:d1:migrate:remote": "wrangler d1 migrations apply concept-clusters-authoring --remote -c wrangler.authoring.jsonc",
+    "authoring:postgres:migrate": "node tools/postgres-migrate.mjs",
+    "authoring:postgres:dump": "node tools/postgres-dump.mjs",
+    "authoring:postgres:copy": "node tools/copy-authoring-to-postgres.mjs",
     "mcp:hosted:release": "npm run authoring:d1:migrate:remote && npm run mcp:hosted:deploy",
     "mcp:hosted:types": "wrangler types -c wrangler.authoring.jsonc src/authoring-worker-configuration.d.ts",
     "test:worker": "vitest run -c vitest.authoring.config.ts",
@@ -56,6 +59,7 @@
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.20.1",
+    "@electric-sql/pglite": "^0.5.10",
     "@types/node": "^26.0.1",
     "playwright": "^1.48.0",
     "typescript": "^6.0.3",
@@ -66,6 +70,7 @@
     "@modelcontextprotocol/server": "2.0.0",
     "agents": "^0.20.1",
     "jose": "^6.2.7",
+    "pg": "^8.23.1",
     "zod": "^4.4.3"
   }
 }

@@ -130,7 +130,7 @@ function titleOf(document) {
   return typeof document?.title === "string" ? document.title : null;
 }
 
-function reviewEventRecord(row) {
+export function reviewEventRecord(row) {
   let proposal = null;
   if (row.proposal_json) {
     proposal = typeof row.proposal_json === "string"
@@ -180,7 +180,7 @@ const REVIEW_EVENT_TYPES = Object.freeze([
 ]);
 const PROPOSAL_BYTE_LIMIT = 1_250_000;
 
-function reviewEventInput({
+export function reviewEventInput({
   reviewerKind,
   comments = null,
   outcome = null,
@@ -341,7 +341,7 @@ function reviewDecisionInputs(decisions, publishedRevision) {
   }));
 }
 
-function reviewIssueThreads(events) {
+export function reviewIssueThreads(events) {
   const threads = new Map();
   for (const event of events) {
     if (!event.issueId) continue;
@@ -410,7 +410,7 @@ export function matchReviewIssue(issues, handle) {
     || null;
 }
 
-function limitReviewIssues(threads, { limit = 50, includeResolved = false, uncapped = false } = {}) {
+export function limitReviewIssues(threads, { limit = 50, includeResolved = false, uncapped = false } = {}) {
   if (uncapped) return threads;
   const cappedLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
   return threads
@@ -465,6 +465,17 @@ function samePublishedSnapshot(record, { kind, contentHash, layoutJson }) {
 function revisedMarkLanded(record, { marked = false, previousStamp = null } = {}) {
   if (!marked) return true;
   return (record?.contentRevisedAt || null) !== (previousStamp || null);
+}
+
+// A second publish of the same snapshot does not allocate a revision.
+// Withdrawn rows stay republishable: samePublishedSnapshot rejects them.
+function currentPublicationMatches(existingRow, {
+  kind, contentHash, layoutJson, marked, previousStamp
+}) {
+  if (!existingRow) return false;
+  const record = publishedRecord(existingRow);
+  return samePublishedSnapshot(record, { kind, contentHash, layoutJson })
+    && revisedMarkLanded(record, { marked, previousStamp });
 }
 
 export async function publishedRowOrNull(contentDocuments, kind, id) {
@@ -905,6 +916,16 @@ export class D1ContentDocumentRepository {
       marked: revised.marked,
       previousStamp: existing?.content_revised_at || null
     };
+    if (currentPublicationMatches(existing, snapshot)) {
+      const keptRevision = Number(existing.revision);
+      const decisionInputs = reviewDecisionInputs(reviewDecisions, keptRevision);
+      if (decisionInputs.length) {
+        await this.database.batch(decisionInputs.map(event =>
+          reviewEventInsertStatement(this.database, id, now, event)
+        ));
+      }
+      return this.getPublished({ kind, id });
+    }
     if (!existing) {
       try {
         await this.database.batch([
@@ -983,6 +1004,18 @@ export class D1ContentDocumentRepository {
       return current;
     }
     throw new PublishedRevisionConflictError(kind, id);
+  }
+
+  async touchPublishedReviewStamp({ id, reviewerKind, reviewedAt }) {
+    assertDraftId(id);
+    const reviewColumn = reviewerKind === "agent"
+      ? "last_agent_reviewed_at"
+      : "last_human_reviewed_at";
+    await this.database.prepare(`
+      UPDATE published_documents
+      SET ${reviewColumn} = ?
+      WHERE kind = 'puzzle' AND id = ? AND withdrawn_at IS NULL
+    `).bind(reviewedAt, id).run();
   }
 
   async unpublish({ kind, id, actor }) {
@@ -1260,9 +1293,21 @@ export function createMemoryContentDocumentRepository() {
       if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
         throw new PublishedRevisionConflictError(kind, id);
       }
+      const contentHash = draftContentHash(documentJson);
+      if (currentPublicationMatches(existing, {
+        kind,
+        contentHash,
+        layoutJson,
+        marked: revised.marked,
+        previousStamp: existing?.content_revised_at || null
+      })) {
+        for (const event of reviewDecisionInputs(reviewDecisions, Number(existing.revision))) {
+          reviewEvents.push(storedReviewEventRow(reviewEvents.length + 1, id, now, event));
+        }
+        return repository.getPublished({ kind, id });
+      }
       const nextRevision = existing ? Number(existing.revision) + 1 : 1;
       const revisionKey = `${key}:${nextRevision}`;
-      const contentHash = draftContentHash(documentJson);
       if (revisions.has(revisionKey)) {
         const current = published.get(key);
         const record = current ? publishedRecord(current) : null;

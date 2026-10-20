@@ -1,10 +1,8 @@
-import { createExecutionContext, createScheduledController, waitOnExecutionContext } from "cloudflare:test";
 import { env } from "cloudflare:workers";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import worker from "../../src/authoring-worker";
 import { D1ContentDocumentRepository } from "../../modules/contentDocumentRepository.js";
 import { createD1WikiLinkCheckStore } from "../../modules/wikiLinkCheckStore.js";
-import { checkDocumentWikiLinks } from "../../modules/wikiLinkCheck.js";
+import { checkDocumentWikiLinks, runWikiLinkHealth } from "../../modules/wikiLinkCheck.js";
 
 // Wikipedia's query API, formatversion=2 shape, for whatever titles it is
 // asked: one redirect, one missing, the rest exist.
@@ -91,7 +89,7 @@ describe("wiki_link_checks in D1", () => {
     expect((await store.readAll()).get("Gram stain")?.checkedAt).toBe("2026-09-24T09:00:00.000Z");
   });
 
-  it("scheduled(): resolves every wiki: link in the published corpus into the table", async () => {
+  it("resolves every wiki: link in the published corpus into the table", async () => {
     const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
     await contentDocuments.publish({
       kind: "puzzle",
@@ -102,9 +100,11 @@ describe("wiki_link_checks in D1", () => {
     const calls: string[][] = [];
     vi.stubGlobal("fetch", wikipediaStub(calls));
 
-    const ctx = createExecutionContext();
-    await worker.scheduled!(createScheduledController({ cron: "0 6 * * 1" }), env, ctx);
-    await waitOnExecutionContext(ctx);
+    await runWikiLinkHealth({
+      contentDocuments,
+      store: createD1WikiLinkCheckStore(env.AUTHORING_DB),
+      fetch: wikipediaStub(calls) as typeof fetch
+    });
 
     expect(calls.length).toBeGreaterThanOrEqual(1);
     const asked = new Set(calls.flat());
