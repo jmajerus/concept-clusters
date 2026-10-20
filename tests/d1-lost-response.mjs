@@ -2,9 +2,19 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  assembleStoredDomainDocuments,
+  partitionAuthoredDocument
+} from "../modules/authoringDomains.js";
 import { d1CommitOutcomeUnknown } from "../modules/d1CommitOutcome.js";
 import { D1DraftRepository } from "../modules/d1DraftRepository.js";
-import { DraftConflictError, DraftNotFoundError } from "../modules/draftRepository.js";
+import {
+  DraftConflictError,
+  DraftNotFoundError,
+  PublishedIdConflictError,
+  draftContentHash,
+  serializeDraftDocument
+} from "../modules/draftRepository.js";
 import { createHttpD1Database, HttpD1Error } from "../modules/httpD1Database.js";
 import { createSqliteD1 } from "./lib/sqlite-d1.mjs";
 
@@ -517,6 +527,44 @@ export async function run() {
   assert.equal(insertedAnyway.revision, 1);
   assert.equal(insertedAnyway.document.title, "Lost response");
 
+  function publishPuzzle(database, id) {
+    database.sqlite.prepare(`
+      INSERT INTO published_documents (
+        kind, id, title, document, content_hash, revision, published_by, published_at, updated_at
+      ) VALUES ('puzzle', ?, 'Lost response', '{}', 'published', 1, 'owner-1', ?, ?)
+    `).run(id, "2026-01-01T00:00:00.000Z", "2026-01-01T00:00:00.000Z");
+  }
+
+  const shadowed = createSqliteD1();
+  const shadowedRepository = new D1DraftRepository(shadowed);
+  await shadowedRepository.create({
+    draftId,
+    document,
+    actor,
+    seededFromPublished: true
+  });
+  publishPuzzle(shadowed, draftId);
+  await assert.rejects(
+    () => shadowedRepository.create({ draftId, document, actor }),
+    error => error instanceof PublishedIdConflictError
+  );
+  assert.equal(Number(storedRevision(shadowed).revision), 1);
+
+  const seededRecoverDb = createSqliteD1();
+  publishPuzzle(seededRecoverDb, draftId);
+  const seededRecover = openWrapped(
+    seededRecoverDb,
+    zeroChangesOnce(entry => /INSERT INTO puzzle_drafts\b/.test(entry.sql))
+  );
+  const seededAnyway = await seededRecover.repository.create({
+    draftId,
+    document,
+    actor,
+    seededFromPublished: true
+  });
+  assert.equal(seededAnyway.revision, 1);
+  assert.equal(seededAnyway.openedFromPublished, true);
+
   let probes = 0;
   const flakyProbe = await seeded(entry => {
     if (/INSERT INTO puzzle_draft_history\b/.test(entry.sql)) return lostResponse("fetch");
@@ -556,6 +604,70 @@ export async function run() {
     thrown => thrown === historyLostForProbe
   );
   assert.equal(exhausted, 3);
+
+  let conflictProbes = 0;
+  const conflictProbeError = lostResponse("fetch");
+  const conflictProbe = await seeded(entry => {
+    if (entry.method === "run" && /UPDATE puzzle_drafts\b/.test(entry.sql)) return { zeroChanges: true };
+    if (entry.sql.replace(/\s+/g, " ").trim() === REVISION_SQL) {
+      conflictProbes += 1;
+      return conflictProbeError;
+    }
+    return undefined;
+  });
+  await assert.rejects(
+    () => conflictProbe.repository.save({
+      draftId,
+      document: savedDocument,
+      actor,
+      expectedRevision: 1
+    }),
+    thrown => thrown === conflictProbeError
+  );
+  assert.equal(conflictProbes, 3);
+
+  const racedUndo = await seeded(() => undefined);
+  await racedUndo.repository.save({
+    draftId,
+    document: savedDocument,
+    actor,
+    expectedRevision: 1
+  });
+  const currentUndo = await racedUndo.repository.get({ draftId, actor });
+  const priorUndo = racedUndo.database.sqlite.prepare(`
+    SELECT document FROM puzzle_draft_history WHERE draft_id = ?
+  `).get(draftId);
+  const restoredHash = draftContentHash(serializeDraftDocument(assembleStoredDomainDocuments({
+    document: JSON.parse(priorUndo.document),
+    administration: partitionAuthoredDocument(currentUndo.document).administration ?? {}
+  })));
+  let planted = false;
+  const racedPop = openWrapped(racedUndo.database, entry => {
+    if (planted || entry.method !== "batch" || !/DELETE FROM puzzle_draft_history\b/.test(entry.sql)) {
+      return undefined;
+    }
+    planted = true;
+    racedUndo.database.sqlite.prepare(`
+      UPDATE puzzle_drafts
+      SET revision = 3, content_hash = ?, updated_at = ?
+      WHERE id = ?
+    `).run(restoredHash, "2000-01-01T00:00:00.000Z", draftId);
+    return undefined;
+  });
+  await assert.rejects(
+    () => racedPop.repository.popWorkingCopy({
+      draftId,
+      actor,
+      expectedRevision: 2
+    }),
+    error => error instanceof DraftConflictError && error.revision === 3
+  );
+  assert.equal(
+    Number(racedUndo.database.sqlite.prepare(
+      "SELECT COUNT(*) AS n FROM puzzle_draft_history WHERE draft_id = ?"
+    ).get(draftId).n),
+    1
+  );
 
   const poppedBase = await seeded(() => undefined);
   await poppedBase.repository.save({

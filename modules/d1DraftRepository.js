@@ -300,21 +300,15 @@ async function returnCommittedDraft(database, error, {
 async function rejectConflictUnlessCommitted(repository, {
   draftId,
   ownerSubject,
-  expectedRevision,
-  expectedContentHash = null,
-  draftAt
+  expectedRevision
 }) {
   let stored;
   try {
     stored = await readCommittedRevision(repository.database, draftId, ownerSubject);
   } catch (error) {
-    return returnCommittedDraft(repository.database, error, {
-      draftId,
-      ownerSubject,
-      expectedRevision,
-      expectedContentHash,
-      draftAt
-    });
+    // The probe already spent its attempts. Recovering here would read the
+    // same revision again and start that budget over.
+    throw error;
   }
   if (stored == null) throw new DraftNotFoundError(draftId);
   // No reported row change conflicts with the stored revision. A matching
@@ -809,14 +803,20 @@ export class D1DraftRepository extends DraftRepository {
       }
     }
     // A UNIQUE violation throws above. changes === 0 is the shadow gate, unless
-    // the insert committed and the response omitted meta.changes.
+    // the insert committed and the response omitted meta.changes. A live
+    // published id means the gate blocked this fresh create; a seeded working
+    // copy of that id can already sit at revision 1 with this same hash.
+    // The seeded route is the insert that may run beside a published id, so
+    // only that route can treat the hash match as its own omitted response.
     if (changes(result) !== 1) {
-      const stored = await readCommittedRevision(this.database, draftId, owner.subject);
-      if (stored?.revision === 1 && stored.contentHash === contentHash) return draftAt(1);
       const live = await this.database.prepare(`
         SELECT id FROM published_documents
         WHERE kind = 'puzzle' AND id IN (?, ?) LIMIT 1
       `).bind(...guardedIds).first();
+      if (!live || seededFromPublished) {
+        const stored = await readCommittedRevision(this.database, draftId, owner.subject);
+        if (stored?.revision === 1 && stored.contentHash === contentHash) return draftAt(1);
+      }
       throw new PublishedIdConflictError(live?.id || guardedIds[1]);
     }
     return draftAt(1);
@@ -1288,9 +1288,11 @@ export class D1DraftRepository extends DraftRepository {
         this.database.prepare(`
           DELETE FROM puzzle_draft_history
           WHERE draft_id = ? AND seq = ?
+            AND changes() = 1
             AND EXISTS (
               SELECT 1 FROM puzzle_drafts
-              WHERE id = ? AND owner_subject = ? AND revision = ? AND content_hash = ?
+              WHERE id = ? AND owner_subject = ? AND revision = ?
+                AND content_hash = ? AND updated_at = ?
             )
         `).bind(
           draftId,
@@ -1298,7 +1300,8 @@ export class D1DraftRepository extends DraftRepository {
           draftId,
           owner.subject,
           nextRevision,
-          contentHash
+          contentHash,
+          now
         )
       ]);
     } catch (error) {
