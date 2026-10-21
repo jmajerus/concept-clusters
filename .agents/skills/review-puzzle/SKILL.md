@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Review a Concept Clusters puzzle
 
-Skill rev `85f37fa7` · 2026-10-08
+Skill rev `11e8afa6` · 2026-10-21
 
 Run **one** planner. Treat its JSON as the contract. Do not improvise a search.
 
@@ -62,27 +62,22 @@ Before the first edit of a review or loop pass, call
 document the review started from. It does not record a completed review.
 
 After the edited draft validates, call the same tool with `action="propose"`.
-That files the current document as one candidate against the published puzzle
-this review started from, then restores content and pedagogy to the baseline
-and leaves provenance as it stands, so another agent can file a competing
-candidate. Changes that only repeat an open proposal are left out of the new
-candidate. Pass `stack_on: true` to put this review on top of the preceding
-one. The server chooses that proposal, so there is no id to track. Skip
-`propose` when the playable puzzle matches the baseline. If content or
-pedagogy has been published since this review began, stop; do not file the
-older draft. A later byline or layout publish does not. Then call
-`action="complete"`.
+That stores the edit as a field patch against the baseline from `begin`, then
+restores the working copy and leaves provenance as it stands. A patch that
+changes a field an open proposal also changes is refused. Pass `stack_on: true`
+to build on the preceding proposal; the server chooses that proposal, so there
+is no id to track. Disjoint fields are filed as their own proposal without
+`stack_on`. Skip `propose` when the playable puzzle matches the baseline.
+Then call `action="complete"`.
 
 If `begin` finds the working copy equal to an open proposal, it restores the
 baseline first. Pass `stack_on: true` on `begin` only when this review should
-start by reading that preceding document. Passing it on `propose` is enough
-to keep the preceding review's edits.
+start from that preceding proposal.
 
-The drafts page lists those candidates for the current published puzzle.
-**Play** loads one into the working copy. **Publish this review** publishes
-that stored proposal and rejects the others. **Keep published** rejects every
-open proposal. When another review wrote a lesson this one does not have, the
-card can use that lesson with the review you play or publish.
+The drafts page lists pending proposals on the working copy. **Accept**
+applies that proposal's fields. **Reject** leaves the working copy as it is.
+**Defer** decides later. Two proposals on different fields can both be
+accepted. Publish warns while a proposal is still open.
 
 When no candidate has been filed yet, the page still offers **Publish** and,
 if this review opened the working copy, **Discard review**. When a draft was

@@ -497,11 +497,12 @@ export async function run() {
   assert.match(choicePage, /Codex gpt-5.4/);
   assert.match(choicePage, /A sharper alpha fact/);
   assert.match(choicePage, /The fact was broader than the cluster/);
-  assert.match(choicePage, /value="publish-review"/);
+  assert.match(choicePage, /value="accept-review"/);
   assert.match(choicePage, /name="proposal_id" value="9"/);
-  assert.match(choicePage, /value="preview-review"/);
-  assert.match(choicePage, /value="keep-published"/);
-  assert.match(choicePage, /alternatives to the published puzzle/);
+  assert.match(choicePage, /value="reject-review"/);
+  assert.match(choicePage, /Pending proposals/);
+  assert.match(choicePage, /pending changes to the working copy/);
+  assert.match(choicePage, /value="publish"/);
   assert.doesNotMatch(choicePage, /different published revision/);
   const localReviewChoice = renderDraftPage({
     ...baseDraft,
@@ -512,17 +513,15 @@ export async function run() {
       proposal: baseDraft.document
     }]
   }, { variant: "local" });
-  assert.match(localReviewChoice, /Choose a review/);
+  assert.match(localReviewChoice, /Pending proposals/);
   assert.match(localReviewChoice, /class="play-button secondary" href="\/\?puzzle=review-fixture" target="_blank" rel="noopener"/);
   assert.doesNotMatch(choicePage, /Open board/);
   assert.doesNotMatch(choicePage, /value="discard-review"/);
   assert.doesNotMatch(choicePage, /value="undo-review"/);
-  assert.doesNotMatch(choicePage, /value="publish"/);
   assert.doesNotMatch(choicePage, /value="delete-draft"/);
-  assert.match(choicePage, /No lesson/);
-  assert.match(choicePage, /Use Claude Code's lesson/);
-  assert.match(choicePage, /name="lesson_from" value="10"/);
-  assert.doesNotMatch(choicePage, /Use Codex gpt-5.4's lesson/);
+  assert.match(choicePage, /Start with the alpha fact/);
+  assert.doesNotMatch(choicePage, /name="lesson_from"/);
+  assert.doesNotMatch(choicePage, /value="publish-review"/);
   assert.doesNotMatch(baselineReview, /value="discard-review"/);
   assert.doesNotMatch(baselineReview, /value="revert-published"/);
 
@@ -625,10 +624,9 @@ export async function run() {
       }
     }]
   });
-  const shelfForm = shelfLessonChoice.split('name="proposal_id" value="1"')[1].split('name="proposal_id"')[0];
-  assert.match(shelfForm, /name="lesson_from" value="" checked(?! data-revised-mark)/);
-  assert.match(shelfForm, /name="lesson_from" value="2" data-revised-mark/);
-  assert.match(shelfForm, /class="meta revised-mark" hidden/);
+  assert.match(shelfLessonChoice, /value="accept-review"/);
+  assert.match(shelfLessonChoice, /A new lesson/);
+  assert.doesNotMatch(shelfLessonChoice, /name="lesson_from"/);
   assert.match(dirtyPlay, /value="revert-published"/);
   assert.match(dirtyPlay, /value="unpublish"/);
   assert.match(dirtyPlay, /Revert to published restores the last D1 published document/);

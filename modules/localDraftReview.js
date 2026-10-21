@@ -29,7 +29,14 @@ import { join } from "node:path";
 import { CATEGORIES, slugify } from "../puzzles/categories.js";
 import { matchReviewIssue, nextReviewIssueId } from "./contentDocumentRepository.js";
 import { DraftEmptyHistoryError, DraftNotFoundError } from "./draftRepository.js";
-import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "./draftReviewPage.js";
+import {
+  renderDraftListPage,
+  renderDraftPage,
+  renderPuzzleReviewIssuesPage,
+  renderReviewOverlapPage,
+  renderStaleReviewPage,
+  renderUndecidedProposalsPage
+} from "./draftReviewPage.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
 import { AUTHORING_SETTINGS } from "./authoringSettings.js";
 import { LocalD1ConfigError } from "./localD1Config.js";
@@ -72,14 +79,15 @@ import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import { draftPlayQuery } from "./stagingPlayLinks.js";
 import {
   diffPublishedDraft,
-  documentForChosenProposal,
-  documentKeepingProvenance,
-  documentWithLesson,
-  lessonContentText,
   publishedDocumentFromService,
-  samePlayablePuzzle,
   valuesEqual
 } from "./draftReviewDiff.js";
+import {
+  applyReviewChanges,
+  freshProposalOverlaps,
+  proposalChanges,
+  staleReviewChanges
+} from "./reviewPatch.js";
 import {
   DraftFieldError,
   draftFieldRedirectPath,
@@ -87,7 +95,9 @@ import {
   draftListPublicationRedirectPath,
   draftPublicationNoticeFromSearch,
   isDraftConflictError,
+  applyDraftFieldEdit,
   parseFieldEditForm,
+  parseWorkingCopyEdits,
   persistDraftFieldEdit,
   persistDraftWorkingCopy,
   persistDraftCanonicalForm,
@@ -463,33 +473,54 @@ async function recordReviewDecision(contentDocuments, {
   });
 }
 
-async function matchingOpenProposals(contentDocuments, puzzleId, anchor) {
-  if (!puzzleId || !Number.isInteger(anchor)) return [];
-  if (typeof contentDocuments?.listOpenReviewProposals !== "function") return [];
-  const open = await contentDocuments.listOpenReviewProposals({ id: puzzleId });
-  return open.filter(event => event.basePublishedRevision === anchor);
-}
-
-async function playableSnapshot(contentDocuments, puzzleId, revision, current) {
-  if (current && current.revision === revision) return current.document || null;
-  if (typeof contentDocuments?.getPublishedAtRevision !== "function") return null;
-  const snapshot = await contentDocuments.getPublishedAtRevision({
-    kind: "puzzle",
-    id: puzzleId,
-    revision
-  });
-  return snapshot?.document || null;
-}
-
 async function currentChoiceProposals(contentDocuments, record) {
   const puzzleId = puzzleIdOf(record);
-  const anchor = record?.reviewBasePublishedRevision;
-  if (!Number.isInteger(anchor)) return [];
-  const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
-  if (!published || published.withdrawnAt || !published.document) return [];
-  const baseDocument = await playableSnapshot(contentDocuments, puzzleId, anchor, published);
-  if (!samePlayablePuzzle(baseDocument, published.document)) return [];
-  return matchingOpenProposals(contentDocuments, puzzleId, anchor);
+  if (!puzzleId || typeof contentDocuments?.listOpenReviewProposals !== "function") return [];
+  return contentDocuments.listOpenReviewProposals({ id: puzzleId });
+}
+
+function nextFieldDocument(record, params, { categoryRegistry, settings, publishedDocument }) {
+  const form = parseFieldEditForm(params);
+  const edited = documentForEditor(record.document, { categoryRegistry });
+  return documentForStorage(
+    applyDraftFieldEdit(edited, form, { publishedDocument, settings }),
+    { categoryRegistry }
+  );
+}
+
+function nextWorkingCopyDocument(record, params, { categoryRegistry, settings }) {
+  let document = documentForEditor(record.document, { categoryRegistry });
+  for (const form of parseWorkingCopyEdits(params)) {
+    document = applyDraftFieldEdit(document, {
+      ...form,
+      isSaveField: true,
+      isRevertField: false
+    }, { settings });
+  }
+  return documentForStorage(document, { categoryRegistry });
+}
+
+async function interruptForReviewOverlap(res, {
+  draftId,
+  record,
+  nextDocument,
+  params,
+  contentDocuments
+}) {
+  if (params.get("acknowledge_review_overlap") === "1") return false;
+  const openProposals = await currentChoiceProposals(contentDocuments, record);
+  if (!openProposals.length) return false;
+  const puzzleId = puzzleIdOf(record);
+  const published = puzzleId
+    ? await publishedRowOrNull(contentDocuments, "puzzle", puzzleId)
+    : null;
+  const anchor = published && !published.withdrawnAt && published.document
+    ? published.document
+    : record.document;
+  const hits = freshProposalOverlaps(record.document, nextDocument, openProposals, anchor);
+  if (!hits.length) return false;
+  html(res, renderReviewOverlapPage({ draftId, hits, params }));
+  return true;
 }
 
 function puzzleIdOf(record) {
@@ -1149,16 +1180,26 @@ export function createLocalDraftReviewHandler({
         try {
           const record = await draftStore.getDraft(draftId);
           const expectedRevision = Number.parseInt(params.get("expected_revision"), 10);
+          const settings = await provenanceModelSettings(contentDocuments);
+          const categoryRegistry = await loadMergedCategoryRegistry({
+            contentDocuments,
+            contentService,
+            actor: publicationActor
+          });
+          const nextDocument = nextWorkingCopyDocument(record, params, { categoryRegistry, settings });
+          if (await interruptForReviewOverlap(res, {
+            draftId,
+            record,
+            nextDocument,
+            params,
+            contentDocuments
+          })) return true;
           await persistDraftWorkingCopy({
             draft: record,
             params,
             expectedRevision,
-            settings: await provenanceModelSettings(contentDocuments),
-            categoryRegistry: await loadMergedCategoryRegistry({
-              contentDocuments,
-              contentService,
-              actor: publicationActor
-            }),
+            settings,
+            categoryRegistry,
             saveDraft: ({ document, expectedRevision: revision }) =>
               draftStore.replaceDraft({ draftId, document, expectedRevision: revision })
           });
@@ -1197,15 +1238,30 @@ export function createLocalDraftReviewHandler({
           const puzzleId = typeof record.document?.id === "string"
             ? record.document.id
             : record.puzzleId || null;
+          const settings = await provenanceModelSettings(contentDocuments);
+          const categoryRegistry = await loadMergedCategoryRegistry({
+            contentDocuments,
+            contentService,
+            actor: publicationActor
+          });
+          const publishedDocument = publishedDocumentFromService(contentService, puzzleId);
+          const nextDocument = nextFieldDocument(record, params, {
+            categoryRegistry,
+            settings,
+            publishedDocument
+          });
+          if (await interruptForReviewOverlap(res, {
+            draftId,
+            record,
+            nextDocument,
+            params,
+            contentDocuments
+          })) return true;
           await persistDraftFieldEdit({
             draft: record,
-            publishedDocument: publishedDocumentFromService(contentService, puzzleId),
-            settings: await provenanceModelSettings(contentDocuments),
-            categoryRegistry: await loadMergedCategoryRegistry({
-              contentDocuments,
-              contentService,
-              actor: publicationActor
-            }),
+            publishedDocument,
+            settings,
+            categoryRegistry,
             form: parseFieldEditForm(params),
             saveDraft: ({ document, expectedRevision }) =>
               draftStore.replaceDraft({ draftId, document, expectedRevision })
@@ -1327,8 +1383,12 @@ export function createLocalDraftReviewHandler({
           }
           if (form.isPublish || form.isPublishAndCue) {
             const openProposals = await currentChoiceProposals(contentDocuments, record);
-            if (openProposals.length) {
-              html(res, "<p>Choose Publish this review or Keep published. Those decide the open proposals.</p>", 400);
+            if (openProposals.length && params.get("acknowledge_open_proposals") !== "1") {
+              html(res, renderUndecidedProposalsPage({
+                draftId,
+                proposals: openProposals,
+                params
+              }));
               return true;
             }
           }
@@ -1619,6 +1679,10 @@ export function createLocalDraftReviewHandler({
         return true;
       }
       if (form.isPreviewReview || form.isPublishReview || form.isKeepPublished) {
+        html(res, "<p>Reload the drafts page. A proposal is accepted or rejected onto the working copy.</p>", 400);
+        return true;
+      }
+      if (form.isAcceptReview || form.isRejectReview) {
         if (!contentDocuments || !publicationActor) {
           html(res, "<p>D1 published documents are not configured.</p>", 503);
           return true;
@@ -1636,92 +1700,47 @@ export function createLocalDraftReviewHandler({
             return true;
           }
           const openProposals = await currentChoiceProposals(contentDocuments, record);
-          if (!openProposals.length) {
-            html(res, "<p>There is no open review proposal against this published revision.</p>", 400);
-            return true;
-          }
-          if (form.isKeepPublished) {
-            if (record.openedFromPublished !== true) {
-              const baseline = typeof draftStore.readReviewBaseline === "function"
-                ? await draftStore.readReviewBaseline(draftId)
-                : null;
-              if (!baseline) {
-                html(res, "<p>This review has no saved baseline to restore.</p>", 400);
-                return true;
-              }
-              for (const event of openProposals) {
-                await recordReviewDecision(contentDocuments, {
-                  puzzleId,
-                  eventType: "rejected",
-                  document: event.proposal,
-                  draftRevision: event.draftRevision,
-                  basePublishedRevision: event.basePublishedRevision,
-                  sourceEventId: event.id
-                });
-              }
-              await draftStore.replaceDraft({
-                draftId,
-                document: baseline,
-                expectedRevision: record.revision
-              });
-              if (typeof draftStore.releaseReviewSession === "function") {
-                await draftStore.releaseReviewSession(draftId);
-              }
-              res.writeHead(303, {
-                Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
-                "Cache-Control": "no-store"
-              });
-              res.end();
-              return true;
-            }
-            for (const event of openProposals) {
-              await recordReviewDecision(contentDocuments, {
-                puzzleId,
-                eventType: "rejected",
-                document: event.proposal,
-                draftRevision: event.draftRevision,
-                basePublishedRevision: event.basePublishedRevision,
-                sourceEventId: event.id
-              });
-            }
-            await draftStore.deleteDraft(draftId, { expectedRevision: record.revision });
-            res.writeHead(303, {
-              Location: `/admin/drafts/${encodeURIComponent(draftId)}/review-issues`,
-              "Cache-Control": "no-store"
-            });
-            res.end();
-            return true;
-          }
           const proposalId = Number.parseInt(params.get("proposal_id") || "", 10);
           const chosen = openProposals.find(event => event.id === proposalId);
           if (!chosen?.proposal) {
-            html(res, "<p>That proposal is not an open choice for this published revision.</p>", 400);
+            html(res, "<p>That proposal is not open.</p>", 400);
             return true;
           }
-          let chosenDocument = documentForChosenProposal(chosen.proposal, record.document, openProposals);
-          const lessonFromRaw = params.get("lesson_from");
-          if (lessonFromRaw) {
-            const lessonFrom = Number.parseInt(lessonFromRaw, 10);
-            const donor = openProposals.find(event => event.id === lessonFrom);
-            if (!Number.isInteger(lessonFrom) || lessonFrom === chosen.id || !donor?.proposal
-              || !lessonContentText(donor.proposal)) {
-              html(res, "<p>That lesson is not an open choice for this published revision.</p>", 400);
-              return true;
-            }
-            chosenDocument = documentWithLesson(chosenDocument, donor.proposal);
-          }
-          if (form.isPreviewReview) {
-            await draftStore.replaceDraft({
-              draftId,
-              document: chosenDocument,
-              expectedRevision: record.revision
+          if (form.isRejectReview) {
+            await recordReviewDecision(contentDocuments, {
+              puzzleId,
+              eventType: "rejected",
+              document: chosen.proposal,
+              draftRevision: chosen.draftRevision,
+              basePublishedRevision: chosen.basePublishedRevision ?? null,
+              sourceEventId: chosen.id
             });
-            const played = await draftStore.getDraft(draftId);
             res.writeHead(303, {
-              Location: draftPlayQuery(draftId, null, played.revision),
+              Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
               "Cache-Control": "no-store"
             });
             res.end();
+            return true;
+          }
+          const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+          const anchor = published && !published.withdrawnAt && published.document
+            ? published.document
+            : record.document;
+          const changes = proposalChanges(chosen.proposal, anchor);
+          const conflicts = staleReviewChanges(record.document, changes);
+          if (conflicts.length && params.get("confirm_stale") !== "1") {
+            html(res, renderStaleReviewPage({
+              draftId,
+              proposalId: chosen.id,
+              expectedRevision: record.revision,
+              stale: conflicts,
+              pendingCount: changes.length
+            }));
+            return true;
+          }
+          const applied = applyReviewChanges(record.document, changes, { force: conflicts.length > 0 });
+          if (applied.stale.length) {
+            html(res, "<p>This proposal could not be applied because a field it changes is no longer on the working copy.</p>", 409);
             return true;
           }
           const categoryRegistry = await loadMergedCategoryRegistry({
@@ -1729,7 +1748,7 @@ export function createLocalDraftReviewHandler({
             contentService,
             actor: publicationActor
           });
-          const authoredDocument = documentForEditor(chosenDocument, { categoryRegistry });
+          const authoredDocument = documentForEditor(applied.document, { categoryRegistry });
           if (typeof contentService?.validatePuzzleDraft === "function") {
             const validation = await contentService.validatePuzzleDraft(authoredDocument, {
               categoryRegistry
@@ -1744,80 +1763,25 @@ export function createLocalDraftReviewHandler({
               return true;
             }
           }
-          const publishedBefore = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
-          const baseDocument = await playableSnapshot(
-            contentDocuments,
-            puzzleId,
-            chosen.basePublishedRevision,
-            publishedBefore
-          );
-          if (!publishedBefore || publishedBefore.withdrawnAt
-            || !samePlayablePuzzle(baseDocument, publishedBefore.document)) {
-            throw new PublishedRevisionConflictError("puzzle", puzzleId);
-          }
-          // An older working copy never overwrites a layout saved on the
-          // published puzzle since; those modes are kept and reported.
-          const { layout: publishLayout, keptPublished } = mergePublishLayout(
-            record.layout,
-            publishedBefore?.layout
-          );
-          const layoutValidation = validatePublishedPuzzleLayout({
-            document: authoredDocument,
-            layout: publishLayout,
-            categoryRegistry
-          });
-          if (!layoutValidation.valid) {
-            html(res, renderContentPublishResultPage({
-              kind: "puzzle",
-              id: puzzleId,
-              error: "The saved layout must be reconfirmed after this puzzle edit.\n" +
-                layoutValidation.errors.join("\n"),
-              backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
-            }), 400);
-            return true;
-          }
-          const published = await contentDocuments.publish({
-            kind: "puzzle",
-            id: puzzleId,
-            document: documentForStorage(authoredDocument, { categoryRegistry }),
-            actor: publicationActor,
-            layout: publishLayout,
-            markRevised: form.markRevised === true,
-            expectedRevision: publishedBefore.revision,
-            reviewDecisions: [
-              {
-                eventType: "accepted",
-                draftRevision: chosen.draftRevision,
-                sourceEventId: chosen.id
-              },
-              ...openProposals.filter(event => event.id !== chosen.id).map(event => ({
-                eventType: "rejected",
-                proposal: event.proposal,
-                draftRevision: event.draftRevision,
-                basePublishedRevision: event.basePublishedRevision,
-                sourceEventId: event.id
-              }))
-            ]
-          });
-          await draftStore.replaceDraft({
-            draftId,
-            document: documentForStorage(authoredDocument, { categoryRegistry }),
-            expectedRevision: record.revision
-          });
-          if (typeof draftStore.releaseReviewSession === "function") {
-            await draftStore.releaseReviewSession(draftId);
-          }
-          res.writeHead(303, {
-            Location: draftEditorPublicationRedirectPath({
+          if (applied.applied.length) {
+            await draftStore.replaceDraft({
               draftId,
-              puzzleId,
-              revision: published.revision,
-              layoutKept: keptPublished,
-              layoutFallback: layoutValidation.fallbackModes
-            }),
+              document: documentForStorage(authoredDocument, { categoryRegistry }),
+              expectedRevision: record.revision
+            });
+          }
+          await recordReviewDecision(contentDocuments, {
+            puzzleId,
+            eventType: "accepted",
+            draftRevision: chosen.draftRevision,
+            sourceEventId: chosen.id
+          });
+          res.writeHead(303, {
+            Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
             "Cache-Control": "no-store"
           });
           res.end();
+          return true;
         } catch (error) {
           if (isMissingDraft(error) || error instanceof ContentDocumentNotFoundError) {
             html(res, `<p>${escapeHtml(error.message)}</p>`, 404);
@@ -1855,7 +1819,7 @@ export function createLocalDraftReviewHandler({
           }
           const openProposals = await currentChoiceProposals(contentDocuments, record);
           if (openProposals.length) {
-            html(res, "<p>Choose Publish this review or Keep published. Those decide the open proposals.</p>", 400);
+            html(res, "<p>Accept or reject the open proposals first.</p>", 400);
             return true;
           }
           if (form.isDiscardReview && record.openedFromPublished !== true) {

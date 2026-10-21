@@ -60,12 +60,14 @@ import {
   stampDocumentAssistanceFromMcp
 } from "./mcpClientIdentity.js";
 import {
-  diffPublishedDraft,
   documentKeepingProvenance,
-  independentReviewDocument,
-  stackedReviewDocument,
   samePlayablePuzzle
 } from "./draftReviewDiff.js";
+import {
+  documentForProposal,
+  fileReviewProposal,
+  isReviewPatch
+} from "./reviewPatch.js";
 import { MCP_EXCLUDED_ROOT_FIELDS } from "./authoringFieldOwnership.js";
 import {
   BOARD_LIMIT_WAIVER_TYPES,
@@ -1963,7 +1965,35 @@ export function createAuthoringMcpServer({
     if (!baseline || !samePlayablePuzzle(baseline, stored.document)) return null;
     const puzzleId = typeof stored.document?.id === "string" ? stored.document.id : stored.puzzleId;
     if (!puzzleId) return null;
-    return precedingReview(await openReviewProposals(puzzleId, stored.reviewBasePublishedRevision));
+    const event = precedingReview(await openReviewProposals(puzzleId, stored.reviewBasePublishedRevision));
+    if (!event) return null;
+    if (!isReviewPatch(event.proposal)) return event;
+    return { ...event, proposal: documentForProposal(baseline, event.proposal) };
+  }
+
+  async function everyOpenReviewProposal(puzzleId) {
+    if (typeof contentDocuments?.listOpenReviewProposals !== "function") return [];
+    return contentDocuments.listOpenReviewProposals({ id: puzzleId });
+  }
+
+  async function proposalWorkingCopy(draftId, stored, proposal) {
+    const baseline = typeof draftRepository.readReviewBaseline === "function"
+      ? await draftRepository.readReviewBaseline({ draftId, actor })
+      : null;
+    const document = isReviewPatch(proposal)
+      ? documentForProposal(baseline || stored.document, proposal)
+      : proposal;
+    return documentKeepingProvenance(document, stored.document);
+  }
+
+  async function workingCopyIsProposal(draftId, stored, event) {
+    if (!event?.proposal) return false;
+    if (isReviewPatch(event.proposal)) {
+      const baseline = await draftRepository.readReviewBaseline({ draftId, actor });
+      if (!baseline) return false;
+      return samePlayablePuzzle(documentForProposal(baseline, event.proposal), stored.document);
+    }
+    return samePlayablePuzzle(event.proposal, stored.document);
   }
 
   async function markReviewStackLoaded(draftId, stackLoaded) {
@@ -1977,7 +2007,7 @@ export function createAuthoringMcpServer({
   server.registerTool("record_agent_puzzle_review", {
     title: "Record agent review or handoff issue",
     description:
-      "Default action complete records a completed agent review of a valid current draft and advances only the agent-review timestamp. action=begin snapshots the current document as the review baseline before edits and does not record a review. If that baseline already exists and the working copy is an open proposal, begin restores the baseline so the next review is independent. action=propose files the current document as one candidate against that published revision, omitting changes that only repeat an open proposal, then restores the working copy to the baseline. After that restore, check_puzzle_links on this draft checks the filed proposal. Pass stack_on true to build on the preceding open proposal instead; the server chooses that proposal, so there is no proposal id to pass. Do not leave unresolved concerns only in that completion comment: create one independent persistent issue per concern with action=open and comments. Open handoffs do not require validity or advance a review timestamp. Use list_puzzle_review_issues and pass that issue's number as issue_id before note, resolve, or reopen. The tracking id is that small integer. The server derives timestamps, draft revision, and guidance version; it never records a human review. Choosing a winner is a human action on the drafts page.",
+      "Default action complete records a completed agent review of a valid current draft and advances only the agent-review timestamp. action=begin snapshots the current document as the review baseline before edits and does not record a review. If that baseline already exists and the working copy is an open proposal, begin restores the baseline so the next review is independent. action=propose stores the edit as a field patch against that baseline, then restores the working copy. A patch that changes a field an open proposal also changes is refused until stack_on true, which builds on the preceding proposal. Disjoint patches are separate proposals. After that restore, check_puzzle_links on this draft checks the latest filed proposal. The server chooses the preceding proposal, so there is no proposal id to pass. Do not leave unresolved concerns only in that completion comment: create one independent persistent issue per concern with action=open and comments. Open handoffs do not require validity or advance a review timestamp. Use list_puzzle_review_issues and pass that issue's number as issue_id before note, resolve, or reopen. The tracking id is that small integer. The server derives timestamps, draft revision, and guidance version; it never records a human review. Accept, reject, and defer are human actions on the drafts page.",
     inputSchema: agentReviewInput,
     annotations: WRITE
   }, tracked("record_agent_puzzle_review", safe(async ({ draft_id, action, issue_id, outcome, comments, stack_on }, ctx) => {
@@ -1993,13 +2023,13 @@ export function createAuthoringMcpServer({
         throw new Error("Recording a review baseline requires draft baseline storage.");
       }
       if (stored.hasReviewBaseline) {
-        const openProposals = await openReviewProposals(puzzleId, stored.reviewBasePublishedRevision);
+        const openProposals = await everyOpenReviewProposal(puzzleId);
         if (stack_on === true) {
           const chosen = precedingReview(openProposals);
           if (!chosen) throw new Error("There is no preceding review to stack on.");
           const loaded = await draftRepository.save({
             draftId: draft_id,
-            document: documentKeepingProvenance(chosen.proposal, stored.document),
+            document: await proposalWorkingCopy(draft_id, stored, chosen.proposal),
             expectedRevision: stored.revision,
             actor
           });
@@ -2017,9 +2047,15 @@ export function createAuthoringMcpServer({
           );
         }
         const baseline = await draftRepository.readReviewBaseline({ draftId: draft_id, actor });
-        const loadedProposal = baseline && openProposals.find(event =>
-          samePlayablePuzzle(event.proposal, stored.document)
-        );
+        let loadedProposal = null;
+        if (baseline) {
+          for (const event of openProposals) {
+            if (await workingCopyIsProposal(draft_id, stored, event)) {
+              loadedProposal = event;
+              break;
+            }
+          }
+        }
         if (loadedProposal) {
           const restored = await draftRepository.save({
             draftId: draft_id,
@@ -2058,13 +2094,7 @@ export function createAuthoringMcpServer({
       }
       let stackTarget = null;
       if (stack_on === true) {
-        const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
-        const revision = Number.isInteger(stored.reviewBasePublishedRevision)
-          ? stored.reviewBasePublishedRevision
-          : (published && !published.withdrawnAt && Number.isInteger(published.revision)
-            ? published.revision
-            : null);
-        stackTarget = precedingReview(await openReviewProposals(puzzleId, revision));
+        stackTarget = precedingReview(await everyOpenReviewProposal(puzzleId));
       }
       let basePublishedRevision = Number.isInteger(stored.reviewBasePublishedRevision)
         ? stored.reviewBasePublishedRevision
@@ -2099,7 +2129,7 @@ export function createAuthoringMcpServer({
       }
       const loaded = await draftRepository.save({
         draftId: draft_id,
-        document: documentKeepingProvenance(stackTarget.proposal, stored.document),
+        document: await proposalWorkingCopy(draft_id, stored, stackTarget.proposal),
         expectedRevision: draft.revision,
         actor
       });
@@ -2123,77 +2153,41 @@ export function createAuthoringMcpServer({
       if (!stored.hasReviewBaseline) {
         throw new Error("Call action=begin before filing a review proposal.");
       }
-      const basePublishedRevision = Number.isInteger(stored.reviewBasePublishedRevision)
-        ? stored.reviewBasePublishedRevision
-        : null;
-      if (basePublishedRevision == null) {
-        throw new Error("A review proposal needs the published puzzle this review started from.");
-      }
-      const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
-      if (!published || published.withdrawnAt || !published.document) {
-        throw new Error("A review proposal needs the published puzzle this review started from.");
-      }
-      let baseDocument = published.document;
-      if (published.revision !== basePublishedRevision) {
-        const snapshot = typeof contentDocuments.getPublishedAtRevision === "function"
-          ? await contentDocuments.getPublishedAtRevision({
-            kind: "puzzle",
-            id: puzzleId,
-            revision: basePublishedRevision
-          })
-          : null;
-        baseDocument = snapshot?.document || null;
-      }
-      if (!samePlayablePuzzle(baseDocument, published.document)) {
-        throw new Error("The published puzzle has changed since this review began. Review the current published puzzle before filing a proposal.");
-      }
       const baseline = await draftRepository.readReviewBaseline({ draftId: draft_id, actor });
       if (!baseline) throw new Error("This review has no saved baseline to restore.");
-      const openProposals = await openReviewProposals(puzzleId, basePublishedRevision);
-      const preceding = stack_on === true ? precedingReview(openProposals) : null;
-      if (stack_on === true && !preceding) throw new Error("There is no preceding review to stack on.");
-      let proposalDocument = stored.document;
-      if (preceding) {
-        proposalDocument = documentKeepingProvenance(
-          stackedReviewDocument(baseline, preceding, stored.document, {
-            loaded: stored.reviewStackLoaded === true
-          }),
-          stored.document
-        );
-        if (samePlayablePuzzle(preceding.proposal, proposalDocument)) {
-          throw new Error("This draft matches the preceding review; add a change or file an independent review.");
-        }
-      } else if (openProposals.length) {
-        proposalDocument = documentKeepingProvenance(
-          independentReviewDocument(baseline, openProposals, stored.document),
-          stored.document
-        );
-      }
-      const proposalDiff = diffPublishedDraft(baseline, proposalDocument);
-      if (!proposalDiff || proposalDiff.total === 0) {
-        throw new Error(openProposals.length
-          ? "This draft only repeats an open review proposal. Edit from the baseline, or pass stack_on true to file it on top of the preceding review."
-          : "This draft matches the review baseline; nothing to propose.");
-      }
+      const openProposals = await everyOpenReviewProposal(puzzleId);
+      const filedProposal = fileReviewProposal({
+        baseline,
+        edited: stored.document,
+        openProposals,
+        stackOn: stack_on === true,
+        stackLoaded: stored.reviewStackLoaded === true,
+        baseDraftRevision: stored.revision
+      });
+      const proposalDocument = documentKeepingProvenance(filedProposal.document, stored.document);
       const taxonomy = await taxonomyContext();
       const validation = await contentService.validatePuzzleDraft(proposalDocument, {
         categoryRegistry: taxonomy.categoryRegistry,
         knownPuzzleIds: taxonomy.puzzleIds
       });
       if (!validation.valid) {
-        const unstacked = !preceding
-          && openProposals.length
-          && !samePlayablePuzzle(proposalDocument, stored.document);
-        throw new Error(unstacked
-          ? "Removing changes already filed in an open proposal leaves an invalid draft. Pass stack_on true to file this working copy on top of the preceding review."
-          : `Draft ${draft_id} is not valid; fix and validate it before filing a proposal.`);
+        throw new Error(`Draft ${draft_id} is not valid; fix and validate it before filing a proposal.`);
+      }
+      let basePublishedRevision = Number.isInteger(stored.reviewBasePublishedRevision)
+        ? stored.reviewBasePublishedRevision
+        : null;
+      if (basePublishedRevision == null) {
+        const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+        if (published && !published.withdrawnAt && Number.isInteger(published.revision)) {
+          basePublishedRevision = published.revision;
+        }
       }
       const stamp = reviewClientStamp(ctx, server, await provenanceSettings());
       const filed = await contentDocuments.recordPuzzleAgentReview({
         id: puzzleId,
         eventType: "proposed",
         comments: reviewComments,
-        proposal: proposalDocument,
+        proposal: filedProposal.patch,
         basePublishedRevision,
         draftRevision: stored.revision,
         ...stamp
@@ -2206,7 +2200,7 @@ export function createAuthoringMcpServer({
       });
       await markReviewStackLoaded(draft_id, false);
       return success(
-        (preceding
+        (filedProposal.patch.stacksOn
           ? `Filed a review proposal for ${puzzleId} on top of the preceding review, and restored the working copy to the baseline.`
           : `Filed a review proposal for ${puzzleId} and restored the working copy to the baseline.`) +
           " check_puzzle_links on this draft checks the filed proposal.",
@@ -2216,7 +2210,9 @@ export function createAuthoringMcpServer({
           draftRevision: restored.revision,
           eventId: filed?.id || null,
           basePublishedRevision,
-          stackOn: preceding ? true : null,
+          baseDraftRevision: stored.revision,
+          changes: filedProposal.patch.changes.map(change => change.path),
+          stackOn: filedProposal.patch.stacksOn ? true : null,
           clientSystem: stamp.clientSystem,
           action
         }
