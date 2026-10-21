@@ -38,8 +38,12 @@ import { d1LargeColumnCacheEnabled } from "./d1LargeColumnCache.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { handleLocalMcpRequest } from "./localMcpHttp.js";
 import { startWeeklyLinkHealth } from "./linkHealthSchedule.js";
-import { startPublishedReplicaDrain } from "./publishedReplicaSchedule.js";
-import { authoringDatabaseUrl } from "./postgresPool.js";
+import { loadPublishedReplicaStatus } from "./publishedReplica.js";
+import {
+  publishedReplicaDrainStatus,
+  startPublishedReplicaDrain
+} from "./publishedReplicaSchedule.js";
+import { authoringDatabaseUrl, getAuthoringPool } from "./postgresPool.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
 import {
@@ -178,6 +182,12 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
       canApplyFreeze: true,
       loadServerRevision: () => revisions.refresh({ fetchRemote: true }),
       subscribeServerRevision: listener => revisions.subscribe(listener),
+      loadReplicaStatus: async () => {
+        const databaseUrl = authoringDatabaseUrl();
+        if (!databaseUrl) return null;
+        const queue = await loadPublishedReplicaStatus(getAuthoringPool(databaseUrl));
+        return { ...queue, drain: publishedReplicaDrainStatus() };
+      },
       loadLinkHealth: async () => {
         const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
         if (!resolved.contentDocuments || !resolved.wikiLinkStore) return null;

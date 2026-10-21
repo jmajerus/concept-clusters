@@ -335,6 +335,41 @@ async function listPending(pool) {
   return rows;
 }
 
+// What /admin shows for the public replica: one row per queued kind and
+// id, plus live puzzles the drain will not ship until a category exists.
+export async function loadPublishedReplicaStatus(pool) {
+  const { rows } = await pool.query(`
+    SELECT q.kind, q.id, q.enqueued_at, d.title, d.document, d.withdrawn_at
+    FROM published_replica_queue q
+    LEFT JOIN published_documents d ON d.kind = q.kind AND d.id = q.id
+    ORDER BY q.enqueued_at, q.kind, q.id
+  `);
+  const { rows: categories } = await pool.query(`
+    SELECT id, title FROM published_documents WHERE kind = 'category' ORDER BY id
+  `);
+  const pending = rows.map(row => ({
+    kind: row.kind,
+    id: row.id,
+    title: row.kind === "site_settings" ? "Site settings" : (row.title || row.id),
+    enqueuedAt: row.enqueued_at
+  }));
+  const held = [];
+  for (const row of rows) {
+    if (row.kind !== "puzzle" || row.withdrawn_at || !row.document) continue;
+    let document;
+    try {
+      document = JSON.parse(row.document);
+    } catch {
+      continue;
+    }
+    const missing = resolveCategoryIds(document, categories)
+      .filter(id => !categories.some(category => category.id === id));
+    if (!missing.length) continue;
+    held.push({ id: row.id, title: row.title || row.id, missing });
+  }
+  return { pending, held };
+}
+
 function catalogueDocument(row) {
   return parseStoredDocument(row.document, `Published catalogue ${row.id}`);
 }

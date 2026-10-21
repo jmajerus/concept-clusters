@@ -8,6 +8,7 @@ import { createPostgresSiteSettingsStore } from "../modules/siteSettings.js";
 import {
   drainPublishedReplica,
   enqueueSiteSettingsReplica,
+  loadPublishedReplicaStatus,
   refuseDirectPublishedD1Write,
   replicaWriteOrder
 } from "../modules/publishedReplica.js";
@@ -191,6 +192,7 @@ export async function run() {
   assert.equal(d1.statements.length, quiet);
   const synced = await published.getPublished({ kind: "puzzle", id: "cell" });
   assert.equal(synced.replicaPending, undefined);
+  assert.deepEqual(await loadPublishedReplicaStatus(pool), { pending: [], held: [] });
 
   await published.publish({
     kind: "catalogue",
@@ -228,6 +230,12 @@ export async function run() {
     actor
   });
   assert.equal(orphan.replicaPending, true);
+  const waiting = await loadPublishedReplicaStatus(pool);
+  assert.equal(waiting.pending.some(row => row.kind === "puzzle" && row.id === "orphan"), true);
+  assert.deepEqual(
+    waiting.held.find(row => row.id === "orphan"),
+    { id: "orphan", title: "Orphan", missing: ["missing"] }
+  );
   const held = await drainPublishedReplica({ pool, d1 });
   assert.equal(held.held > 0, true);
   assert.equal(d1.documents.has("puzzle:orphan"), false);

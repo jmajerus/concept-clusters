@@ -8,6 +8,24 @@ import { drainPublishedReplica } from "./publishedReplica.js";
 
 const DRAIN_INTERVAL_MS = 15_000;
 
+const drainStatus = {
+  phase: "idle",
+  waiting: null,
+  error: null,
+  at: null
+};
+
+export function publishedReplicaDrainStatus() {
+  return { ...drainStatus };
+}
+
+function noteDrainStatus({ phase, waiting = null, error = null }) {
+  drainStatus.phase = phase;
+  drainStatus.waiting = waiting;
+  drainStatus.error = error;
+  drainStatus.at = new Date().toISOString();
+}
+
 export async function openPublishedReplicaDatabase({
   env = process.env,
   repositoryRoot
@@ -41,18 +59,19 @@ export function startPublishedReplicaDrain({
           console.error(`Public replica drain waiting: ${error.message}`);
           reportedWaiting = true;
         }
+        noteDrainStatus({ phase: "waiting", waiting: error.message });
         return;
       }
       reportedWaiting = false;
       const result = await drainPublishedReplica({ pool, d1 });
+      noteDrainStatus({ phase: "ok" });
       if (result.shipped) {
         console.log(`Public replica drain shipped ${result.shipped}.`);
       }
     } catch (error) {
-      console.error(
-        "Public replica drain failed",
-        error instanceof Error ? error.message : error
-      );
+      const message = error instanceof Error ? error.message : String(error);
+      noteDrainStatus({ phase: "error", error: message });
+      console.error("Public replica drain failed", message);
     } finally {
       running = false;
     }
