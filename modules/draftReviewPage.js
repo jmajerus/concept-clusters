@@ -1662,8 +1662,22 @@ function reviewCandidateLines(diff) {
   return lines;
 }
 
+function legacyAnchorFor(draft, event) {
+  if (isReviewPatch(event?.proposal)) return draft.document;
+  const revision = event?.basePublishedRevision;
+  if (Number.isInteger(revision)) {
+    if (draft.reviewBaseSnapshots?.[revision]) return draft.reviewBaseSnapshots[revision];
+    if (draft.currentPublishedRevision === revision) {
+      return draft.reviewAnchorDocument || draft.document;
+    }
+    return null;
+  }
+  return draft.reviewAnchorDocument || draft.document;
+}
+
 function changesForCandidate(draft, event) {
-  const anchor = draft.reviewAnchorDocument || draft.document;
+  const anchor = legacyAnchorFor(draft, event);
+  if (!anchor) return [];
   return proposalChanges(event?.proposal, anchor);
 }
 
@@ -1674,6 +1688,10 @@ function renderReviewChoice(draft) {
   const action = `/admin/drafts/${encodeURIComponent(draftId)}`;
   const expected = escapeHtml(String(draft.revision ?? ""));
   const cards = candidates.map(event => {
+    const unresolvedLegacy = !isReviewPatch(event?.proposal)
+      && Number.isInteger(event?.basePublishedRevision)
+      && !legacyAnchorFor(draft, event);
+    const predecessorOpen = candidates.some(item => item.id === event.proposal?.stacksOn);
     const changes = changesForCandidate(draft, event);
     const stale = new Set(staleReviewChanges(draft.document, changes).map(change => change.path));
     const shown = changes.slice(0, 8);
@@ -1690,13 +1708,22 @@ function renderReviewChoice(draft) {
       ? `<p class="validation-flags">The working copy has changed ${stale.size === 1 ? "a field" : "fields"} this proposal also changes. Accept shows those side by side.</p>`
       : "";
     const stacked = Number.isInteger(event.proposal?.stacksOn)
-      ? `<p class="meta">Builds on an earlier proposal.</p>`
+      ? predecessorOpen
+        ? `<p class="meta">Builds on an earlier proposal. Accept that proposal before this one.</p>`
+        : `<p class="meta">Builds on an earlier proposal.</p>`
       : "";
+    const missingRevision = unresolvedLegacy
+      ? `<p class="validation-flags">This proposal was filed against published revision ${escapeHtml(String(event.basePublishedRevision))}, which is no longer available.</p>`
+      : "";
+    const accept = predecessorOpen || unresolvedLegacy
+      ? ""
+      : `<button type="submit" name="confirm" value="accept-review">Accept</button>`;
     const proposalId = escapeHtml(String(event.id));
     return `<article class="review-candidate">
       <h3>${escapeHtml(reviewCandidateLabel(event))}</h3>
       ${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}
       ${stacked}
+      ${missingRevision}
       ${staleNote}
       ${list}
       ${more}
@@ -1704,7 +1731,7 @@ function renderReviewChoice(draft) {
         <input type="hidden" name="proposal_id" value="${proposalId}">
         <input type="hidden" name="expected_revision" value="${expected}">
         <div class="actions">
-          <button type="submit" name="confirm" value="accept-review">Accept</button>
+          ${accept}
           <button type="submit" name="confirm" value="reject-review" class="secondary">Reject</button>
           <a class="play-button secondary" href="#${WORKING_COPY_FORM_ID}">Defer</a>
         </div>

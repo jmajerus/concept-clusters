@@ -483,6 +483,16 @@ export async function run() {
     basePublishedRevision: 2,
     reviewedAt: "2026-10-02T12:00:00.000Z"
   });
+  const unpublished = withClusterWikiLink(
+    { ...fixture, id: "unpublished-puzzle" },
+    { name: "Unpublished cluster", title: "Unpublished page" }
+  );
+  const unpublishedEvent = await reviewDocuments.recordPuzzleAgentReview({
+    id: "unpublished-puzzle",
+    eventType: "proposed",
+    proposal: unpublished,
+    reviewedAt: "2026-10-04T00:00:00.000Z"
+  });
   const reviewDrafts = {
     "filed-review": {
       draftId: "filed-review",
@@ -510,6 +520,15 @@ export async function run() {
       document: quiet,
       hasReviewBaseline: true,
       reviewBasePublishedRevision: 1
+    },
+    "unpublished-review": {
+      draftId: "unpublished-review",
+      puzzleId: "unpublished-puzzle",
+      revision: 2,
+      status: "draft",
+      document: { ...fixture, id: "unpublished-puzzle" },
+      hasReviewBaseline: true,
+      reviewBasePublishedRevision: null
     }
   };
   const reviewServer = createHostedMcpAuthoringServer({
@@ -521,7 +540,9 @@ export async function run() {
         return record;
       },
       async readReviewBaseline({ draftId }) {
-        return draftId === "quiet-review" ? quiet : fixture;
+        if (draftId === "quiet-review") return quiet;
+        if (draftId === "unpublished-review") return { ...fixture, id: "unpublished-puzzle" };
+        return fixture;
       }
     },
     contentDocuments: reviewDocuments,
@@ -551,6 +572,12 @@ export async function run() {
     const quietCheck = await reviewSession.call("check_puzzle_links", { draft_id: "quiet-review" });
     assert.equal(quietCheck.checkedDocument, "working-copy");
     assert.equal(quietCheck.eventId, undefined, "a baseline with no filed review is the working copy");
+
+    const unpublishedCheck = await reviewSession.call("check_puzzle_links", { draft_id: "unpublished-review" });
+    assert.equal(unpublishedCheck.checkedDocument, "proposal");
+    assert.equal(unpublishedCheck.eventId, unpublishedEvent.id);
+    assert.ok(unpublishedCheck.results.some(item => item.title === "Unpublished page"),
+      "a proposal filed before publication is still the document link check reads");
 
     await reviewDocuments.recordPuzzleAgentReview({
       id: "gram-stain-fixture",

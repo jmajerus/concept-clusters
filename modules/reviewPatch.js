@@ -279,11 +279,36 @@ function overlapError(changes, proposals, baseline, { stacking = false } = {}) {
   }
 }
 
-function stackedBaseDocument(baseline, preceding) {
-  if (isReviewPatch(preceding?.proposal)) {
-    return applyReviewChanges(baseline, preceding.proposal.changes, { force: true }).document;
+function proposalAncestry(proposal, proposals) {
+  const byId = new Map();
+  for (const event of proposals || []) {
+    if (Number.isInteger(event?.id) && event.proposal) byId.set(event.id, event.proposal);
   }
-  return preceding?.proposal || baseline;
+  const chain = [];
+  const seen = new Set();
+  let current = proposal;
+  while (current && typeof current === "object" && !seen.has(current)) {
+    seen.add(current);
+    chain.push(current);
+    const parentId = isReviewPatch(current) ? current.stacksOn : null;
+    if (!Number.isInteger(parentId)) break;
+    const parent = byId.get(parentId);
+    if (!parent || seen.has(parent)) break;
+    current = parent;
+  }
+  return chain.reverse();
+}
+
+function stackedBaseDocument(baseline, preceding, openProposals) {
+  if (!preceding?.proposal) return baseline;
+  return documentForProposal(baseline, preceding.proposal, openProposals);
+}
+
+/** The still-open proposal this one builds on, if its accept has to come first. */
+export function openStackPredecessor(event, openProposals) {
+  const parentId = isReviewPatch(event?.proposal) ? event.proposal.stacksOn : null;
+  if (!Number.isInteger(parentId)) return null;
+  return (openProposals || []).find(item => item?.id === parentId) || null;
 }
 
 /**
@@ -310,7 +335,7 @@ export function fileReviewProposal({
   let composed = edited;
   if (stackOn) {
     const precedingChanges = proposalChanges(preceding.proposal, baseline);
-    const stackedBase = stackedBaseDocument(baseline, preceding);
+    const stackedBase = stackedBaseDocument(baseline, preceding, openProposals);
     changes = stackLoaded
       ? fieldChanges(stackedBase, edited)
       : retargetReviewChanges(fieldChanges(baseline, edited), stackedBase);
@@ -362,12 +387,23 @@ export function staleReviewChanges(document, changes) {
   });
 }
 
-/** The puzzle a proposal describes, for checks that still need a document. */
-export function documentForProposal(baseline, proposal) {
-  if (isReviewPatch(proposal)) {
-    return applyReviewChanges(baseline, proposal.changes, { force: true }).document;
+/**
+ * The puzzle a proposal describes, for checks that still need a document.
+ * A stacked patch includes its ancestors, oldest first, so a field an
+ * ancestor changed and this patch left alone is still present.
+ */
+export function documentForProposal(baseline, proposal, proposals = []) {
+  const chain = proposalAncestry(proposal, proposals);
+  if (chain.length === 1 && !isReviewPatch(chain[0])) return chain[0];
+  let document = baseline && typeof baseline === "object" ? clone(baseline) : {};
+  for (const item of chain) {
+    if (isReviewPatch(item)) {
+      document = applyReviewChanges(document, item.changes, { force: true }).document;
+    } else if (item && typeof item === "object") {
+      document = clone(item);
+    }
   }
-  return proposal;
+  return document;
 }
 
 /**
@@ -379,7 +415,9 @@ export function freshProposalOverlaps(beforeDocument, afterDocument, proposals, 
   if (!saved.length) return [];
   const hits = [];
   for (const event of proposals || []) {
-    const changes = proposalChanges(event?.proposal, legacyAnchor || beforeDocument);
+    const anchor = typeof legacyAnchor === "function" ? legacyAnchor(event) : legacyAnchor;
+    if (!isReviewPatch(event?.proposal) && anchor == null && typeof legacyAnchor === "function") continue;
+    const changes = proposalChanges(event?.proposal, anchor || beforeDocument);
     const paths = [];
     for (const change of changes) {
       if (!saved.some(item => pathsOverlap(item.path, change.path))) continue;

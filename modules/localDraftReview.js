@@ -85,6 +85,8 @@ import {
 import {
   applyReviewChanges,
   freshProposalOverlaps,
+  isReviewPatch,
+  openStackPredecessor,
   proposalChanges,
   staleReviewChanges
 } from "./reviewPatch.js";
@@ -479,6 +481,31 @@ async function currentChoiceProposals(contentDocuments, record) {
   return contentDocuments.listOpenReviewProposals({ id: puzzleId });
 }
 
+async function publishedDocumentAtRevision(contentDocuments, puzzleId, revision, published) {
+  if (!Number.isInteger(revision) || !puzzleId) return null;
+  if (published && !published.withdrawnAt && published.revision === revision && published.document) {
+    return published.document;
+  }
+  if (typeof contentDocuments?.getPublishedAtRevision !== "function") return null;
+  const snapshot = await contentDocuments.getPublishedAtRevision({
+    kind: "puzzle",
+    id: puzzleId,
+    revision
+  });
+  return snapshot?.document || null;
+}
+
+async function legacyAnchorForEvent(contentDocuments, puzzleId, event, published, workingCopy) {
+  if (isReviewPatch(event?.proposal)) return workingCopy;
+  const revision = event?.basePublishedRevision;
+  if (!Number.isInteger(revision)) {
+    return published && !published.withdrawnAt && published.document
+      ? published.document
+      : workingCopy;
+  }
+  return publishedDocumentAtRevision(contentDocuments, puzzleId, revision, published);
+}
+
 function nextFieldDocument(record, params, { categoryRegistry, settings, publishedDocument }) {
   const form = parseFieldEditForm(params);
   const edited = documentForEditor(record.document, { categoryRegistry });
@@ -514,10 +541,17 @@ async function interruptForReviewOverlap(res, {
   const published = puzzleId
     ? await publishedRowOrNull(contentDocuments, "puzzle", puzzleId)
     : null;
-  const anchor = published && !published.withdrawnAt && published.document
-    ? published.document
-    : record.document;
-  const hits = freshProposalOverlaps(record.document, nextDocument, openProposals, anchor);
+  const anchors = new Map();
+  for (const event of openProposals) {
+    if (isReviewPatch(event?.proposal)) continue;
+    const anchor = await legacyAnchorForEvent(
+      contentDocuments, puzzleId, event, published, record.document
+    );
+    if (anchor) anchors.set(event.id, anchor);
+  }
+  const hits = freshProposalOverlaps(record.document, nextDocument, openProposals, event => (
+    isReviewPatch(event?.proposal) ? null : anchors.get(event.id) || null
+  ));
   if (!hits.length) return false;
   html(res, renderReviewOverlapPage({ draftId, hits, params }));
   return true;
@@ -1722,10 +1756,19 @@ export function createLocalDraftReviewHandler({
             res.end();
             return true;
           }
+          const predecessor = openStackPredecessor(chosen, openProposals);
+          if (predecessor) {
+            html(res, "<p>Accept the earlier proposal this one builds on before accepting this one.</p>", 400);
+            return true;
+          }
           const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
-          const anchor = published && !published.withdrawnAt && published.document
-            ? published.document
-            : record.document;
+          const anchor = await legacyAnchorForEvent(
+            contentDocuments, puzzleId, chosen, published, record.document
+          );
+          if (!isReviewPatch(chosen.proposal) && !anchor) {
+            html(res, "<p>This proposal was filed against a published revision that is no longer available.</p>", 409);
+            return true;
+          }
           const changes = proposalChanges(chosen.proposal, anchor);
           const conflicts = staleReviewChanges(record.document, changes);
           if (conflicts.length && params.get("confirm_stale") !== "1") {
@@ -2047,11 +2090,9 @@ export function createLocalDraftReviewHandler({
             })
           };
         };
-        // Same test as the puzzle page's Choose a review, so the count never
-        // promises a choice that page will not offer. Only the few working
-        // copies with an undecided proposal pay for it.
+        // Same list the puzzle page offers. An unpublished puzzle has no
+        // published revision, and its proposals still count.
         const pendingReviewCount = withOpenProposals.has(puzzleId)
-          && Number.isInteger(metadata.reviewBasePublishedRevision)
           ? (await currentChoiceProposals(contentDocuments, metadata).catch(() => [])).length
           : 0;
         const { unpublishedDomains, workingLayoutAttention, shadowsPublished } = registryKey
@@ -2261,11 +2302,21 @@ export function createLocalDraftReviewHandler({
       const reviewAnchorDocument = reviewCandidates.length && publishedRow && !publishedRow.withdrawnAt
         ? publishedRow.document || null
         : null;
+      const reviewBaseSnapshots = {};
+      for (const event of reviewCandidates) {
+        if (isReviewPatch(event?.proposal) || !Number.isInteger(event?.basePublishedRevision)) continue;
+        if (Object.hasOwn(reviewBaseSnapshots, event.basePublishedRevision)) continue;
+        const snapshot = await publishedDocumentAtRevision(
+          contentDocuments, puzzleId, event.basePublishedRevision, publishedRow
+        );
+        if (snapshot) reviewBaseSnapshots[event.basePublishedRevision] = snapshot;
+      }
       html(res, renderDraftPage({
         ...draft,
         currentPublishedRevision,
         reviewCandidates,
         reviewAnchorDocument,
+        reviewBaseSnapshots,
         firstPublishedAt: publishedRow && !publishedRow.withdrawnAt
           ? publishedRow.firstPublishedAt || null
           : null,

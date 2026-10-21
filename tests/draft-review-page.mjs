@@ -464,7 +464,8 @@ export async function run() {
       bridges: { added: [], removed: [], changed: {} },
       lenses: { added: [], removed: [], changed: {} }
     },
-    reviewAnchorDocument: baseDraft.document,
+    reviewAnchorDocument: { ...baseDraft.document, title: "Later publication" },
+    reviewBaseSnapshots: { 4: baseDraft.document },
     reviewCandidates: [{
       id: 9,
       eventType: "proposed",
@@ -503,7 +504,48 @@ export async function run() {
   assert.match(choicePage, /Pending proposals/);
   assert.match(choicePage, /pending changes to the working copy/);
   assert.match(choicePage, /value="publish"/);
+  assert.doesNotMatch(choicePage, /title: Review Fixture/);
   assert.doesNotMatch(choicePage, /different published revision/);
+  const stackedChoice = renderDraftPage({
+    ...baseDraft,
+    validation: { valid: true, errors: [], flags: [] },
+    reviewCandidates: [{
+      id: 3,
+      eventType: "proposed",
+      proposal: {
+        envelope: "review-patch",
+        baseDraftRevision: 1,
+        stacksOn: null,
+        changes: [{
+          path: "clusters[alpha].fact",
+          op: "replace",
+          before: "Alpha fact.",
+          after: "From the first review."
+        }]
+      }
+    }, {
+      id: 4,
+      eventType: "proposed",
+      proposal: {
+        envelope: "review-patch",
+        baseDraftRevision: 1,
+        stacksOn: 3,
+        changes: [{
+          path: "clusters[alpha].fact",
+          op: "replace",
+          before: "From the first review.",
+          after: "From the stacked review."
+        }]
+      }
+    }]
+  });
+  assert.match(stackedChoice, /name="proposal_id" value="3"/);
+  assert.match(stackedChoice, /Accept that proposal before this one/);
+  assert.match(stackedChoice, /From the stacked review/);
+  const stackedCards = stackedChoice.split('class="review-candidate"').slice(1);
+  assert.match(stackedCards[0], /value="accept-review"/);
+  assert.doesNotMatch(stackedCards[1], /value="accept-review"/);
+  assert.match(stackedCards[1], /value="reject-review"/);
   const localReviewChoice = renderDraftPage({
     ...baseDraft,
     validation: { valid: true, errors: [], flags: [] },

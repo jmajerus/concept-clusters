@@ -1959,16 +1959,18 @@ export function createAuthoringMcpServer({
 
   async function filedProposalReplacingBaseline(draftId, stored) {
     if (stored?.hasReviewBaseline !== true) return null;
-    if (!Number.isInteger(stored.reviewBasePublishedRevision)) return null;
     if (typeof draftRepository.readReviewBaseline !== "function") return null;
     const baseline = await draftRepository.readReviewBaseline({ draftId, actor });
     if (!baseline || !samePlayablePuzzle(baseline, stored.document)) return null;
     const puzzleId = typeof stored.document?.id === "string" ? stored.document.id : stored.puzzleId;
     if (!puzzleId) return null;
-    const event = precedingReview(await openReviewProposals(puzzleId, stored.reviewBasePublishedRevision));
+    const open = Number.isInteger(stored.reviewBasePublishedRevision)
+      ? await openReviewProposals(puzzleId, stored.reviewBasePublishedRevision)
+      : (await everyOpenReviewProposal(puzzleId)).filter(event => event.proposal);
+    const event = precedingReview(open);
     if (!event) return null;
     if (!isReviewPatch(event.proposal)) return event;
-    return { ...event, proposal: documentForProposal(baseline, event.proposal) };
+    return { ...event, proposal: documentForProposal(baseline, event.proposal, open) };
   }
 
   async function everyOpenReviewProposal(puzzleId) {
@@ -1976,22 +1978,25 @@ export function createAuthoringMcpServer({
     return contentDocuments.listOpenReviewProposals({ id: puzzleId });
   }
 
-  async function proposalWorkingCopy(draftId, stored, proposal) {
+  async function proposalWorkingCopy(draftId, stored, proposal, openProposals) {
     const baseline = typeof draftRepository.readReviewBaseline === "function"
       ? await draftRepository.readReviewBaseline({ draftId, actor })
       : null;
     const document = isReviewPatch(proposal)
-      ? documentForProposal(baseline || stored.document, proposal)
+      ? documentForProposal(baseline || stored.document, proposal, openProposals)
       : proposal;
     return documentKeepingProvenance(document, stored.document);
   }
 
-  async function workingCopyIsProposal(draftId, stored, event) {
+  async function workingCopyIsProposal(draftId, stored, event, openProposals) {
     if (!event?.proposal) return false;
     if (isReviewPatch(event.proposal)) {
       const baseline = await draftRepository.readReviewBaseline({ draftId, actor });
       if (!baseline) return false;
-      return samePlayablePuzzle(documentForProposal(baseline, event.proposal), stored.document);
+      return samePlayablePuzzle(
+        documentForProposal(baseline, event.proposal, openProposals),
+        stored.document
+      );
     }
     return samePlayablePuzzle(event.proposal, stored.document);
   }
@@ -2029,7 +2034,7 @@ export function createAuthoringMcpServer({
           if (!chosen) throw new Error("There is no preceding review to stack on.");
           const loaded = await draftRepository.save({
             draftId: draft_id,
-            document: await proposalWorkingCopy(draft_id, stored, chosen.proposal),
+            document: await proposalWorkingCopy(draft_id, stored, chosen.proposal, openProposals),
             expectedRevision: stored.revision,
             actor
           });
@@ -2050,7 +2055,7 @@ export function createAuthoringMcpServer({
         let loadedProposal = null;
         if (baseline) {
           for (const event of openProposals) {
-            if (await workingCopyIsProposal(draft_id, stored, event)) {
+            if (await workingCopyIsProposal(draft_id, stored, event, openProposals)) {
               loadedProposal = event;
               break;
             }
@@ -2093,8 +2098,10 @@ export function createAuthoringMcpServer({
         });
       }
       let stackTarget = null;
+      let openAtBegin = [];
       if (stack_on === true) {
-        stackTarget = precedingReview(await everyOpenReviewProposal(puzzleId));
+        openAtBegin = await everyOpenReviewProposal(puzzleId);
+        stackTarget = precedingReview(openAtBegin);
       }
       let basePublishedRevision = Number.isInteger(stored.reviewBasePublishedRevision)
         ? stored.reviewBasePublishedRevision
@@ -2129,7 +2136,7 @@ export function createAuthoringMcpServer({
       }
       const loaded = await draftRepository.save({
         draftId: draft_id,
-        document: await proposalWorkingCopy(draft_id, stored, stackTarget.proposal),
+        document: await proposalWorkingCopy(draft_id, stored, stackTarget.proposal, openAtBegin),
         expectedRevision: draft.revision,
         actor
       });

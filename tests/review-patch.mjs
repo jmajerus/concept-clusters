@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import {
   applyReviewChanges,
+  documentForProposal,
   fieldChanges,
   fileReviewProposal,
   freshProposalOverlaps,
+  openStackPredecessor,
   pathsOverlap,
   REVIEW_PATCH_ENVELOPE,
   staleReviewChanges
@@ -120,4 +122,52 @@ export async function run() {
     baseline
   );
   assert.deepEqual(alreadyStale, []);
+
+  const first = fileReviewProposal({
+    baseline,
+    edited: {
+      ...withFact("An agent edit."),
+      learningIntroduction: {
+        requirement: "recommended",
+        content: { text: "From the first review." }
+      }
+    },
+    openProposals: []
+  });
+  const firstEvent = { id: 7, proposal: first.patch };
+  const second = fileReviewProposal({
+    baseline,
+    edited: withFact("Another agent."),
+    openProposals: [firstEvent],
+    stackOn: true
+  });
+  const secondEvent = { id: 8, proposal: second.patch };
+  const chain = [firstEvent, secondEvent];
+  const composed = documentForProposal(baseline, second.patch, chain);
+  assert.equal(composed.clusters[0].fact, "Another agent.");
+  assert.equal(composed.learningIntroduction.content.text, "From the first review.");
+  assert.equal(openStackPredecessor(secondEvent, chain)?.id, 7);
+  assert.equal(openStackPredecessor(secondEvent, [secondEvent]), null);
+
+  const third = fileReviewProposal({
+    baseline,
+    edited: {
+      ...composed,
+      lenses: [{ ...composed.lenses[0], prompt: "Stacked prompt." }]
+    },
+    openProposals: chain,
+    stackOn: true,
+    stackLoaded: true
+  });
+  assert.deepEqual(third.patch.changes.map(change => change.path), ["lenses[which-alpha].prompt"]);
+  assert.equal(third.document.learningIntroduction.content.text, "From the first review.");
+  assert.equal(third.document.clusters[0].fact, "Another agent.");
+
+  const anchored = freshProposalOverlaps(baseline, withFact("Typed."), open, () => baseline);
+  assert.deepEqual(anchored.map(hit => hit.paths), [["clusters[alpha].fact"]]);
+  const missingSnapshot = freshProposalOverlaps(baseline, withFact("Typed."), [{
+    id: 1,
+    proposal: withFact("An agent edit.")
+  }], () => null);
+  assert.deepEqual(missingSnapshot, []);
 }
