@@ -25,8 +25,15 @@ import {
   WORKING_COPY_FORM_ID
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
-import { diffPublishedDraft, documentWithLesson, independentReviewDocument, lessonContentText, samePlayablePuzzle } from "./draftReviewDiff.js";
-import { revisedLessonLabel, revisedMarkChangesLessonLine, samePlayerFacingProjection } from "./playerFacingRevision.js";
+import { diffPublishedDraft } from "./draftReviewDiff.js";
+import {
+  formatReviewValue,
+  isReviewPatch,
+  proposalChanges,
+  reviewChangeSummary,
+  staleReviewChanges
+} from "./reviewPatch.js";
+import { revisedLessonLabel, revisedMarkChangesLessonLine } from "./playerFacingRevision.js";
 import { draftBoardQuery, draftPlayQuery, layoutQuery, playQuery } from "./stagingPlayLinks.js";
 import {
   RECENCY_ORDER,
@@ -869,7 +876,7 @@ const SHADOW_BADGE = '<span class="badge badge-warn" title="Almost none of the p
 function renderPendingReviewBadge(count) {
   if (!(count > 0)) return "";
   const label = count === 1 ? "review pending" : `${count} reviews pending`;
-  return ` <span class="badge badge-warn" title="Agent review proposals wait for a person to publish one or keep the published puzzle. Open the puzzle to choose.">${label}</span>`;
+  return ` <span class="badge badge-warn" title="Agent review proposals are pending changes to the working copy. Open the puzzle to accept, reject, or defer them.">${label}</span>`;
 }
 
 function renderPuzzlePathBadges(item, { detail = false } = {}) {
@@ -1655,138 +1662,174 @@ function reviewCandidateLines(diff) {
   return lines;
 }
 
-function lessonDonors(event, candidates) {
-  const own = lessonContentText(event.proposal);
-  return candidates.filter(other => {
-    if (other.id === event.id) return false;
-    const text = lessonContentText(other.proposal);
-    return Boolean(text) && text !== own;
-  });
-}
-
-function composedReviewDocument(proposal, donor) {
-  return donor ? documentWithLesson(proposal, donor.proposal) : proposal;
-}
-
-function lessonChoiceMarksRevision(anchor, proposal, donor) {
-  return Boolean(anchor && proposal)
-    && !samePlayerFacingProjection(anchor, composedReviewDocument(proposal, donor));
-}
-
-// Radio values whose composed proposal would change the lesson line. "" is
-// the review's own lesson.
-function revisedMarkChoices(anchor, event, candidates, firstPublishedAt) {
-  const marks = new Set();
-  if (!revisedMarkChangesLessonLine(firstPublishedAt) || !event?.proposal) return marks;
-  if (lessonChoiceMarksRevision(anchor, event.proposal, null)) marks.add("");
-  for (const donor of lessonDonors(event, candidates)) {
-    if (lessonChoiceMarksRevision(anchor, event.proposal, donor)) marks.add(String(donor.id));
+function legacyAnchorFor(draft, event) {
+  if (isReviewPatch(event?.proposal)) return draft.document;
+  const revision = event?.basePublishedRevision;
+  if (Number.isInteger(revision)) {
+    if (draft.reviewBaseSnapshots?.[revision]) return draft.reviewBaseSnapshots[revision];
+    if (draft.currentPublishedRevision === revision) {
+      return draft.reviewAnchorDocument || draft.document;
+    }
+    return null;
   }
-  return marks;
+  return draft.reviewAnchorDocument || draft.document;
 }
 
-function renderLessonChoice(event, candidates, marks = new Set()) {
-  const donors = lessonDonors(event, candidates);
-  if (!donors.length) return "";
-  const keepLabel = lessonContentText(event.proposal) ? "Keep this review's lesson" : "No lesson";
-  const markAttr = value => marks.has(value) ? " data-revised-mark" : "";
-  const options = donors.map(other =>
-    `<label><input type="radio" name="lesson_from" value="${escapeHtml(String(other.id))}"${markAttr(String(other.id))}> Use ${escapeHtml(reviewCandidateLabel(other))}'s lesson</label>`
-  ).join("");
-  return `<fieldset class="lesson-choice"><legend>Lesson</legend>
-      <label><input type="radio" name="lesson_from" value="" checked${markAttr("")}> ${keepLabel}</label>
-      ${options}
-    </fieldset>`;
+function changesForCandidate(draft, event) {
+  const anchor = legacyAnchorFor(draft, event);
+  if (!anchor) return [];
+  return proposalChanges(event?.proposal, anchor);
 }
 
-function renderReviewChoice(draft, { boardButton = "" } = {}) {
+function renderReviewChoice(draft) {
   const candidates = reviewChoiceCandidates(draft);
   if (!candidates.length) return "";
   const draftId = draft.draftId;
   const action = `/admin/drafts/${encodeURIComponent(draftId)}`;
   const expected = escapeHtml(String(draft.revision ?? ""));
   const cards = candidates.map(event => {
-    const diff = draft.reviewAnchorDocument && event.proposal
-      ? diffPublishedDraft(draft.reviewAnchorDocument, event.proposal)
-      : null;
-    const lines = reviewCandidateLines(diff).slice(0, 8);
-    const hidden = lines.length;
-    const total = reviewCandidateLines(diff).length;
-    const list = lines.length
-      ? `<ul>${lines.map(line => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`
-      : `<p class="meta">${draft.reviewAnchorDocument ? "No fact-level changes to show." : "The published puzzle is not available, so this card has no diff."}</p>`;
-    const more = total > hidden ? `<p class="meta">${total - hidden} more changes are in the proposal.</p>` : "";
-    const included = draft.reviewAnchorDocument
-      ? candidates.filter(other =>
-        other.id !== event.id &&
-        other.proposal &&
-        !samePlayablePuzzle(
-          independentReviewDocument(draft.reviewAnchorDocument, [other], event.proposal),
-          event.proposal
-        )
-      )
-      : [];
-    const stackedNote = included.length
-      ? `<p class="meta">Also includes ${included.map(other => escapeHtml(reviewCandidateLabel(other))).join(" and ")}'s changes.</p>`
+    const unresolvedLegacy = !isReviewPatch(event?.proposal)
+      && Number.isInteger(event?.basePublishedRevision)
+      && !legacyAnchorFor(draft, event);
+    const predecessorOpen = candidates.some(item => item.id === event.proposal?.stacksOn);
+    const changes = changesForCandidate(draft, event);
+    const stale = new Set(staleReviewChanges(draft.document, changes).map(change => change.path));
+    const shown = changes.slice(0, 8);
+    const list = shown.length
+      ? `<ul>${shown.map(change => {
+          const mark = stale.has(change.path) ? ` <span class="badge badge-warn">stale</span>` : "";
+          return `<li>${escapeHtml(reviewChangeSummary(change))}${mark}</li>`;
+        }).join("")}</ul>`
+      : `<p class="meta">No field changes in this proposal.</p>`;
+    const more = changes.length > shown.length
+      ? `<p class="meta">${changes.length - shown.length} more changes are in the proposal.</p>`
       : "";
+    const staleNote = stale.size
+      ? `<p class="validation-flags">The working copy has changed ${stale.size === 1 ? "a field" : "fields"} this proposal also changes. Accept shows those side by side.</p>`
+      : "";
+    const stacked = Number.isInteger(event.proposal?.stacksOn)
+      ? predecessorOpen
+        ? `<p class="meta">Builds on an earlier proposal. Accept that proposal before this one.</p>`
+        : `<p class="meta">Builds on an earlier proposal.</p>`
+      : "";
+    const missingRevision = unresolvedLegacy
+      ? `<p class="validation-flags">This proposal was filed against published revision ${escapeHtml(String(event.basePublishedRevision))}, which is no longer available.</p>`
+      : "";
+    const accept = predecessorOpen || unresolvedLegacy
+      ? ""
+      : `<button type="submit" name="confirm" value="accept-review">Accept</button>`;
     const proposalId = escapeHtml(String(event.id));
-    const marks = revisedMarkChoices(
-      draft.reviewAnchorDocument,
-      event,
-      candidates,
-      draft.firstPublishedAt
-    );
     return `<article class="review-candidate">
       <h3>${escapeHtml(reviewCandidateLabel(event))}</h3>
       ${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}
-      ${stackedNote}
+      ${stacked}
+      ${missingRevision}
+      ${staleNote}
       ${list}
       ${more}
       <form method="post" action="${action}">
         <input type="hidden" name="proposal_id" value="${proposalId}">
         <input type="hidden" name="expected_revision" value="${expected}">
-        ${renderLessonChoice(event, candidates, marks)}
-        ${renderRevisedCheckbox(marks.size > 0, { hidden: !marks.has("") })}
         <div class="actions">
-          <button type="submit" name="confirm" value="preview-review">Play</button>
-          <button type="submit" name="confirm" value="publish-review">Publish this review</button>
+          ${accept}
+          <button type="submit" name="confirm" value="reject-review" class="secondary">Reject</button>
+          <a class="play-button secondary" href="#${WORKING_COPY_FORM_ID}">Defer</a>
         </div>
       </form>
     </article>`;
   }).join("\n");
   return `<section class="submit-pr">
-    <h2>Choose a review</h2>
-    <p class="meta">These proposals are alternatives to the published puzzle. A later review files only its own changes. Pass stack_on to put it on top of the preceding review. When another review wrote a lesson, you can use that lesson with the review you play or publish. Play loads one into the working copy. Publish this review publishes that stored proposal and rejects the others. Keep published rejects every proposal.</p>
-    ${boardButton ? `<div class="actions">${boardButton}</div>` : ""}
+    <h2>Pending proposals</h2>
+    <p class="meta">These proposals are pending changes to the working copy. Accept applies one proposal's fields. Reject leaves the working copy as it is. Defer decides later. Two proposals on different fields can both be accepted. Publish warns while a proposal is still open.</p>
     ${cards}
-    <script>
-    (() => {
-      for (const form of document.querySelectorAll("form")) {
-        const mark = form.querySelector(".revised-mark");
-        const radios = [...form.querySelectorAll('input[name="lesson_from"]')];
-        if (!mark || !radios.length) continue;
-        const sync = () => {
-          const selected = radios.find(radio => radio.checked);
-          const offered = Boolean(selected && selected.hasAttribute("data-revised-mark"));
-          mark.hidden = !offered;
-          if (!offered) {
-            const box = mark.querySelector("input");
-            if (box) box.checked = false;
-          }
-        };
-        for (const radio of radios) radio.addEventListener("change", sync);
-        sync();
-      }
-    })();
-    </script>
-    <form method="post" action="${action}">
-      <input type="hidden" name="confirm" value="keep-published">
-      <input type="hidden" name="expected_revision" value="${expected}">
-      <div class="actions">
-        <button type="submit" class="secondary">Keep published</button>
-      </div>
-    </form>
   </section>`;
+}
+
+function hiddenReviewFields(params) {
+  return [...params.entries()]
+    .filter(([key]) => key !== "acknowledge_review_overlap" && key !== "acknowledge_open_proposals")
+    .map(([key, value]) => `<input type="hidden" name="${escapeHtml(key)}" value="${escapeHtml(value)}">`)
+    .join("\n");
+}
+
+export function renderReviewOverlapPage({ draftId, hits, params }) {
+  const action = `/admin/drafts/${encodeURIComponent(draftId)}`;
+  const items = (hits || []).map(hit => {
+    const paths = (hit.paths || []).map(path => `<li>${escapeHtml(path)}</li>`).join("");
+    return `<article class="review-candidate"><h3>${escapeHtml(reviewCandidateLabel(hit.event))}</h3><ul>${paths}</ul></article>`;
+  }).join("");
+  return pageShell("Decide on the proposal", `
+    <p class="meta">${authoringAdminNav()}</p>
+    <h1>This save changes a pending proposal</h1>
+    <p>The fields below are also in an open proposal. Decide on that proposal first, or save anyway and leave the proposal stale.</p>
+    ${items}
+    <form method="post" action="${action}">
+      ${hiddenReviewFields(params)}
+      <input type="hidden" name="acknowledge_review_overlap" value="1">
+      <div class="actions">
+        <button type="submit">Save anyway</button>
+        <a class="play-button secondary" href="${action}">Decide on the proposal first</a>
+      </div>
+    </form>`);
+}
+
+export function renderStaleReviewPage({
+  draftId,
+  proposalId,
+  expectedRevision,
+  stale,
+  pendingCount = 0
+}) {
+  const action = `/admin/drafts/${encodeURIComponent(draftId)}`;
+  const rows = (stale || []).map(change => `<li>
+      <strong>${escapeHtml(change.path)}</strong>
+      <p>Proposal started from: ${escapeHtml(formatReviewValue(change.before))}</p>
+      <p>Proposal would set: ${escapeHtml(formatReviewValue(change.after))}</p>
+      <p>Working copy now: ${escapeHtml(formatReviewValue(change.current))}</p>
+    </li>`).join("");
+  const rest = pendingCount > (stale || []).length
+    ? `<p class="meta">The other ${pendingCount - stale.length} field${pendingCount - stale.length === 1 ? "" : "s"} in this proposal still match and will be applied too.</p>`
+    : "";
+  const id = escapeHtml(String(proposalId));
+  const revision = escapeHtml(String(expectedRevision ?? ""));
+  return pageShell("Proposal overlaps your edit", `
+    <p class="meta">${authoringAdminNav()}</p>
+    <h1>This proposal overlaps an edit</h1>
+    <p>Accepting it applies the proposal's wording on these fields.</p>
+    <ul>${rows}</ul>
+    ${rest}
+    <form method="post" action="${action}">
+      <input type="hidden" name="confirm" value="accept-review">
+      <input type="hidden" name="proposal_id" value="${id}">
+      <input type="hidden" name="expected_revision" value="${revision}">
+      <input type="hidden" name="confirm_stale" value="1">
+      <div class="actions"><button type="submit">Apply the proposal's values</button></div>
+    </form>
+    <form method="post" action="${action}">
+      <input type="hidden" name="confirm" value="reject-review">
+      <input type="hidden" name="proposal_id" value="${id}">
+      <input type="hidden" name="expected_revision" value="${revision}">
+      <div class="actions"><button type="submit" class="secondary">Reject this proposal</button></div>
+    </form>
+    <p><a href="${action}">Back to the draft</a></p>`);
+}
+
+export function renderUndecidedProposalsPage({ draftId, proposals, params }) {
+  const action = `/admin/drafts/${encodeURIComponent(draftId)}`;
+  const items = (proposals || []).map(event =>
+    `<li>${escapeHtml(reviewCandidateLabel(event))}${event.comments ? `: ${escapeHtml(event.comments)}` : ""}</li>`
+  ).join("");
+  return pageShell("Proposals still open", `
+    <p class="meta">${authoringAdminNav()}</p>
+    <h1>Proposals are still undecided</h1>
+    <p>Publishing does not accept or reject them. A proposal whose fields this publish does not change stays applicable afterward.</p>
+    <ul>${items}</ul>
+    <form method="post" action="${action}">
+      ${hiddenReviewFields(params)}
+      <input type="hidden" name="acknowledge_open_proposals" value="1">
+      <div class="actions"><button type="submit">Publish anyway</button></div>
+    </form>
+    <p><a href="${action}">Back to the draft</a></p>`);
 }
 
 // Board-limit waiver decisions, shown inside the Review section beside
@@ -1932,7 +1975,7 @@ function renderSubmitForm(draft, variant = "hosted") {
   const workingMeta = [
     "Copy edits on this page stay in the browser until you Save working copy. Construct auto-saves board structure.",
     choosingReview
-      ? "Open proposals are the choice. Saving the working copy does not publish one or end the choice."
+      ? "Open proposals are pending changes. Accept applies one. Saving a field a proposal also changes asks you to decide or to leave that proposal stale."
       : "",
     reviewOpenedDraft
       ? "This working copy was opened for review. Publish records the review as accepted. Discard review deletes the working copy and keeps the proposal on the review record."
@@ -1964,11 +2007,8 @@ function renderSubmitForm(draft, variant = "hosted") {
     <a class="play-button secondary" href="${reviewLink}">Review issues</a>
     ${waivers.html}
   </section>`;
-  const publishSection = choosingReview
-    ? renderReviewChoice(draft, {
-      boardButton: variant === "local" ? renderOpenBoardButton(draft) : ""
-    })
-    : `<section class="submit-pr">
+  const proposals = renderReviewChoice(draft);
+  const publishSection = `<section class="submit-pr">
     <h2>Actions</h2>
     <p class="meta">${hint}${waivers.blocking
       ? ` ${waivers.blocking} board-limit waiver request${waivers.blocking === 1 ? " is" : "s are"} awaiting decision under Review; validation blocks publishing until ${waivers.blocking === 1 ? "it is" : "they are"} granted or the board is restructured.`
@@ -1987,7 +2027,8 @@ function renderSubmitForm(draft, variant = "hosted") {
   const deleteWorkingCopy = choosingReview
     ? ""
     : `<button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>`;
-  return `${publishSection}
+  return `${proposals}
+  ${publishSection}
   ${reviewSummary}
   ${renderFreezeCueForm(`/admin/drafts/${encodeURIComponent(draftId)}`, {
     published: draft.d1Published === true,
@@ -2081,8 +2122,17 @@ function decisionEventDetail(event, publishedSnapshots, events = []) {
   }
   if (event.eventType === "accepted") {
     const revision = event.publishedRevision;
-    const before = Number.isInteger(revision) ? snapshot(revision - 1) : null;
-    const after = Number.isInteger(revision) ? snapshot(revision) : null;
+    if (!Number.isInteger(revision)) {
+      return {
+        summary: candidate
+          ? `Accepted ${candidate} onto the working copy.`
+          : "Accepted onto the working copy.",
+        notes,
+        diff: null
+      };
+    }
+    const before = snapshot(revision - 1);
+    const after = snapshot(revision);
     return {
       summary: candidate
         ? `Accepted ${candidate} as published revision ${revision}.`
@@ -2093,6 +2143,20 @@ function decisionEventDetail(event, publishedSnapshots, events = []) {
     };
   }
   if (event.eventType !== "rejected") return null;
+  if (isReviewPatch(event.proposal)) {
+    const against = event.basePublishedRevision
+      ? ` against published revision ${event.basePublishedRevision}`
+      : "";
+    return {
+      summary: candidate
+        ? `Rejected ${candidate}, kept${against}.`
+        : `Rejected proposal kept${against}.`,
+      notes,
+      changes: event.proposal.changes,
+      diff: null,
+      diffLabel: "Proposed fields"
+    };
+  }
   const baseline = snapshot(event.basePublishedRevision);
   const diff = baseline && event.proposal
     ? diffPublishedDraft(baseline, event.proposal)
@@ -2136,6 +2200,12 @@ function decisionEventDetail(event, publishedSnapshots, events = []) {
 }
 
 function renderDecisionChanges(detail) {
+  if (detail?.changes?.length) {
+    const lines = detail.changes.map(change => reviewChangeSummary(change));
+    return `<details class="review-note"><summary>${escapeHtml(detail.diffLabel || "Proposed fields")}: ${lines.length}</summary>
+      <ul>${lines.map(line => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
+    </details>`;
+  }
   if (!detail?.diff) return "";
   const lines = reviewCandidateLines(detail.diff);
   if (!lines.length) return "";

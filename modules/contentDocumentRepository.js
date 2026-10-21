@@ -236,12 +236,6 @@ export function reviewEventInput({
   if (publishedRevision != null && (!Number.isInteger(publishedRevision) || publishedRevision < 1)) {
     throw new Error("publishedRevision must be a positive integer");
   }
-  if (eventType === "accepted" && publishedRevision == null) {
-    throw new Error("accepted events require publishedRevision");
-  }
-  if (eventType === "proposed" && basePublishedRevision == null) {
-    throw new Error("proposed events require basePublishedRevision");
-  }
   if (sourceEventId != null && (!Number.isInteger(sourceEventId) || sourceEventId < 1)) {
     throw new Error("sourceEventId must be a positive integer");
   }
