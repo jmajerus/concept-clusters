@@ -5,7 +5,7 @@
       "args": ["${workspaceFolder}/tools/mcp-server.mjs"]
     },
     "concept-clusters-authoring": {
-      "url": "https://concept-clusters-authoring.jmajerus.workers.dev/mcp"
+      "url": "https://mcp.majerus.us/mcp"
     }
   }
 }

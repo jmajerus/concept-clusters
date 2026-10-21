@@ -11,8 +11,7 @@
         "command": "/usr/bin/node",
         "args": [
           "/home/john/Workspace/concept-clusters/tools/mcp-server.mjs"
-        ],
-        "enabled": true
+        ]
       }
     }
   }
