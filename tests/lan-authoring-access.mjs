@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
+import { Readable, Writable } from "node:stream";
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from "jose";
 import {
   authenticateAuthoringAccess,
   verifyAccessToken
 } from "../modules/accessAuth.js";
 import { linkHealthDue } from "../modules/linkHealthSchedule.js";
+import { handleLocalMcpRequest, nodeRequestToWeb } from "../modules/localMcpHttp.js";
 
 export const name = "LAN authoring access: Access token and Monday link-health slot";
 
@@ -63,4 +65,46 @@ export async function run() {
   assert.equal(linkHealthDue(mondayMorning, mondayMorning.getTime()), false);
   const before = new Date("2026-10-19T05:59:00.000Z");
   assert.equal(linkHealthDue(before, lastWeek.getTime()), false);
+
+  let pulled = false;
+  const unread = new Readable({
+    read() {
+      pulled = true;
+      this.push(null);
+    }
+  });
+  unread.method = "POST";
+  unread.url = "/mcp";
+  unread.headers = { host: "authoring.example", "content-length": "2000000" };
+  await assert.rejects(() => nodeRequestToWeb(unread), /exceeds/);
+  assert.equal(pulled, false);
+
+  let unauthorizedPulls = 0;
+  const anonymous = new Readable({
+    read() {
+      unauthorizedPulls += 1;
+      this.push(Buffer.alloc(64));
+    }
+  });
+  anonymous.method = "POST";
+  anonymous.url = "/mcp";
+  anonymous.headers = { host: "authoring.example" };
+  const chunks = [];
+  const res = new Writable({
+    write(chunk, _encoding, callback) {
+      chunks.push(Buffer.from(chunk));
+      callback();
+    }
+  });
+  res.writeHead = status => {
+    res.statusCode = status;
+  };
+  const handled = await handleLocalMcpRequest(anonymous, res, {
+    env: {},
+    repositoryRoot: process.cwd()
+  });
+  assert.equal(handled, true);
+  assert.equal(res.statusCode, 401);
+  assert.equal(unauthorizedPulls, 0);
+  assert.match(Buffer.concat(chunks).toString("utf8"), /Cloudflare Access authentication is required/);
 }

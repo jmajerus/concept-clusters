@@ -19,7 +19,17 @@ export class PostgresModelSuggestionRepository {
   }
 
   async hasCompleteCatalog() {
-    return false;
+    try {
+      const { rows } = await this.pool.query(`
+        SELECT version
+        FROM authoring_model_suggestion_catalog
+        WHERE id = 1
+      `);
+      return Number(rows[0]?.version) >= 1;
+    } catch (error) {
+      if (error?.code === "42P01") return false;
+      throw error;
+    }
   }
 
   async listForRuntime() {
@@ -35,7 +45,8 @@ export class PostgresModelSuggestionRepository {
   }
 
   async listForFreeze() {
-    return null;
+    if (!await this.hasCompleteCatalog()) return null;
+    return this.list();
   }
 
   async add(label, { createdBy = null } = {}) {

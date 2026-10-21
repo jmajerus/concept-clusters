@@ -41,6 +41,10 @@ const TABLES = [
     key: ["label"]
   },
   {
+    name: "authoring_model_suggestion_catalog",
+    key: ["id"]
+  },
+  {
     name: "wiki_link_checks",
     key: ["title"]
   },
@@ -109,20 +113,32 @@ async function syncIdentity(pool, table) {
   );
 }
 
-loadProjectEnv();
-const url = authoringDatabaseUrl();
-if (!url) {
-  console.error("AUTHORING_DATABASE_URL is required");
-  process.exit(1);
+async function main() {
+  loadProjectEnv();
+  const url = authoringDatabaseUrl();
+  if (!url) {
+    console.error("AUTHORING_DATABASE_URL is required");
+    process.exitCode = 1;
+    return;
+  }
+  const pool = getAuthoringPool(url);
+  try {
+    await applyPostgresMigrations(pool);
+    const d1 = createHttpD1Database(await resolveLocalD1Config());
+    for (const table of TABLES) {
+      const count = await copyTable(d1, pool, table);
+      console.log(`${table.name}: ${count}`);
+    }
+    await syncIdentity(pool, "puzzle_review_events");
+    await syncIdentity(pool, "puzzle_board_limit_waiver_requests");
+    await syncIdentity(pool, "puzzle_board_limit_waiver_events");
+    console.log("Authoring rows are in Postgres. Published player rows stayed in D1.");
+  } finally {
+    await pool.end();
+  }
 }
-const pool = getAuthoringPool(url);
-await applyPostgresMigrations(pool);
-const d1 = createHttpD1Database(await resolveLocalD1Config());
-for (const table of TABLES) {
-  const count = await copyTable(d1, pool, table);
-  console.log(`${table.name}: ${count}`);
-}
-await syncIdentity(pool, "puzzle_review_events");
-await syncIdentity(pool, "puzzle_board_limit_waiver_requests");
-await syncIdentity(pool, "puzzle_board_limit_waiver_events");
-console.log("Authoring rows are in Postgres. Published player rows stayed in D1.");
+
+main().catch(error => {
+  console.error(error instanceof Error ? error.message : error);
+  process.exitCode = 1;
+});

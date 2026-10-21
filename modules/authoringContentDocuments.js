@@ -19,14 +19,38 @@ export function createSplitContentDocuments({
       const event = await reviewEvents.insert(input);
       return eventType === "proposed" ? event : null;
     }
-    await published.getPublished({ kind: "puzzle", id: input.id });
+    const current = await published.getPublished({ kind: "puzzle", id: input.id });
     const reviewedAt = input.reviewedAt || new Date().toISOString();
-    await reviewEvents.insert({ ...input, eventType: "review", reviewedAt });
+    const stamp = input.reviewerKind === "agent"
+      ? current.lastAgentReviewedAt
+      : current.lastHumanReviewedAt;
+    const prior = typeof reviewEvents.latestMatchingReview === "function"
+      ? await reviewEvents.latestMatchingReview({
+        id: input.id,
+        reviewerKind: input.reviewerKind,
+        eventType: "review",
+        comments: input.comments ?? null,
+        outcome: input.outcome ?? null,
+        draftRevision: input.draftRevision ?? null
+      })
+      : null;
+    // The event and the D1 stamp cannot commit together. A retry of a call
+    // whose event landed and whose stamp did not must stamp that event
+    // instead of inserting another one.
+    if (prior && (!stamp || prior.reviewedAt > stamp)) {
+      await published.touchPublishedReviewStamp({
+        id: input.id,
+        reviewerKind: input.reviewerKind,
+        reviewedAt: prior.reviewedAt
+      });
+      return published.getPublished({ kind: "puzzle", id: input.id });
+    }
     await published.touchPublishedReviewStamp({
       id: input.id,
       reviewerKind: input.reviewerKind,
       reviewedAt
     });
+    await reviewEvents.insert({ ...input, eventType: "review", reviewedAt });
     return published.getPublished({ kind: "puzzle", id: input.id });
   }
 

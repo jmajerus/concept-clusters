@@ -154,6 +154,23 @@ export function createPostgresSiteSettingsStore(pool) {
 
 // Postgres is the authoring copy. The same patch is upserted into D1 so the
 // play Worker keeps reading site settings from the publication database.
+// The two databases cannot commit together. A transient mirror failure is
+// retried here; a later update of the same keys upserts both copies again.
+const MIRROR_ATTEMPTS = 3;
+
+async function updateMirror(mirror, patch, options) {
+  let lastError;
+  for (let attempt = 0; attempt < MIRROR_ATTEMPTS; attempt += 1) {
+    try {
+      await mirror.update(patch, options);
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
+
 export function createMirroredSiteSettingsStore(primary, mirror) {
   if (!primary) throw new Error("A site settings store is required");
   return {
@@ -162,7 +179,7 @@ export function createMirroredSiteSettingsStore(primary, mirror) {
     },
     async update(patch, options) {
       const saved = await primary.update(patch, options);
-      if (mirror) await mirror.update(patch, options);
+      if (mirror) await updateMirror(mirror, patch, options);
       return saved;
     }
   };

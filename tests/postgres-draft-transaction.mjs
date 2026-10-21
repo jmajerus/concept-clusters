@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { PGlite } from "@electric-sql/pglite";
 import { DraftConflictError } from "../modules/draftRepository.js";
+import { createSplitContentDocuments } from "../modules/authoringContentDocuments.js";
 import { PostgresDraftRepository } from "../modules/postgresDraftRepository.js";
+import { PostgresModelSuggestionRepository } from "../modules/postgresModelSuggestionRepository.js";
+import { PostgresReviewEventStore } from "../modules/postgresReviewEvents.js";
 import { postgresConnectionDropped, withTransaction } from "../modules/postgresPool.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { applyPostgresMigrations } from "../tools/postgres-migrate.mjs";
@@ -36,7 +39,7 @@ export async function run() {
   const db = new PGlite();
   const pool = poolFrom(db);
   const applied = await applyPostgresMigrations(pool);
-  assert.deepEqual(applied, ["0001_authoring.sql"]);
+  assert.deepEqual(applied, ["0001_authoring.sql", "0002_model_suggestion_catalog.sql"]);
 
   const repository = new PostgresDraftRepository({ pool });
   const content = createHostedAuthoringContentService();
@@ -125,4 +128,102 @@ export async function run() {
     ["pg-conflict"]
   )).rows[0].content_hash);
   assert.equal(await historyCount(pool, "pg-conflict"), 2);
+
+  let droppedPop = false;
+  const flakyPop = {
+    async connect() {
+      const inner = await pool.connect();
+      return {
+        async query(text, values) {
+          const result = await inner.query(text, values);
+          if (!droppedPop && text === "COMMIT") {
+            droppedPop = true;
+            const error = new Error("Connection terminated");
+            error.code = "57P01";
+            throw error;
+          }
+          return result;
+        },
+        release() {
+          inner.release();
+        }
+      };
+    },
+    query: (text, values) => pool.query(text, values)
+  };
+  const popped = await new PostgresDraftRepository({ pool: flakyPop }).popWorkingCopy({
+    draftId: "pg-conflict",
+    actor,
+    expectedRevision: 3
+  });
+  assert.equal(popped.revision, 4);
+  assert.equal(popped.document.title, "Two");
+
+  const models = new PostgresModelSuggestionRepository(pool);
+  await models.add("Muse Spark 9");
+  assert.equal(await models.listForFreeze(), null);
+  await pool.query(
+    "INSERT INTO authoring_model_suggestion_catalog (id, version) VALUES (1, 1)"
+  );
+  assert.deepEqual(await models.listForFreeze(), ["Muse Spark 9"]);
+
+  const reviewEvents = new PostgresReviewEventStore(pool);
+  await reviewEvents.insert({
+    id: "pg-conflict",
+    reviewerKind: "agent",
+    reviewedAt: "2026-10-20T00:00:00.000Z",
+    comments: "done",
+    outcome: "changed",
+    draftRevision: 1,
+    eventType: "review"
+  });
+  const stamps = [];
+  const documents = createSplitContentDocuments({
+    drafts: {},
+    published: {
+      async getPublished() {
+        return { id: "pg-conflict", lastAgentReviewedAt: stamps.at(-1) || null };
+      },
+      async touchPublishedReviewStamp({ reviewedAt }) {
+        stamps.push(reviewedAt);
+      }
+    },
+    reviewEvents
+  });
+  const stamped = await documents.recordPuzzleAgentReview({
+    id: "pg-conflict",
+    comments: "done",
+    outcome: "changed",
+    draftRevision: 1
+  });
+  assert.equal(stamped.lastAgentReviewedAt, "2026-10-20T00:00:00.000Z");
+  assert.equal(stamps.length, 1);
+  const eventCount = async () => Number((await pool.query(
+    "SELECT COUNT(*)::int AS count FROM puzzle_review_events WHERE puzzle_id = $1",
+    ["pg-conflict"]
+  )).rows[0].count);
+  assert.equal(await eventCount(), 1);
+
+  const blocked = createSplitContentDocuments({
+    drafts: {},
+    published: {
+      async getPublished() {
+        return { id: "pg-conflict", lastAgentReviewedAt: stamps.at(-1) || null };
+      },
+      async touchPublishedReviewStamp() {
+        throw new Error("d1 down");
+      }
+    },
+    reviewEvents
+  });
+  await assert.rejects(
+    () => blocked.recordPuzzleAgentReview({
+      id: "pg-conflict",
+      comments: "third",
+      outcome: "changed",
+      draftRevision: 1
+    }),
+    /d1 down/
+  );
+  assert.equal(await eventCount(), 1);
 }

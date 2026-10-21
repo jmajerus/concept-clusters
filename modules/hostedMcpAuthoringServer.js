@@ -688,9 +688,12 @@ export function createAuthoringMcpServer({
   if (!actor?.subject) throw new Error("authenticated actor is required");
 
   async function provenanceSettings() {
-    const database = contentDocuments?.database;
-    if (!database) return AUTHORING_SETTINGS;
-    const modelSuggestions = await new D1ModelSuggestionRepository(database).listForRuntime();
+    const repository = contentDocuments?.modelSuggestions
+      || (contentDocuments?.database
+        ? new D1ModelSuggestionRepository(contentDocuments.database)
+        : null);
+    if (!repository) return AUTHORING_SETTINGS;
+    const modelSuggestions = await repository.listForRuntime();
     return { ...AUTHORING_SETTINGS, modelSuggestions };
   }
 

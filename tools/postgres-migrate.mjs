@@ -57,8 +57,17 @@ if (isMain) {
   const url = authoringDatabaseUrl();
   if (!url) {
     console.error("AUTHORING_DATABASE_URL is required");
-    process.exit(1);
+    process.exitCode = 1;
+  } else {
+    const pool = getAuthoringPool(url);
+    try {
+      const ran = await applyPostgresMigrations(pool);
+      console.log(ran.length ? `Applied ${ran.join(", ")}` : "Postgres schema is current");
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : error);
+      process.exitCode = 1;
+    } finally {
+      await pool.end();
+    }
   }
-  const ran = await applyPostgresMigrations(getAuthoringPool(url));
-  console.log(ran.length ? `Applied ${ran.join(", ")}` : "Postgres schema is current");
 }

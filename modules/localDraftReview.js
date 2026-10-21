@@ -164,9 +164,12 @@ function formatActionError(error) {
 }
 
 async function provenanceModelSettings(contentDocuments) {
-  const database = contentDocuments?.database;
-  if (!database) return AUTHORING_SETTINGS;
-  const modelSuggestions = await new D1ModelSuggestionRepository(database).listForRuntime();
+  const repository = contentDocuments?.modelSuggestions
+    || (contentDocuments?.database
+      ? new D1ModelSuggestionRepository(contentDocuments.database)
+      : null);
+  if (!repository) return AUTHORING_SETTINGS;
+  const modelSuggestions = await repository.listForRuntime();
   return { ...AUTHORING_SETTINGS, modelSuggestions };
 }
 

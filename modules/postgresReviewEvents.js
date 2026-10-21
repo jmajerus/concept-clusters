@@ -49,6 +49,36 @@ export class PostgresReviewEventStore {
     this.pool = pool;
   }
 
+  async latestMatchingReview({
+    id,
+    reviewerKind,
+    eventType = "review",
+    comments = null,
+    outcome = null,
+    draftRevision = null
+  }) {
+    assertDraftId(id);
+    const { rows } = await this.pool.query(`
+      SELECT * FROM puzzle_review_events
+      WHERE puzzle_id = $1
+        AND reviewer_kind = $2
+        AND event_type = $3
+        AND comments IS NOT DISTINCT FROM $4
+        AND outcome IS NOT DISTINCT FROM $5
+        AND draft_revision IS NOT DISTINCT FROM $6
+      ORDER BY reviewed_at DESC, id DESC
+      LIMIT 1
+    `, [
+      id,
+      reviewerKind,
+      eventType,
+      comments?.trim() || null,
+      typeof outcome === "string" ? outcome.trim() || null : outcome,
+      draftRevision
+    ]);
+    return rows[0] ? reviewEventRecord(rows[0]) : null;
+  }
+
   async insert(input) {
     const reviewedAt = input.reviewedAt || new Date().toISOString();
     if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {

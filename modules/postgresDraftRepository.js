@@ -655,16 +655,15 @@ export class PostgresDraftRepository extends DraftRepository {
       );
     }
     const now = new Date().toISOString();
-    let popped = null;
     const committed = {
       draftId,
       ownerSubject: owner.subject,
       expectedRevision,
       expectedContentHash: null,
-      draftAt: revision => ({ ...popped, revision })
+      draftAt: () => this.get({ draftId, actor })
     };
     try {
-      popped = await withTransaction(this.pool, async client => {
+      const popped = await withTransaction(this.pool, async client => {
         const current = await this.#requireCurrent(client, draftId, owner.subject, expectedRevision);
         const history = await client.query(`
           SELECT seq, document,
@@ -712,10 +711,10 @@ export class PostgresDraftRepository extends DraftRepository {
           document: materialized
         };
       });
+      return popped;
     } catch (error) {
       return recoverIfCommitted(this.pool, error, committed);
     }
-    return popped;
   }
 
   async delete({ draftId, actor, expectedRevision = null }) {

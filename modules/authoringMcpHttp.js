@@ -23,7 +23,7 @@ async function learningIntroduction() {
   return learningIntroductionText;
 }
 
-const MAX_MCP_REQUEST_BYTES = 1_600_000;
+export const MAX_MCP_REQUEST_BYTES = 1_600_000;
 
 function jsonError(status, error) {
   return Response.json({ error }, { status });

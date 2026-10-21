@@ -61,7 +61,7 @@ export function renderModelSuggestionsAdminPage({
     : `<li class="meta">None added yet.</li>`;
 
   const description = catalogManaged
-    ? `This D1 list is the source of model names offered on the
+    ? `This list is the source of model names offered on the
     <code>/admin/drafts</code> model dropdown and used to format MCP model
     slugs. Enter the preferred display label (for example,
     <code>GPT-6 Luna</code>); <code>gpt-6-luna</code> resolves to it
@@ -69,11 +69,10 @@ export function renderModelSuggestionsAdminPage({
     snapshot.`
     : `Additions here are available immediately alongside the frozen model
     snapshot. Enter the preferred display label (for example,
-    <code>GPT-6 Luna</code>); <code>gpt-6-luna</code> resolves to it. Apply
-    the model vocabulary D1 migration to make this editor manage the complete
-    list and include it in Freeze.`;
+    <code>GPT-6 Luna</code>); <code>gpt-6-luna</code> resolves to it. A
+    complete catalog marker makes this editor the source Freeze copies.`;
   const catalogLists = catalogManaged
-    ? `<h2>Models in D1</h2><ul>${customItems}</ul>
+    ? `<h2>Models</h2><ul>${customItems}</ul>
       <p class="meta"><code>auto</code> and <code>Custom Model</code> are
       always available as special options.</p>`
     : `<h2>Added here</h2><ul>${customItems}</ul>
@@ -142,21 +141,21 @@ export async function handleLocalModelSuggestions(req, res, { repositoryRoot, en
     return true;
   }
 
-  let database = null;
+  let repository = null;
   try {
     const resolved = await resolveLocalAuthoringWorkspace({ env, repositoryRoot });
-    database = resolved.contentDocuments?.database || null;
+    const database = resolved.contentDocuments?.database || null;
+    repository = resolved.modelSuggestions
+      || (database ? new D1ModelSuggestionRepository(database) : null);
   } catch {
-    database = null;
+    repository = null;
   }
-  if (!database) {
+  if (!repository) {
     html(res, renderModelSuggestionsAdminPage({
-      error: "No D1 database configured for this local workspace -- " +
-        "add models from the hosted site's /admin/model-suggestions instead."
+      error: "No model catalog is configured for this authoring server."
     }), 503);
     return true;
   }
-  const repository = new D1ModelSuggestionRepository(database);
   const catalogManaged = await repository.hasCompleteCatalog();
 
   if (req.method === "POST") {
