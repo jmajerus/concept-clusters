@@ -1,8 +1,9 @@
 # Authoring on Postgres, D1 for published play
 
-**Status: approved, not started.** Gameplay stays on D1. Working copies move
-to Postgres on the LAN authoring server. MCP reaches that server, not the
-database.
+**Status: implemented on the LAN.** Gameplay stays on D1. Working copies are
+on Postgres. MCP reaches the LAN server, not the database. The Worker
+`/mcp` 410 ships with `npm run mcp:hosted:release`, which has not been run.
+Removing the D1 lost-response recovery waits until this path has been quiet.
 
 This is the follow-up to the lost-response work (`d1CommitOutcome.js`, the
 revision probe, and the history batch in `0036_puzzle_draft_history_domains.sql`).

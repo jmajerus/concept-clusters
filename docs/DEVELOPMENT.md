@@ -26,7 +26,7 @@ auth prompt on loopback; an all-interface bind requires `ADMIN_KEY` for
 `/admin` routes). Set
 `AUTHORING_DRAFT_REVIEW_URL` to the URL agents should print, for example
 `http://authoring.example:8787/admin/drafts`. The same server also serves a
-read-only review of stdio MCP's D1 drafts at
+read-only review of stdio MCP's working copies at
 `http://127.0.0.1:8787/admin/drafts` (or that public URL), an authoring
 index at `/admin`, catalogues at `/admin/catalogues`, and categories at
 `/admin/categories` — see [AUTHORING.md](AUTHORING.md) and
@@ -109,9 +109,11 @@ npm run dev -- --worker
 
 `DEV_WORKER=1 npm run dev` is the same switch. `npm run dev:worker` remains
 a thin alias. Worker mode still binds `http://127.0.0.1:8787`: Node serves
-`/admin` (authoring index), `/admin/drafts` with the same D1 HTTP client and
-Access owner as stdio MCP, and `/admin/catalogues` from the same D1 content
-documents, and proxies everything else to Wrangler. Static assets still come
+`/admin` (authoring index), `/admin/drafts` with the same workspace and
+Access owner as stdio MCP, and `/admin/catalogues` from the same content
+documents, and proxies everything else to Wrangler. Working copies are
+Postgres when `AUTHORING_DATABASE_URL` is set, and D1 otherwise. Published
+rows stay on D1. Static assets still come
 from
 [`site/`](../site/), a tree of symlinks into the files the browser actually
 loads — that keeps Wrangler's asset watcher off `.wrangler/` (watching the
@@ -191,7 +193,8 @@ server's `ADMIN_KEY` in the ignored `.env`.
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
 | `content/` | Versioned canonical simplified puzzle sources plus JSON-LD interchange/context and JSON Schema contracts — see [CANONICAL-CONTENT.md](CANONICAL-CONTENT.md) and [JSON-LD.md](JSON-LD.md) |
 | `.concept-clusters/` | Git-ignored local state. Remnant file drafts may still live under `drafts/`. Authoring scratch (review log, inventories, split plans, loss ledgers, proposals) lives under `authoring/` unless `AUTHORING_DATA_DIR` points elsewhere — see [Local development](DEVELOPMENT.md#local-development) |
-| `d1/migrations/` | Versioned schema for hosted authoring drafts, content documents, and publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
+| `d1/migrations/` | Versioned schema for published documents and, when `AUTHORING_DATABASE_URL` is unset, authoring drafts — see [MCP-REMOTE.md](MCP-REMOTE.md) |
+| `postgres/migrations/` | Versioned schema for LAN working copies. Apply with `npm run authoring:postgres:migrate` |
 | `wrangler.authoring.jsonc` | Isolated D1/Access/observability configuration for the separate hosted authoring Worker |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all four renderers to `modules/` |
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
@@ -202,7 +205,7 @@ server's `ADMIN_KEY` in the ignored `.env`.
 | `tools/check-wiki-links.mjs` | Verifies `termInfo`/bridge/cluster `info` Wikipedia links resolve — run with `npm run check-wiki-links` (see below) |
 | `site/` | Symlinked public tree Wrangler serves as Worker static assets (`wrangler.jsonc` `assets.directory`); keeps `.wrangler/` out of the asset watcher |
 | `src/worker.js` | Cloudflare Worker: serves static assets, the D1-backed public publication read routes, `/api/event`, and `/admin` (see "Deployment & analytics" below) |
-| `modules/wikipediaTitles.js`, `modules/wikiLinkCheck.js`, `modules/wikiLinkCheckStore.js` | One resolver for "does this Wikipedia title exist", the per-document / corpus-wide check built on it, and its D1-backed memory (`wiki_link_checks`) — shared by the CLI, the draft page, `check_puzzle_links`, and the authoring Worker's weekly cron |
+| `modules/wikipediaTitles.js`, `modules/wikiLinkCheck.js`, `modules/wikiLinkCheckStore.js` | One resolver for "does this Wikipedia title exist", the per-document / corpus-wide check built on it, and its remembered results (`wiki_link_checks`, Postgres when `AUTHORING_DATABASE_URL` is set) — shared by the CLI, the draft page, `check_puzzle_links`, and the LAN server's Monday link-health timer |
 
 ## Code modules
 
@@ -240,7 +243,7 @@ anything ever imports from it directly):
 | `httpD1Database.js` | D1 HTTP client with Worker-like `prepare` / `bind` / `batch`, over the REST API or the D1 proxy Worker | `fetch` |
 | `localD1Config.js` | Account, database, token (or D1 proxy URL and token), and Access-owner resolution for stdio D1 | `wrangler.authoring.jsonc`, env |
 | `repositoryDraftStore.js` | Adapts `DraftRepository` to the local MCP draftStore shape | `draftRepository.js` |
-| `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
+| `localAuthoringWorkspace.js` | Wires Postgres working copies when `AUTHORING_DATABASE_URL` is set, otherwise D1 repositories, for stdio MCP and the LAN server | Postgres repos, D1 repos, HTTP D1, file remnant |
 | `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus the LAN server's running revision, LAN Freeze (generated release summary, optional PR context, then Confirm / Cancel), and Refresh from GitHub | `contentFreezePlan.js`, `githubProductionManifest.js` |
 | `draftReviewPage.js` | HTML for `/admin/drafts`: publish-path status, GitHub production, list Show filters (Working copies = badge, Drafts = never in GitHub, Modified = changed since the last Freeze, Cued = cued for the next one, Published only = no private draft), Publish (stays on editor), Publish & Cue, Revert when the working copy differs, Cue/Hold (Cue returns to list), local Open board / Play, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
 | `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, Publish & Cue, Cue/Hold, withdraw) | `authoringAdminIndex.js` |
@@ -639,11 +642,12 @@ Wikipedia search chip. `check-wiki-links.mjs` therefore checks authored
 still use a search fallback when they have no authored `links`. An
 "auto-search" finding from this tool is for those overview surfaces, not
 an acceptable steady state for a board term. Results are remembered in
-D1's `wiki_link_checks` table — the same rows the authoring Worker's weekly
-cron, the draft page's link flags, and the `check_puzzle_links` MCP tool
+the `wiki_link_checks` table — Postgres when `AUTHORING_DATABASE_URL` is
+set, otherwise D1 — the same rows the LAN server's Monday link-health
+timer, the draft page's link flags, and the `check_puzzle_links` MCP tool
 share — so re-running only hits the network for titles nobody has checked
-recently. Without D1 configured (`.env`, see `modules/localD1Config.js`) it
-still runs, asking Wikipedia for everything.
+recently. Without that store configured it still runs, asking Wikipedia
+for everything.
 
 ## Catalogue routing and browser history
 
@@ -988,8 +992,8 @@ Builds" for production deploys from `main`, or a manual deploy.
 ## Roadmap ideas (in rough priority order)
 
 1. **Consider Vite** (or similar) — no longer needed for module imports (see "Code modules" above and `puzzles/`, both done with plain native ES modules), but would still add a real dev server and let `d3.v7.min.js` load via `import` instead of a classic `<script>` global, if that ever becomes worth the added build step
-2. **Graphical board authoring** — the LAN construct canvas on `/?draft=` is the authoring environment (add terms, join clusters, create bridges, inspectors). `/admin/drafts` stays a prose ledger plus Publish / Cue / Hold. Freeze is on `/admin`. Same D1 drafts. See [docs/dev-briefs/graphical-board-authoring.md](dev-briefs/graphical-board-authoring.md). Catalogue and category documents are D1-backed at `/admin/catalogues` and `/admin/categories`; LAN `/?catalogue=&view=author` edits Library cards. See [docs/dev-briefs/content-as-data.md](dev-briefs/content-as-data.md) and [docs/dev-briefs/graphical-catalogue-authoring.md](dev-briefs/graphical-catalogue-authoring.md).
-3. **Richer authoring assistance** — local and Access-authenticated MCP authoring now exist, including D1 draft history, validation, and GitHub pull-request publication. Fact-checking and definition suggestions can follow as author-controlled assistance rather than broad web or Git tools. They write the same drafts `/admin/drafts` edits.
+2. **Graphical board authoring** — the LAN construct canvas on `/?draft=` is the authoring environment (add terms, join clusters, create bridges, inspectors). `/admin/drafts` stays a prose ledger plus Publish / Cue / Hold. Freeze is on `/admin`. Working copies are Postgres on the LAN when `AUTHORING_DATABASE_URL` is set. See [docs/dev-briefs/graphical-board-authoring.md](dev-briefs/graphical-board-authoring.md). Catalogue and category documents are at `/admin/catalogues` and `/admin/categories`; published rows stay on D1, and LAN `/?catalogue=&view=author` edits Library cards. See [docs/dev-briefs/content-as-data.md](dev-briefs/content-as-data.md) and [docs/dev-briefs/graphical-catalogue-authoring.md](dev-briefs/graphical-catalogue-authoring.md).
+3. **Richer authoring assistance** — local and Access-authenticated MCP authoring now exist, including draft history, validation, and LAN Freeze publication. Fact-checking and definition suggestions can follow as author-controlled assistance rather than broad web or Git tools. They write the same drafts `/admin/drafts` edits.
 4. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
 5. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
 6. **Bridge chains across puzzles** — sequence puzzles so completed clusters seed the next puzzle, letting students assemble a whole unit's concept map over time
