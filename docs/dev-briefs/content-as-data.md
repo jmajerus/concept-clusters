@@ -7,8 +7,9 @@ change.
 
 This is the split already named in
 [Incorporating JSON-LD.md](../Incorporating JSON-LD.md) (domain model →
-database / interchange / runtime bundle). D1 is the database we have.
-JSON-LD stays interchange only.
+database / interchange / runtime bundle). Published rows stay in D1.
+Working copies are Postgres on the LAN when `AUTHORING_DATABASE_URL` is
+set, and D1 otherwise. JSON-LD stays interchange only.
 
 ## Stores
 
@@ -18,8 +19,9 @@ JSON-LD stays interchange only.
 | Catalogue | `content_drafts` `kind=catalogue` | `published_documents` `kind=catalogue` |
 | Category | `content_drafts` `kind=category` | `published_documents` `kind=category` |
 
-Drafts stay owner-scoped. Published documents are shared: one live id for
-the library, not per-author published copies.
+Drafts stay owner-scoped. The working-copy tables are Postgres when
+`AUTHORING_DATABASE_URL` is set. Published documents stay shared D1 rows:
+one live id for the library, not per-author published copies.
 
 Derived catalogues (`all`, `new`, `level-*`) and category membership stay
 computed. Meta catalogues are authored documents (`kind: meta`) stored as
@@ -63,8 +65,8 @@ manual sequence is in
 **Freeze** on LAN `/admin` (confirm dialog first) applies that patch to
 this checkout: live D1 ids not in git become new files, shared ids are
 rewritten, withdrawn or git-only ids become file deletions
-(`planContentFreeze` / `applyContentFreeze`). Hosted `/admin` shows the
-same plan and does not write files. Admin lists mark published D1 rows
+(`planContentFreeze` / `applyContentFreeze`). The authoring Worker does not
+serve `/admin`. Admin lists mark published D1 rows
 that git does not have yet and that you cued as **new on next freeze**.
 Published rows you have not cued show **held** unless they are automatically
 included as a required Freeze dependency.
@@ -111,4 +113,7 @@ Apply `d1/migrations/0009_content_documents.sql`,
 
 - Changing how production `game.js` loads puzzles
 - Serving documents from the hosted authoring Worker as a player API
-- Postgres; JSON-LD as storage
+- JSON-LD as storage
+
+Working copies have since moved to LAN Postgres. See
+[Authoring on Postgres, D1 for published play](authoring-postgres-on-the-lan.md).

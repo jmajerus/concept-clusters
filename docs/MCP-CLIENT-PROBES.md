@@ -36,7 +36,7 @@ same JSON in the tool result; stderr appears in Wrangler logs when applicable.
 | `gemini` / `gemini-cli` | stdio | user MCP | Gemini CLI MCP config (stdio → `tools/mcp-server.mjs`) |
 | `copilot` | stdio | VS Code Copilot MCP | Copilot MCP settings (stdio → `tools/mcp-server.mjs`) |
 | `kilo-code` | stdio | project MCP | `.kilo/kilo.json` (local → `tools/mcp-server.mjs`) |
-| `claude-web` | hosted HTTP | `concept-clusters-authoring` | Claude web custom connector → `https://concept-clusters-authoring.jmajerus.workers.dev/mcp` |
+| `claude-web` | hosted HTTP | portal | Claude web custom connector → `https://mcp.majerus.us/mcp` |
 
 ### Cursor
 

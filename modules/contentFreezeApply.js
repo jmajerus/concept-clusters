@@ -259,15 +259,17 @@ export async function applyContentFreeze({
   }
 
   if (freezePlanKindCount(plan.modelSuggestions)) {
-    if (!contentDocuments.database) {
-      throw new Error("Freezing model suggestions requires the D1 database");
+    if (!contentDocuments.modelSuggestions && !contentDocuments.database) {
+      throw new Error("Freezing model suggestions requires the authoring database");
     }
     const modelSuggestionsPath = join(repositoryRoot, "modules", "authoringModelSuggestions.js");
     const modelSuggestionsSource = await currentFile(modelSuggestionsPath);
     if (modelSuggestionsSource == null) {
       throw new Error("Missing modules/authoringModelSuggestions.js");
     }
-    const labels = await new D1ModelSuggestionRepository(contentDocuments.database).list();
+    const labels = contentDocuments.modelSuggestions
+      ? await contentDocuments.modelSuggestions.list()
+      : await new D1ModelSuggestionRepository(contentDocuments.database).list();
     await remember(modelSuggestionsPath);
     queueWrite(files, modelSuggestionsPath,
       replaceAuthoringModelSuggestionsSource(modelSuggestionsSource, labels));

@@ -3,7 +3,10 @@ import { env } from "cloudflare:workers";
 import { LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 import worker from "../../src/authoring-worker";
+import { handleAuthoringMcpRequest } from "../../modules/authoringMcpHttp.js";
+import { D1ContentDocumentRepository } from "../../modules/contentDocumentRepository.js";
 import { D1DraftRepository } from "../../modules/d1DraftRepository.js";
+import { createD1WikiLinkCheckStore } from "../../modules/wikiLinkCheckStore.js";
 import {
   definePuzzle,
   resolvePuzzleResourceUrl
@@ -22,7 +25,18 @@ async function rpc(body: object, extraHeaders: Record<string, string> = {}) {
     },
     body: JSON.stringify(body)
   });
-  return worker.fetch(request, env, createExecutionContext());
+  return handleAuthoringMcpRequest(request, {
+    draftRepository: new D1DraftRepository(env.AUTHORING_DB),
+    contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+    wikiLinkStore: createD1WikiLinkCheckStore(env.AUTHORING_DB),
+    actor: { subject: env.AUTHORING_DEV_SUBJECT },
+    authInfo: {
+      token: "local-development",
+      clientId: env.AUTHORING_DEV_SUBJECT,
+      scopes: ["puzzles:read", "drafts:write", "publication:submit"]
+    },
+    analytics: env.ANALYTICS
+  });
 }
 
 async function rpcJson(response: Response): Promise<unknown> {
@@ -46,7 +60,7 @@ describe("hosted authoring Worker", () => {
       .toBe("https://worker.invalid/puzzles/example/example.intro.md");
   });
 
-  it("rejects direct unauthenticated non-local requests", async () => {
+  it("answers 410 for MCP, which now runs on the LAN server", async () => {
     const response = await worker.fetch(
       new Request("https://concept-clusters-authoring.jmajerus.workers.dev/mcp", {
         method: "POST",
@@ -55,17 +69,8 @@ describe("hosted authoring Worker", () => {
       env,
       createExecutionContext()
     );
-    expect(response.status).toBe(401);
-
-    const unexpectedHost = await worker.fetch(
-      new Request("https://unrelated-worker.workers.dev/mcp", {
-        method: "POST",
-        body: "{}"
-      }),
-      env,
-      createExecutionContext()
-    );
-    expect(unexpectedHost.status).toBe(421);
+    expect(response.status).toBe(410);
+    expect(await response.text()).toContain("MCP has moved");
   });
 
   it("serves stateless MCP tools locally with the explicit dev identity", async () => {
@@ -1485,7 +1490,7 @@ describe("hosted authoring Worker", () => {
         createExecutionContext()
       );
       expect(response.status, `${path} should be gone, not served`).toBe(410);
-      expect(await response.text()).toContain("Admin has moved");
+      expect(await response.text()).toContain("Authoring admin runs on the LAN authoring server");
     }
 
     // A path this Worker never owned is still a plain 404.

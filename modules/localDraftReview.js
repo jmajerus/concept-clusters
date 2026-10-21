@@ -164,9 +164,12 @@ function formatActionError(error) {
 }
 
 async function provenanceModelSettings(contentDocuments) {
-  const database = contentDocuments?.database;
-  if (!database) return AUTHORING_SETTINGS;
-  const modelSuggestions = await new D1ModelSuggestionRepository(database).listForRuntime();
+  const repository = contentDocuments?.modelSuggestions
+    || (contentDocuments?.database
+      ? new D1ModelSuggestionRepository(contentDocuments.database)
+      : null);
+  if (!repository) return AUTHORING_SETTINGS;
+  const modelSuggestions = await repository.listForRuntime();
   return { ...AUTHORING_SETTINGS, modelSuggestions };
 }
 
@@ -2261,9 +2264,11 @@ export function createLocalDraftReviewHandler({
         publishedRowLoad,
         draftLoad,
         loadOrHydrateGithubProductionManifest({ repositoryRoot }),
-        contentDocuments?.database
-          ? new D1ModelSuggestionRepository(contentDocuments.database).listForRuntime()
-          : null,
+        contentDocuments?.modelSuggestions
+          ? contentDocuments.modelSuggestions.listForRuntime()
+          : contentDocuments?.database
+            ? new D1ModelSuggestionRepository(contentDocuments.database).listForRuntime()
+            : null,
         puzzleId && contentDocuments?.listPuzzleReviewEvents
           ? contentDocuments.listPuzzleReviewEvents({ id: puzzleId })
           : [],

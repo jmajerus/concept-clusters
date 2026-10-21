@@ -36,6 +36,8 @@ import { guardLocalAdmin } from "./localAdminAuth.js";
 import { withD1Timing } from "./d1RequestTiming.js";
 import { d1LargeColumnCacheEnabled } from "./d1LargeColumnCache.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
+import { handleLocalMcpRequest } from "./localMcpHttp.js";
+import { startWeeklyLinkHealth } from "./linkHealthSchedule.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
 import {
@@ -165,6 +167,7 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
     running: readGitRevision({ repositoryRoot })
   });
   return async function handleLocalDevRequest(req, res) {
+    if (await handleLocalMcpRequest(req, res, { repositoryRoot })) return true;
     if (await handleGithubPushWebhook(req, res, {
       secret: process.env.AUTHORING_GITHUB_WEBHOOK_SECRET,
       onPush: revisions.notifyPush
@@ -191,7 +194,9 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
             );
             await createFreezePublicationService({
               github,
-              repository: new D1FreezePublicationRepository(resolved.contentDocuments.database)
+              repository: resolved.freezeRepository
+                || resolved.contentDocuments.freezeRepository
+                || new D1FreezePublicationRepository(resolved.contentDocuments.database)
             }).reconcile({ contentDocuments: resolved.contentDocuments });
           } catch {
             // A release-status refresh must not hide the local D1 plan when
@@ -542,12 +547,18 @@ export async function startLocalStaticDev({
 
   const fallbackBase = serverURL(server);
   const base = displayBaseUrl({ host, port: actualPort, fallbackBase });
+  const stopLinkHealth = startWeeklyLinkHealth({
+    repositoryRoot,
+    env,
+    enabled: isAllInterfacesHost(host)
+  });
   printReady(base, manifest, authoringReadyExtras({ host, port: actualPort, repositoryRoot, env }));
 
   let stopping = false;
   const stop = () => {
     if (stopping) return;
     stopping = true;
+    stopLinkHealth();
     closeHttpServer(server).then(() => {
       removeLocalDevLease({
         repositoryRoot,
@@ -723,6 +734,11 @@ export async function startLocalWorkerDev({
     port: actualPort,
     fallbackBase: `http://${host}:${actualPort}`
   });
+  const stopLinkHealth = startWeeklyLinkHealth({
+    repositoryRoot,
+    env,
+    enabled: isAllInterfacesHost(host)
+  });
   printReady(base, manifest, [
     `Worker mode: Wrangler on ${DEFAULT_HOST}:${wranglerPort}`,
     ...authoringReadyExtras({ host, port: actualPort, repositoryRoot, env })
@@ -732,6 +748,7 @@ export async function startLocalWorkerDev({
   async function stop(exitCode = 0) {
     if (stopping) return;
     stopping = true;
+    stopLinkHealth();
     await Promise.all([
       closeHttpServer(server),
       stopChildProcess(wrangler)

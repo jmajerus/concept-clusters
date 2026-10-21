@@ -7,8 +7,10 @@ validation, and catalogue and category authoring. Neither surface writes
 git or GitHub directly -- that is Admin Freeze, on the LAN authoring
 checkout only.
 
-All live MCP content and taxonomy reads come from published or owner-scoped
-D1 rows. Git is an explicit bootstrap/Freeze-import source only; it is never a
+Published puzzles, catalogues, and categories, and the live taxonomy, are D1
+rows. Unpublished working copies live in Postgres on the LAN when
+`AUTHORING_DATABASE_URL` is set, and in that same D1 database when it is not.
+Git is an explicit bootstrap/Freeze-import source only; it is never a
 silent fallback for `list_*`, `search_puzzles`, `get_*`, resources, validation
 membership, or `seed_from_published`.
 
@@ -69,7 +71,7 @@ MCP instructions are a routing layer, not a gated workflow. An agent may
 research and compose a complete simplified `document`, then call
 `create_puzzle_draft` exactly once to store the whole puzzle. It does not need
 to call a guidance/schema tool first and does not need a server-side approval
-token to create or save a D1 draft.
+token to create or save a draft.
 
 When a client benefits from smaller focused material, it can instead use the
 progressive route:
@@ -82,9 +84,11 @@ progressive route:
    Codex) close the MCP transport if both tools run in parallel.
 3. The agent edits one accumulating draft, retrieves its latest revision, and
    preserves fields owned by earlier phases. On Codex, the first
-   `create_puzzle_draft` / `save_puzzle_draft` also needs outbound HTTPS to
-   `api.cloudflare.com` (D1); approve network when prompted, then retry the
-   same save — nothing is persisted until that call succeeds.
+   `create_puzzle_draft` / `save_puzzle_draft`. With `AUTHORING_DATABASE_URL`
+   unset, that call needs outbound HTTPS to `api.cloudflare.com` (D1);
+   approve network when prompted, then retry the same save — nothing is
+   persisted until that call succeeds. With the URL set, the draft write
+   goes to LAN Postgres. Published reads and Publish still use D1.
 4. The same pair is requested with `review`, `pedagogy`, `classification`, or `publication` only
    when that concern is active. Omitting `phase`, or passing `complete`, returns
    the full fallback payload.
@@ -110,9 +114,14 @@ copy by hand. That process is not an HTTP server and is not part of
 running; list or prune them with `npm run mcp:housekeep` or
 `npm run mcp:prune` (keeps the newest match). Optional automatic pruning
 on startup: set `MCP_PRUNE_SIBLINGS=1` in `.env`. The `mcp:hosted:*`
-family is the Cloudflare authoring Worker (Wrangler preview, D1
-migrations, deploy). The `authoring:d1:migrate:*` scripts explicitly select
-the local or remote D1 database; they are independent of the stdio server.
+family deploys the Cloudflare authoring Worker. After
+`npm run mcp:hosted:release`, that Worker's `/mcp` and `/admin` answer 410.
+Remote MCP is the LAN server, usually through the portal at
+`https://mcp.majerus.us/mcp`. Until that release, the previous Worker still
+serves `https://concept-clusters-authoring.jmajerus.workers.dev/mcp`. The
+`authoring:d1:migrate:*` scripts select the local or remote D1 database.
+`authoring:postgres:*` selects the LAN working-copy database. Both are
+independent of which MCP process is running.
 
 | Script | What it is |
 |---|---|
@@ -126,7 +135,10 @@ the local or remote D1 database; they are independent of the stdio server.
 | `authoring:d1:migrate:remote` | D1 migrations on the remote authoring database. |
 | `mcp:hosted:deploy` | Deploy the hosted Worker. |
 | `authoring:deploy` | From this machine, SSH to the LAN authoring server and bring `/opt/concept-clusters` up to date in one step: with no option, the branch it is already on; `-- --main` switches to `main`; `-- --pr <number>` switches to an open PR's branch (resolved with `gh`). It fetches, restores `puzzles/`, `catalogues/`, and `content/` to `HEAD` (a Freeze checkout of those directories stages them and would block the switch), checks out the branch, fast-forwards it to origin, then restarts `concept-clusters-authoring.service`. It refuses before restarting when the branch is gone from origin or does not include `origin/main`, when the server's local branch has commits not on origin, when the checkout is detached, or when HEAD does not end up at origin. The VS Code "Deploy Authoring" button offers the same three choices. Reads `AUTHORING_DEPLOY_PASSWORD` from the ignored local `.env` for SSH and sudo authentication. `/admin` on the server shows the branch and commit it is running and how far that is behind GitHub. |
-| `mcp:hosted:release` | Remote D1 migration, then hosted Worker deploy. |
+| `mcp:hosted:release` | Remote D1 migration, then hosted Worker deploy. The deployed Worker answers `/mcp` and `/admin` with 410. |
+| `authoring:postgres:migrate` | Apply `postgres/migrations/` to `AUTHORING_DATABASE_URL`. |
+| `authoring:postgres:copy` | Insert authoring rows from D1 that Postgres does not already have. Published player rows stay in D1. A later run does not replace working copies written since the cutover. |
+| `authoring:postgres:dump` | `pg_dump` that database to `AUTHORING_DUMP_DIR`. Run it from a machine other than the database host. |
 | `mcp:hosted:types` | Regenerate Worker TypeScript types. |
 
 From the repository root:
@@ -165,8 +177,10 @@ environment. Put shared stdio secrets there so Cursor, Gemini CLI, and other
 MCP clients do not each need a copy. `GEMINI_API_KEY` in the same file is for
 Gemini CLI itself, not the MCP server.
 
-Drafts and publication requests live in the same D1 database the hosted
-authoring Worker uses. Configure the stdio server environment with:
+Stdio uses the same workspace as the LAN server. Set
+`AUTHORING_DATABASE_URL` to put working copies in Postgres; leave it unset
+and they stay in D1. Published reads, Publish, and the site-settings mirror
+still need D1. Configure the stdio server environment with:
 
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_API_TOKEN` (D1 edit on `concept-clusters-authoring`)
@@ -197,7 +211,7 @@ return the draft id and revision for whatever human publication workflow the
 team uses. If later revisions are necessary, call `get_puzzle_draft` followed
 by one `save_puzzle_draft` using its current revision. The server imposes no
 phase gate or approval token on either draft write; any confirmation dialog is
-the MCP client’s policy and cannot be overridden by this Worker.
+the MCP client’s policy and cannot be overridden by this server.
 
 The following progressive workflow remains useful for agents that need it:
 
@@ -250,7 +264,7 @@ of truth. Admin Freeze is now the only thing that writes `puzzles/`,
 `catalogues/`, and `content/`.
 
 Validation is intentionally available at any point. A stored draft may be
-incomplete or temporarily invalid; D1 authoring publication and LAN Freeze
+incomplete or temporarily invalid; authoring publication and LAN Freeze
 require a complete valid puzzle.
 
 ## Tools
@@ -283,21 +297,44 @@ write.
 
 ## Draft storage
 
-Stdio MCP is a client of the hosted authoring D1 database, not a second
-store. `create_puzzle_draft` / `get_puzzle_draft` / `save_puzzle_draft`
-use `D1DraftRepository` over Cloudflare's D1 HTTP API. Rows are
-scoped to `AUTHORING_OWNER_SUBJECT`, which must be the same Access `sub`
-hosted MCP authenticated as, so a Cursor draft is the same row Claude sees.
+Stdio and the LAN `/mcp` server share one workspace. When
+`AUTHORING_DATABASE_URL` is set, working copies are Postgres: puzzle drafts
+and their undo stack, catalogue and category drafts, waivers, review events,
+link-check results, the model catalogue, freeze requests, and the authoring
+copy of site settings. The same URL on a workstation points stdio at that
+database. Without the URL, those rows stay in D1 and stdio uses
+`D1DraftRepository` over the D1 HTTP API.
 
-Published D1 is the runtime record read by both MCP surfaces; D1 also holds
-unpublished working state. Git-to-D1 publication is an explicit bootstrap or
-Freeze/import step, not a read fallback. `create_puzzle_draft` with
-`seed_from_published: true` copies an existing published D1 snapshot into that
-working state without overwriting an existing draft. If the D1 row is absent,
-the call fails and asks for the explicit bootstrap/import.
+Published rows stay in D1 either way: `published_documents` and
+`published_document_revisions` for puzzle, catalogue, and category. Publish
+upserts that row. Sending the same document again leaves the revision and
+any freeze cue unchanged. Play reads D1. Site settings are written to
+Postgres and upserted into D1 on the same request, because play reads them
+from D1. A later update of the same keys writes both copies again.
+
+A Postgres draft write is one transaction. If the connection drops, the
+server rereads `revision` and `content_hash` once before the caller retries.
+The older D1 lost-response recovery stays on the D1 path until this Postgres
+path has been quiet.
+
+Rows are scoped to `AUTHORING_OWNER_SUBJECT`, which must be the same Access
+`sub` remote MCP authenticated as, so a Cursor draft is the same row Claude
+sees.
+
+Git-to-D1 publication is an explicit bootstrap or Freeze/import step, not a
+read fallback. `create_puzzle_draft` with `seed_from_published: true` copies
+an existing published D1 snapshot into the working copy without overwriting
+an existing draft. If the published row is absent, the call fails and asks
+for the explicit bootstrap/import.
+
+A completed agent review (`record_agent_puzzle_review`, default action
+`complete`) stores the event with the working copies and sets
+`last_agent_reviewed_at` on the published D1 row. An unpublished puzzle has
+no such row, so the call returns `Unknown puzzle: <id>`. Issue actions
+(`open`, `note`, `resolve`, `reopen`) do not need a published row.
 
 `CONCEPT_CLUSTERS_DRAFT_DIR` remains only as a test/migration remnant.
-It is not the default, and it is not a sync path into D1.
+It is not the default, and it is not a sync path into either store.
 
 ## Publication boundary
 
@@ -339,20 +376,23 @@ The interfaces are deliberately thin:
 content-jsonld.mjs ───────┐
                           ├── contentInterchangeService
                           │   repositoryPublicationService
-MCP stdio server ─────────┤   D1DraftRepository
-future authoring portal ──┘
+MCP stdio server ─────────┤   working copies: Postgres, or D1 when
+LAN /mcp ─────────────────┘   AUTHORING_DATABASE_URL is unset
+published rows ─────────────── D1, read by the player
 ```
 
 `modules/contentInterchangeService.js` owns export and validation operations.
 `modules/repositoryPublicationService.js` owns deterministic checkout
 planning, preconditions, transactional writes, rollback, and live in-process
 registry updates, for `tools/content-jsonld.mjs`'s `content:import` --
-the MCP server no longer calls it. `modules/httpD1Database.js` is a D1 HTTP
-binding used by the same `D1DraftRepository` class the hosted Worker binds
-natively. File-backed `puzzleDraftStore.js` remains a test remnant. The CLI
+the MCP server no longer calls it. `modules/httpD1Database.js` is the D1 HTTP
+client for published rows and for the D1 working-copy path.
+File-backed `puzzleDraftStore.js` remains a test remnant. The CLI
 and MCP server contain only argument/protocol adaptation.
 
-The separate [hosted MCP authoring Worker](MCP-REMOTE.md) is the other
-client of that D1 database. Neither writes git or GitHub; that is Admin
-Freeze, on the LAN authoring checkout only. Authoring assumes network;
-there is no offline draft store.
+Remote MCP terminates on the LAN authoring server's `/mcp`, behind
+Cloudflare Access. Client setup is in
+[MCP-CLIENTS.md](MCP-CLIENTS.md), and the Worker deploy that retires the
+old endpoint is in [MCP-REMOTE.md](MCP-REMOTE.md). Neither stdio nor the LAN
+server writes git or GitHub; that is Admin Freeze, on the LAN authoring
+checkout only. Authoring assumes network; there is no offline draft store.

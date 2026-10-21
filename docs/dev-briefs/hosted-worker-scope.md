@@ -1,11 +1,13 @@
 # Hosted Worker scope: MCP and the cron, not admin
 
-*Status: implemented.*
+*Status: the admin removal below stands. `/mcp` and the Monday link-health
+sweep have since moved to the LAN authoring server.* After
+`npm run mcp:hosted:release`, the Worker answers `/mcp` and `/admin` with
+410. Until that release, the previous Worker still serves `/mcp`.
 
-The hosted authoring Worker serves two things: the `/mcp` endpoint and a
-weekly wiki link-health sweep. It has no admin pages. This note records why,
-because the obvious reading of the deletion — "we dropped a feature" — is the
-wrong one.
+This note records why admin left the Worker, because the obvious reading of
+that deletion — "we dropped a feature" — is the wrong one. At the time, the
+Worker still served `/mcp` and the weekly sweep.
 
 ## What was removed
 
@@ -66,14 +68,22 @@ test rig, not a fallback — same code, different source of truth.
 
 ## What the Worker still does
 
-- **`/mcp`** — the full 27-tool authoring surface. Not duplicated: both
+After the LAN Postgres cutover, the Worker no longer serves authoring.
+`npm run mcp:hosted:release` deploys that: `/mcp` and `/admin` answer 410.
+The Monday link-health sweep runs on the LAN server. Remote MCP is that
+server's `/mcp`, behind Cloudflare Access. Stdio and the LAN server still
+share `hostedMcpAuthoringServer.js`.
+
+Until the release, the previous Worker still serves `/mcp`. The list below
+is what it served when admin was removed and before this move:
+
+- **`/mcp`** — the full authoring surface. Not duplicated: both
   transports already share `hostedMcpAuthoringServer.js`, with stdio wrapped by
   `mcpAuthoringServer.js` for `tools/mcp-server.mjs`.
 - **The weekly cron** (`0 6 * * 1`) — `scheduledLinkHealth` over `AUTHORING_DB`.
-  Results are read on the LAN server's `/admin/link-health`, which already
-  routes it.
-- Cloudflare Access authentication and the hostname guard, both still required
-  by `/mcp`.
+  Results were read on the LAN server's `/admin/link-health`.
+- Cloudflare Access authentication and the hostname guard, both required
+  by `/mcp`. The LAN server checks the same token.
 
 ## Consequences worth knowing
 

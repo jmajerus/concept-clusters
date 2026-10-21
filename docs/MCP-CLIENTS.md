@@ -1,6 +1,6 @@
 # Connecting AI clients to the hosted MCP server
 
-> Last verified: August 3, 2026
+> Last verified: October 21, 2026
 
 Concept Clusters provides a remote Model Context Protocol (MCP) server for
 AI-assisted puzzle authoring. Its URL is publicly reachable, but access is not
@@ -10,8 +10,11 @@ allowed by the server's Access policy.
 Use this exact Streamable HTTP endpoint:
 
 ```text
-https://concept-clusters-authoring.jmajerus.workers.dev/mcp
+https://mcp.majerus.us/mcp
 ```
+
+That is the client-facing portal. It fronts the LAN origin
+`https://authoring.majerus.us/mcp`. Connect clients to the portal URL.
 
 Do not enter a GitHub personal access token, Cloudflare service token, or
 Worker secret in an MCP client. A compatible client discovers Cloudflare's
@@ -49,8 +52,12 @@ The authentication sequence should be:
 3. The client opens a browser for Access sign-in.
 4. After a successful policy check, the client reconnects with an OAuth access
    token.
-5. Cloudflare supplies the authenticated identity assertion that the Worker
-   independently verifies before exposing any tools or drafts.
+5. Cloudflare supplies the authenticated identity assertion that the LAN
+   authoring server independently verifies before exposing any tools or drafts.
+
+The previous Worker URL,
+`https://concept-clusters-authoring.jmajerus.workers.dev/mcp`, still serves
+until `npm run mcp:hosted:release`. That release answers `/mcp` with 410.
 
 A normal browser visit to the endpoint is not a useful MCP test. Use one of
 the clients below so it can complete protocol negotiation and OAuth.
@@ -131,7 +138,7 @@ Gemini CLI can register the endpoint at user scope:
 ```sh
 gemini mcp add --scope user --transport http \
   concept-clusters-authoring \
-  https://concept-clusters-authoring.jmajerus.workers.dev/mcp
+  https://mcp.majerus.us/mcp
 ```
 
 Start Gemini CLI and inspect or authenticate the connection:
@@ -185,7 +192,7 @@ Kimi Code is the most direct supported route for a Moonshot AI/Kimi API key:
    {
      "mcpServers": {
        "concept-clusters-authoring": {
-         "url": "https://concept-clusters-authoring.jmajerus.workers.dev/mcp"
+         "url": "https://mcp.majerus.us/mcp"
        }
      }
    }
@@ -229,14 +236,14 @@ places instead.
        },
        "concept-clusters-authoring": {
          "type": "streamableHttp",
-         "url": "https://concept-clusters-authoring.jmajerus.workers.dev/mcp"
+         "url": "https://mcp.majerus.us/mcp"
        }
      }
    }
    ```
 
    The `"type": "streamableHttp"` is required, not cosmetic: Cline defaults a
-   bare `url` entry to the legacy SSE transport, and the Worker only
+   bare `url` entry to the legacy SSE transport, and the server only
    implements Streamable HTTP, so an SSE connection attempt fails with
    `SSE error: Non-200 status code (405)`.
 3. For the hosted `concept-clusters-authoring` entry, complete the Cloudflare
@@ -371,7 +378,7 @@ connection or authentication error. The current Inspector requires Node.js
 
 ```sh
 npx @modelcontextprotocol/inspector \
-  --server-url https://concept-clusters-authoring.jmajerus.workers.dev/mcp \
+  --server-url https://mcp.majerus.us/mcp \
   --transport http
 ```
 
@@ -499,7 +506,7 @@ and advertises protected-resource metadata:
 
 ```sh
 curl --silent --show-error --dump-header - --output /dev/null \
-  https://concept-clusters-authoring.jmajerus.workers.dev/mcp
+  https://mcp.majerus.us/mcp
 ```
 
 The response should be HTTP `401` with a `WWW-Authenticate` header containing

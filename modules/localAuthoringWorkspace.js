@@ -1,13 +1,26 @@
 import { D1DraftRepository } from "./d1DraftRepository.js";
 import { D1ContentDocumentRepository } from "./contentDocumentRepository.js";
+import { D1FreezePublicationRepository } from "./d1FreezePublicationRepository.js";
+import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
 import { draftContentHash } from "./draftRepository.js";
 import { createHttpD1Database } from "./httpD1Database.js";
 import { createLargeColumnCachedD1Database, d1LargeColumnCacheEnabled } from "./d1LargeColumnCache.js";
 import { resolveLocalD1Config, resolveLocalDraftActor } from "./localD1Config.js";
 import { createRepositoryDraftStore } from "./repositoryDraftStore.js";
-import { createD1WikiLinkCheckStore } from "./wikiLinkCheckStore.js";
-import { createD1SiteSettingsStore } from "./siteSettings.js";
+import { createD1WikiLinkCheckStore, createPostgresWikiLinkCheckStore } from "./wikiLinkCheckStore.js";
+import {
+  createD1SiteSettingsStore,
+  createMirroredSiteSettingsStore,
+  createPostgresSiteSettingsStore
+} from "./siteSettings.js";
 import { applyAuthoredDomain } from "./authoringDomains.js";
+import { createSplitContentDocuments } from "./authoringContentDocuments.js";
+import { PostgresContentDraftRepository } from "./postgresContentDraftRepository.js";
+import { PostgresDraftRepository } from "./postgresDraftRepository.js";
+import { PostgresFreezePublicationRepository } from "./postgresFreezePublicationRepository.js";
+import { PostgresModelSuggestionRepository } from "./postgresModelSuggestionRepository.js";
+import { PostgresReviewEventStore } from "./postgresReviewEvents.js";
+import { authoringDatabaseUrl, getAuthoringPool } from "./postgresPool.js";
 
 export const LOCAL_PUBLICATION_ACTOR = Object.freeze({ subject: "local" });
 
@@ -150,14 +163,48 @@ export async function resolveLocalAuthoringWorkspace({
   }
   const resolvedActor = actor || resolveLocalDraftActor({ env });
   const d1 = database || await createLocalD1Database({ env, repositoryRoot });
-  const repository = new D1DraftRepository(d1);
+  const databaseUrl = authoringDatabaseUrl(env);
+  if (!databaseUrl) {
+    const repository = new D1DraftRepository(d1);
+    const contentDocuments = new D1ContentDocumentRepository(d1);
+    contentDocuments.modelSuggestions = new D1ModelSuggestionRepository(d1);
+    contentDocuments.freezeRepository = new D1FreezePublicationRepository(d1);
+    return {
+      actor: resolvedActor,
+      draftStore: createRepositoryDraftStore({ repository, actor: resolvedActor }),
+      draftRepository: repository,
+      contentDocuments,
+      wikiLinkStore: createD1WikiLinkCheckStore(d1),
+      siteSettings: createD1SiteSettingsStore(d1),
+      freezeRepository: contentDocuments.freezeRepository,
+      modelSuggestions: contentDocuments.modelSuggestions
+    };
+  }
+  const pool = getAuthoringPool(databaseUrl);
+  const published = new D1ContentDocumentRepository(d1);
+  const contentDocuments = createSplitContentDocuments({
+    drafts: new PostgresContentDraftRepository(pool),
+    published,
+    reviewEvents: new PostgresReviewEventStore(pool),
+    modelSuggestions: new PostgresModelSuggestionRepository(pool),
+    freezeRepository: new PostgresFreezePublicationRepository(pool)
+  });
+  const repository = new PostgresDraftRepository({
+    pool,
+    publishedDocuments: published
+  });
   return {
     actor: resolvedActor,
     draftStore: createRepositoryDraftStore({ repository, actor: resolvedActor }),
     draftRepository: repository,
-    contentDocuments: new D1ContentDocumentRepository(d1),
-    wikiLinkStore: createD1WikiLinkCheckStore(d1),
-    siteSettings: createD1SiteSettingsStore(d1)
+    contentDocuments,
+    wikiLinkStore: createPostgresWikiLinkCheckStore(pool),
+    siteSettings: createMirroredSiteSettingsStore(
+      createPostgresSiteSettingsStore(pool),
+      createD1SiteSettingsStore(d1)
+    ),
+    freezeRepository: contentDocuments.freezeRepository,
+    modelSuggestions: contentDocuments.modelSuggestions
   };
 }
 

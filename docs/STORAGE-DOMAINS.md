@@ -48,7 +48,7 @@ The document's `board` object holds values that older puzzles carry for settings
 
 Stored puzzles are canonical: publishing, seeding from git, and Freeze lift any `board` setting the layout does not already set into the layout and drop `board` from the document (`liftLegacyBoard` in `modules/layoutDocument.js`), which reads exactly as before. Publishing lifts after the working copy's layout is merged with the published one, so a newer layout save always wins. Working copies keep `board` in `administration_json` until they are published. Comparisons between a working copy and its published puzzle read `board` as part of the layout, so a lifted row and a working copy still carrying the same values match. `npm run content:lift-legacy-board` lifts published rows written before this, as a dry run unless given `--apply`; `--cue` also cues the lifted rows that match the git checkout, so the next Freeze writes their canonical form.
 
-Site settings are not part of any puzzle. They live in D1's `site_settings` table, one row per setting, and apply to every puzzle at once: `lensRevealCue` and `lensRevealHoverPing` (pointing at an answer named in a lens explanation pings its pill). A missing row is the built-in default. Public play reads them from the publication index (`/api/publications`) and the authoring server from its play corpus, and the layout view's Site settings card writes them. A puzzle's own layout setting overrides the matching site setting.
+Site settings are not part of any puzzle. They apply to every puzzle at once: `lensRevealCue` and `lensRevealHoverPing` (pointing at an answer named in a lens explanation pings its pill). A missing row is the built-in default. With `AUTHORING_DATABASE_URL` set, the authoring copy is Postgres and each write also upserts D1, because public play reads D1. Otherwise the only copy is D1's `site_settings` table. Public play reads them from the publication index (`/api/publications`) and the authoring server from its play corpus, and the layout view's Site settings card writes them. A puzzle's own layout setting overrides the matching site setting.
 
 Do not add a writer for `board`: a new play setting the layout page offers is a layout board setting. Promotion of an experiment to agent-authored content is a later, explicit change for one field after it has been vetted: move its ownership to content or pedagogy, set its kind to authored or derived, add it to that domain's phase, and carry the layout values across. Until then, agents cannot set or clear these settings.
 
@@ -149,14 +149,17 @@ The creator, license, and source-lineage values stay in the existing pedagogy
 storage projection for compatibility; they are not moved into the separate
 `provenance_json` record. `language` remains authored and agent-editable.
 
-For puzzle drafts, D1 stores projections for the three authored domains as the
-durable write surface. The complete `document` column is a materialized cache
-refreshed on complete saves and on validate/publish (`materialize`). Focused
-domain saves replace the selected authored projection, preserve the other
-domains, and mark the cache stale; reads assemble from the domain columns.
-The materialized document keeps publication and player-facing paths
-independent of the domain model. The system domain remains in D1 columns and
-response metadata rather than being duplicated in a `system` document field.
+For puzzle drafts, the working-copy store — Postgres when
+`AUTHORING_DATABASE_URL` is set, D1 otherwise — stores projections for the
+three authored domains as the durable write surface. The complete `document`
+column is a materialized cache refreshed on complete saves and on
+validate/publish (`materialize`). Focused domain saves replace the selected
+authored projection, preserve the other domains, and mark the cache stale;
+reads assemble from the domain columns. The materialized document keeps
+publication and player-facing paths independent of the domain model. The
+system domain remains in columns and response metadata rather than being
+duplicated in a `system` document field. A Postgres save is one transaction.
+A dropped connection is reread once from `revision` and `content_hash`.
 How that write lands in a row, on the undo stack, and in the publish ledger
 is described in [How a save is stored](#how-a-save-is-stored).
 
@@ -286,7 +289,7 @@ Two counters and a few clocks are involved:
 | `administration` (legacy `board`) | Nothing writes it | – | – | Lifted into the layout at publish | Read-only compatibility for older puzzles |
 | `system` | Infrastructure | – | – | – | Not authored. Freeze cues and withdrawals change `updated_at` only |
 | Categories and catalogues | Their own working copies on `content_drafts` | +1 | No | Publish, or `publish_to_authoring` on the MCP write | Shared taxonomy, outside any one puzzle |
-| Site settings | `site_settings`, live | None | No | Immediately | Site-wide rather than puzzle content, with no working copy to hold them |
+| Site settings | Postgres authoring copy when `AUTHORING_DATABASE_URL` is set, mirrored into D1; otherwise D1 only | None | No | Immediately; play reads D1 | Site-wide rather than puzzle content, with no working copy to hold them |
 
 **The one puzzle-level exception.** `reassign_puzzle_classifications` with
 `publish_to_authoring` writes each working copy first, then publishes just

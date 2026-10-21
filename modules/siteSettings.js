@@ -105,6 +105,86 @@ export function createMemorySiteSettingsStore(initial = {}) {
 
 // Play must never fail over a setting. Before the table exists, or when
 // D1 has a hiccup, every setting takes its default.
+export function createPostgresSiteSettingsStore(pool) {
+  if (!pool) throw new Error("A Postgres pool is required");
+  return {
+    async read() {
+      const { rows } = await pool.query("SELECT key, value_json FROM site_settings");
+      const raw = {};
+      for (const row of rows) {
+        try {
+          raw[row.key] = JSON.parse(row.value_json);
+        } catch {
+          // An unreadable row falls back to the default like a missing one.
+        }
+      }
+      return normalizeSiteSettings(raw);
+    },
+    async update(patch, { actor = null } = {}) {
+      assertPatch(patch);
+      const now = new Date().toISOString();
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        for (const [key, value] of Object.entries(patch)) {
+          if (value === null) {
+            await client.query("DELETE FROM site_settings WHERE key = $1", [key]);
+          } else {
+            await client.query(`
+              INSERT INTO site_settings (key, value_json, updated_at, updated_by)
+              VALUES ($1, $2, $3, $4)
+              ON CONFLICT (key) DO UPDATE SET
+                value_json = excluded.value_json,
+                updated_at = excluded.updated_at,
+                updated_by = excluded.updated_by
+            `, [key, JSON.stringify(value), now, actor?.subject || null]);
+          }
+        }
+        await client.query("COMMIT");
+      } catch (error) {
+        try { await client.query("ROLLBACK"); } catch { /* socket already gone */ }
+        throw error;
+      } finally {
+        client.release();
+      }
+      return this.read();
+    }
+  };
+}
+
+// Postgres is the authoring copy. The same patch is upserted into D1 so the
+// play Worker keeps reading site settings from the publication database.
+// The two databases cannot commit together. A transient mirror failure is
+// retried here; a later update of the same keys upserts both copies again.
+const MIRROR_ATTEMPTS = 3;
+
+async function updateMirror(mirror, patch, options) {
+  let lastError;
+  for (let attempt = 0; attempt < MIRROR_ATTEMPTS; attempt += 1) {
+    try {
+      await mirror.update(patch, options);
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
+
+export function createMirroredSiteSettingsStore(primary, mirror) {
+  if (!primary) throw new Error("A site settings store is required");
+  return {
+    async read() {
+      return primary.read();
+    },
+    async update(patch, options) {
+      const saved = await primary.update(patch, options);
+      if (mirror) await updateMirror(mirror, patch, options);
+      return saved;
+    }
+  };
+}
+
 export async function readSiteSettingsOrDefaults(store) {
   if (!store) return {};
   try {

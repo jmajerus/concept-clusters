@@ -1,22 +1,26 @@
 # Hosted MCP authoring
 
-Concept Clusters has a separate Cloudflare Worker for authenticated remote
-authoring. It complements the local stdio server rather than replacing it:
+Remote authoring is the LAN server's `/mcp`, behind Cloudflare Access.
+Stdio uses the same workspace. The authoring Worker remains only as the
+deploy that answers `/mcp` and `/admin` with 410 after
+`npm run mcp:hosted:release`. Until that release, the previous Worker still
+serves `https://concept-clusters-authoring.jmajerus.workers.dev/mcp`.
 
 For instructions on connecting leading chat clients, CLIs, agent platforms,
 and model APIs, see
 [Connecting AI clients to the hosted MCP server](MCP-CLIENTS.md).
 
 ```text
-Local stdio MCP ── D1 working copies
-Remote HTTP MCP  ── D1 working copies
+Local stdio MCP ── working copies (Postgres when AUTHORING_DATABASE_URL is set)
+Remote HTTP MCP  ── the same working copies, through the LAN /mcp server
 Human Publish ── published D1 (what the player reads) ── Cue + Freeze ── git snapshot
 ```
 
-The lifecycle boundary is intentional. Authoring D1 is the sole runtime source
-of truth for MCP reads, play, and working copies. A puzzle publish writes the
-row the public player reads. Git Freeze is a snapshot out of that store, used
-when the static fingerprints still match. Git-to-D1 seeding is an explicit
+The lifecycle boundary is intentional. Working copies are the authoring
+record. Published D1 is what play reads. A puzzle publish upserts that row.
+Sending the same document again leaves the revision and any freeze cue
+unchanged. Git Freeze is a snapshot of the published row, used when the
+static fingerprints still match. Git-to-D1 seeding is an explicit
 bootstrap/import operation; MCP never silently falls back to Git or seeds a
 missing row while answering a read. An MCP working copy is created by
 `create_puzzle_draft`, optionally with `seed_from_published`, but that option
@@ -24,14 +28,26 @@ requires the puzzle already to have a published D1 row.
 
 A draft is one mutable row: an integer `revision` is an optimistic-concurrency
 token for multi-pass saves (`expected_revision` on `save_puzzle_draft`), not a
-ledger of old documents. D1 holds the working copy and the published row. Cue
-and Freeze copy a published snapshot into git.
+ledger of old documents. Postgres holds the working copy when
+`AUTHORING_DATABASE_URL` is set; D1 holds it otherwise. D1 always holds the
+published row. Cue and Freeze copy a published snapshot into git.
+
+A Postgres draft write is one transaction. If the connection drops, the
+server rereads `revision` and `content_hash` once before the caller retries.
+The older D1 lost-response recovery stays on the D1 path until this Postgres
+path has been quiet.
+
+A completed agent review stores its event with the working copies and sets
+`last_agent_reviewed_at` on the published D1 row. An unpublished puzzle has
+no such row, so `record_agent_puzzle_review` with the default action
+`complete` returns `Unknown puzzle: <id>`. Issue actions do not need a
+published row.
 
 An agent may compose an entire simplified puzzle and store it in one
 `create_puzzle_draft` call. Guidance/schema phases are optional aids, not
 server-side gates, and draft create/save have no approval token. A client may
 still require a human confirmation for any state-changing MCP call; that is a
-client policy (for example, Claude Web’s), outside the Worker’s control.
+client policy (for example, Claude Web’s), outside the server’s control.
 `save_puzzle_draft` does not publish a puzzle. A person publishes the working
 copy, and that publish is what players see. `publish_to_authoring` remains on
 category, catalogue, and shelf-reassignment writes, and those publishes are
@@ -196,10 +212,11 @@ one-way lifecycle gates.
 
 ## What is implemented
 
-The remote Worker uses Cloudflare's stateless `createMcpHandler()` with
-Streamable HTTP at `/mcp`. It accepts current MCP requests through the
+The LAN `/mcp` server uses Cloudflare's stateless `createMcpHandler()` with
+Streamable HTTP. It accepts current MCP requests through the
 handler's stateless compatibility lane; it does not create MCP Durable Objects
-or retain protocol sessions.
+or retain protocol sessions. A browser GET after Access login receives
+`Method not allowed`; clients must POST.
 
 The tools are:
 
@@ -272,9 +289,14 @@ The connected model can compose them from `get_puzzle_draft`,
 `validate_puzzle_draft`, and `get_authoring_guidance`; `save_puzzle_draft`
 remains the deliberate boundary for overwriting the draft's document.
 
-## D1 data model
+## Where the rows live
 
-The tracked D1 migrations create:
+With `AUTHORING_DATABASE_URL` set, the working-copy tables below live in
+Postgres (`postgres/migrations/`). D1 keeps `published_documents` and
+`published_document_revisions`, and it keeps a mirrored `site_settings` row
+because public play reads D1. Each site-settings write updates Postgres and
+then upserts that mirror. Without the URL, the working-copy tables remain in
+D1. The tracked D1 migrations still create:
 
 - `puzzle_drafts` for owner, status, current materialized document, revision
   (OCC token), content hash, last validation result, the optional confirmed
@@ -306,7 +328,7 @@ reads `working/<id>.json` and submits `--expected-revision` (or the recorded
 stale or the draft does not exist, and it does not substitute the current
 revision. Distinct saves push the
 previous working copy onto a
-capped D1 stack (`puzzle_draft_history`). A revert operation pops one save at
+capped history stack (`puzzle_draft_history`). A revert operation pops one save at
 a time. `save_puzzle_draft` does not publish. A person publishes the working
 copy after review. `create_puzzle_draft` does not publish either.
 
@@ -390,6 +412,10 @@ held the tool name are not misreported as objects; older phase rows remain
 visible as `legacy (pre-phase)`.
 
 ## Local development
+
+The sections below keep the Worker release path. `npm run mcp:hosted:release`
+is what makes the deployed Worker answer `/mcp` with 410. Day-to-day remote
+MCP is the LAN server, and day-to-day local MCP is stdio.
 
 This section is the **hosted** authoring Worker running on your machine via
 Wrangler. It is not the stdio MCP (`npm run mcp` / `mcp:stdio`) that Cursor
