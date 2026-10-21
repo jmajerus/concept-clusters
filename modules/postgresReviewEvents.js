@@ -103,6 +103,14 @@ export class PostgresReviewEventStore {
         publishedRevision: decision.eventType === "accepted" ? publishedRevision : null,
         sourceEventId: decision.sourceEventId ?? null
       });
+      if (event.sourceEventId != null) {
+        const existing = await this.pool.query(`
+          SELECT id FROM puzzle_review_events
+          WHERE puzzle_id = $1 AND source_event_id = $2 AND event_type = $3
+          LIMIT 1
+        `, [puzzleId, event.sourceEventId, event.eventType]);
+        if (existing.rows[0]) continue;
+      }
       await this.pool.query(INSERT_SQL, insertValues(puzzleId, reviewedAt, event));
     }
   }

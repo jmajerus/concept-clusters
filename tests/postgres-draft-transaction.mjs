@@ -225,5 +225,14 @@ export async function run() {
     }),
     /d1 down/
   );
-  assert.equal(await eventCount(), 1);
+  assert.equal(await eventCount(), 2);
+
+  const repaired = await documents.recordPuzzleAgentReview({
+    id: "pg-conflict",
+    comments: "third",
+    outcome: "changed",
+    draftRevision: 1
+  });
+  assert.equal(await eventCount(), 2);
+  assert.equal(repaired.lastAgentReviewedAt, stamps.at(-1));
 }

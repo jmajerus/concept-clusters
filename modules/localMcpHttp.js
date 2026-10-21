@@ -105,7 +105,10 @@ export async function handleLocalMcpRequest(req, res, {
       actor: { subject: "cors-preflight" },
       authInfo: { token: "cors-preflight", clientId: "cors-preflight", scopes: [] }
     }
-    : await authenticateAuthoringAccess(headerRequest, env, { keys });
+    : await authenticateAuthoringAccess(headerRequest, env, {
+      keys,
+      peerAddress: req.socket?.remoteAddress || null
+    });
   if (authenticated.error) {
     await sendWebResponse(res, jsonError(authenticated.error.status, authenticated.error.message));
     destroyRequest(req);

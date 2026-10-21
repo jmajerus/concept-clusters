@@ -399,6 +399,9 @@ export class PostgresDraftRepository extends DraftRepository {
     const now = new Date().toISOString();
     const identity = puzzleIdentity(materialized);
     const guardedIds = [draftId, identity.puzzleId || draftId];
+    // D1 and Postgres cannot lock this together. A publish that commits
+    // after this read and before the insert can still leave an unseeded
+    // draft under a live id.
     if (!seededFromPublished) {
       const live = await blockingPublishedId(this.publishedDocuments, guardedIds);
       if (live) throw new PublishedIdConflictError(live);

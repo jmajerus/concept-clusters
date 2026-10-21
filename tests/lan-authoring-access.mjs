@@ -54,10 +54,25 @@ export async function run() {
 
   const local = await authenticateAuthoringAccess(
     new Request("http://localhost/mcp"),
-    { AUTHORING_DEV_SUBJECT: "local-author" }
+    { AUTHORING_DEV_SUBJECT: "local-author" },
+    { peerAddress: "127.0.0.1" }
   );
   assert.equal(local.actor.subject, "local-author");
   assert.equal(local.authInfo.token, "local-development");
+
+  const spoofedHost = await authenticateAuthoringAccess(
+    new Request("http://localhost/mcp"),
+    { AUTHORING_DEV_SUBJECT: "local-author" },
+    { peerAddress: "192.168.1.50" }
+  );
+  assert.equal(spoofedHost.error.status, 401);
+
+  const mappedLoopback = await authenticateAuthoringAccess(
+    new Request("http://localhost/mcp"),
+    { AUTHORING_DEV_SUBJECT: "local-author" },
+    { peerAddress: "::ffff:127.0.0.1" }
+  );
+  assert.equal(mappedLoopback.actor.subject, "local-author");
 
   const mondayMorning = new Date("2026-10-19T06:00:00.000Z");
   const lastWeek = new Date("2026-10-12T06:05:00.000Z");

@@ -56,17 +56,27 @@ export async function verifyAccessToken({
   };
 }
 
-// Local hostnames may use AUTHORING_DEV_SUBJECT when no token is present, so
-// a developer on the box can open /mcp. Any other host, including the tunnel
-// hostname cloudflared forwards, requires the Access token. cloudflared
-// connects from loopback, so the Host header is the signal, not the socket.
-export async function authenticateAuthoringAccess(request, env = process.env, { keys = null } = {}) {
+export function isLoopbackPeer(address) {
+  if (typeof address !== "string" || !address) return false;
+  const host = address.toLowerCase().replace(/^::ffff:/, "");
+  return host === "127.0.0.1" || host === "::1";
+}
+
+// A developer on this machine may open /mcp without a token when the peer
+// is loopback, the Host is a local name, and AUTHORING_DEV_SUBJECT is set.
+// The public Host still requires the Access token, including when cloudflared
+// connects from loopback. A remote caller cannot gain that bypass by sending
+// Host: localhost.
+export async function authenticateAuthoringAccess(request, env = process.env, {
+  keys = null,
+  peerAddress = null
+} = {}) {
   const hostname = new URL(request.url).hostname;
   const token = request.headers.get("cf-access-jwt-assertion");
   const devSubject = typeof env.AUTHORING_DEV_SUBJECT === "string"
     ? env.AUTHORING_DEV_SUBJECT.trim()
     : "";
-  if (!token && LOCAL_ACCESS_HOSTNAMES.has(hostname) && devSubject) {
+  if (!token && LOCAL_ACCESS_HOSTNAMES.has(hostname) && devSubject && isLoopbackPeer(peerAddress)) {
     return devAccessActor(devSubject);
   }
   if (!token) {

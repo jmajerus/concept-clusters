@@ -1,5 +1,6 @@
-// One-shot copy of authoring tables from D1 into Postgres. Published
-// player rows stay in D1. Safe to run again: each row is upserted.
+// Copy authoring tables from D1 into Postgres. Published player rows stay
+// in D1. Rows already in Postgres are left alone, so a later run can fill a
+// missing table without replacing working copies written after the cutover.
 
 import { createHttpD1Database } from "../modules/httpD1Database.js";
 import { resolveLocalD1Config } from "../modules/localD1Config.js";
@@ -72,23 +73,20 @@ async function copyTable(database, pool, table) {
   if (!rows.length) return 0;
   const columns = Object.keys(rows[0]);
   const columnList = columns.map(quoteIdent).join(", ");
-  const updates = columns
-    .filter(column => !table.key.includes(column))
-    .map(column => `${quoteIdent(column)} = excluded.${quoteIdent(column)}`)
-    .join(", ");
   const conflict = table.key.map(quoteIdent).join(", ");
   const client = await pool.connect();
+  let inserted = 0;
   try {
     await client.query("BEGIN");
     for (const row of rows) {
       const values = columns.map(column => row[column]);
       const placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
-      const sql = updates
-        ? `INSERT INTO ${quoteIdent(table.name)} (${columnList}) VALUES (${placeholders})
-           ON CONFLICT (${conflict}) DO UPDATE SET ${updates}`
-        : `INSERT INTO ${quoteIdent(table.name)} (${columnList}) VALUES (${placeholders})
-           ON CONFLICT (${conflict}) DO NOTHING`;
-      await client.query(sql, values);
+      const result = await client.query(
+        `INSERT INTO ${quoteIdent(table.name)} (${columnList}) VALUES (${placeholders})
+         ON CONFLICT (${conflict}) DO NOTHING`,
+        values
+      );
+      inserted += result.rowCount || 0;
     }
     await client.query("COMMIT");
   } catch (error) {
@@ -97,7 +95,7 @@ async function copyTable(database, pool, table) {
   } finally {
     client.release();
   }
-  return rows.length;
+  return inserted;
 }
 
 async function syncIdentity(pool, table) {
@@ -127,7 +125,7 @@ async function main() {
     const d1 = createHttpD1Database(await resolveLocalD1Config());
     for (const table of TABLES) {
       const count = await copyTable(d1, pool, table);
-      console.log(`${table.name}: ${count}`);
+      console.log(`${table.name}: ${count} inserted`);
     }
     await syncIdentity(pool, "puzzle_review_events");
     await syncIdentity(pool, "puzzle_board_limit_waiver_requests");

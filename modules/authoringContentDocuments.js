@@ -45,12 +45,12 @@ export function createSplitContentDocuments({
       });
       return published.getPublished({ kind: "puzzle", id: input.id });
     }
+    const event = await reviewEvents.insert({ ...input, eventType: "review", reviewedAt });
     await published.touchPublishedReviewStamp({
       id: input.id,
       reviewerKind: input.reviewerKind,
-      reviewedAt
+      reviewedAt: event.reviewedAt || reviewedAt
     });
-    await reviewEvents.insert({ ...input, eventType: "review", reviewedAt });
     return published.getPublished({ kind: "puzzle", id: input.id });
   }
 
