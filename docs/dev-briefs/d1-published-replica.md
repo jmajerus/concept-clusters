@@ -76,8 +76,8 @@ Once the LAN reads Postgres and the drain is the only D1 writer:
 - the synchronous D1 round trip on publish, unpublish, layout save, and
   Freeze cue
 - the review-stamp split and its retry
-- the site-settings update waiting on the D1 mirror (`createMirroredSiteSettingsStore`
-  reads Postgres and still awaits the mirror)
+- the site-settings update waiting on a D1 mirror. The Postgres store
+  commits and enqueues the replica; it does not await D1
 - D1 as a requirement for booting the authoring server
 - the large-column D1 cache on the authoring hot path
 
@@ -113,14 +113,18 @@ with the last successful generation, not with an authoring error.
 
 ## Read first
 
-- `docs/dev-briefs/authoring-postgres-on-the-lan.md` — the cut this one
-  finishes. Its note that LAN play stays on D1 is the part this replaces.
-  Public play stays on D1.
+- `docs/dev-briefs/authoring-postgres-on-the-lan.md` — the working-copy
+  cut this one finishes. Public play stays on D1. LAN play reads Postgres.
 - `docs/dev-briefs/hosted-worker-scope.md` — why the LAN server is the
   only authoring writer.
-- `modules/authoringContentDocuments.js` — the stamp split to delete.
-- `modules/publicPlayService.js` — the replica payload.
-- `modules/localPlayCorpus.js` — LAN play still lists D1.
-- `modules/siteSettings.js` — the mirror the settings update still awaits.
-- `modules/localAuthoringWorkspace.js` — startup still opens a D1 client
-  before the split repositories exist.
+- `modules/authoringContentDocuments.js` — a completed review is one
+  Postgres transaction. The stamp split is gone.
+- `modules/publicPlayService.js` — the replica payload the public Worker
+  reads from D1.
+- `modules/localPlayCorpus.js` — LAN play reads the Postgres corpus.
+- `modules/siteSettings.js` — the LAN store commits in Postgres and
+  enqueues the replica.
+- `modules/localAuthoringWorkspace.js` — with Postgres configured, startup
+  does not open a D1 client. The drain opens one when it can.
+- `modules/publishedReplica.js` — the queue and the drain. Static and
+  worker dev both start it.

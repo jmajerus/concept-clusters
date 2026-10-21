@@ -743,6 +743,7 @@ export async function startLocalWorkerDev({
     env,
     enabled: isAllInterfacesHost(host)
   });
+  const stopReplicaDrain = startPublishedReplicaDrain({ repositoryRoot, env });
   printReady(base, manifest, [
     `Worker mode: Wrangler on ${DEFAULT_HOST}:${wranglerPort}`,
     ...authoringReadyExtras({ host, port: actualPort, repositoryRoot, env })
@@ -753,6 +754,7 @@ export async function startLocalWorkerDev({
     if (stopping) return;
     stopping = true;
     stopLinkHealth();
+    stopReplicaDrain();
     await Promise.all([
       closeHttpServer(server),
       stopChildProcess(wrangler)
