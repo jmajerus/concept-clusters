@@ -892,7 +892,10 @@ function renderPuzzlePathBadges(item, { detail = false } = {}) {
     const unpublished = detail && hasUnpublishedChanges(item)
       ? ' <span class="badge badge-warn">unpublished changes</span>'
       : "";
-    return `<span class="badge badge-ok">published</span> ${renderPublishedFreezeBadges(item)}${unpublished}${shadow}`.trim();
+    const lag = item.replicaPending
+      ? ' <span class="badge badge-warn" title="On the LAN. Not yet on the public site.">not on the public site</span>'
+      : "";
+    return `<span class="badge badge-ok">published</span> ${renderPublishedFreezeBadges(item)}${lag}${unpublished}${shadow}`.trim();
   }
   const hasWorkingCopy = item.hasWorkingCopy === true
     || (detail && Boolean(item.draftId || item.status || item.document));
@@ -2757,11 +2760,12 @@ function renderPublicationNotice(notice) {
   }
   const action = notice.action || "published";
   const cued = notice.cued || action === "cued";
+  const revisionLabel = notice.replicaPending ? "revision" : "D1 revision";
   const message = action === "cued"
     ? `<strong>Cued</strong> <code>${escapeHtml(notice.id)}</code>
-    as D1 revision ${escapeHtml(String(notice.revision))} for the next freeze.`
+    as ${revisionLabel} ${escapeHtml(String(notice.revision))} for the next freeze.`
     : `<strong>Published</strong> <code>${escapeHtml(notice.id)}</code>
-    as D1 revision ${escapeHtml(String(notice.revision))}.${cued ? " Cued for the next freeze." : ""}`;
+    as ${revisionLabel} ${escapeHtml(String(notice.revision))}.${cued ? " Cued for the next freeze." : ""}`;
   const modeNames = { star: "Star", graph: "Graph", sets: "Circle" };
   const kept = (notice.layoutKept || []).map(mode => modeNames[mode]).filter(Boolean);
   const keptNote = kept.length
@@ -2778,6 +2782,7 @@ function renderPublicationNotice(notice) {
     ${message}
     ${keptNote}
     ${fallbackNote}
+    ${notice.replicaPending ? "<p class=\"meta\">On the LAN. Not yet on the public site.</p>" : ""}
     <p class="meta">${escapeHtml(PUBLIC_PLAY_PUBLICATION_NOTE)}</p>
   </div>
   <script>
@@ -2842,6 +2847,7 @@ export function renderDraftPage(draft, {
       ${renderGithubSnapshotStatus(draft.inGithubProduction)}
       working copy updated ${escapeHtml(draft.updatedAt)}
     </p>
+    ${draft.replicaPending ? "<p class=\"meta\">On the LAN. Not yet on the public site.</p>" : ""}
     <p class="meta">${escapeHtml(PUBLIC_PLAY_PUBLICATION_NOTE)}
       Working copy edits stay private until you publish.</p>
     ${renderDiffSummary(diff, {

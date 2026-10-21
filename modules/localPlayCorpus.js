@@ -1,6 +1,6 @@
-// LAN authoring play: serve published D1 documents as the player corpus.
-// Production uses separate read-only D1 routes and can reuse matching
-// frozen modules; this LAN handler remains authoring-only.
+// LAN authoring play: serve the published Postgres corpus.
+// The public play Worker keeps reading the D1 replica. This handler
+// remains authoring-only.
 
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";

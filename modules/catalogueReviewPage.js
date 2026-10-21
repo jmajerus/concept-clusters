@@ -193,15 +193,20 @@ export function renderContentPublicationNotice(notice) {
   const idKey = notice.kind === "category" ? "category_id" : "catalogue_id";
   const action = notice.action || "published";
   const cued = notice.cued || action === "cued";
+  const revisionLabel = notice.replicaPending ? "revision" : "D1 revision";
   const message = action === "cued"
     ? '  <strong>Cued</strong> <code>' + escapeHtml(notice.id) + '</code>'
-      + ' as D1 revision ' + escapeHtml(String(notice.revision)) + ' for the next freeze.'
+      + ' as ' + revisionLabel + ' ' + escapeHtml(String(notice.revision)) + ' for the next freeze.'
     : '  <strong>Published</strong> <code>' + escapeHtml(notice.id) + '</code>'
-      + ' as D1 revision ' + escapeHtml(String(notice.revision)) + '.'
+      + ' as ' + revisionLabel + ' ' + escapeHtml(String(notice.revision)) + '.'
       + (cued ? ' Cued for the next freeze.' : '');
+  const lag = notice.replicaPending
+    ? '  <p class="meta">On the LAN. Not yet on the public site.</p>'
+    : "";
   return [
     '<div class="validation validation-ok" role="status">',
     message,
+    ...(lag ? [lag] : []),
     '  <p class="meta">' + escapeHtml(PUBLIC_PLAY_PUBLICATION_NOTE) + '</p>',
     '</div>',
     '<script>',
@@ -215,6 +220,13 @@ export function renderContentPublicationNotice(notice) {
     '  }',
     '</script>'
   ].join("\n");
+}
+
+function publishedPlaceBadge(item) {
+  if (item?.replicaPending) {
+    return '<span class="badge badge-warn" title="On the LAN. Not yet on the public site.">not on the public site</span>';
+  }
+  return '<span class="badge badge-ok">published in D1</span>';
 }
 
 function catalogueChoiceOptions(choices, excludeIds = []) {
@@ -238,7 +250,7 @@ export function renderCatalogueListPage(catalogues, { notice = null } = {}) {
     <td>${item.withdrawn
       ? '<span class="badge">withdrawn</span>'
       : item.published
-      ? `<span class="badge badge-ok">published in D1</span> ${renderPublishedFreezeBadges(item)}`
+      ? `${publishedPlaceBadge(item)} ${renderPublishedFreezeBadges(item)}`
       : '<span class="badge badge-warn">working copy only</span>'}</td>
     <td>${escapeHtml(String(item.entryCount ?? 0))}</td>
     <td>${item.published && !item.withdrawn
@@ -535,7 +547,7 @@ function categoryStatusCell(item) {
   const unpublished = item.differsFromPublished
     ? ' <span class="badge badge-warn">unpublished changes</span>'
     : "";
-  return `<span class="badge badge-ok">published in D1</span> ${renderPublishedFreezeBadges(item)}${unpublished}`;
+  return `${publishedPlaceBadge(item)} ${renderPublishedFreezeBadges(item)}${unpublished}`;
 }
 
 export function renderCategoryListPage(categories, { notice = null } = {}) {

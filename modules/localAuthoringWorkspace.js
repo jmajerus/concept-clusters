@@ -10,9 +10,10 @@ import { createRepositoryDraftStore } from "./repositoryDraftStore.js";
 import { createD1WikiLinkCheckStore, createPostgresWikiLinkCheckStore } from "./wikiLinkCheckStore.js";
 import {
   createD1SiteSettingsStore,
-  createMirroredSiteSettingsStore,
   createPostgresSiteSettingsStore
 } from "./siteSettings.js";
+import { PostgresPublishedRepository } from "./postgresPublishedRepository.js";
+import { enqueueSiteSettingsReplica } from "./publishedReplica.js";
 import { applyAuthoredDomain } from "./authoringDomains.js";
 import { createSplitContentDocuments } from "./authoringContentDocuments.js";
 import { PostgresContentDraftRepository } from "./postgresContentDraftRepository.js";
@@ -162,9 +163,9 @@ export async function resolveLocalAuthoringWorkspace({
     };
   }
   const resolvedActor = actor || resolveLocalDraftActor({ env });
-  const d1 = database || await createLocalD1Database({ env, repositoryRoot });
   const databaseUrl = authoringDatabaseUrl(env);
   if (!databaseUrl) {
+    const d1 = database || await createLocalD1Database({ env, repositoryRoot });
     const repository = new D1DraftRepository(d1);
     const contentDocuments = new D1ContentDocumentRepository(d1);
     contentDocuments.modelSuggestions = new D1ModelSuggestionRepository(d1);
@@ -181,7 +182,9 @@ export async function resolveLocalAuthoringWorkspace({
     };
   }
   const pool = getAuthoringPool(databaseUrl);
-  const published = new D1ContentDocumentRepository(d1);
+  // Published rows are Postgres. D1 is optional here: the replica drain
+  // writes it when the network is up, and the server still boots without it.
+  const published = new PostgresPublishedRepository(pool);
   const contentDocuments = createSplitContentDocuments({
     drafts: new PostgresContentDraftRepository(pool),
     published,
@@ -199,10 +202,9 @@ export async function resolveLocalAuthoringWorkspace({
     draftRepository: repository,
     contentDocuments,
     wikiLinkStore: createPostgresWikiLinkCheckStore(pool),
-    siteSettings: createMirroredSiteSettingsStore(
-      createPostgresSiteSettingsStore(pool),
-      createD1SiteSettingsStore(d1)
-    ),
+    siteSettings: createPostgresSiteSettingsStore(pool, {
+      replicate: enqueueSiteSettingsReplica
+    }),
     freezeRepository: contentDocuments.freezeRepository,
     modelSuggestions: contentDocuments.modelSuggestions
   };

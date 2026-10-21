@@ -166,6 +166,7 @@ import * as d1LostResponse from "./d1-lost-response.mjs";
 import * as derivedRowMemo from "./derived-row-memo.mjs";
 import * as lanAuthoringAccess from "./lan-authoring-access.mjs";
 import * as postgresDraftTransaction from "./postgres-draft-transaction.mjs";
+import * as publishedReplica from "./published-replica.mjs";
 
 const allTests = [
   tableMode, tableSorting, tableFeedback, tableInfo, tablePanels, tableLensEffects,
@@ -183,7 +184,7 @@ const allTests = [
   nonCryptographicHash,
   skillRevisionStamp,
   wikiLinkCheck, d1LargeColumnCache, d1LostResponse, derivedRowMemo,
-  lanAuthoringAccess, postgresDraftTransaction
+  lanAuthoringAccess, postgresDraftTransaction, publishedReplica
 ];
 
 // Keep these lists intentional rather than making every new test quick or
@@ -202,7 +203,7 @@ const quickTests = [
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
   circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, layoutPassJobs, autoLayoutWatcher, singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck, d1LargeColumnCache, d1LostResponse, derivedRowMemo,
-  lanAuthoringAccess, postgresDraftTransaction
+  lanAuthoringAccess, postgresDraftTransaction, publishedReplica
 ];
 
 const standardTests = [
@@ -253,7 +254,7 @@ const sideTests = {
     localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks,
     localDevHttp, localDevHousekeep, playCorpus, boardAdministration, domains, wikiLinkCheck,
     boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, autoLayoutWatcher, legacyBoardLift, firstPublishedBackfill, d1LargeColumnCache, d1LostResponse, derivedRowMemo,
-    lanAuthoringAccess, postgresDraftTransaction
+    lanAuthoringAccess, postgresDraftTransaction, publishedReplica
   ]),
   shared: new Set([
     contentValidation,

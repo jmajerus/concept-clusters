@@ -71,6 +71,11 @@ npm run content:canonicalize -- --apply-d1
 npm run content:canonicalize -- --git-only --apply-git
 ```
 
+Once `AUTHORING_DATABASE_URL` is set, Postgres is the published corpus and
+D1 is a replica. `--apply-d1` is refused, because that write would fight
+the replica drain. Canonicalize by publishing the Postgres row; the drain
+copies it.
+
 An unresolved D1 row blocks `--apply-d1`; an unresolved Git source blocks
 `--apply-git`. A combined `--apply` requires both sides to be clean.
 

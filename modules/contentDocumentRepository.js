@@ -130,6 +130,24 @@ function titleOf(document) {
   return typeof document?.title === "string" ? document.title : null;
 }
 
+export function publishedRecordFromRow(row) {
+  return publishedRecord(row);
+}
+
+export function publishedRevisionFromRow(kind, row) {
+  return publishedRevisionSnapshot(kind, row);
+}
+
+// The stored puzzle document and its layout, after the same canonical fold
+// the D1 publish path uses.
+export function preparePublishedWrite(kind, document, layoutJson) {
+  return canonicalPuzzleWrite(
+    kind,
+    documentForPublishedStorage(kind, document),
+    layoutJson
+  );
+}
+
 export function reviewEventRecord(row) {
   let proposal = null;
   if (row.proposal_json) {

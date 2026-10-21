@@ -1,10 +1,8 @@
 import assert from "node:assert/strict";
 import { PGlite } from "@electric-sql/pglite";
 import { DraftConflictError } from "../modules/draftRepository.js";
-import { createSplitContentDocuments } from "../modules/authoringContentDocuments.js";
 import { PostgresDraftRepository } from "../modules/postgresDraftRepository.js";
 import { PostgresModelSuggestionRepository } from "../modules/postgresModelSuggestionRepository.js";
-import { PostgresReviewEventStore } from "../modules/postgresReviewEvents.js";
 import { postgresConnectionDropped, withTransaction } from "../modules/postgresPool.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { applyPostgresMigrations } from "../tools/postgres-migrate.mjs";
@@ -39,7 +37,11 @@ export async function run() {
   const db = new PGlite();
   const pool = poolFrom(db);
   const applied = await applyPostgresMigrations(pool);
-  assert.deepEqual(applied, ["0001_authoring.sql", "0002_model_suggestion_catalog.sql"]);
+  assert.deepEqual(applied, [
+    "0001_authoring.sql",
+    "0002_model_suggestion_catalog.sql",
+    "0003_published_corpus.sql"
+  ]);
 
   const repository = new PostgresDraftRepository({ pool });
   const content = createHostedAuthoringContentService();
@@ -166,73 +168,4 @@ export async function run() {
     "INSERT INTO authoring_model_suggestion_catalog (id, version) VALUES (1, 1)"
   );
   assert.deepEqual(await models.listForFreeze(), ["Muse Spark 9"]);
-
-  const reviewEvents = new PostgresReviewEventStore(pool);
-  await reviewEvents.insert({
-    id: "pg-conflict",
-    reviewerKind: "agent",
-    reviewedAt: "2026-10-20T00:00:00.000Z",
-    comments: "done",
-    outcome: "changed",
-    draftRevision: 1,
-    eventType: "review"
-  });
-  const stamps = [];
-  const documents = createSplitContentDocuments({
-    drafts: {},
-    published: {
-      async getPublished() {
-        return { id: "pg-conflict", lastAgentReviewedAt: stamps.at(-1) || null };
-      },
-      async touchPublishedReviewStamp({ reviewedAt }) {
-        stamps.push(reviewedAt);
-      }
-    },
-    reviewEvents
-  });
-  const stamped = await documents.recordPuzzleAgentReview({
-    id: "pg-conflict",
-    comments: "done",
-    outcome: "changed",
-    draftRevision: 1
-  });
-  assert.equal(stamped.lastAgentReviewedAt, "2026-10-20T00:00:00.000Z");
-  assert.equal(stamps.length, 1);
-  const eventCount = async () => Number((await pool.query(
-    "SELECT COUNT(*)::int AS count FROM puzzle_review_events WHERE puzzle_id = $1",
-    ["pg-conflict"]
-  )).rows[0].count);
-  assert.equal(await eventCount(), 1);
-
-  const blocked = createSplitContentDocuments({
-    drafts: {},
-    published: {
-      async getPublished() {
-        return { id: "pg-conflict", lastAgentReviewedAt: stamps.at(-1) || null };
-      },
-      async touchPublishedReviewStamp() {
-        throw new Error("d1 down");
-      }
-    },
-    reviewEvents
-  });
-  await assert.rejects(
-    () => blocked.recordPuzzleAgentReview({
-      id: "pg-conflict",
-      comments: "third",
-      outcome: "changed",
-      draftRevision: 1
-    }),
-    /d1 down/
-  );
-  assert.equal(await eventCount(), 2);
-
-  const repaired = await documents.recordPuzzleAgentReview({
-    id: "pg-conflict",
-    comments: "third",
-    outcome: "changed",
-    draftRevision: 1
-  });
-  assert.equal(await eventCount(), 2);
-  assert.equal(repaired.lastAgentReviewedAt, stamps.at(-1));
 }

@@ -21,6 +21,16 @@ const INSERT_SQL = `
   RETURNING *
 `;
 
+export async function insertReviewEvent(client, input) {
+  const reviewedAt = input.reviewedAt || new Date().toISOString();
+  if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
+    throw new Error("reviewedAt must be an ISO timestamp");
+  }
+  const event = reviewEventInput({ ...input, reviewedAt });
+  const { rows } = await client.query(INSERT_SQL, insertValues(input.id, reviewedAt, event));
+  return reviewEventRecord(rows[0]);
+}
+
 function insertValues(puzzleId, reviewedAt, event) {
   return [
     puzzleId,
@@ -80,16 +90,7 @@ export class PostgresReviewEventStore {
   }
 
   async insert(input) {
-    const reviewedAt = input.reviewedAt || new Date().toISOString();
-    if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
-      throw new Error("reviewedAt must be an ISO timestamp");
-    }
-    const event = reviewEventInput({ ...input, reviewedAt });
-    const { rows } = await this.pool.query(
-      INSERT_SQL,
-      insertValues(input.id, reviewedAt, event)
-    );
-    return reviewEventRecord(rows[0]);
+    return insertReviewEvent(this.pool, input);
   }
 
   async insertDecisions(puzzleId, decisions, publishedRevision, reviewedAt = new Date().toISOString()) {

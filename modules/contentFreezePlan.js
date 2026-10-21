@@ -279,6 +279,7 @@ export function freezeFlagsFromPublished(row, gitIds = []) {
   return {
     d1Published,
     d1Withdrawn: Boolean(row?.withdrawnAt),
+    replicaPending: row?.replicaPending === true,
     cuedForFreeze,
     gitSeedCue,
     freezeAdd: Boolean(

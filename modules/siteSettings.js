@@ -4,7 +4,9 @@
 // puzzle's own board flags override them, and a missing row is the
 // built-in default.
 //
-// D1 keeps one row per setting (d1/migrations/0034_site_settings.sql).
+// The LAN keeps one row per setting in Postgres and enqueues a replica of
+// the public set. The play Worker still reads D1
+// (d1/migrations/0034_site_settings.sql) after the drain copies it.
 
 import { isLensRevealCue } from "./lensRevealCue.js";
 
@@ -105,25 +107,30 @@ export function createMemorySiteSettingsStore(initial = {}) {
 
 // Play must never fail over a setting. Before the table exists, or when
 // D1 has a hiccup, every setting takes its default.
-export function createPostgresSiteSettingsStore(pool) {
+function settingsFromRows(rows) {
+  const raw = {};
+  for (const row of rows) {
+    try {
+      raw[row.key] = JSON.parse(row.value_json);
+    } catch {
+      // An unreadable row falls back to the default like a missing one.
+    }
+  }
+  return normalizeSiteSettings(raw);
+}
+
+export function createPostgresSiteSettingsStore(pool, { replicate = null } = {}) {
   if (!pool) throw new Error("A Postgres pool is required");
   return {
     async read() {
       const { rows } = await pool.query("SELECT key, value_json FROM site_settings");
-      const raw = {};
-      for (const row of rows) {
-        try {
-          raw[row.key] = JSON.parse(row.value_json);
-        } catch {
-          // An unreadable row falls back to the default like a missing one.
-        }
-      }
-      return normalizeSiteSettings(raw);
+      return settingsFromRows(rows);
     },
     async update(patch, { actor = null } = {}) {
       assertPatch(patch);
       const now = new Date().toISOString();
       const client = await pool.connect();
+      let saved;
       try {
         await client.query("BEGIN");
         for (const [key, value] of Object.entries(patch)) {
@@ -140,6 +147,9 @@ export function createPostgresSiteSettingsStore(pool) {
             `, [key, JSON.stringify(value), now, actor?.subject || null]);
           }
         }
+        const current = await client.query("SELECT key, value_json FROM site_settings");
+        saved = settingsFromRows(current.rows);
+        if (replicate) await replicate(client, saved);
         await client.query("COMMIT");
       } catch (error) {
         try { await client.query("ROLLBACK"); } catch { /* socket already gone */ }
@@ -147,39 +157,6 @@ export function createPostgresSiteSettingsStore(pool) {
       } finally {
         client.release();
       }
-      return this.read();
-    }
-  };
-}
-
-// Postgres is the authoring copy. The same patch is upserted into D1 so the
-// play Worker keeps reading site settings from the publication database.
-// The two databases cannot commit together. A transient mirror failure is
-// retried here; a later update of the same keys upserts both copies again.
-const MIRROR_ATTEMPTS = 3;
-
-async function updateMirror(mirror, patch, options) {
-  let lastError;
-  for (let attempt = 0; attempt < MIRROR_ATTEMPTS; attempt += 1) {
-    try {
-      await mirror.update(patch, options);
-      return;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-  throw lastError;
-}
-
-export function createMirroredSiteSettingsStore(primary, mirror) {
-  if (!primary) throw new Error("A site settings store is required");
-  return {
-    async read() {
-      return primary.read();
-    },
-    async update(patch, options) {
-      const saved = await primary.update(patch, options);
-      if (mirror) await updateMirror(mirror, patch, options);
       return saved;
     }
   };

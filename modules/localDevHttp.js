@@ -38,6 +38,8 @@ import { d1LargeColumnCacheEnabled } from "./d1LargeColumnCache.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { handleLocalMcpRequest } from "./localMcpHttp.js";
 import { startWeeklyLinkHealth } from "./linkHealthSchedule.js";
+import { startPublishedReplicaDrain } from "./publishedReplicaSchedule.js";
+import { authoringDatabaseUrl } from "./postgresPool.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
 import {
@@ -552,6 +554,7 @@ export async function startLocalStaticDev({
     env,
     enabled: isAllInterfacesHost(host)
   });
+  const stopReplicaDrain = startPublishedReplicaDrain({ repositoryRoot, env });
   printReady(base, manifest, authoringReadyExtras({ host, port: actualPort, repositoryRoot, env }));
 
   let stopping = false;
@@ -559,6 +562,7 @@ export async function startLocalStaticDev({
     if (stopping) return;
     stopping = true;
     stopLinkHealth();
+    stopReplicaDrain();
     closeHttpServer(server).then(() => {
       removeLocalDevLease({
         repositoryRoot,
@@ -853,7 +857,8 @@ export async function runLocalDev({
 // the lists the admin pages read, so the first load after a start does not
 // download the whole corpus. Same calls as the pages, so the queries match.
 async function warmD1LargeColumnCache({ repositoryRoot, env }) {
-  if (!d1LargeColumnCacheEnabled(env)) return;
+  // The LAN published corpus is Postgres. The cache only helps the D1 fallback.
+  if (authoringDatabaseUrl(env) || !d1LargeColumnCacheEnabled(env)) return;
   const startedAt = performance.now();
   try {
     const { contentDocuments, draftRepository, actor } =
