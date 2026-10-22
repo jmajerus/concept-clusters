@@ -57,6 +57,23 @@ export function draftPlayQuery(draftId, mode = null, revision = null) {
   return queryWithMode(params, mode);
 }
 
+// Preview one filed proposal. The working copy stays as it is; play.json
+// composes the proposal for that request only.
+export function draftProposalPlayQuery(draftId, proposalId) {
+  if (!SLUG_RE.test(draftId)) {
+    throw new Error(`Invalid draft id: ${draftId}`);
+  }
+  const id = Number(proposalId);
+  if (!Number.isInteger(id) || id < 1) {
+    throw new Error(`Invalid proposal id: ${proposalId}`);
+  }
+  return queryWithMode(new URLSearchParams({
+    puzzle: draftId,
+    play: "",
+    proposal: String(id)
+  }));
+}
+
 export function stagingPlayItems(puzzleId) {
   if (!SLUG_RE.test(puzzleId)) return [];
   return [

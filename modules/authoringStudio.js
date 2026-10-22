@@ -100,10 +100,16 @@ export function createAuthoringStudio({
   // can enter Play without asking the server again.
   let lastPlayPuzzle = null;
 
+  function proposalPlayQuery() {
+    const proposal = new URLSearchParams(globalThis.location?.search || "").get("proposal");
+    if (!proposal || !/^[1-9]\d*$/.test(proposal)) return "";
+    return `?proposal=${encodeURIComponent(proposal)}`;
+  }
+
   async function readPlayStatus() {
     if (!draftId) return;
     const response = await fetch(
-      `/admin/drafts/${encodeURIComponent(draftId)}/play.json`,
+      `/admin/drafts/${encodeURIComponent(draftId)}/play.json${proposalPlayQuery()}`,
       { cache: "no-store" }
     );
     const body = await response.json().catch(() => ({}));

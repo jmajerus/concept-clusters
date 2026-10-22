@@ -84,6 +84,7 @@ import {
 } from "./draftReviewDiff.js";
 import {
   applyReviewChanges,
+  documentForProposal,
   freshProposalOverlaps,
   isReviewPatch,
   openStackPredecessor,
@@ -450,6 +451,18 @@ async function publishedSnapshotsFor(contentDocuments, puzzleId, events) {
     if (snapshot?.document) snapshots[revision] = snapshot.document;
   }));
   return snapshots;
+}
+
+async function documentForOpenProposal(draftStore, contentDocuments, draftId, record, proposalId) {
+  const puzzleId = typeof record.document?.id === "string" ? record.document.id : record.puzzleId;
+  if (!puzzleId || typeof contentDocuments?.listOpenReviewProposals !== "function") return null;
+  const open = await contentDocuments.listOpenReviewProposals({ id: puzzleId });
+  const chosen = open.find(event => event.id === proposalId);
+  if (!chosen?.proposal) return null;
+  const baseline = typeof draftStore.readReviewBaseline === "function"
+    ? await draftStore.readReviewBaseline(draftId)
+    : null;
+  return documentForProposal(baseline || record.document, chosen.proposal, open);
 }
 
 async function recordReviewDecision(contentDocuments, {
@@ -1953,6 +1966,14 @@ export function createLocalDraftReviewHandler({
     if (playMatch) {
       const draftId = decodeURIComponent(playMatch[1]);
       try {
+        const proposalRaw = requestUrl.searchParams.get("proposal");
+        const proposalId = proposalRaw == null || proposalRaw === ""
+          ? null
+          : Number.parseInt(proposalRaw, 10);
+        if (proposalRaw && (!Number.isInteger(proposalId) || proposalId < 1)) {
+          json(res, { draftId, error: "That proposal is not open." }, 404);
+          return true;
+        }
         // Read the registry alongside the working copy, and the published
         // row as soon as the working copy names its puzzle.
         const categoryRegistryLoad = loadMergedCategoryRegistry({
@@ -1962,6 +1983,13 @@ export function createLocalDraftReviewHandler({
         });
         categoryRegistryLoad.catch(() => {});
         const record = await draftStore.getDraft(draftId);
+        const proposalDocument = proposalId == null
+          ? null
+          : await documentForOpenProposal(draftStore, contentDocuments, draftId, record, proposalId);
+        if (proposalId != null && !proposalDocument) {
+          json(res, { draftId, error: "That proposal is not open." }, 404);
+          return true;
+        }
         const documentPuzzleId = typeof record.document?.id === "string" ? record.document.id : null;
         const publishedLoad = documentPuzzleId
           ? publishedRowOrNull(contentDocuments, "puzzle", documentPuzzleId)
@@ -1969,7 +1997,7 @@ export function createLocalDraftReviewHandler({
         publishedLoad?.catch(() => {});
         const categoryRegistry = await categoryRegistryLoad;
         const { puzzle, errors } = puzzleFromAuthoredDocument(
-          documentForEditor(record.document, { categoryRegistry })
+          documentForEditor(proposalDocument || record.document, { categoryRegistry })
         );
         if (!puzzle) {
           json(res, {

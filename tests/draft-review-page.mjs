@@ -557,6 +557,9 @@ export async function run() {
   }, { variant: "local" });
   assert.match(localReviewChoice, /Pending proposals/);
   assert.match(localReviewChoice, /class="play-button secondary" href="\/\?puzzle=review-fixture" target="_blank" rel="noopener"/);
+  assert.match(localReviewChoice, /class="play-button" href="\/\?puzzle=review-fixture&amp;play&amp;proposal=9" target="_blank" rel="noopener">Play</);
+  assert.match(localReviewChoice, /Play opens one proposal in a new tab and leaves the working copy as it is/);
+  assert.doesNotMatch(choicePage, /proposal=9/);
   assert.doesNotMatch(choicePage, /Open board/);
   assert.doesNotMatch(choicePage, /value="discard-review"/);
   assert.doesNotMatch(choicePage, /value="undo-review"/);
@@ -1255,6 +1258,30 @@ export async function run() {
   assert.match(historyPage, /Winning fact\./);
   assert.match(historyPage, /Proposed changes to published revision 7: 1 changed/);
   assert.match(historyPage, /Losing fact\./);
+  const unidentifiedHistory = renderPuzzleReviewIssuesPage({
+    draft: { draftId: "review-fixture", title: "Review Fixture", document: { title: "Review Fixture" } },
+    events: [
+      {
+        id: 2,
+        reviewerKind: "human",
+        reviewedAt: "2026-10-22T10:11:07.265Z",
+        issueId: null,
+        eventType: "accepted",
+        sourceEventId: 1
+      },
+      {
+        id: 1,
+        reviewerKind: "agent",
+        reviewedAt: "2026-10-22T07:20:30.545Z",
+        issueId: null,
+        eventType: "proposed",
+        clientName: "mcp-client",
+        comments: "Filed the lesson."
+      }
+    ]
+  });
+  assert.match(unidentifiedHistory, /Accepted an unidentified agent&#39;s proposal \(client name mcp-client\) onto the working copy/);
+  assert.doesNotMatch(unidentifiedHistory, /mcp-client's proposal/);
 
   const publishedLocal = renderDraftPage({
     ...baseDraft,
@@ -1472,6 +1499,21 @@ export async function run() {
   assert.match(blankProvenancePage, /<h2>Provenance<\/h2>/);
   assert.match(blankProvenancePage, /No provenance has been recorded for this draft/);
   assert.match(blankProvenancePage, /add drafting client/);
+  const unidentifiedProvenancePage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      provenance: {
+        collaboration: "ai",
+        contributors: [{ name: "generative assistance", kind: "generative" }]
+      }
+    },
+    assistanceStamps: [{ clientName: "mcp-client" }],
+    reviewEvents: [{ eventType: "proposed", clientName: "mcp-client" }]
+  }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
+  assert.match(unidentifiedProvenancePage, /id="provenance-identify"/);
+  assert.match(unidentifiedProvenancePage, /called itself <code>mcp-client<\/code>/);
+  assert.match(unidentifiedProvenancePage, /Choose that agent on the drafting client row/);
   assert.match(blankProvenancePage, /<option value="Muse Code"[^>]*>Muse Code<\/option>/);
 
   // A host already stamped (MCP auto-stamp or a prior manual add) gets one

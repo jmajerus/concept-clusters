@@ -548,6 +548,51 @@ export async function run() {
     assert.doesNotMatch(afterPublishGet.body, /<h1>Puzzles<\/h1>/);
     assert.doesNotMatch(afterPublishGet.body, /<h1>Published<\/h1>/);
     assert.match(afterPublishGet.body, />Cue for freeze</);
+    const proposalBase = await draftStore.getDraft("energy-flow-review");
+    await draftStore.rememberReviewBaseline({
+      draftId: "energy-flow-review",
+      document: proposalBase.document,
+      expectedRevision: proposalBase.revision
+    });
+    const filed = await contentDocuments.recordPuzzleAgentReview({
+      id: "energy-flow",
+      eventType: "proposed",
+      proposal: {
+        envelope: "review-patch",
+        baseDraftRevision: proposalBase.revision,
+        stacksOn: null,
+        changes: [{
+          path: "title",
+          op: "replace",
+          before: proposalBase.document.title,
+          after: "Proposed title"
+        }]
+      },
+      clientName: "mcp-client"
+    });
+    const proposalPlay = createResponse();
+    assert.equal(await handlePublish({
+      method: "GET",
+      url: `/admin/drafts/energy-flow-review/play.json?proposal=${filed.id}`
+    }, proposalPlay), true);
+    assert.equal(proposalPlay.status, 200, proposalPlay.body);
+    assert.equal(JSON.parse(proposalPlay.body).puzzle.title, "Proposed title");
+    assert.equal(
+      (await draftStore.getDraft("energy-flow-review")).document.title,
+      proposalBase.document.title
+    );
+    const missingProposal = createResponse();
+    assert.equal(await handlePublish({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review/play.json?proposal=99999"
+    }, missingProposal), true);
+    assert.equal(missingProposal.status, 404);
+    await contentDocuments.recordPuzzleHumanReview({
+      id: "energy-flow",
+      eventType: "rejected",
+      sourceEventId: filed.id,
+      proposal: filed.proposal
+    });
     const afterPublishList = createResponse();
     assert.equal(await handlePublish({
       method: "GET",
