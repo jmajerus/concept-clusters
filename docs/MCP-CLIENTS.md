@@ -1,6 +1,6 @@
 # Connecting AI clients to the hosted MCP server
 
-> Last verified: October 21, 2026
+> Last verified: October 22, 2026
 
 Concept Clusters provides a remote Model Context Protocol (MCP) server for
 AI-assisted puzzle authoring. Its URL is publicly reachable, but access is not
@@ -128,6 +128,10 @@ under **Organization settings > Connectors**. Members then find it under
 Claude Desktop remote connectors are account-managed connectors. Do not add
 this remote URL to `claude_desktop_config.json`, which is a separate mechanism
 for locally launched MCP servers.
+
+When a later deploy changes a tool, refresh this connector's tool list and
+then start a new chat. A chat that is already open keeps the list it started
+with. See [Refreshing a changed tool list](#refreshing-a-changed-tool-list).
 
 See Claude's current [remote custom connector documentation][claude-mcp].
 
@@ -459,6 +463,60 @@ held D1 publication. The separate HTML authoring workflow and LAN Freeze
 process are documented in [AUTHORING.md](AUTHORING.md) and
 [CATALOGUES.md](CATALOGUES.md).
 
+## Refreshing a changed tool list
+
+A tool's name, description, and input schema exist in three places. A change
+reaches a conversation only after each place has the new copy.
+
+1. The LAN authoring server defines the tools. Deploy Authoring restarts that
+   process, which is what updates the definition.
+2. The portal at `https://mcp.majerus.us/mcp` stores its own copy of that
+   list. Cloudflare refreshes the stored copy on its own schedule, and a
+   maintainer can copy the LAN list in immediately with Sync MCP portal
+   (`npm run mcp:portal:sync`, or the VS Code **MCP** menu). The server's
+   tool page in the Cloudflare dashboard shows that stored copy. A call such
+   as `get_authoring_guidance` runs on the LAN server and returns its current
+   text; that text is not read from the stored list.
+3. The client stores a third copy, taken when the connector connects or when
+   its tool list is refreshed. A conversation keeps the copy it was given
+   when it started.
+
+Do these in order. Sync the portal first when the LAN tool list changed, and
+confirm the dashboard tool page shows the new text. Then refresh the client's
+list. Then start a new conversation.
+
+In Claude, open **Customize > Connectors**, open **Concept Clusters
+Authoring**, open the **⋮** menu beside **Disconnect**, and choose **Refresh
+tools list**. The tools under Tool permissions are the connector's new copy.
+That refresh replaces the whole list: new tools, removed tools, and a new
+description or input schema on a tool that was already there. Start a new
+chat after it finishes, and enable the connector in that chat. The new chat
+loads the list the refresh stored.
+
+**Refresh tools list**, disconnecting, reconnecting, and signing in again all
+update the connector. A chat that is already open keeps its original list
+through all of those. Refreshing after the chat has started leaves that chat
+on the old wording, including when the tool name and inputs did not change
+and only the description did.
+
+Other clients split the same way. A session that connected before the portal
+sync keeps the old list until that client reloads the server and a new
+conversation starts.
+
+`get_tool_catalog` is the check inside a chat that already has the tool. Its
+description quotes the catalog id of the list that chat was given. The call
+runs on the server and returns `interfaceCurrent`. False means this chat's
+list does not match the server: sync the portal if its tool page is old,
+refresh the connector, then start a new chat. A chat that started before the
+tool was in the connector has no such call. The server's instructions tell a
+model that can see the tool to call it before authoring and to stop when the
+result is false.
+
+If the dashboard tool page shows a **Modified** label, the portal is serving
+an override of the server definition. **Reset to server definition** on that
+tool drops the override. A client refresh still has to follow that reset,
+and the conversation still has to be a new one.
+
 ## Troubleshooting
 
 ### The client opens a normal Access page but never completes OAuth
@@ -491,6 +549,14 @@ returns `405` on the SSE handshake. Seen in Cline, whose config defaults a
 bare `url` entry to SSE — add `"type": "streamableHttp"` to that server's
 config entry (see the Cline section above) and reconnect. Any client with an
 explicit transport setting needs the same correction.
+
+### A conversation quotes an old tool description
+
+The portal catalog and the connector can both be current while the open
+conversation still quotes the description it loaded at the start. Follow
+[Refreshing a changed tool list](#refreshing-a-changed-tool-list): sync the
+portal, refresh the client's tool list, then start a new conversation. Asking
+again in the chat that was already open keeps returning the old text.
 
 ### The client sees tools but cannot author or publish
 

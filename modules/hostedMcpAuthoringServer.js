@@ -79,6 +79,12 @@ import {
 import { creditableChangeScore, isSubstantialChange } from "./authoringChangeScore.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
+import {
+  MCP_TOOL_CATALOG_TOOL,
+  toolCatalogDescription,
+  toolCatalogIdFromRegistry,
+  toolCatalogReport
+} from "./mcpToolCatalog.js";
 import { AUTHORING_SETTINGS } from "./authoringSettings.js";
 import { canonicalModelLabel } from "./authoringModelSuggestions.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
@@ -618,7 +624,8 @@ function track(analytics, toolName, handler) {
 }
 
 function serverInstructions() {
-  return "Use one accumulating simplified-puzzle draft. You may build a complete simplified document and " +
+  return "If get_tool_catalog is in your tool list, call it before authoring with the catalogId quoted in that tool's description. If interfaceCurrent is false, stop and tell the user this chat's tool list is stale. " +
+    "Use one accumulating simplified-puzzle draft. You may build a complete simplified document and " +
     "create it in one create_puzzle_draft call; guidance and phase schemas are optional aids, not prerequisites " +
     "or approval gates. Make individual MCP calls one at a time, not in parallel (some stdio hosts, including " +
     "Codex, close the transport on concurrent tool calls). Use review, pedagogy, and publication guidance only " +
@@ -2495,6 +2502,18 @@ export function createAuthoringMcpServer({
     );
   })));
 
+  const catalogId = toolCatalogIdFromRegistry(server._registeredTools);
+  server.registerTool(MCP_TOOL_CATALOG_TOOL, {
+    title: "Get tool catalog",
+    description: toolCatalogDescription(catalogId),
+    inputSchema: z.object({
+      catalogId: z.string().min(1)
+    }),
+    annotations: READ_ONLY
+  }, tracked(MCP_TOOL_CATALOG_TOOL, safe(async ({ catalogId: claimedId }) => {
+    const report = toolCatalogReport(claimedId, catalogId);
+    return success(report.summary, report.output);
+  })));
 
   return server;
 }

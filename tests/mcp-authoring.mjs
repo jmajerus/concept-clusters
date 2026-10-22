@@ -118,6 +118,7 @@ export async function run() {
       initialized.result.instructions,
       /create_puzzle_draft takes category, categories, and subcategories on the complete document/
     );
+    assert.match(initialized.result.instructions, /get_tool_catalog/);
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -170,7 +171,8 @@ export async function run() {
       "update_catalogue",
       "update_meta_catalogue",
       "create_category",
-      "update_category"
+      "update_category",
+      "get_tool_catalog"
     ]) {
       assert.ok(toolNames.includes(name), `${name} should be registered`);
     }

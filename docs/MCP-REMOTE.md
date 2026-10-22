@@ -578,7 +578,11 @@ with excess permission.
 
 [Sync MCP portal](../.github/workflows/sync-mcp-portal.yml) is separate. The MCP
 status-bar menu runs it when a LAN restart changed the tool list, and the job
-copies that server's tool list into the portal. It reuses `CLOUDFLARE_ACCOUNT_ID`
+copies that server's tool list into the portal. Clients still keep their own
+copies: refresh the client tool list after this job, then start a new
+conversation
+([Refreshing a changed tool list](MCP-CLIENTS.md#refreshing-a-changed-tool-list)).
+It reuses `CLOUDFLARE_ACCOUNT_ID`
 and needs its own token:
 
 - `CLOUDFLARE_MCP_PORTAL_TOKEN` — **MCP Portals Read** and **MCP Portals Write**
