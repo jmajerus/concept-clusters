@@ -129,7 +129,7 @@ independent of which MCP process is running.
 | `mcp:housekeep` | List stray `mcp-server.mjs` processes for this repo (dry run). |
 | `mcp:prune` | Stop extra stdio servers; keep the newest one. |
 | `mcp:restart` | Stop every stdio server started from this checkout, then print how each host (Claude Code, VS Code, Cursor, Codex) reconnects to a fresh one. The VS Code "MCP" status-bar menu offers this. |
-| `mcp:portal:sync` | Dispatch [Sync MCP portal](../.github/workflows/sync-mcp-portal.yml) on main. The job copies the LAN authoring server's current tool list into the Cloudflare portal. Use it after a Deploy Authoring restart that changed that list. Clients still refresh their own tool lists to see it. The VS Code "MCP" menu offers this. |
+| `mcp:portal:sync` | Dispatch [Sync MCP portal](../.github/workflows/sync-mcp-portal.yml) on main. The job copies the LAN authoring server's current tool list into the Cloudflare portal. Use it after a Deploy Authoring restart that changed that list. Clients still refresh their own tool lists, then start a new conversation, to see it ([Refreshing a changed tool list](MCP-CLIENTS.md#refreshing-a-changed-tool-list)). The VS Code "MCP" menu offers this. |
 | `mcp:probe-report` | Summarize captured `probe_mcp_client` call frames. |
 | `mcp:hosted:dev` | Hosted authoring Worker on localhost (`http://localhost:8788/mcp`). |
 | `authoring:d1:migrate:local` | D1 migrations for Wrangler's local database used by `mcp:hosted:dev`. |
