@@ -1629,6 +1629,20 @@ function unidentifiedClientPhrase(event) {
   return name ? `an unidentified agent's proposal (client name ${name})` : null;
 }
 
+function publishedWinnerPhrase(winnerSource, loserSource) {
+  if (!winnerSource) return "Another proposal";
+  const label = reviewCandidateLabel(winnerSource);
+  const rawName = reviewClientSystem(winnerSource) ? "" : reviewClientName(winnerSource);
+  const sameAgent = Boolean(loserSource)
+    && reviewCandidateLabel(loserSource) === label
+    && reviewClientName(loserSource) === reviewClientName(winnerSource);
+  if (rawName) {
+    const kind = sameAgent ? "other proposal" : "proposal";
+    return `an unidentified agent's ${kind} (client name ${rawName})`;
+  }
+  return sameAgent ? `${label}'s other proposal` : `${label}'s proposal`;
+}
+
 function reviewActorLabel(event) {
   if (event?.reviewerKind === "human") return "human";
   const stamped = reviewCandidateLabel(event);
@@ -2212,12 +2226,7 @@ function decisionEventDetail(event, publishedSnapshots, events = []) {
     ? `Proposed changes to published revision ${event.basePublishedRevision}`
     : "Proposed changes";
   if (winner) {
-    const winnerLabel = winnerSource ? reviewCandidateLabel(winnerSource) : null;
-    const chosen = !winnerLabel
-      ? "Another proposal"
-      : source && reviewCandidateLabel(source) === winnerLabel
-        ? `${winnerLabel}'s other proposal`
-        : `${winnerLabel}'s proposal`;
+    const chosen = publishedWinnerPhrase(winnerSource, source);
     return {
       summary: `Not chosen: ${chosen} was published as revision ${winner.publishedRevision}.`,
       notes,

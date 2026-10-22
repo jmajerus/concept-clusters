@@ -1282,6 +1282,55 @@ export async function run() {
   });
   assert.match(unidentifiedHistory, /Accepted an unidentified agent&#39;s proposal \(client name mcp-client\) onto the working copy/);
   assert.doesNotMatch(unidentifiedHistory, /mcp-client's proposal/);
+  const losingUnidentified = renderPuzzleReviewIssuesPage({
+    draft: { draftId: "review-fixture", title: "Review Fixture", document: { title: "Review Fixture" } },
+    events: [
+      {
+        id: 9,
+        reviewerKind: "human",
+        reviewedAt: "2026-10-02T02:48:32.869Z",
+        issueId: null,
+        eventType: "rejected",
+        sourceEventId: 4,
+        basePublishedRevision: 7,
+        proposal: { ...baseDraft.document, title: "Losing title" }
+      },
+      {
+        id: 4,
+        reviewerKind: "agent",
+        reviewedAt: "2026-10-01T11:00:00.000Z",
+        issueId: null,
+        eventType: "proposed",
+        clientName: "other-client"
+      },
+      {
+        id: 8,
+        reviewerKind: "human",
+        reviewedAt: "2026-10-02T02:48:32.869Z",
+        issueId: null,
+        eventType: "accepted",
+        publishedRevision: 8,
+        sourceEventId: 5
+      },
+      {
+        id: 5,
+        reviewerKind: "agent",
+        reviewedAt: "2026-10-01T12:00:00.000Z",
+        issueId: null,
+        eventType: "proposed",
+        clientName: "mcp-client"
+      }
+    ],
+    publishedSnapshots: {
+      7: baseDraft.document,
+      8: { ...baseDraft.document, title: "Winning title" }
+    }
+  });
+  assert.match(
+    losingUnidentified,
+    /Not chosen: an unidentified agent&#39;s proposal \(client name mcp-client\) was published as revision 8\./
+  );
+  assert.doesNotMatch(losingUnidentified, /other proposal/);
 
   const publishedLocal = renderDraftPage({
     ...baseDraft,

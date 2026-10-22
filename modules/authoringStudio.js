@@ -32,6 +32,7 @@ import {
 } from "./authorEngine.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 import { renderSafeMarkdown } from "./safeMarkdown.js";
+import { proposalPlaySearch } from "./stagingPlayLinks.js";
 
 const engine = createAuthorEngine();
 const DIRECTION_KINDS = ["undirected", "through", "bidirectional", "outward", "inward"];
@@ -101,9 +102,7 @@ export function createAuthoringStudio({
   let lastPlayPuzzle = null;
 
   function proposalPlayQuery() {
-    const proposal = new URLSearchParams(globalThis.location?.search || "").get("proposal");
-    if (!proposal || !/^[1-9]\d*$/.test(proposal)) return "";
-    return `?proposal=${encodeURIComponent(proposal)}`;
+    return proposalPlaySearch(globalThis.location?.search || "");
   }
 
   async function readPlayStatus() {
