@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
-import { draftBoardQuery, draftPlayQuery, layoutQuery, playQuery, stagingPlayItems } from "../modules/stagingPlayLinks.js";
+import {
+  draftBoardQuery,
+  draftPlayQuery,
+  layoutQuery,
+  playQuery,
+  proposalPlaySearch,
+  stagingPlayItems
+} from "../modules/stagingPlayLinks.js";
 
 export const name = "Staging play links: LAN Play, not Cloudflare preview";
 
@@ -27,4 +34,9 @@ export async function run() {
     ]
   );
   assert.deepEqual(stagingPlayItems("Not-A-Slug"), []);
+  assert.equal(proposalPlaySearch("?puzzle=energy-flow-review&play"), "");
+  assert.equal(proposalPlaySearch("?puzzle=energy-flow-review&play&proposal=9"), "?proposal=9");
+  assert.equal(proposalPlaySearch("?proposal="), "?proposal=");
+  assert.equal(proposalPlaySearch("?proposal=9junk"), "?proposal=9junk");
+  assert.equal(proposalPlaySearch("?proposal=9.5"), "?proposal=9.5");
 }

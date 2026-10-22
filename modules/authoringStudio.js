@@ -32,6 +32,7 @@ import {
 } from "./authorEngine.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 import { renderSafeMarkdown } from "./safeMarkdown.js";
+import { proposalPlaySearch } from "./stagingPlayLinks.js";
 
 const engine = createAuthorEngine();
 const DIRECTION_KINDS = ["undirected", "through", "bidirectional", "outward", "inward"];
@@ -100,10 +101,14 @@ export function createAuthoringStudio({
   // can enter Play without asking the server again.
   let lastPlayPuzzle = null;
 
+  function proposalPlayQuery() {
+    return proposalPlaySearch(globalThis.location?.search || "");
+  }
+
   async function readPlayStatus() {
     if (!draftId) return;
     const response = await fetch(
-      `/admin/drafts/${encodeURIComponent(draftId)}/play.json`,
+      `/admin/drafts/${encodeURIComponent(draftId)}/play.json${proposalPlayQuery()}`,
       { cache: "no-store" }
     );
     const body = await response.json().catch(() => ({}));

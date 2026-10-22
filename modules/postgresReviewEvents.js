@@ -167,6 +167,19 @@ export class PostgresReviewEventStore {
     return rows[0] ? reviewEventRecord(rows[0]) : null;
   }
 
+  async getProposalDecision({ id, sourceEventId }) {
+    assertDraftId(id);
+    if (!Number.isInteger(sourceEventId) || sourceEventId < 1) return null;
+    const { rows } = await this.pool.query(`
+      SELECT * FROM puzzle_review_events
+      WHERE puzzle_id = $1 AND source_event_id = $2
+        AND event_type IN ('accepted', 'rejected')
+      ORDER BY reviewed_at DESC, id DESC
+      LIMIT 1
+    `, [id, sourceEventId]);
+    return rows[0] ? reviewEventRecord(rows[0]) : null;
+  }
+
   async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false, uncapped = false }) {
     assertDraftId(id);
     const { rows } = await this.pool.query(`

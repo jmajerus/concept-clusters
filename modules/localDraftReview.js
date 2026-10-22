@@ -84,6 +84,7 @@ import {
 } from "./draftReviewDiff.js";
 import {
   applyReviewChanges,
+  documentForProposal,
   freshProposalOverlaps,
   isReviewPatch,
   openStackPredecessor,
@@ -450,6 +451,73 @@ async function publishedSnapshotsFor(contentDocuments, puzzleId, events) {
     if (snapshot?.document) snapshots[revision] = snapshot.document;
   }));
   return snapshots;
+}
+
+function stackParentId(proposal) {
+  const parentId = isReviewPatch(proposal) ? proposal.stacksOn : null;
+  return Number.isInteger(parentId) && parentId > 0 ? parentId : null;
+}
+
+function proposalIdFromQuery(searchParams) {
+  if (!searchParams.has("proposal")) return null;
+  const raw = searchParams.get("proposal");
+  if (!/^[1-9]\d*$/.test(raw || "")) return { invalid: true };
+  const proposalId = Number(raw);
+  if (!Number.isSafeInteger(proposalId) || String(proposalId) !== raw) return { invalid: true };
+  return { proposalId };
+}
+
+// An accepted predecessor is no longer open, but its patch still has to be
+// applied. The saved baseline predates that accept, so a child preview that
+// starts there would drop the predecessor's other fields.
+async function acceptedStackAncestors(contentDocuments, puzzleId, proposal, open) {
+  const ancestors = [];
+  const known = new Map((open || []).map(event => [event.id, event]));
+  let parentId = stackParentId(proposal);
+  const seen = new Set();
+  while (parentId != null && !seen.has(parentId)) {
+    seen.add(parentId);
+    const openParent = known.get(parentId);
+    if (openParent) {
+      parentId = stackParentId(openParent.proposal);
+      continue;
+    }
+    if (typeof contentDocuments.getProposalDecision !== "function") break;
+    if (typeof contentDocuments.getPuzzleReviewEvent !== "function") break;
+    const decision = await contentDocuments.getProposalDecision({
+      id: puzzleId,
+      sourceEventId: parentId
+    });
+    if (decision?.eventType !== "accepted") break;
+    const parent = await contentDocuments.getPuzzleReviewEvent({
+      id: puzzleId,
+      eventId: parentId
+    });
+    if (!parent?.proposal) break;
+    ancestors.push(parent);
+    known.set(parent.id, parent);
+    parentId = stackParentId(parent.proposal);
+  }
+  return ancestors;
+}
+
+async function documentForOpenProposal(draftStore, contentDocuments, draftId, record, proposalId) {
+  const puzzleId = typeof record.document?.id === "string" ? record.document.id : record.puzzleId;
+  if (!puzzleId || typeof contentDocuments?.listOpenReviewProposals !== "function") return null;
+  const open = await contentDocuments.listOpenReviewProposals({ id: puzzleId });
+  const chosen = open.find(event => event.id === proposalId);
+  if (!chosen?.proposal) return null;
+  const baseline = typeof draftStore.readReviewBaseline === "function"
+    ? await draftStore.readReviewBaseline(draftId)
+    : null;
+  const ancestors = await acceptedStackAncestors(
+    contentDocuments, puzzleId, chosen.proposal, open
+  );
+  return documentForProposal(
+    baseline || record.document,
+    chosen.proposal,
+    ancestors.length ? open.concat(ancestors) : open
+  );
 }
 
 async function recordReviewDecision(contentDocuments, {
@@ -1953,6 +2021,12 @@ export function createLocalDraftReviewHandler({
     if (playMatch) {
       const draftId = decodeURIComponent(playMatch[1]);
       try {
+        const requestedProposal = proposalIdFromQuery(requestUrl.searchParams);
+        if (requestedProposal?.invalid) {
+          json(res, { draftId, error: "That proposal is not open." }, 404);
+          return true;
+        }
+        const proposalId = requestedProposal?.proposalId ?? null;
         // Read the registry alongside the working copy, and the published
         // row as soon as the working copy names its puzzle.
         const categoryRegistryLoad = loadMergedCategoryRegistry({
@@ -1962,6 +2036,13 @@ export function createLocalDraftReviewHandler({
         });
         categoryRegistryLoad.catch(() => {});
         const record = await draftStore.getDraft(draftId);
+        const proposalDocument = proposalId == null
+          ? null
+          : await documentForOpenProposal(draftStore, contentDocuments, draftId, record, proposalId);
+        if (proposalId != null && !proposalDocument) {
+          json(res, { draftId, error: "That proposal is not open." }, 404);
+          return true;
+        }
         const documentPuzzleId = typeof record.document?.id === "string" ? record.document.id : null;
         const publishedLoad = documentPuzzleId
           ? publishedRowOrNull(contentDocuments, "puzzle", documentPuzzleId)
@@ -1969,7 +2050,7 @@ export function createLocalDraftReviewHandler({
         publishedLoad?.catch(() => {});
         const categoryRegistry = await categoryRegistryLoad;
         const { puzzle, errors } = puzzleFromAuthoredDocument(
-          documentForEditor(record.document, { categoryRegistry })
+          documentForEditor(proposalDocument || record.document, { categoryRegistry })
         );
         if (!puzzle) {
           json(res, {

@@ -34,7 +34,7 @@ import {
   staleReviewChanges
 } from "./reviewPatch.js";
 import { revisedLessonLabel, revisedMarkChangesLessonLine } from "./playerFacingRevision.js";
-import { draftBoardQuery, draftPlayQuery, layoutQuery, playQuery } from "./stagingPlayLinks.js";
+import { draftBoardQuery, draftPlayQuery, draftProposalPlayQuery, layoutQuery, playQuery } from "./stagingPlayLinks.js";
 import {
   RECENCY_ORDER,
   hasUnpublishedChanges,
@@ -1606,12 +1606,41 @@ function submitHint(variant, { valid, alreadyPublished = false }) {
      has no git checkout.`;
 }
 
+function reviewClientSystem(event) {
+  return typeof event?.clientSystem === "string" ? event.clientSystem.trim() : "";
+}
+
+function reviewClientName(event) {
+  return typeof event?.clientName === "string" ? event.clientName.trim() : "";
+}
+
+// clientSystem is set only when the call frame matched a known agent.
+// A raw clientInfo name such as "mcp-client" is the protocol default, not
+// that agent, so it must not be shown as who reviewed.
 function reviewCandidateLabel(event) {
-  const system = typeof event?.clientSystem === "string" ? event.clientSystem.trim() : "";
+  const system = reviewClientSystem(event);
   if (system) return system;
-  const name = typeof event?.clientName === "string" ? event.clientName.trim() : "";
-  if (name) return name;
+  if (reviewClientName(event)) return "Unidentified agent";
   return "Unnamed agent";
+}
+
+function unidentifiedClientPhrase(event) {
+  const name = reviewClientSystem(event) ? "" : reviewClientName(event);
+  return name ? `an unidentified agent's proposal (client name ${name})` : null;
+}
+
+function publishedWinnerPhrase(winnerSource, loserSource) {
+  if (!winnerSource) return "Another proposal";
+  const label = reviewCandidateLabel(winnerSource);
+  const rawName = reviewClientSystem(winnerSource) ? "" : reviewClientName(winnerSource);
+  const sameAgent = Boolean(loserSource)
+    && reviewCandidateLabel(loserSource) === label
+    && reviewClientName(loserSource) === reviewClientName(winnerSource);
+  if (rawName) {
+    const kind = sameAgent ? "other proposal" : "proposal";
+    return `an unidentified agent's ${kind} (client name ${rawName})`;
+  }
+  return sameAgent ? `${label}'s other proposal` : `${label}'s proposal`;
 }
 
 function reviewActorLabel(event) {
@@ -1684,7 +1713,18 @@ function changesForCandidate(draft, event) {
   return proposalChanges(event?.proposal, anchor);
 }
 
-function renderReviewChoice(draft) {
+function proposalPlayLink(draftId, event, variant, unresolvedLegacy) {
+  if (variant !== "local" || unresolvedLegacy || !Number.isInteger(event?.id)) return "";
+  let href;
+  try {
+    href = draftProposalPlayQuery(draftId, event.id);
+  } catch {
+    return "";
+  }
+  return `<a class="play-button" href="${escapeHtml(href)}" target="_blank" rel="noopener">Play</a>`;
+}
+
+function renderReviewChoice(draft, variant = "hosted") {
   const candidates = reviewChoiceCandidates(draft);
   if (!candidates.length) return "";
   const draftId = draft.draftId;
@@ -1721,9 +1761,14 @@ function renderReviewChoice(draft) {
     const accept = predecessorOpen || unresolvedLegacy
       ? ""
       : `<button type="submit" name="confirm" value="accept-review">Accept</button>`;
+    const play = proposalPlayLink(draftId, event, variant, unresolvedLegacy);
     const proposalId = escapeHtml(String(event.id));
+    const rawName = reviewClientSystem(event) ? "" : reviewClientName(event);
+    const heading = rawName
+      ? `${reviewCandidateLabel(event)} (${rawName})`
+      : reviewCandidateLabel(event);
     return `<article class="review-candidate">
-      <h3>${escapeHtml(reviewCandidateLabel(event))}</h3>
+      <h3>${escapeHtml(heading)}</h3>
       ${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}
       ${stacked}
       ${missingRevision}
@@ -1734,6 +1779,7 @@ function renderReviewChoice(draft) {
         <input type="hidden" name="proposal_id" value="${proposalId}">
         <input type="hidden" name="expected_revision" value="${expected}">
         <div class="actions">
+          ${play}
           ${accept}
           <button type="submit" name="confirm" value="reject-review" class="secondary">Reject</button>
           <a class="play-button secondary" href="#${WORKING_COPY_FORM_ID}">Defer</a>
@@ -1741,9 +1787,12 @@ function renderReviewChoice(draft) {
       </form>
     </article>`;
   }).join("\n");
+  const playNote = variant === "local"
+    ? " Play opens one proposal in a new tab and leaves the working copy as it is."
+    : "";
   return `<section class="submit-pr">
     <h2>Pending proposals</h2>
-    <p class="meta">These proposals are pending changes to the working copy. Accept applies one proposal's fields. Reject leaves the working copy as it is. Defer decides later. Two proposals on different fields can both be accepted. Publish warns while a proposal is still open.</p>
+    <p class="meta">These proposals are pending changes to the working copy. Accept applies one proposal's fields. Reject leaves the working copy as it is. Defer decides later. Two proposals on different fields can both be accepted. Publish warns while a proposal is still open.${playNote}</p>
     ${cards}
   </section>`;
 }
@@ -2010,7 +2059,7 @@ function renderSubmitForm(draft, variant = "hosted") {
     <a class="play-button secondary" href="${reviewLink}">Review issues</a>
     ${waivers.html}
   </section>`;
-  const proposals = renderReviewChoice(draft);
+  const proposals = renderReviewChoice(draft, variant);
   const publishSection = `<section class="submit-pr">
     <h2>Actions</h2>
     <p class="meta">${hint}${waivers.blocking
@@ -2114,7 +2163,8 @@ function decisionEventDetail(event, publishedSnapshots, events = []) {
   const source = Number.isInteger(event.sourceEventId)
     ? events.find(item => item.id === event.sourceEventId)
     : null;
-  const candidate = source ? `${reviewCandidateLabel(source)}'s proposal` : null;
+  const unidentified = source ? unidentifiedClientPhrase(source) : null;
+  const candidate = unidentified || (source ? `${reviewCandidateLabel(source)}'s proposal` : null);
   const notes = source?.comments || null;
   const snapshot = revision => publishedSnapshots?.[revision] || null;
   if (event.eventType === "proposed") {
@@ -2176,12 +2226,7 @@ function decisionEventDetail(event, publishedSnapshots, events = []) {
     ? `Proposed changes to published revision ${event.basePublishedRevision}`
     : "Proposed changes";
   if (winner) {
-    const winnerLabel = winnerSource ? reviewCandidateLabel(winnerSource) : null;
-    const chosen = !winnerLabel
-      ? "Another proposal"
-      : source && reviewCandidateLabel(source) === winnerLabel
-        ? `${winnerLabel}'s other proposal`
-        : `${winnerLabel}'s proposal`;
+    const chosen = publishedWinnerPhrase(winnerSource, source);
     return {
       summary: `Not chosen: ${chosen} was published as revision ${winner.publishedRevision}.`,
       notes,
@@ -2458,7 +2503,41 @@ function claudeReportedBySummary(stamps = []) {
   }).join(" · ");
 }
 
-function renderProvenanceOverride({ edit, document, actor, customModelSuggestions = null, assistanceStamps = [] }) {
+function unidentifiedClientNames(events = [], stamps = []) {
+  const names = [];
+  const add = name => {
+    const text = typeof name === "string" ? name.trim() : "";
+    if (text && !names.includes(text)) names.push(text);
+  };
+  for (const event of Array.isArray(events) ? events : []) {
+    if (reviewClientSystem(event)) continue;
+    add(reviewClientName(event));
+  }
+  for (const stamp of Array.isArray(stamps) ? stamps : []) {
+    if (stamp?.system || stamp?.hostId) continue;
+    add(stamp?.clientName);
+  }
+  return names;
+}
+
+function unidentifiedReviewNote(events, stamps, hasUnnamed) {
+  const names = unidentifiedClientNames(events, stamps);
+  if (!names.length) return "";
+  const called = names.map(name => `<code>${escapeHtml(name)}</code>`).join(", ");
+  const where = hasUnnamed
+    ? "Choose that agent on the drafting client row when you know which one ran."
+    : "Add that agent as a drafting client when you know which one ran.";
+  return `<p class="meta">A client that wrote or reviewed this draft called itself ${called}. The server does not recognize that name as an agent, so the review is not stamped from it. ${where}</p>`;
+}
+
+function renderProvenanceOverride({
+  edit,
+  document,
+  actor,
+  customModelSuggestions = null,
+  assistanceStamps = [],
+  reviewEvents = []
+}) {
   if (!edit?.draftId) return "";
 
   const provenanceSettings = Array.isArray(customModelSuggestions)
@@ -2626,7 +2705,7 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
       <input${form} type="hidden" name="${prefix}authorName" value="${escapeHtml(author)}">
       <${PROVENANCE_CLIENTS_TAG} class="provenance-clients" data-form="${WORKING_COPY_FORM_ID}">
         <p class="field-label">Drafting client</p>
-        <p class="meta">Confirmed by the MCP probe when a client identifies itself, or added here. Model, reasoning, and switch are optional -- set them only when you're confident what ran; they concatenate into the derived byline after the model (for example Grok 4.6 High Fast). A "use last" button fills a row's blank fields with what you last saved for that client in this browser; nothing is filled until you click it.</p>${hasUnnamed ? `<p class="meta">This puzzle records an agent that could not be named when it was written. Choosing a drafting client above fills that blank in place -- it does not add a second contributor. Leave it unidentified unless you have evidence of which client ran. A client the MCP probe confirmed is not editable here; correcting one of those is a removal, not a rename.</p>` : ""}
+        <p class="meta">Confirmed by the MCP probe when a client identifies itself, or added here. Model, reasoning, and switch are optional -- set them only when you're confident what ran; they concatenate into the derived byline after the model (for example Grok 4.6 High Fast). A "use last" button fills a row's blank fields with what you last saved for that client in this browser; nothing is filled until you click it.</p>${hasUnnamed ? `<p class="meta">This puzzle records an agent that could not be named when it was written. Choosing a drafting client above fills that blank in place -- it does not add a second contributor. Leave it unidentified unless you have evidence of which client ran. A client the MCP probe confirmed is not editable here; correcting one of those is a removal, not a rename.</p>` : ""}${unidentifiedReviewNote(reviewEvents, assistanceStamps, hasUnnamed)}
         ${clientRows}
         ${addClaudeRow}
         ${addClientRow}
@@ -2875,7 +2954,14 @@ export function renderDraftPage(draft, {
     ${renderWas(diff?.fields?.level)}
     ${renderPuzzleMeta(document, provenanceSettings)}
     ${renderClassificationEditor({ edit, document, relatedPuzzleOptions, categoryRegistry })}
-    ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions, assistanceStamps: draft.assistanceStamps })}
+    ${renderProvenanceOverride({
+      edit,
+      document,
+      actor,
+      customModelSuggestions,
+      assistanceStamps: draft.assistanceStamps,
+      reviewEvents: draft.reviewEvents
+    })}
     ${renderInfo(document.info, {
       alwaysShowReferences: true,
       hideLinksOverlappingCitations: true

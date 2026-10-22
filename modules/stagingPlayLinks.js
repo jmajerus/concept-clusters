@@ -57,6 +57,32 @@ export function draftPlayQuery(draftId, mode = null, revision = null) {
   return queryWithMode(params, mode);
 }
 
+// Preview one filed proposal. The working copy stays as it is; play.json
+// composes the proposal for that request only.
+// The page URL's proposal value, forwarded unchanged to play.json. An empty
+// or malformed value has to reach the server so that request 404s; a URL
+// with no proposal parameter plays the working copy.
+export function proposalPlaySearch(search) {
+  const params = new URLSearchParams(typeof search === "string" ? search : "");
+  if (!params.has("proposal")) return "";
+  return `?proposal=${encodeURIComponent(params.get("proposal") ?? "")}`;
+}
+
+export function draftProposalPlayQuery(draftId, proposalId) {
+  if (!SLUG_RE.test(draftId)) {
+    throw new Error(`Invalid draft id: ${draftId}`);
+  }
+  const id = Number(proposalId);
+  if (!Number.isInteger(id) || id < 1) {
+    throw new Error(`Invalid proposal id: ${proposalId}`);
+  }
+  return queryWithMode(new URLSearchParams({
+    puzzle: draftId,
+    play: "",
+    proposal: String(id)
+  }));
+}
+
 export function stagingPlayItems(puzzleId) {
   if (!SLUG_RE.test(puzzleId)) return [];
   return [
