@@ -575,3 +575,11 @@ Add both under Settings → Secrets and variables → Actions before merging any
 that changes `puzzles/`, `catalogues/`, `content/`, `modules/`, or the authoring
 worker, or the workflow will fail closed with an auth error rather than deploy
 with excess permission.
+
+[Sync MCP portal](../.github/workflows/sync-mcp-portal.yml) is separate. The MCP
+status-bar menu runs it when a LAN restart changed the tool list, and the job
+copies that server's tool list into the portal. It reuses `CLOUDFLARE_ACCOUNT_ID`
+and needs its own token:
+
+- `CLOUDFLARE_MCP_PORTAL_TOKEN` — **MCP Portals Read** and **MCP Portals Write**
+  on this account. Do not add that permission to `CLOUDFLARE_API_TOKEN`.

@@ -168,6 +168,7 @@ import * as lanAuthoringAccess from "./lan-authoring-access.mjs";
 import * as postgresDraftTransaction from "./postgres-draft-transaction.mjs";
 import * as publishedReplica from "./published-replica.mjs";
 import * as dispatchPlayDeploy from "./dispatch-play-deploy.mjs";
+import * as mcpPortalSync from "./mcp-portal-sync.mjs";
 
 const allTests = [
   tableMode, tableSorting, tableFeedback, tableInfo, tablePanels, tableLensEffects,
@@ -185,7 +186,8 @@ const allTests = [
   nonCryptographicHash,
   skillRevisionStamp,
   wikiLinkCheck, d1LargeColumnCache, d1LostResponse, derivedRowMemo,
-  lanAuthoringAccess, postgresDraftTransaction, publishedReplica, dispatchPlayDeploy
+  lanAuthoringAccess, postgresDraftTransaction, publishedReplica, dispatchPlayDeploy,
+  mcpPortalSync
 ];
 
 // Keep these lists intentional rather than making every new test quick or
@@ -204,7 +206,8 @@ const quickTests = [
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
   circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, layoutPassJobs, autoLayoutWatcher, singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck, d1LargeColumnCache, d1LostResponse, derivedRowMemo,
-  lanAuthoringAccess, postgresDraftTransaction, publishedReplica, dispatchPlayDeploy
+  lanAuthoringAccess, postgresDraftTransaction, publishedReplica, dispatchPlayDeploy,
+  mcpPortalSync
 ];
 
 const standardTests = [
@@ -255,7 +258,8 @@ const sideTests = {
     localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks,
     localDevHttp, localDevHousekeep, playCorpus, boardAdministration, domains, wikiLinkCheck,
     boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, autoLayoutWatcher, legacyBoardLift, firstPublishedBackfill, d1LargeColumnCache, d1LostResponse, derivedRowMemo,
-    lanAuthoringAccess, postgresDraftTransaction, publishedReplica, dispatchPlayDeploy
+    lanAuthoringAccess, postgresDraftTransaction, publishedReplica, dispatchPlayDeploy,
+    mcpPortalSync
   ]),
   shared: new Set([
     contentValidation,

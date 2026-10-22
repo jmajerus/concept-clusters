@@ -12,6 +12,16 @@
       }
     },
     {
+      "label": "MCP: sync portal",
+      "type": "npm",
+      "script": "mcp:portal:sync",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
       "label": "Dev",
       "type": "npm",
       "script": "dev",

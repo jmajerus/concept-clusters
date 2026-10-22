@@ -9,9 +9,20 @@
     },
     {
       "label": "$(plug) MCP",
-      "task": "MCP: restart stdio",
-      "tooltip": "npm run mcp:restart — stop this checkout's stdio servers so each host reconnects to current code. Remote MCP updates with Deploy Authoring.",
-      "alignment": "left"
+      "tooltip": "Restart local stdio servers, or copy the LAN server's tool list into the Cloudflare portal.",
+      "alignment": "left",
+      "tasks": [
+        {
+          "label": "Restart local servers",
+          "task": "MCP: restart stdio",
+          "description": "$(debug-restart) npm run mcp:restart — hosts reconnect to current code"
+        },
+        {
+          "label": "Sync portal catalog",
+          "task": "MCP: sync portal",
+          "description": "$(cloud-upload) npm run mcp:portal:sync — after a LAN restart that changed the tool list"
+        }
+      ]
     },
     {
       "label": "$(server) Deploy Authoring",

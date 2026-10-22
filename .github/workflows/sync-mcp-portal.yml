@@ -1,0 +1,31 @@
+name: Sync MCP portal
+
+# The MCP status-bar menu dispatches this after a LAN restart that changed
+# the tool list. The portal serves a stored copy of that server's tools, so a
+# client refresh keeps showing the previous catalog until this sync runs.
+# This is not a Worker deploy and does not use CLOUDFLARE_API_TOKEN.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mcp-portal-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Sync the portal tool catalog
+        run: node tools/sync-mcp-portal.mjs
+        env:
+          CLOUDFLARE_MCP_PORTAL_TOKEN: ${{ secrets.CLOUDFLARE_MCP_PORTAL_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
