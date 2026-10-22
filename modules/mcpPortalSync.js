@@ -21,24 +21,25 @@ function isMcpEndpoint(hostname) {
   }
 }
 
-/** The one portal server whose hostname is the LAN authoring origin. */
+/** The one portal server whose hostname is the LAN authoring /mcp endpoint. */
 export function portalServerForOrigin(servers, originHost = MCP_PORTAL_ORIGIN_HOST) {
-  const matches = (Array.isArray(servers) ? servers : []).filter(server =>
-    mcpServerHost(server?.hostname) === originHost
-  );
-  if (matches.length === 1) return matches[0];
-  const listed = (Array.isArray(servers) ? servers : [])
-    .map(server => server?.hostname)
-    .filter(Boolean);
+  const all = Array.isArray(servers) ? servers : [];
+  const matches = all.filter(server => mcpServerHost(server?.hostname) === originHost);
+  const endpoints = matches.filter(server => isMcpEndpoint(server.hostname));
+  if (endpoints.length === 1) return endpoints[0];
+  const listed = all.map(server => server?.hostname).filter(Boolean);
   if (!matches.length) {
     throw new Error(
       `No MCP server for ${originHost}. Found: ${listed.join(", ") || "none"}.`
     );
   }
-  const endpoints = matches.filter(server => isMcpEndpoint(server.hostname));
-  if (endpoints.length === 1) return endpoints[0];
+  if (!endpoints.length) {
+    throw new Error(
+      `No /mcp server for ${originHost}. Found: ${matches.map(server => server.hostname).join(", ")}.`
+    );
+  }
   throw new Error(
-    `Several MCP servers use ${originHost}: ${matches.map(server => server.hostname).join(", ")}.`
+    `Several MCP servers use ${originHost}: ${endpoints.map(server => server.hostname).join(", ")}.`
   );
 }
 

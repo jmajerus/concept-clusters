@@ -4,9 +4,18 @@ name: Sync MCP portal
 # the tool list. The portal serves a stored copy of that server's tools, so a
 # client refresh keeps showing the previous catalog until this sync runs.
 # This is not a Worker deploy and does not use CLOUDFLARE_API_TOKEN.
+# dispatch_id is the local request's marker. The run title carries it so the
+# dispatcher watches this run and not an older one.
+
+run-name: Sync MCP portal ${{ inputs.dispatch_id }}
 
 on:
   workflow_dispatch:
+    inputs:
+      dispatch_id:
+        description: Correlates this run with the local request
+        required: true
+        type: string
 
 permissions:
   contents: read
