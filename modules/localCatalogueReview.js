@@ -260,7 +260,8 @@ function listCatalogueRows(published, working) {
       entryCount: draft?.document?.entries?.length ?? item.document?.entries?.length ?? 0,
       updatedAt: draft?.updatedAt || item.updatedAt || "",
       cuedForFreeze: isPendingFreezeCue(item),
-      gitSeedCue: isGitSeedFreezeCue(item)
+      gitSeedCue: isGitSeedFreezeCue(item),
+      replicaPending: item.replicaPending === true
     });
   }
   for (const draft of working) {
@@ -495,7 +496,8 @@ function listCategoryRows(published, working) {
       unpublishedSubcategories: subcategoryList(draft).filter(sub => !publishedIds.has(sub.id)),
       updatedAt: item.updatedAt || "",
       cuedForFreeze: isPendingFreezeCue(item),
-      gitSeedCue: isGitSeedFreezeCue(item)
+      gitSeedCue: isGitSeedFreezeCue(item),
+      replicaPending: item.replicaPending === true
     });
   }
   for (const draft of working) {
@@ -525,6 +527,7 @@ function publicationNoticeFromSearch(searchParams, kind, rows) {
     id,
     revision,
     action,
+    replicaPending: row.replicaPending === true,
     cued: action === "cued" || searchParams.get("cued") === "1"
   };
 }

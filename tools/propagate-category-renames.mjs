@@ -22,6 +22,7 @@ import {
   serializeDraftDocument
 } from "../modules/draftRepository.js";
 import { createHttpD1Database } from "../modules/httpD1Database.js";
+import { refuseDirectPublishedD1Write } from "../modules/publishedReplica.js";
 import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 import { resolveLocalD1Config } from "../modules/localD1Config.js";
 import { planCategoryRenamePropagation } from "../modules/categoryRenamePropagation.js";
@@ -521,6 +522,7 @@ async function main() {
     if (JSON.stringify(initialCategoryVersion) !== JSON.stringify(latestCategoryVersion)) {
       throw new Error("Category registry changed while planning; re-run the dry-run and retry.");
     }
+    refuseDirectPublishedD1Write();
     applied = await applyD1Changes(database, d1Changes);
   }
   const finalGitChanges = [...gitChanges, ...interchangeChanges];

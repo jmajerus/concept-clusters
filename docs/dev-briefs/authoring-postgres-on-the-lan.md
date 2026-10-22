@@ -1,9 +1,11 @@
 # Authoring on Postgres, D1 for published play
 
-**Status: implemented on the LAN.** Gameplay stays on D1. Working copies are
-on Postgres. MCP reaches the LAN server, not the database. The Worker
-`/mcp` 410 ships with `npm run mcp:hosted:release`, which has not been run.
-Removing the D1 lost-response recovery waits until this path has been quiet.
+**Status: implemented on the LAN.** Working copies and the published corpus
+the LAN reads are on Postgres. D1 is a replica for the public play Worker;
+see `d1-published-replica.md`. MCP reaches the LAN server, not the
+database. The Worker `/mcp` 410 ships with `npm run mcp:hosted:release`,
+which has not been run. Removing the D1 lost-response recovery waits until
+this path has been quiet.
 
 This is the follow-up to the lost-response work (`d1CommitOutcome.js`, the
 revision probe, and the history batch in `0036_puzzle_draft_history_domains.sql`).
@@ -18,11 +20,10 @@ for everything not yet player-visible: puzzle drafts and their undo stack,
 content drafts, waivers, review, link-check results, the model catalogue,
 and site settings.
 
-D1 keeps the player-visible published corpus. Publish is an upsert of that
-document, safe to send twice. A failed publish means the person clicks
-again. Kinds that the play Worker reads go out in that upsert, not puzzles
-alone: `published_documents` for `puzzle`, `catalogue`, and `category`,
-plus `published_document_revisions`.
+The public play Worker still reads D1. The LAN's own published corpus has
+since moved to Postgres; `d1-published-replica.md` is that cut. Publish
+commits on the LAN and the replica drain upserts the current public row.
+Sending the same row twice is a no-op.
 
 The Cloudflare tunnel, if a remote client needs MCP, terminates at the LAN
 server's `/mcp`. Cloudflare Access sits in front of that hostname. The
@@ -130,10 +131,9 @@ produced a working sign-in.
    content-document repository so each write is one transaction. The
    draft write locks the row, checks `expected_revision`, inserts the
    undo snapshot from the current domain columns, and updates the draft.
-4. **Point the LAN server and stdio at Postgres.** Publish becomes an
-   idempotent upsert into D1 `published_documents` for puzzle, catalogue,
-   and category. Sending it twice is a no-op when the content hash
-   already matches.
+4. **Point the LAN server and stdio at Postgres.** Publish commits on the
+   LAN. The replica drain upserts the current public row into D1.
+   Sending the same row twice is a no-op.
 5. **Retire the authoring Worker `/mcp`** after the connector from step 1
    is the one people use. Move the link-health cron to a timer. The play
    Worker (`src/worker.js`) stays on D1.

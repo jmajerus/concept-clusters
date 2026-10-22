@@ -18,7 +18,7 @@ const PAGE_STYLE = `
   .link-health-ok strong { color: #15803d; }
   .link-issues > li { margin: 10px 0; }
   .link-issues ul { margin: 2px 0 0 0; }
-  body { font: 16px/1.5 -apple-system, system-ui, sans-serif; max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; color: #1a1a1a; }
+  body { font: 16px/1.5 -apple-system, system-ui, sans-serif; max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; color: #1a1a1a; background: #fff; }
   .meta { color: #666; font-size: 14px; }
   a { color: #2563eb; }
   table { border-collapse: collapse; width: 100%; }
@@ -28,6 +28,17 @@ const PAGE_STYLE = `
   .server-revision p { margin: 4px 0; }
   .server-revision-stale { border-color: #f59e0b; background: #fffbeb; }
   .server-revision-stale strong { color: #b45309; }
+  .replica-sync { margin: 20px 0; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+  .replica-sync h2 { margin: 0 0 4px; font-size: 18px; }
+  .replica-sync p { margin: 4px 0; }
+  .replica-sync ul { margin: 8px 0 0; padding-left: 1.2em; }
+  .replica-sync-behind { border-color: #f59e0b; background: #fffbeb; }
+  .replica-sync-behind strong { color: #b45309; }
+  .mcp-health { margin: 20px 0; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+  .mcp-health h2 { margin: 0 0 4px; font-size: 18px; }
+  .mcp-health p { margin: 4px 0; }
+  .mcp-health-warn { border-color: #f59e0b; background: #fffbeb; }
+  .mcp-health-warn strong { color: #b45309; }
   .freeze, .github-prod { margin: 28px 0; padding: 16px; border: 1px solid #dbeafe; background: #f8fbff; border-radius: 8px; }
   .freeze h2, .github-prod h2 { margin: 0 0 8px; font-size: 18px; }
   .github-prod .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
@@ -191,6 +202,153 @@ export function renderServerRevisionSection(status) {
     <p class="meta">${comparison}.</p>
     ${fix}
     ${fetchNote}
+  </section>`;
+}
+
+const REPLICA_KIND_LABEL = Object.freeze({
+  puzzle: "Puzzle",
+  catalogue: "Catalogue",
+  category: "Category",
+  site_settings: "Site settings"
+});
+const REPLICA_LIST_LIMIT = 12;
+
+function formatReplicaWhen(value) {
+  const text = String(value || "");
+  if (text.length < 16) return text;
+  return `${text.slice(0, 10)} ${text.slice(11, 16)} UTC`;
+}
+
+function replicaItemHref(item) {
+  const id = encodeURIComponent(item.id);
+  if (item.kind === "puzzle") return `/admin/drafts/${id}`;
+  if (item.kind === "catalogue") return `/admin/catalogues/${id}`;
+  if (item.kind === "category") return `/admin/categories/${id}`;
+  return "";
+}
+
+function waitingForCategories(missing = []) {
+  const codes = missing.map(id => `<code>${escapeHtml(id)}</code>`);
+  const noun = codes.length === 1 ? "category" : "categories";
+  return `waiting for ${noun} ${codes.join(", ")}`;
+}
+
+function renderReplicaItem(item, heldById) {
+  const since = item.enqueuedAt
+    ? ` <span class="meta">since ${escapeHtml(formatReplicaWhen(item.enqueuedAt))}</span>`
+    : "";
+  if (item.kind === "site_settings") return `<li>Site settings${since}</li>`;
+  const label = escapeHtml(REPLICA_KIND_LABEL[item.kind] || item.kind);
+  const name = escapeHtml(item.title || item.id);
+  const href = replicaItemHref(item);
+  const linked = href ? `<a href="${href}">${name}</a>` : name;
+  const held = item.kind === "puzzle" ? heldById.get(item.id) : null;
+  const waiting = held
+    ? ` <span class="meta">${waitingForCategories(held.missing)}</span>`
+    : "";
+  return `<li>${label} ${linked}${since}${waiting}</li>`;
+}
+
+/** Queue plus the in-process drain. Absent when this server does not replicate. */
+export function renderReplicaSyncSection(status) {
+  if (!status) return "";
+  if (status.error) {
+    return `<section class="replica-sync replica-sync-behind">
+      <h2>Public site</h2>
+      <p><strong>Could not read the replica queue</strong> (${escapeHtml(status.error)}).</p>
+    </section>`;
+  }
+  const pending = Array.isArray(status.pending) ? status.pending : [];
+  const held = Array.isArray(status.held) ? status.held : [];
+  const drain = status.drain || {};
+  const behind = pending.length > 0 || held.length > 0
+    || drain.phase === "waiting" || drain.phase === "error";
+  const heldById = new Map(held.map(item => [item.id, item]));
+  const shown = pending.slice(0, REPLICA_LIST_LIMIT);
+  const rest = pending.length - shown.length;
+  const list = shown.length
+    ? `<ul>${shown.map(item => renderReplicaItem(item, heldById)).join("")}</ul>${
+      rest > 0 ? `<p class="meta">and ${rest} more.</p>` : ""
+    }`
+    : "";
+  const count = pending.length === 1
+    ? "1 change is on the LAN and not yet on the public site."
+    : `${pending.length} changes are on the LAN and not yet on the public site.`;
+  let summary;
+  if (pending.length) summary = count;
+  else if (drain.phase === "ok") summary = "The public site matches the LAN.";
+  else summary = "Nothing is waiting to copy.";
+  const notes = [];
+  if (drain.phase === "waiting" && drain.waiting) {
+    notes.push(`<strong>Cannot reach the public site</strong> (${escapeHtml(drain.waiting)}). Players keep the last copy that arrived.`);
+  }
+  if (drain.phase === "error" && drain.error) {
+    notes.push(`<strong>The last copy failed</strong> (${escapeHtml(drain.error)}).`);
+  }
+  if (drain.at && drain.phase !== "idle") {
+    notes.push(`Last checked ${escapeHtml(formatReplicaWhen(drain.at))}.`);
+  }
+  const noteHtml = notes.map(note => `<p class="meta">${note}</p>`).join("");
+  return `<section class="replica-sync${behind ? " replica-sync-behind" : ""}">
+    <h2>Public site</h2>
+    <p>${escapeHtml(summary)}</p>
+    <p class="meta">Publish commits on the LAN and returns. This server copies the current public rows to the site players use.</p>
+    ${list}
+    ${noteHtml}
+  </section>`;
+}
+
+function formatAdminWhen(value) {
+  const text = String(value || "");
+  if (text.length < 16) return text;
+  return `${text.slice(0, 10)} ${text.slice(11, 16)} UTC`;
+}
+
+function mcpCount(count, label) {
+  return `${count} ${label}${count === 1 ? "" : "s"}`;
+}
+
+/** Remote /mcp on this process. Absent when the page has no health snapshot. */
+export function renderMcpHealthSection(health) {
+  if (!health) return "";
+  if (health.error) {
+    return `<section class="mcp-health mcp-health-warn">
+      <h2>Remote MCP</h2>
+      <p><strong>Could not read MCP health</strong> (${escapeHtml(health.error)}).</p>
+    </section>`;
+  }
+  const accepted = Number(health.accepted) || 0;
+  const rejected = Number(health.rejected) || 0;
+  const lastAccepted = health.lastAccepted || null;
+  const lastRejected = health.lastRejected || null;
+  const latestRejected = Boolean(
+    lastRejected && (!lastAccepted || String(lastRejected.at) >= String(lastAccepted.at))
+  );
+  const warn = health.accessConfigured === false || latestRejected;
+  const trafficParts = [];
+  if (accepted) trafficParts.push(`${mcpCount(accepted, "request")} accepted`);
+  if (rejected) trafficParts.push(`${mcpCount(rejected, "request")} rejected`);
+  const traffic = trafficParts.length
+    ? `${trafficParts.join(", ")} since this process started.`
+    : "No client has connected since this process started.";
+  const acceptedLine = lastAccepted
+    ? `<p class="meta">Last accepted${lastAccepted.method ? ` <code>${escapeHtml(lastAccepted.method)}</code>` : ""}${
+      lastAccepted.client ? ` from ${escapeHtml(lastAccepted.client)}` : ""
+    } at ${escapeHtml(formatAdminWhen(lastAccepted.at))}.</p>`
+    : "";
+  const rejectedLine = lastRejected
+    ? `<p class="meta">Last rejected at ${escapeHtml(formatAdminWhen(lastRejected.at))}: ${escapeHtml(lastRejected.reason)}.</p>`
+    : "";
+  const accessLine = health.accessConfigured === false
+    ? `<p><strong>Remote clients cannot sign in.</strong> Cloudflare Access is not configured.</p>`
+    : "";
+  return `<section class="mcp-health${warn ? " mcp-health-warn" : ""}">
+    <h2>Remote MCP</h2>
+    <p>${escapeHtml(traffic)}</p>
+    <p class="meta">This server answers <code>/mcp</code>. A workstation's stdio server is separate.</p>
+    ${accessLine}
+    ${acceptedLine}
+    ${rejectedLine}
   </section>`;
 }
 
@@ -414,7 +572,20 @@ function renderGithubProductionSection({
  *   githubProduction?: object | null,
  *   canRefreshGithubProduction?: boolean,
  *   linkHealth?: Awaited<ReturnType<import("./wikiLinkCheck.js").loadWikiLinkHealth>> | null,
- *   serverRevision?: Awaited<ReturnType<import("./authoringServerRevision.js").loadServerRevisionStatus>>
+ *   serverRevision?: Awaited<ReturnType<import("./authoringServerRevision.js").loadServerRevisionStatus>>,
+ *   replicaStatus?: {
+ *     pending?: { kind: string, id: string, title?: string, enqueuedAt?: string }[],
+ *     held?: { id: string, title?: string, missing?: string[] }[],
+ *     drain?: { phase?: string, waiting?: string | null, error?: string | null, at?: string | null },
+ *     error?: string
+ *   } | null,
+ *   mcpHealth?: {
+ *     accessConfigured?: boolean,
+ *     accepted?: number,
+ *     rejected?: number,
+ *     lastAccepted?: { at?: string, method?: string | null, client?: string | null } | null,
+ *     lastRejected?: { at?: string, reason?: string } | null
+ *   } | null
  * }} [options]
  */
 export function renderAdminIndexPage({
@@ -424,13 +595,19 @@ export function renderAdminIndexPage({
   githubProduction = null,
   canRefreshGithubProduction = canApplyFreeze,
   linkHealth = null,
-  serverRevision = null
+  serverRevision = null,
+  replicaStatus = null,
+  mcpHealth = null
 } = {}) {
+  const intro = replicaStatus
+    ? "Published rows live on the LAN. The public site follows them."
+    : "Authoring documents in D1. Publish writes the shared live row.";
   const body = `<h1>Admin</h1>
-    <p class="meta">Authoring documents in D1. Publish writes the shared live
-    row. Freeze validates cued snapshots and creates one release PR.
+    <p class="meta">${intro} Freeze validates cued snapshots and creates one release PR.
     ${authoringAdminNav()}</p>
     ${renderServerRevisionSection(serverRevision)}
+    ${renderMcpHealthSection(mcpHealth)}
+    ${renderReplicaSyncSection(replicaStatus)}
     ${renderFreezeSection({ freezePlan, canApplyFreeze, canCueAllPublished })}
     ${renderGithubProductionSection({ githubProduction, canRefreshGithubProduction })}
     ${renderLinkHealthSummary(linkHealth)}
@@ -640,7 +817,9 @@ export async function handleAuthoringAdminIndex(req, res, {
   cueAllPublished = null,
   loadLinkHealth = null,
   loadServerRevision = null,
-  subscribeServerRevision = null
+  subscribeServerRevision = null,
+  loadReplicaStatus = null,
+  loadMcpHealth = null
 } = {}) {
   const urlPath = (req.url || "").split("?")[0];
   if (urlPath === LINK_HEALTH_PATH) {
@@ -839,6 +1018,26 @@ export async function handleAuthoringAdminIndex(req, res, {
       serverRevision = null;
     }
   }
+  let mcpHealth = null;
+  if (loadMcpHealth && req.method !== "HEAD") {
+    try {
+      mcpHealth = await loadMcpHealth();
+    } catch (error) {
+      mcpHealth = {
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+  let replicaStatus = null;
+  if (loadReplicaStatus && req.method !== "HEAD") {
+    try {
+      replicaStatus = await loadReplicaStatus();
+    } catch (error) {
+      replicaStatus = {
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
   res.writeHead(200, {
     "Content-Type": "text/html; charset=utf-8",
     "Cache-Control": "no-store"
@@ -850,7 +1049,9 @@ export async function handleAuthoringAdminIndex(req, res, {
     githubProduction: snapshot,
     canRefreshGithubProduction: typeof refreshGithubProduction === "function",
     linkHealth,
-    serverRevision
+    serverRevision,
+    replicaStatus,
+    mcpHealth
   }));
   return true;
 }

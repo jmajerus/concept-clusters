@@ -71,18 +71,6 @@
       "problemMatcher": []
     },
     {
-      "label": "Deploy MCP",
-      "type": "npm",
-      "script": "mcp:hosted:deploy",
-      "problemMatcher": []
-    },
-    {
-      "label": "Release MCP",
-      "type": "npm",
-      "script": "mcp:hosted:release",
-      "problemMatcher": []
-    },
-    {
       "label": "Deploy Authoring",
       "type": "npm",
       "script": "authoring:deploy",

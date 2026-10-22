@@ -1,7 +1,8 @@
 import { DraftNotFoundError } from "./draftRepository.js";
 
-// Working copies live in Postgres. Published rows, including the review
-// stamp players do not read but Freeze and the draft page do, stay on D1.
+// Working copies and the published corpus the LAN reads live in Postgres.
+// A completed review is one transaction there: the event and the stamp
+// commit together. The public replica is a separate queue.
 export function createSplitContentDocuments({
   drafts,
   published,
@@ -19,38 +20,10 @@ export function createSplitContentDocuments({
       const event = await reviewEvents.insert(input);
       return eventType === "proposed" ? event : null;
     }
-    const current = await published.getPublished({ kind: "puzzle", id: input.id });
-    const reviewedAt = input.reviewedAt || new Date().toISOString();
-    const stamp = input.reviewerKind === "agent"
-      ? current.lastAgentReviewedAt
-      : current.lastHumanReviewedAt;
-    const prior = typeof reviewEvents.latestMatchingReview === "function"
-      ? await reviewEvents.latestMatchingReview({
-        id: input.id,
-        reviewerKind: input.reviewerKind,
-        eventType: "review",
-        comments: input.comments ?? null,
-        outcome: input.outcome ?? null,
-        draftRevision: input.draftRevision ?? null
-      })
-      : null;
-    // The event and the D1 stamp cannot commit together. A retry of a call
-    // whose event landed and whose stamp did not must stamp that event
-    // instead of inserting another one.
-    if (prior && (!stamp || prior.reviewedAt > stamp)) {
-      await published.touchPublishedReviewStamp({
-        id: input.id,
-        reviewerKind: input.reviewerKind,
-        reviewedAt: prior.reviewedAt
-      });
-      return published.getPublished({ kind: "puzzle", id: input.id });
+    if (typeof published.recordReview !== "function") {
+      throw new Error("A completed review is one Postgres insert");
     }
-    const event = await reviewEvents.insert({ ...input, eventType: "review", reviewedAt });
-    await published.touchPublishedReviewStamp({
-      id: input.id,
-      reviewerKind: input.reviewerKind,
-      reviewedAt: event.reviewedAt || reviewedAt
-    });
+    await published.recordReview(input);
     return published.getPublished({ kind: "puzzle", id: input.id });
   }
 

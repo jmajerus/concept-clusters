@@ -43,6 +43,7 @@ import {
 } from "./propagate-category-renames.mjs";
 import { planCategoryReferenceMigration } from "../modules/categoryReferenceMigration.js";
 import { createHttpD1Database } from "../modules/httpD1Database.js";
+import { refuseDirectPublishedD1Write } from "../modules/publishedReplica.js";
 import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 import { resolveLocalD1Config } from "../modules/localD1Config.js";
 
@@ -282,6 +283,7 @@ async function main() {
   let appliedD1 = 0;
   let appliedGit = { files: 0, modules: 0 };
   if (options.applyD1) {
+    refuseDirectPublishedD1Write();
     if (!database) throw new Error("D1 apply requires credentials; omit --git-only.");
     const initialCategoryVersion = categoryRegistryVersion(
       d1.published.filter(row => row.kind === "category")

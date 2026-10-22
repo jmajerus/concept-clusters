@@ -36,8 +36,15 @@ import { guardLocalAdmin } from "./localAdminAuth.js";
 import { withD1Timing } from "./d1RequestTiming.js";
 import { d1LargeColumnCacheEnabled } from "./d1LargeColumnCache.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
+import { authoringMcpHealth } from "./authoringMcpHealth.js";
 import { handleLocalMcpRequest } from "./localMcpHttp.js";
 import { startWeeklyLinkHealth } from "./linkHealthSchedule.js";
+import { loadPublishedReplicaStatus } from "./publishedReplica.js";
+import {
+  publishedReplicaDrainStatus,
+  startPublishedReplicaDrain
+} from "./publishedReplicaSchedule.js";
+import { authoringDatabaseUrl, getAuthoringPool } from "./postgresPool.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
 import {
@@ -176,6 +183,13 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
       canApplyFreeze: true,
       loadServerRevision: () => revisions.refresh({ fetchRemote: true }),
       subscribeServerRevision: listener => revisions.subscribe(listener),
+      loadMcpHealth: () => authoringMcpHealth(),
+      loadReplicaStatus: async () => {
+        const databaseUrl = authoringDatabaseUrl();
+        if (!databaseUrl) return null;
+        const queue = await loadPublishedReplicaStatus(getAuthoringPool(databaseUrl));
+        return { ...queue, drain: publishedReplicaDrainStatus() };
+      },
       loadLinkHealth: async () => {
         const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
         if (!resolved.contentDocuments || !resolved.wikiLinkStore) return null;
@@ -552,6 +566,7 @@ export async function startLocalStaticDev({
     env,
     enabled: isAllInterfacesHost(host)
   });
+  const stopReplicaDrain = startPublishedReplicaDrain({ repositoryRoot, env });
   printReady(base, manifest, authoringReadyExtras({ host, port: actualPort, repositoryRoot, env }));
 
   let stopping = false;
@@ -559,6 +574,7 @@ export async function startLocalStaticDev({
     if (stopping) return;
     stopping = true;
     stopLinkHealth();
+    stopReplicaDrain();
     closeHttpServer(server).then(() => {
       removeLocalDevLease({
         repositoryRoot,
@@ -739,6 +755,7 @@ export async function startLocalWorkerDev({
     env,
     enabled: isAllInterfacesHost(host)
   });
+  const stopReplicaDrain = startPublishedReplicaDrain({ repositoryRoot, env });
   printReady(base, manifest, [
     `Worker mode: Wrangler on ${DEFAULT_HOST}:${wranglerPort}`,
     ...authoringReadyExtras({ host, port: actualPort, repositoryRoot, env })
@@ -749,6 +766,7 @@ export async function startLocalWorkerDev({
     if (stopping) return;
     stopping = true;
     stopLinkHealth();
+    stopReplicaDrain();
     await Promise.all([
       closeHttpServer(server),
       stopChildProcess(wrangler)
@@ -853,7 +871,8 @@ export async function runLocalDev({
 // the lists the admin pages read, so the first load after a start does not
 // download the whole corpus. Same calls as the pages, so the queries match.
 async function warmD1LargeColumnCache({ repositoryRoot, env }) {
-  if (!d1LargeColumnCacheEnabled(env)) return;
+  // The LAN published corpus is Postgres. The cache only helps the D1 fallback.
+  if (authoringDatabaseUrl(env) || !d1LargeColumnCacheEnabled(env)) return;
   const startedAt = performance.now();
   try {
     const { contentDocuments, draftRepository, actor } =

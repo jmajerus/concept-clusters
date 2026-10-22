@@ -922,6 +922,7 @@ export function draftPublicationNoticeFromSearch(searchParams, rows, {
     id,
     revision,
     action,
+    replicaPending: row.replicaPending === true,
     cued: action === "cued" || searchParams.get("cued") === "1",
     layoutKept: (searchParams.get("layout_kept") || "")
       .split(",")

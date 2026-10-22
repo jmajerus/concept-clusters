@@ -6,6 +6,11 @@ import {
   verifyAccessToken
 } from "../modules/accessAuth.js";
 import { linkHealthDue } from "../modules/linkHealthSchedule.js";
+import {
+  authoringMcpHealth,
+  summarizeMcpBody
+} from "../modules/authoringMcpHealth.js";
+import { MAX_MCP_REQUEST_BYTES } from "../modules/authoringMcpHttp.js";
 import { handleLocalMcpRequest, nodeRequestToWeb } from "../modules/localMcpHttp.js";
 
 export const name = "LAN authoring access: Access token and Monday link-health slot";
@@ -114,6 +119,7 @@ export async function run() {
   res.writeHead = status => {
     res.statusCode = status;
   };
+  const beforeReject = authoringMcpHealth();
   const handled = await handleLocalMcpRequest(anonymous, res, {
     env: {},
     repositoryRoot: process.cwd()
@@ -122,4 +128,70 @@ export async function run() {
   assert.equal(res.statusCode, 401);
   assert.equal(unauthorizedPulls, 0);
   assert.match(Buffer.concat(chunks).toString("utf8"), /Cloudflare Access authentication is required/);
+  const afterReject = authoringMcpHealth();
+  assert.equal(afterReject.rejected, beforeReject.rejected + 1);
+  assert.equal(afterReject.accepted, beforeReject.accepted);
+  assert.equal(afterReject.lastRejected.reason, "no token");
+  assert.equal(JSON.stringify(afterReject).includes("author@example.com"), false);
+
+  const summary = summarizeMcpBody(JSON.stringify({
+    method: "initialize",
+    params: {
+      clientInfo: { name: "Cursor\n<script>" },
+      arguments: { token: "secret" }
+    }
+  }));
+  assert.equal(summary.client, "Cursor<script>");
+  assert.equal(summary.method, "initialize");
+  assert.deepEqual(
+    summarizeMcpBody(JSON.stringify({
+      method: "tools/call",
+      params: { name: "list_puzzles", arguments: { query: "secret" } }
+    })),
+    { method: "tools/call list_puzzles", client: null }
+  );
+
+  const oversized = new Readable({ read() { this.push(null); } });
+  oversized.method = "POST";
+  oversized.url = "/mcp";
+  oversized.headers = { host: "authoring.example", "content-length": "2000000" };
+  const oversizedRes = new Writable({
+    write(_chunk, _encoding, callback) { callback(); }
+  });
+  oversizedRes.writeHead = status => { oversizedRes.statusCode = status; };
+  const beforeLarge = authoringMcpHealth();
+  assert.equal(await handleLocalMcpRequest(oversized, oversizedRes, { env: {} }), true);
+  assert.equal(oversizedRes.statusCode, 413);
+  const afterLarge = authoringMcpHealth();
+  assert.equal(afterLarge.rejected, beforeLarge.rejected + 1);
+  assert.equal(afterLarge.lastRejected.reason, "body too large");
+
+  const chunk = Buffer.alloc(64 * 1024, 1);
+  let sent = 0;
+  const chunked = new Readable({
+    read() {
+      if (sent > MAX_MCP_REQUEST_BYTES + chunk.length) return;
+      sent += chunk.length;
+      this.push(chunk);
+    }
+  });
+  chunked.method = "POST";
+  chunked.url = "/mcp";
+  chunked.headers = { host: "localhost" };
+  chunked.socket = { remoteAddress: "127.0.0.1" };
+  const chunkedRes = new Writable({
+    write(_chunk, _encoding, callback) { callback(); }
+  });
+  chunkedRes.writeHead = status => { chunkedRes.statusCode = status; };
+  const beforeChunked = authoringMcpHealth();
+  assert.equal(await handleLocalMcpRequest(chunked, chunkedRes, {
+    env: { AUTHORING_DEV_SUBJECT: "local-author" },
+    repositoryRoot: process.cwd()
+  }), true);
+  assert.equal(chunkedRes.statusCode, 413);
+  assert.ok(sent < MAX_MCP_REQUEST_BYTES + chunk.length * 4, "the reader stops once the limit is crossed");
+  const afterChunked = authoringMcpHealth();
+  assert.equal(afterChunked.rejected, beforeChunked.rejected + 1);
+  assert.equal(afterChunked.accepted, beforeChunked.accepted);
+  assert.equal(afterChunked.lastRejected.reason, "body too large");
 }

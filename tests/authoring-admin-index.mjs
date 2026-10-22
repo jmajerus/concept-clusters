@@ -43,6 +43,8 @@ export async function run(page) {
   assert.match(pageHtml, /Play this server/);
   assert.match(pageHtml, /Publish writes the shared live/);
   assert.match(pageHtml, /<h2>Freeze<\/h2>/);
+  assert.doesNotMatch(pageHtml, /<h2>Public site<\/h2>/);
+  assert.doesNotMatch(pageHtml, /<h2>Remote MCP<\/h2>/);
   assert.match(pageHtml, />Freeze</);
   assert.match(pageHtml, /No changes cued/);
   assert.match(pageHtml, /Git-seeded snapshots already in this checkout/);
@@ -195,6 +197,156 @@ export async function run(page) {
   const nothingYet = renderAdminIndexPage({ linkHealth: { ...linkHealth, checked: 0, issues: [] } });
   assert.match(nothingYet, /none checked yet/);
   assert.doesNotMatch(renderAdminIndexPage(), /Wikipedia links/, "no loader, no section");
+
+  const caughtUp = renderAdminIndexPage({
+    replicaStatus: {
+      pending: [],
+      held: [],
+      drain: { phase: "ok", at: "2026-10-21T14:40:00.000Z" }
+    }
+  });
+  assert.match(caughtUp, /<h2>Public site<\/h2>/);
+  assert.match(caughtUp, /Published rows live on the LAN/);
+  assert.doesNotMatch(caughtUp, /Publish writes the shared live/);
+  assert.match(caughtUp, /The public site matches the LAN/);
+  assert.match(caughtUp, /Last checked 2026-10-21 14:40 UTC/);
+  assert.match(caughtUp, /<section class="replica-sync">/);
+  assert.doesNotMatch(caughtUp, /<section class="replica-sync replica-sync-behind">/);
+  assert.ok(
+    caughtUp.indexOf("<h2>Public site</h2>") < caughtUp.indexOf("<h2>Freeze</h2>"),
+    "the replica card sits with the server status, ahead of Freeze"
+  );
+
+  const behind = renderAdminIndexPage({
+    replicaStatus: {
+      pending: [
+        { kind: "puzzle", id: "cell", title: "Cell", enqueuedAt: "2026-10-21T14:36:00.000Z" },
+        { kind: "site_settings", id: "public", title: "Site settings", enqueuedAt: "2026-10-21T14:37:00.000Z" }
+      ],
+      held: [{ id: "cell", title: "Cell", missing: ["biology"] }],
+      drain: {
+        phase: "waiting",
+        waiting: "CLOUDFLARE_API_TOKEN is not set",
+        at: "2026-10-21T14:40:00.000Z"
+      }
+    }
+  });
+  assert.match(behind, /<section class="replica-sync replica-sync-behind">/);
+  assert.match(behind, /2 changes are on the LAN and not yet on the public site/);
+  assert.match(behind, /href="\/admin\/drafts\/cell"/);
+  assert.match(behind, /waiting for category <code>biology<\/code>/);
+  assert.match(behind, /Site settings/);
+  assert.doesNotMatch(behind, /href="\/admin\/[^"]*public"/);
+  assert.match(behind, /Cannot reach the public site/);
+  assert.match(behind, /CLOUDFLARE_API_TOKEN is not set/);
+  assert.doesNotMatch(behind, /The public site matches the LAN/);
+
+  const many = Array.from({ length: 13 }, (_, index) => ({
+    kind: "puzzle",
+    id: `puzzle-${index}`,
+    title: `Puzzle ${index}`,
+    enqueuedAt: "2026-10-21T14:36:00.000Z"
+  }));
+  const truncated = renderAdminIndexPage({
+    replicaStatus: { pending: many, held: [], drain: { phase: "ok", at: "2026-10-21T14:40:00.000Z" } }
+  });
+  assert.match(truncated, /13 changes are on the LAN/);
+  assert.match(truncated, /puzzle-11/);
+  assert.doesNotMatch(truncated, /puzzle-12/);
+  assert.match(truncated, /and 1 more/);
+
+  const unread = renderAdminIndexPage({
+    replicaStatus: { error: "relation \"published_replica_queue\" does not exist" }
+  });
+  assert.match(unread, /Could not read the replica queue/);
+  assert.match(unread, /relation &quot;published_replica_queue&quot; does not exist/);
+  assert.match(unread, /<section class="replica-sync replica-sync-behind">/);
+
+  const replicaRoute = createResponse();
+  assert.equal(await handleAuthoringAdminIndex({ method: "GET", url: "/admin" }, replicaRoute, {
+    loadReplicaStatus: async () => ({
+      pending: [],
+      held: [],
+      drain: { phase: "error", error: "d1 down", at: "2026-10-21T14:41:00.000Z" }
+    })
+  }), true);
+  assert.match(replicaRoute.body, /The last copy failed/);
+  assert.match(replicaRoute.body, /d1 down/);
+  assert.doesNotMatch(replicaRoute.body, /The public site matches the LAN/);
+  const replicaFails = createResponse();
+  assert.equal(await handleAuthoringAdminIndex({ method: "GET", url: "/admin" }, replicaFails, {
+    loadReplicaStatus: async () => { throw new Error("postgres down"); }
+  }), true);
+  assert.equal(replicaFails.status, 200, "a failing replica loader never takes the index down");
+  assert.match(replicaFails.body, /Could not read the replica queue/);
+  assert.match(replicaFails.body, /postgres down/);
+
+  const mcpIdle = renderAdminIndexPage({
+    mcpHealth: { accessConfigured: true, accepted: 0, rejected: 0, lastAccepted: null, lastRejected: null }
+  });
+  assert.match(mcpIdle, /<h2>Remote MCP<\/h2>/);
+  assert.match(mcpIdle, /No client has connected since this process started/);
+  assert.match(mcpIdle, /stdio server is separate/);
+  assert.match(mcpIdle, /<section class="mcp-health">/);
+  assert.doesNotMatch(mcpIdle, /<section class="mcp-health mcp-health-warn">/);
+  assert.ok(
+    mcpIdle.indexOf("<h2>Remote MCP</h2>") < mcpIdle.indexOf("<h2>Freeze</h2>"),
+    "the MCP card sits with the server status, ahead of Freeze"
+  );
+
+  const mcpSeen = renderAdminIndexPage({
+    mcpHealth: {
+      accessConfigured: true,
+      accepted: 2,
+      rejected: 1,
+      lastAccepted: {
+        at: "2026-10-21T23:50:00.000Z",
+        method: "tools/call list_puzzles",
+        client: "Cursor"
+      },
+      lastRejected: { at: "2026-10-21T23:40:00.000Z", reason: "no token" }
+    }
+  });
+  assert.match(mcpSeen, /2 requests accepted, 1 request rejected/);
+  assert.match(mcpSeen, /tools\/call list_puzzles/);
+  assert.match(mcpSeen, /from Cursor/);
+  assert.match(mcpSeen, /Last rejected at 2026-10-21 23:40 UTC: no token/);
+  assert.doesNotMatch(mcpSeen, /<section class="mcp-health mcp-health-warn">/);
+
+  const mcpDown = renderAdminIndexPage({
+    mcpHealth: {
+      accessConfigured: false,
+      accepted: 0,
+      rejected: 1,
+      lastAccepted: null,
+      lastRejected: { at: "2026-10-21T23:51:00.000Z", reason: "invalid token" }
+    }
+  });
+  assert.match(mcpDown, /<section class="mcp-health mcp-health-warn">/);
+  assert.match(mcpDown, /Remote clients cannot sign in/);
+  assert.match(mcpDown, /invalid token/);
+  assert.doesNotMatch(mcpDown, /cf-access-jwt-assertion/);
+  const hostile = renderAdminIndexPage({
+    mcpHealth: {
+      accessConfigured: true,
+      accepted: 1,
+      rejected: 0,
+      lastAccepted: { at: "2026-10-21T23:50:00.000Z", method: "initialize", client: "Cursor<script>" },
+      lastRejected: null
+    }
+  });
+  assert.match(hostile, /1 request accepted since this process started/);
+  assert.doesNotMatch(hostile, /0 requests rejected/);
+  assert.match(hostile, /Cursor&lt;script&gt;/);
+  assert.doesNotMatch(hostile, /Cursor<script>/);
+
+  const mcpRoute = createResponse();
+  assert.equal(await handleAuthoringAdminIndex({ method: "GET", url: "/admin" }, mcpRoute, {
+    loadMcpHealth: async () => { throw new Error("health reader failed"); }
+  }), true);
+  assert.equal(mcpRoute.status, 200);
+  assert.match(mcpRoute.body, /Could not read MCP health/);
+  assert.match(mcpRoute.body, /health reader failed/);
 
   const healthPage = renderLinkHealthPage(linkHealth);
   assert.match(healthPage, /<h1>Wikipedia link health<\/h1>/);
