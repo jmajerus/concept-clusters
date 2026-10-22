@@ -35,7 +35,7 @@ function destroyRequest(req) {
   else if (typeof req.resume === "function") req.resume();
 }
 
-async function readNodeBody(req, maxBytes) {
+async function readNodeBody(req, maxBytes = MAX_MCP_REQUEST_BYTES) {
   if (mcpContentLengthExceeded(req.headers, maxBytes)) {
     destroyRequest(req);
     throw new RangeError(`MCP request exceeds ${maxBytes} bytes`);
@@ -130,7 +130,7 @@ export async function handleLocalMcpRequest(req, res, {
   let summary = { method: method === "GET" ? "GET" : null, client: null };
   if (hasBody) {
     try {
-      const raw = await readNodeBody(req);
+      const raw = await readNodeBody(req, MAX_MCP_REQUEST_BYTES);
       summary = summarizeMcpBody(raw);
       request = new Request(headerRequest.url, {
         method,

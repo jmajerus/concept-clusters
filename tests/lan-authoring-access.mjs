@@ -10,6 +10,7 @@ import {
   authoringMcpHealth,
   summarizeMcpBody
 } from "../modules/authoringMcpHealth.js";
+import { MAX_MCP_REQUEST_BYTES } from "../modules/authoringMcpHttp.js";
 import { handleLocalMcpRequest, nodeRequestToWeb } from "../modules/localMcpHttp.js";
 
 export const name = "LAN authoring access: Access token and Monday link-health slot";
@@ -164,4 +165,33 @@ export async function run() {
   const afterLarge = authoringMcpHealth();
   assert.equal(afterLarge.rejected, beforeLarge.rejected + 1);
   assert.equal(afterLarge.lastRejected.reason, "body too large");
+
+  const chunk = Buffer.alloc(64 * 1024, 1);
+  let sent = 0;
+  const chunked = new Readable({
+    read() {
+      if (sent > MAX_MCP_REQUEST_BYTES + chunk.length) return;
+      sent += chunk.length;
+      this.push(chunk);
+    }
+  });
+  chunked.method = "POST";
+  chunked.url = "/mcp";
+  chunked.headers = { host: "localhost" };
+  chunked.socket = { remoteAddress: "127.0.0.1" };
+  const chunkedRes = new Writable({
+    write(_chunk, _encoding, callback) { callback(); }
+  });
+  chunkedRes.writeHead = status => { chunkedRes.statusCode = status; };
+  const beforeChunked = authoringMcpHealth();
+  assert.equal(await handleLocalMcpRequest(chunked, chunkedRes, {
+    env: { AUTHORING_DEV_SUBJECT: "local-author" },
+    repositoryRoot: process.cwd()
+  }), true);
+  assert.equal(chunkedRes.statusCode, 413);
+  assert.ok(sent < MAX_MCP_REQUEST_BYTES + chunk.length * 4, "the reader stops once the limit is crossed");
+  const afterChunked = authoringMcpHealth();
+  assert.equal(afterChunked.rejected, beforeChunked.rejected + 1);
+  assert.equal(afterChunked.accepted, beforeChunked.accepted);
+  assert.equal(afterChunked.lastRejected.reason, "body too large");
 }

@@ -6,6 +6,7 @@ import { PostgresPublishedRepository } from "../modules/postgresPublishedReposit
 import { PostgresReviewEventStore } from "../modules/postgresReviewEvents.js";
 import { createPostgresSiteSettingsStore } from "../modules/siteSettings.js";
 import {
+  categoryReferences,
   drainPublishedReplica,
   enqueueSiteSettingsReplica,
   loadPublishedReplicaStatus,
@@ -144,6 +145,14 @@ export async function run() {
   );
   assert.doesNotThrow(() => refuseDirectPublishedD1Write({}));
   assert.deepEqual(
+    categoryReferences({
+      category: "biology",
+      categories: ["science"],
+      subcategories: { medicine: "joints" }
+    }).sort(),
+    ["biology", "medicine", "science"]
+  );
+  assert.deepEqual(
     replicaWriteOrder([
       { kind: "puzzle", id: "cell", withdrawn_at: "2026-01-01" },
       { kind: "catalogue", id: "life" },
@@ -248,6 +257,43 @@ export async function run() {
   await drainPublishedReplica({ pool, d1 });
   assert.equal(d1.documents.has("category:missing"), true);
   assert.equal(d1.documents.has("puzzle:orphan"), true);
+
+  const subOnly = await published.publish({
+    kind: "puzzle",
+    id: "sub-only",
+    document: {
+      id: "sub-only",
+      title: "Sub only",
+      subcategories: { "not-a-category": "leaf" }
+    },
+    actor
+  });
+  assert.equal(subOnly.replicaPending, true);
+  assert.equal(
+    (await loadPublishedReplicaStatus(pool)).held.some(row => row.id === "sub-only"),
+    true
+  );
+  await drainPublishedReplica({ pool, d1 });
+  assert.equal(d1.documents.has("puzzle:sub-only"), false);
+
+  await published.publish({
+    kind: "category",
+    id: "retired",
+    document: { id: "retired", title: "Retired" },
+    actor
+  });
+  await drainPublishedReplica({ pool, d1 });
+  await published.unpublish({ kind: "category", id: "retired", actor });
+  await published.publish({
+    kind: "puzzle",
+    id: "uses-retired",
+    document: { id: "uses-retired", title: "Uses retired", category: "retired" },
+    actor
+  });
+  const retiredHold = await drainPublishedReplica({ pool, d1 });
+  assert.equal(d1.documents.get("category:retired").withdrawn_at == null, false);
+  assert.equal(d1.documents.has("puzzle:uses-retired"), false);
+  assert.equal(retiredHold.held > 0, true);
 
   await published.seedPublishedIfAbsent({
     kind: "category",

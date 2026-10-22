@@ -47,6 +47,12 @@ export function categoryReferences(document) {
       if (typeof value === "string" && value.trim()) refs.push(value.trim());
     }
   }
+  const subcategories = document?.subcategories;
+  if (subcategories && typeof subcategories === "object" && !Array.isArray(subcategories)) {
+    for (const key of Object.keys(subcategories)) {
+      if (key.trim()) refs.push(key.trim());
+    }
+  }
   return [...new Set(refs)];
 }
 
@@ -345,7 +351,8 @@ export async function loadPublishedReplicaStatus(pool) {
     ORDER BY q.enqueued_at, q.kind, q.id
   `);
   const { rows: categories } = await pool.query(`
-    SELECT id, title FROM published_documents WHERE kind = 'category' ORDER BY id
+    SELECT id, title, withdrawn_at FROM published_documents
+    WHERE kind = 'category' ORDER BY id
   `);
   const pending = rows.map(row => ({
     kind: row.kind,
@@ -362,8 +369,9 @@ export async function loadPublishedReplicaStatus(pool) {
     } catch {
       continue;
     }
-    const missing = resolveCategoryIds(document, categories)
-      .filter(id => !categories.some(category => category.id === id));
+    const liveCategories = categories.filter(category => !category.withdrawn_at);
+    const missing = resolveCategoryIds(document, liveCategories)
+      .filter(id => !liveCategories.some(category => category.id === id));
     if (!missing.length) continue;
     held.push({ id: row.id, title: row.title || row.id, missing });
   }
@@ -479,11 +487,12 @@ export async function drainPublishedReplica({ pool, d1 } = {}) {
         continue;
       }
       const categories = await rowsOfKind(pool, "category");
+      const liveCategories = categories.filter(category => !category.withdrawn_at);
       const catalogues = await rowsOfKind(pool, "catalogue");
       const document = puzzleDocument(row);
       if (!row.withdrawn_at) {
-        const missing = resolveCategoryIds(document, categories)
-          .filter(id => !categories.some(category => category.id === id));
+        const missing = resolveCategoryIds(document, liveCategories)
+          .filter(id => !liveCategories.some(category => category.id === id));
         if (missing.length) {
           heldPuzzles.add(puzzle.id);
           if (!pending.some(item => item.kind !== "puzzle")) break;
@@ -492,8 +501,8 @@ export async function drainPublishedReplica({ pool, d1 } = {}) {
       }
       const members = [row];
       if (!row.withdrawn_at) {
-        for (const categoryId of resolveCategoryIds(document, categories)) {
-          const category = categories.find(item => item.id === categoryId);
+        for (const categoryId of resolveCategoryIds(document, liveCategories)) {
+          const category = liveCategories.find(item => item.id === categoryId);
           if (category) members.push(category);
         }
       }
