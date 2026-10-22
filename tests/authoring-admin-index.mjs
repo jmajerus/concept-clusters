@@ -44,6 +44,7 @@ export async function run(page) {
   assert.match(pageHtml, /Publish writes the shared live/);
   assert.match(pageHtml, /<h2>Freeze<\/h2>/);
   assert.doesNotMatch(pageHtml, /<h2>Public site<\/h2>/);
+  assert.doesNotMatch(pageHtml, /<h2>Remote MCP<\/h2>/);
   assert.match(pageHtml, />Freeze</);
   assert.match(pageHtml, /No changes cued/);
   assert.match(pageHtml, /Git-seeded snapshots already in this checkout/);
@@ -279,6 +280,73 @@ export async function run(page) {
   assert.equal(replicaFails.status, 200, "a failing replica loader never takes the index down");
   assert.match(replicaFails.body, /Could not read the replica queue/);
   assert.match(replicaFails.body, /postgres down/);
+
+  const mcpIdle = renderAdminIndexPage({
+    mcpHealth: { accessConfigured: true, accepted: 0, rejected: 0, lastAccepted: null, lastRejected: null }
+  });
+  assert.match(mcpIdle, /<h2>Remote MCP<\/h2>/);
+  assert.match(mcpIdle, /No client has connected since this process started/);
+  assert.match(mcpIdle, /stdio server is separate/);
+  assert.match(mcpIdle, /<section class="mcp-health">/);
+  assert.doesNotMatch(mcpIdle, /<section class="mcp-health mcp-health-warn">/);
+  assert.ok(
+    mcpIdle.indexOf("<h2>Remote MCP</h2>") < mcpIdle.indexOf("<h2>Freeze</h2>"),
+    "the MCP card sits with the server status, ahead of Freeze"
+  );
+
+  const mcpSeen = renderAdminIndexPage({
+    mcpHealth: {
+      accessConfigured: true,
+      accepted: 2,
+      rejected: 1,
+      lastAccepted: {
+        at: "2026-10-21T23:50:00.000Z",
+        method: "tools/call list_puzzles",
+        client: "Cursor"
+      },
+      lastRejected: { at: "2026-10-21T23:40:00.000Z", reason: "no token" }
+    }
+  });
+  assert.match(mcpSeen, /2 requests accepted, 1 request rejected/);
+  assert.match(mcpSeen, /tools\/call list_puzzles/);
+  assert.match(mcpSeen, /from Cursor/);
+  assert.match(mcpSeen, /Last rejected at 2026-10-21 23:40 UTC: no token/);
+  assert.doesNotMatch(mcpSeen, /<section class="mcp-health mcp-health-warn">/);
+
+  const mcpDown = renderAdminIndexPage({
+    mcpHealth: {
+      accessConfigured: false,
+      accepted: 0,
+      rejected: 1,
+      lastAccepted: null,
+      lastRejected: { at: "2026-10-21T23:51:00.000Z", reason: "invalid token" }
+    }
+  });
+  assert.match(mcpDown, /<section class="mcp-health mcp-health-warn">/);
+  assert.match(mcpDown, /Remote clients cannot sign in/);
+  assert.match(mcpDown, /invalid token/);
+  assert.doesNotMatch(mcpDown, /cf-access-jwt-assertion/);
+  const hostile = renderAdminIndexPage({
+    mcpHealth: {
+      accessConfigured: true,
+      accepted: 1,
+      rejected: 0,
+      lastAccepted: { at: "2026-10-21T23:50:00.000Z", method: "initialize", client: "Cursor<script>" },
+      lastRejected: null
+    }
+  });
+  assert.match(hostile, /1 request accepted since this process started/);
+  assert.doesNotMatch(hostile, /0 requests rejected/);
+  assert.match(hostile, /Cursor&lt;script&gt;/);
+  assert.doesNotMatch(hostile, /Cursor<script>/);
+
+  const mcpRoute = createResponse();
+  assert.equal(await handleAuthoringAdminIndex({ method: "GET", url: "/admin" }, mcpRoute, {
+    loadMcpHealth: async () => { throw new Error("health reader failed"); }
+  }), true);
+  assert.equal(mcpRoute.status, 200);
+  assert.match(mcpRoute.body, /Could not read MCP health/);
+  assert.match(mcpRoute.body, /health reader failed/);
 
   const healthPage = renderLinkHealthPage(linkHealth);
   assert.match(healthPage, /<h1>Wikipedia link health<\/h1>/);

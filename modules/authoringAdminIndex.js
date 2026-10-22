@@ -34,6 +34,11 @@ const PAGE_STYLE = `
   .replica-sync ul { margin: 8px 0 0; padding-left: 1.2em; }
   .replica-sync-behind { border-color: #f59e0b; background: #fffbeb; }
   .replica-sync-behind strong { color: #b45309; }
+  .mcp-health { margin: 20px 0; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+  .mcp-health h2 { margin: 0 0 4px; font-size: 18px; }
+  .mcp-health p { margin: 4px 0; }
+  .mcp-health-warn { border-color: #f59e0b; background: #fffbeb; }
+  .mcp-health-warn strong { color: #b45309; }
   .freeze, .github-prod { margin: 28px 0; padding: 16px; border: 1px solid #dbeafe; background: #f8fbff; border-radius: 8px; }
   .freeze h2, .github-prod h2 { margin: 0 0 8px; font-size: 18px; }
   .github-prod .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
@@ -293,6 +298,60 @@ export function renderReplicaSyncSection(status) {
   </section>`;
 }
 
+function formatAdminWhen(value) {
+  const text = String(value || "");
+  if (text.length < 16) return text;
+  return `${text.slice(0, 10)} ${text.slice(11, 16)} UTC`;
+}
+
+function mcpCount(count, label) {
+  return `${count} ${label}${count === 1 ? "" : "s"}`;
+}
+
+/** Remote /mcp on this process. Absent when the page has no health snapshot. */
+export function renderMcpHealthSection(health) {
+  if (!health) return "";
+  if (health.error) {
+    return `<section class="mcp-health mcp-health-warn">
+      <h2>Remote MCP</h2>
+      <p><strong>Could not read MCP health</strong> (${escapeHtml(health.error)}).</p>
+    </section>`;
+  }
+  const accepted = Number(health.accepted) || 0;
+  const rejected = Number(health.rejected) || 0;
+  const lastAccepted = health.lastAccepted || null;
+  const lastRejected = health.lastRejected || null;
+  const latestRejected = Boolean(
+    lastRejected && (!lastAccepted || String(lastRejected.at) >= String(lastAccepted.at))
+  );
+  const warn = health.accessConfigured === false || latestRejected;
+  const trafficParts = [];
+  if (accepted) trafficParts.push(`${mcpCount(accepted, "request")} accepted`);
+  if (rejected) trafficParts.push(`${mcpCount(rejected, "request")} rejected`);
+  const traffic = trafficParts.length
+    ? `${trafficParts.join(", ")} since this process started.`
+    : "No client has connected since this process started.";
+  const acceptedLine = lastAccepted
+    ? `<p class="meta">Last accepted${lastAccepted.method ? ` <code>${escapeHtml(lastAccepted.method)}</code>` : ""}${
+      lastAccepted.client ? ` from ${escapeHtml(lastAccepted.client)}` : ""
+    } at ${escapeHtml(formatAdminWhen(lastAccepted.at))}.</p>`
+    : "";
+  const rejectedLine = lastRejected
+    ? `<p class="meta">Last rejected at ${escapeHtml(formatAdminWhen(lastRejected.at))}: ${escapeHtml(lastRejected.reason)}.</p>`
+    : "";
+  const accessLine = health.accessConfigured === false
+    ? `<p><strong>Remote clients cannot sign in.</strong> Cloudflare Access is not configured.</p>`
+    : "";
+  return `<section class="mcp-health${warn ? " mcp-health-warn" : ""}">
+    <h2>Remote MCP</h2>
+    <p>${escapeHtml(traffic)}</p>
+    <p class="meta">This server answers <code>/mcp</code>. A workstation's stdio server is separate.</p>
+    ${accessLine}
+    ${acceptedLine}
+    ${rejectedLine}
+  </section>`;
+}
+
 function freezePuzzleItem(id, detail) {
   if (!detail) return `<li><code>${escapeHtml(id)}</code></li>`;
   const title = detail.title ? ` — ${escapeHtml(detail.title)}` : "";
@@ -519,6 +578,13 @@ function renderGithubProductionSection({
  *     held?: { id: string, title?: string, missing?: string[] }[],
  *     drain?: { phase?: string, waiting?: string | null, error?: string | null, at?: string | null },
  *     error?: string
+ *   } | null,
+ *   mcpHealth?: {
+ *     accessConfigured?: boolean,
+ *     accepted?: number,
+ *     rejected?: number,
+ *     lastAccepted?: { at?: string, method?: string | null, client?: string | null } | null,
+ *     lastRejected?: { at?: string, reason?: string } | null
  *   } | null
  * }} [options]
  */
@@ -530,7 +596,8 @@ export function renderAdminIndexPage({
   canRefreshGithubProduction = canApplyFreeze,
   linkHealth = null,
   serverRevision = null,
-  replicaStatus = null
+  replicaStatus = null,
+  mcpHealth = null
 } = {}) {
   const intro = replicaStatus
     ? "Published rows live on the LAN. The public site follows them."
@@ -539,6 +606,7 @@ export function renderAdminIndexPage({
     <p class="meta">${intro} Freeze validates cued snapshots and creates one release PR.
     ${authoringAdminNav()}</p>
     ${renderServerRevisionSection(serverRevision)}
+    ${renderMcpHealthSection(mcpHealth)}
     ${renderReplicaSyncSection(replicaStatus)}
     ${renderFreezeSection({ freezePlan, canApplyFreeze, canCueAllPublished })}
     ${renderGithubProductionSection({ githubProduction, canRefreshGithubProduction })}
@@ -750,7 +818,8 @@ export async function handleAuthoringAdminIndex(req, res, {
   loadLinkHealth = null,
   loadServerRevision = null,
   subscribeServerRevision = null,
-  loadReplicaStatus = null
+  loadReplicaStatus = null,
+  loadMcpHealth = null
 } = {}) {
   const urlPath = (req.url || "").split("?")[0];
   if (urlPath === LINK_HEALTH_PATH) {
@@ -949,6 +1018,16 @@ export async function handleAuthoringAdminIndex(req, res, {
       serverRevision = null;
     }
   }
+  let mcpHealth = null;
+  if (loadMcpHealth && req.method !== "HEAD") {
+    try {
+      mcpHealth = await loadMcpHealth();
+    } catch (error) {
+      mcpHealth = {
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
   let replicaStatus = null;
   if (loadReplicaStatus && req.method !== "HEAD") {
     try {
@@ -971,7 +1050,8 @@ export async function handleAuthoringAdminIndex(req, res, {
     canRefreshGithubProduction: typeof refreshGithubProduction === "function",
     linkHealth,
     serverRevision,
-    replicaStatus
+    replicaStatus,
+    mcpHealth
   }));
   return true;
 }

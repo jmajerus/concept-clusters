@@ -36,6 +36,7 @@ import { guardLocalAdmin } from "./localAdminAuth.js";
 import { withD1Timing } from "./d1RequestTiming.js";
 import { d1LargeColumnCacheEnabled } from "./d1LargeColumnCache.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
+import { authoringMcpHealth } from "./authoringMcpHealth.js";
 import { handleLocalMcpRequest } from "./localMcpHttp.js";
 import { startWeeklyLinkHealth } from "./linkHealthSchedule.js";
 import { loadPublishedReplicaStatus } from "./publishedReplica.js";
@@ -182,6 +183,7 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
       canApplyFreeze: true,
       loadServerRevision: () => revisions.refresh({ fetchRemote: true }),
       subscribeServerRevision: listener => revisions.subscribe(listener),
+      loadMcpHealth: () => authoringMcpHealth(),
       loadReplicaStatus: async () => {
         const databaseUrl = authoringDatabaseUrl();
         if (!databaseUrl) return null;

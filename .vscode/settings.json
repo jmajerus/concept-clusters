@@ -9,26 +9,9 @@
     },
     {
       "label": "$(plug) MCP",
-      "tooltip": "Get MCP clients onto current code: restart local stdio servers, or deploy the hosted Worker",
-      "alignment": "left",
-      "color": "warning",
-      "tasks": [
-        {
-          "label": "Restart stdio MCP",
-          "task": "MCP: restart stdio",
-          "description": "$(debug-restart) Stop this checkout's mcp-server.mjs processes; each host reconnects to current code"
-        },
-        {
-          "label": "Deploy hosted MCP",
-          "task": "Deploy MCP",
-          "description": "$(cloud-upload) npm run mcp:hosted:deploy — the Cloudflare-hosted authoring Worker"
-        },
-        {
-          "label": "Release hosted MCP",
-          "task": "Release MCP",
-          "description": "$(database) npm run mcp:hosted:release — apply remote D1 migrations, then deploy"
-        }
-      ]
+      "task": "MCP: restart stdio",
+      "tooltip": "npm run mcp:restart — stop this checkout's stdio servers so each host reconnects to current code. Remote MCP updates with Deploy Authoring.",
+      "alignment": "left"
     },
     {
       "label": "$(server) Deploy Authoring",

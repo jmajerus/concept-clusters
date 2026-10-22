@@ -1,6 +1,12 @@
 import { Readable } from "node:stream";
 import { authenticateAuthoringAccess } from "./accessAuth.js";
 import { handleAuthoringMcpRequest, MAX_MCP_REQUEST_BYTES } from "./authoringMcpHttp.js";
+import {
+  mcpRejectionReason,
+  recordAuthoringMcpAccepted,
+  recordAuthoringMcpRejected,
+  summarizeMcpBody
+} from "./authoringMcpHealth.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 
 function jsonError(status, error) {
@@ -95,6 +101,7 @@ export async function handleLocalMcpRequest(req, res, {
   const preflight = method === "OPTIONS";
   const hasBody = method !== "GET" && method !== "HEAD" && !preflight;
   if (hasBody && mcpContentLengthExceeded(req.headers)) {
+    recordAuthoringMcpRejected({ reason: "body too large" });
     await sendWebResponse(res, jsonError(413, `MCP request exceeds ${MAX_MCP_REQUEST_BYTES} bytes`));
     destroyRequest(req);
     return true;
@@ -110,17 +117,30 @@ export async function handleLocalMcpRequest(req, res, {
       peerAddress: req.socket?.remoteAddress || null
     });
   if (authenticated.error) {
+    if (!preflight) {
+      recordAuthoringMcpRejected({
+        reason: mcpRejectionReason(authenticated.error.status, authenticated.error.message)
+      });
+    }
     await sendWebResponse(res, jsonError(authenticated.error.status, authenticated.error.message));
     destroyRequest(req);
     return true;
   }
   let request = headerRequest;
+  let summary = { method: method === "GET" ? "GET" : null, client: null };
   if (hasBody) {
     try {
-      request = await nodeRequestToWeb(req);
+      const raw = await readNodeBody(req);
+      summary = summarizeMcpBody(raw);
+      request = new Request(headerRequest.url, {
+        method,
+        headers: headerRequest.headers,
+        body: raw
+      });
     } catch (error) {
       destroyRequest(req);
       if (error instanceof RangeError) {
+        recordAuthoringMcpRejected({ reason: "body too large" });
         await sendWebResponse(res, jsonError(413, error.message));
         return true;
       }
@@ -135,6 +155,13 @@ export async function handleLocalMcpRequest(req, res, {
     actor: authenticated.actor,
     authInfo: authenticated.authInfo
   });
+  if (!preflight) {
+    if (response.status >= 400) {
+      recordAuthoringMcpRejected({ reason: mcpRejectionReason(response.status) });
+    } else {
+      recordAuthoringMcpAccepted(summary);
+    }
+  }
   await sendWebResponse(res, response);
   return true;
 }

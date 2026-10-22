@@ -128,14 +128,14 @@ independent of which MCP process is running.
 | `mcp` / `mcp:stdio` | Local stdio server (`tools/mcp-server.mjs`). Loads repo-root `.env`. |
 | `mcp:housekeep` | List stray `mcp-server.mjs` processes for this repo (dry run). |
 | `mcp:prune` | Stop extra stdio servers; keep the newest one. |
-| `mcp:restart` | Stop every stdio server started from this checkout, then print how each host (Claude Code, VS Code, Cursor, Codex) reconnects to a fresh one. The VS Code "MCP" status-bar button runs it. |
+| `mcp:restart` | Stop every stdio server started from this checkout, then print how each host (Claude Code, VS Code, Cursor, Codex) reconnects to a fresh one. The VS Code "MCP" status-bar button runs only this. |
 | `mcp:probe-report` | Summarize captured `probe_mcp_client` call frames. |
 | `mcp:hosted:dev` | Hosted authoring Worker on localhost (`http://localhost:8788/mcp`). |
 | `authoring:d1:migrate:local` | D1 migrations for Wrangler's local database used by `mcp:hosted:dev`. |
 | `authoring:d1:migrate:remote` | D1 migrations on the remote authoring database. |
-| `mcp:hosted:deploy` | Deploy the hosted Worker. |
+| `mcp:hosted:deploy` | Deploy the 410 Worker. Clients do not get new MCP code from this; local hosts use `mcp:restart`, and remote MCP updates with `authoring:deploy`. |
 | `authoring:deploy` | From this machine, SSH to the LAN authoring server and bring `/opt/concept-clusters` up to date in one step: with no option, the branch it is already on; `-- --main` switches to `main`; `-- --pr <number>` switches to an open PR's branch (resolved with `gh`). It fetches, restores `puzzles/`, `catalogues/`, and `content/` to `HEAD` (a Freeze checkout of those directories stages them and would block the switch), checks out the branch, fast-forwards it to origin, then restarts `concept-clusters-authoring.service`. It refuses before restarting when the branch is gone from origin or does not include `origin/main`, when the server's local branch has commits not on origin, when the checkout is detached, or when HEAD does not end up at origin. The VS Code "Deploy Authoring" button offers the same three choices. Reads `AUTHORING_DEPLOY_PASSWORD` from the ignored local `.env` for SSH and sudo authentication. `/admin` on the server shows the branch and commit it is running and how far that is behind GitHub. |
-| `mcp:hosted:release` | Remote D1 migration, then hosted Worker deploy. The deployed Worker answers `/mcp` and `/admin` with 410. |
+| `mcp:hosted:release` | Remote D1 migration, then the 410 Worker deploy. GitHub Actions runs this on main. It is not a remote MCP deploy. |
 | `authoring:postgres:migrate` | Apply `postgres/migrations/` to `AUTHORING_DATABASE_URL`. |
 | `authoring:postgres:copy` | Insert authoring rows from D1 that Postgres does not already have. Published player rows stay in D1. A later run does not replace working copies written since the cutover. |
 | `authoring:postgres:dump` | `pg_dump` that database to `AUTHORING_DUMP_DIR`. Run it from a machine other than the database host. |
