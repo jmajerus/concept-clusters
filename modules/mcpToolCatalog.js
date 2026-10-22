@@ -1,3 +1,4 @@
+import * as z from "zod/v4";
 import { nonCryptographicHash } from "./nonCryptographicHash.js";
 
 // The chat freezes this tool's description, then the call runs live. The
@@ -11,11 +12,11 @@ const EMPTY_INPUT_SCHEMA = Object.freeze({ type: "object", properties: {} });
 
 function advertisedInputSchema(schema) {
   if (!schema) return EMPTY_INPUT_SCHEMA;
-  const convert = schema["~standard"]?.jsonSchema?.input;
-  if (typeof convert !== "function") {
-    throw new Error("MCP tool input schema has no JSON Schema conversion");
-  }
-  const result = convert({ target: JSON_SCHEMA_TARGET });
+  // Same conversion as the simplified-puzzle schema resource.
+  const result = z.toJSONSchema(schema, {
+    target: JSON_SCHEMA_TARGET,
+    io: "input"
+  });
   if (result.type !== undefined && result.type !== "object") {
     throw new Error("MCP tool input schema must be an object");
   }
