@@ -19,6 +19,7 @@ import { storedDocumentNeedsCanonicalSave } from "../modules/authoredPuzzleDocum
 import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 import { openPuzzleWorkingCopy } from "../modules/contentDocumentSeed.js";
 import { layoutDocumentForMode, layoutRevision } from "../modules/layoutDocument.js";
+import { applyReviewChanges, fileReviewProposal } from "../modules/reviewPatch.js";
 
 export const name = "local draft review: file-store mapping, live validation, and GET /admin/drafts";
 
@@ -587,11 +588,101 @@ export async function run() {
       url: "/admin/drafts/energy-flow-review/play.json?proposal=99999"
     }, missingProposal), true);
     assert.equal(missingProposal.status, 404);
+    for (const raw of ["", "9junk", "9.5", "09"]) {
+      const malformed = createResponse();
+      assert.equal(await handlePublish({
+        method: "GET",
+        url: `/admin/drafts/energy-flow-review/play.json?proposal=${encodeURIComponent(raw)}`
+      }, malformed), true);
+      assert.equal(malformed.status, 404, raw);
+    }
+    const workingCopyPlay = createResponse();
+    assert.equal(await handlePublish({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review/play.json"
+    }, workingCopyPlay), true);
+    assert.equal(workingCopyPlay.status, 200);
+    assert.equal(JSON.parse(workingCopyPlay.body).puzzle.title, proposalBase.document.title);
     await contentDocuments.recordPuzzleHumanReview({
       id: "energy-flow",
       eventType: "rejected",
       sourceEventId: filed.id,
       proposal: filed.proposal
+    });
+    const parentEdited = {
+      ...proposalBase.document,
+      title: "First title",
+      clusters: proposalBase.document.clusters.map((cluster, index) =>
+        index === 0 ? { ...cluster, fact: "From the accepted review." } : cluster)
+    };
+    const parentPatch = fileReviewProposal({
+      baseline: proposalBase.document,
+      edited: parentEdited,
+      openProposals: []
+    });
+    const parentEvent = await contentDocuments.recordPuzzleAgentReview({
+      id: "energy-flow",
+      eventType: "proposed",
+      proposal: parentPatch.patch
+    });
+    const parentApplied = applyReviewChanges(proposalBase.document, parentPatch.patch.changes);
+    const acceptedDraft = await draftStore.replaceDraft({
+      draftId: "energy-flow-review",
+      document: parentApplied.document,
+      expectedRevision: proposalBase.revision
+    });
+    await contentDocuments.recordPuzzleHumanReview({
+      id: "energy-flow",
+      eventType: "accepted",
+      sourceEventId: parentEvent.id
+    });
+    const drifted = await draftStore.replaceDraft({
+      draftId: "energy-flow-review",
+      document: {
+        ...parentApplied.document,
+        clusters: parentApplied.document.clusters.map((cluster, index) =>
+          index === 0 ? { ...cluster, fact: "A later local edit." } : cluster)
+      },
+      expectedRevision: acceptedDraft.revision
+    });
+    const childPatch = fileReviewProposal({
+      baseline: proposalBase.document,
+      edited: { ...parentEdited, title: "Second title" },
+      openProposals: [parentEvent],
+      stackOn: true,
+      stackLoaded: true
+    });
+    assert.equal(childPatch.patch.stacksOn, parentEvent.id);
+    assert.deepEqual(childPatch.patch.changes.map(change => change.path), ["title"]);
+    const childEvent = await contentDocuments.recordPuzzleAgentReview({
+      id: "energy-flow",
+      eventType: "proposed",
+      proposal: childPatch.patch
+    });
+    const stackedPlay = createResponse();
+    assert.equal(await handlePublish({
+      method: "GET",
+      url: `/admin/drafts/energy-flow-review/play.json?proposal=${childEvent.id}`
+    }, stackedPlay), true);
+    assert.equal(stackedPlay.status, 200, stackedPlay.body);
+    const stackedPuzzle = JSON.parse(stackedPlay.body).puzzle;
+    assert.equal(stackedPuzzle.title, "Second title");
+    assert.match(stackedPlay.body, /From the accepted review\./);
+    assert.doesNotMatch(stackedPlay.body, /A later local edit\./);
+    assert.equal(
+      (await draftStore.getDraft("energy-flow-review")).document.clusters[0].fact,
+      "A later local edit."
+    );
+    await contentDocuments.recordPuzzleHumanReview({
+      id: "energy-flow",
+      eventType: "rejected",
+      sourceEventId: childEvent.id,
+      proposal: childEvent.proposal
+    });
+    await draftStore.replaceDraft({
+      draftId: "energy-flow-review",
+      document: proposalBase.document,
+      expectedRevision: drifted.revision
     });
     const afterPublishList = createResponse();
     assert.equal(await handlePublish({

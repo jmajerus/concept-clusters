@@ -802,6 +802,19 @@ export class D1ContentDocumentRepository {
     return row ? reviewEventRecord(row) : null;
   }
 
+  async getProposalDecision({ id, sourceEventId }) {
+    assertDraftId(id);
+    if (!Number.isInteger(sourceEventId) || sourceEventId < 1) return null;
+    const row = await this.database.prepare(`
+      SELECT * FROM puzzle_review_events
+      WHERE puzzle_id = ? AND source_event_id = ?
+        AND event_type IN ('accepted', 'rejected')
+      ORDER BY reviewed_at DESC, id DESC
+      LIMIT 1
+    `).bind(id, sourceEventId).first();
+    return row ? reviewEventRecord(row) : null;
+  }
+
   async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false, uncapped = false }) {
     assertDraftId(id);
     const result = await this.database.prepare(`
@@ -1462,6 +1475,18 @@ export function createMemoryContentDocumentRepository() {
         throw new Error("eventId must be a positive integer");
       }
       const row = reviewEvents.find(event => event.puzzle_id === id && event.id === eventId);
+      return row ? reviewEventRecord(row) : null;
+    },
+    async getProposalDecision({ id, sourceEventId }) {
+      assertDraftId(id);
+      if (!Number.isInteger(sourceEventId) || sourceEventId < 1) return null;
+      const row = reviewEvents
+        .filter(event => event.puzzle_id === id
+          && Number(event.source_event_id) === sourceEventId
+          && (event.event_type === "accepted" || event.event_type === "rejected"))
+        .sort((left, right) =>
+          String(right.reviewed_at).localeCompare(String(left.reviewed_at)) || right.id - left.id
+        )[0];
       return row ? reviewEventRecord(row) : null;
     },
     async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false, uncapped = false }) {

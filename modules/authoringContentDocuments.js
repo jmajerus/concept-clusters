@@ -87,6 +87,7 @@ export function createSplitContentDocuments({
     listOpenReviewProposals: input => reviewEvents.listOpenReviewProposals(input),
     listPuzzleIdsWithOpenReviewProposals: () => reviewEvents.listPuzzleIdsWithOpenReviewProposals(),
     getPuzzleReviewEvent: input => reviewEvents.getPuzzleReviewEvent(input),
+    getProposalDecision: input => reviewEvents.getProposalDecision(input),
     listPuzzleReviewIssues: input => reviewEvents.listPuzzleReviewIssues(input),
     getPuzzleReviewIssue: input => reviewEvents.getPuzzleReviewIssue(input)
   };
