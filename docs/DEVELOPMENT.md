@@ -970,16 +970,16 @@ cron with:
 curl http://localhost:8787/cdn-cgi/handler/scheduled
 ```
 
-**Deploy**: Apply D1 migrations with `npm run authoring:d1:migrate:remote`
-before deploying either Worker, then run `npx wrangler deploy` for the public
-Worker. Before the first public-play deploy, verify that D1 contains published
-rows for the frozen corpus: an absent row
-will be absent from the public Library. Puzzle gameplay is reviewed on the
-LAN authoring checkout (`/?draft=<id>&view=play`, without writing git).
-Publishing in D1 makes a puzzle or correction playable after the cache
-window; Freeze and a later Worker deploy refresh the static copy. The Pages
-predecessor auto-deployed on `git push`; Workers need Cloudflare "Workers
-Builds" for production deploys from `main`, or a manual deploy.
+**Deploy**: The public play Worker deploys from `main` through
+[`.github/workflows/deploy-play-worker.yml`](../.github/workflows/deploy-play-worker.yml).
+A push to `main` that changes the Worker, the static site, or the manifest
+starts it. The VS Code **Deploy game** button, and `npm run deploy`, dispatch
+that same workflow when a push did not. Neither uploads the local checkout.
+Gameplay is reviewed on localhost and on the LAN authoring server
+(`/?draft=<id>&view=play`). Publishing in D1 makes a puzzle or correction
+playable after the cache window; the workflow also applies pending D1
+migrations before it deploys. The Pages predecessor auto-deployed on
+`git push`.
 
 ## Known limitations
 

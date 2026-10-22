@@ -5,7 +5,7 @@
   // analytics and /admin for a dashboard over them (see src/admin.js — needs the
   // ADMIN_KEY and API_TOKEN secrets set via `wrangler secret put`,
   // documented there).
-  // Deploy: npx wrangler deploy
+  // Production deploy is .github/workflows/deploy-play-worker.yml, from main.
   "name": "concept-clusters",
   "main": "src/worker.js",
   "compatibility_date": "2026-07-22",

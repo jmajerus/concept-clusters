@@ -3,7 +3,7 @@
     {
       "label": "$(rocket) Deploy game",
       "task": "Deploy game",
-      "tooltip": "npm run deploy -- the live player-facing app",
+      "tooltip": "Dispatch the Deploy game workflow for main. This checkout is not uploaded.",
       "alignment": "left",
       "color": "warning"
     },
