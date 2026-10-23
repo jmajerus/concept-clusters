@@ -101,9 +101,12 @@ so apply writes each created item's key itself (`modules/citationKeys.js`):
 the project rule, author + year + first title word, using Better BibTeX's
 skipwords, with an institution's short name when no person is named
 (`openstax2018biology`, `ussenate2008inquiry`) and a title word that does
-not repeat the author (`feynman1963lectures`). `… -- repair` lists name,
-date, and key repairs to items the backfill created, and `… -- repair-apply
-<repairs.json>` writes them. It rewrites only keys that are missing,
+not repeat the author (`feynman1963lectures`), or the institution's acronym
+when the publisher field gives one (`nist2001advanced`). `… -- repair` lists
+name, date, item type, container, and key repairs to items the backfill
+created, and `… -- repair-apply <repairs.json>` writes them. It retypes only
+items still in the backfill's default book or document type, never corrects
+an item whose metadata came from a DOI, rewrites only keys that are missing,
 misshapen, or not led by the author, and never touches items filed from the
 existing library.
 

@@ -45,7 +45,9 @@ export function authorPart(data) {
     // words; "Koefoed-Johnsen" keeps its hyphen, as Better BibTeX does.
     return ascii(first.lastName).replace(/[^a-z-]/g, "");
   }
-  if (first?.name) return institutionKey(first.name);
+  // An institution's acronym in the publisher field is its usual short name:
+  // "National Institute of Standards and Technology", publisher "NIST".
+  if (first?.name) return /^[A-Z]{2,6}$/.test(data.publisher || "") ? data.publisher.toLowerCase() : institutionKey(first.name);
   return data.publisher ? institutionKey(data.publisher).replace(/(?<=.)(university|press)$/, "") : "";
 }
 

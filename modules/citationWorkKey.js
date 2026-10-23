@@ -123,10 +123,24 @@ function personName([name, listedSuffix = null]) {
 // "Honig, Jan Willem, and Norbert Both", "Joseph S. Nye, Jr.". A comma is
 // "Family, Given" when the part before it is one word, a suffix when the
 // part after it is Jr./Sr./II-IV, and a list separator otherwise.
+// An organization is one name, never split at its "and": "National
+// Institute of Standards and Technology"; "Nature Education / Scitable" is
+// the organization Nature Education.
+const INSTITUTION_WORDS = /\b(?:institute|university|committee|council|department|agency|office|association|society|survey|senate|organi[sz]ation|foundation|cent(?:er|re)|bureau|commission|education|administration|academy|ministry|program(?:me)?)\b/i;
+
+export function institutionName(author) {
+  const text = String(author || "").split(" / ")[0].trim();
+  return text && !text.includes(",") && INSTITUTION_WORDS.test(text) ? text : null;
+}
+
 export function cslAuthors(author) {
-  // "et al." names no one; the list is simply incomplete.
-  const text = String(author || "").trim().replace(/,?\s*et\s+al\.?$/i, "");
+  // "et al." names no one; the list is simply incomplete. A "dir." prefix
+  // marks directors (see cslDirectors).
+  const text = String(author || "").trim()
+    .replace(/,?\s*et\s+al\.?$/i, "").replace(/^dir\.\s*/i, "");
   if (!text) return [];
+  const institution = institutionName(text);
+  if (institution) return [{ literal: institution }];
   const chunks = text.split(/\s*;\s*|,?\s+and\s+|\s*&\s*/).filter(Boolean);
   const names = [];
   for (const chunk of chunks) {
@@ -152,8 +166,10 @@ function yearOf(citation) {
 
 // Authors put a journal in "publisher": "Psychological Science 17(3)",
 // "Journal of Management, 13(1)", "Administrative Science Quarterly".
-const JOURNAL = /^(.*?)(?:,?\s*(\d+)\s*\((\d+)\))?\s*$/;
-const JOURNAL_WORDS = /\b(journal|review|quarterly|proceedings|annals|bulletin|letters|transactions)\b/i;
+// A trailing volume alone ("Cognitive Science 12", "Fortschritte der
+// Medizin 2") also marks a journal.
+const JOURNAL = /^(.*?)(?:,?\s+(\d+)(?:\s*\((\d+)\))?)?\s*$/;
+const JOURNAL_WORDS = /\b(journal|review|quarterly|proceedings|annals|bulletin|letters|transactions|zeitschrift|fortschritte|archiv|annalen|jahrbuch|revue|rivista)\b/i;
 
 function journalOf(publisher) {
   const text = String(publisher || "").trim();
@@ -173,6 +189,40 @@ function articleCsl({ title, citation, journal }) {
     ...(journal.volume ? { volume: journal.volume } : {}),
     ...(journal.issue ? { issue: journal.issue } : {}),
     ...(citation.pages ? { page: citation.pages } : {}),
+    ...(year ? { issued: { "date-parts": [[Number(year)]] } } : {})
+  };
+}
+
+// "Two Concepts of Liberty, in Four Essays on Liberty": a chapter or essay
+// in a named book. "…, in his lectures" is too vague to be a container.
+const IN_CONTAINER = /^(.+?),\s+in\s+(?=[A-Z])(.+)$/;
+
+function chapterCsl({ title, container, citation }) {
+  const year = yearOf(citation);
+  const authors = cslAuthors(citation.author);
+  return {
+    type: "chapter",
+    title,
+    "container-title": container,
+    ...(authors.length ? { author: authors } : {}),
+    ...(citation.publisher ? { publisher: citation.publisher } : {}),
+    ...(citation.pages ? { page: citation.pages } : {}),
+    ...(year ? { issued: { "date-parts": [[Number(year)]] } } : {})
+  };
+}
+
+const FILM = /\s*\((?:documentary\s+)?film\)\s*$/i;
+
+// CSL "director" is not imported as such by the Zotero bridge; the backfill
+// repair sets the creator role after creation.
+function filmCsl({ title, citation }) {
+  const year = yearOf(citation);
+  const directors = cslAuthors(citation.author);
+  return {
+    type: "motion_picture",
+    title: title.replace(FILM, ""),
+    ...(directors.length ? { director: directors } : {}),
+    ...(citation.publisher ? { publisher: citation.publisher } : {}),
     ...(year ? { issued: { "date-parts": [[Number(year)]] } } : {})
   };
 }
@@ -285,6 +335,16 @@ export function classifyCitation(citation) {
   if (!url || edition) {
     if (!String(citation.author || "").trim() && !String(citation.publisher || "").trim()) {
       return { scholarly: false, reason: "title only, no author or publisher", host };
+    }
+    const workKey = `book:${normalizedText(bookTitle)}${edition ? `|ed${edition}` : ""}`;
+    if (FILM.test(bookTitle) || /^dir\.\s/i.test(String(citation.author || ""))) {
+      return { scholarly: true, workKey, kind: "csl", label: bookTitle,
+        source: filmCsl({ title: bookTitle, citation }) };
+    }
+    const chapter = edition ? null : bookTitle.match(IN_CONTAINER);
+    if (chapter) {
+      return { scholarly: true, workKey, kind: "csl", label: bookTitle,
+        source: chapterCsl({ title: chapter[1], container: chapter[2], citation }) };
     }
     const journal = edition ? null : journalOf(citation.publisher);
     if (journal) {

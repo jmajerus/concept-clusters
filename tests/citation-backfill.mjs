@@ -148,6 +148,8 @@ async function citekeys() {
     creators: [{ creatorType: "author", lastName: "Nye", firstName: "Joseph S., Jr." }] }), "nye2011future");
   assert.equal(key({ title: "Inquiry into the Treatment of Detainees", date: "2008",
     creators: [{ creatorType: "author", name: "U.S. Senate Committee on Armed Services" }] }), "ussenate2008inquiry");
+  assert.equal(key({ title: "Advanced Encryption Standard", date: "2001", publisher: "NIST",
+    creators: [{ creatorType: "author", name: "National Institute of Standards and Technology" }] }), "nist2001advanced");
   assert.equal(key({ title: "The Feynman Lectures on Physics", date: "1963",
     creators: [{ creatorType: "author", lastName: "Feynman" }] }), "feynman1963lectures");
   assert.equal(key({ title: "Macbeth", creators: [{ creatorType: "author", lastName: "Shakespeare" }] }), "shakespearemacbeth");
@@ -163,6 +165,37 @@ async function citekeys() {
   const work = classifyCitation({ title: "Distributed practice", author: "Nicholas J. Cepeda et al.", year: "2006" });
   assert.deepEqual(itemDataRepairs(work, { creators: [{ creatorType: "author", name: "Nicholas J. Cepeda et al." }], date: "2006" }),
     { creators: [{ creatorType: "author", lastName: "Cepeda", firstName: "Nicholas J." }] });
+  const sweller = classifyCitation({ title: "Cognitive load during problem solving", author: "John Sweller",
+    publisher: "Cognitive Science 12", year: "1988" });
+  assert.deepEqual(itemDataRepairs(sweller, { itemType: "book", date: "1988",
+    creators: [{ creatorType: "author", lastName: "Sweller", firstName: "John" }] }),
+  { itemType: "journalArticle", fields: { title: "Cognitive load during problem solving",
+    publication_title: "Cognitive Science", volume: "12" } });
+  // Metadata that came from a DOI is never corrected from inline text.
+  assert.deepEqual(itemDataRepairs(sweller, { itemType: "book", DOI: "10.1/x", date: "1988", creators: [] }), {});
+  // An item someone already converted is left alone.
+  assert.deepEqual(itemDataRepairs(sweller, { itemType: "conferencePaper", date: "1988",
+    creators: [{ creatorType: "author", lastName: "Sweller", firstName: "John" }] }), {});
+  const nist = classifyCitation({ title: "Advanced Encryption Standard", author: "National Institute of Standards and Technology",
+    publisher: "NIST", year: "2001", url: "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf" });
+  assert.deepEqual(itemDataRepairs(nist, { itemType: "document", date: "2001", creators: [
+    { creatorType: "author", lastName: "Standards", firstName: "National Institute of" },
+    { creatorType: "author", lastName: "Technology", firstName: "" }] }).creators,
+  [{ creatorType: "author", name: "National Institute of Standards and Technology" }]);
+  const film = classifyCitation({ title: "Requiem for the American Dream (documentary film)",
+    author: "dir. Peter D. Hutchison and Kelly Nyks", publisher: "PDA Films", year: "2015" });
+  const filmRepair = itemDataRepairs(film, { itemType: "book", date: "2015", creators: [
+    { creatorType: "author", lastName: "Hutchison", firstName: "dir. Peter D." },
+    { creatorType: "author", lastName: "Nyks", firstName: "Kelly" }] });
+  assert.equal(filmRepair.itemType, "film");
+  assert.equal(filmRepair.fields.title, "Requiem for the American Dream");
+  assert.deepEqual(filmRepair.creators.map(creator => [creator.creatorType, creator.firstName]),
+    [["director", "Peter D."], ["director", "Kelly"]]);
+  const berlin = classifyCitation({ title: "Two Concepts of Liberty, in Four Essays on Liberty",
+    author: "Isaiah Berlin", publisher: "Oxford University Press", year: "1969" });
+  assert.deepEqual(itemDataRepairs(berlin, { itemType: "book", date: "1969",
+    creators: [{ creatorType: "author", lastName: "Berlin", firstName: "Isaiah" }] }).fields,
+  { title: "Two Concepts of Liberty", book_title: "Four Essays on Liberty", publisher: "Oxford University Press" });
   // A name someone corrected in Zotero is not overwritten.
   assert.deepEqual(itemDataRepairs(work, { creators: [{ creatorType: "author", lastName: "Cepeda", firstName: "N." }], date: "2006" }), {});
 }

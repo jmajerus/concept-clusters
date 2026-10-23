@@ -72,7 +72,8 @@ if (isMain) {
             `${repair.itemKey}  ${repair.title}`,
             repair.toKey ? `  key      ${repair.fromKey || "(none)"} -> ${repair.toKey}` : null,
             repair.creators ? `  creators ${repair.creatorsFrom || "(none)"} -> ${repair.creatorsTo}` : null,
-            repair.date ? `  date     (none) -> ${repair.date}` : null
+            repair.date ? `  date     (none) -> ${repair.date}` : null,
+            repair.itemType ? `  type     ${repair.itemTypeFrom} -> ${repair.itemType} ${JSON.stringify(repair.fields)}` : null
           ].filter(Boolean).join("\n"));
         }
         console.log(`${repairs.length} items to repair; nothing written. Review ${repairPath}, then run repair-apply.`);

@@ -333,21 +333,66 @@ export async function applyBackfill({ pool, service, plan, fetchImpl = fetch, on
 // in Zotero survive: only demonstrably broken names and empty fields change.
 const BROKEN_NAME = /^(?:al|jr|sr)\.?$|\bet al\b/i;
 
-function zoteroCreator(person) {
+function zoteroCreator(person, creatorType = "author") {
   return person.literal
-    ? { creatorType: "author", name: person.literal }
-    : { creatorType: "author", lastName: person.family, firstName: person.given };
+    ? { creatorType, name: person.literal }
+    : { creatorType, lastName: person.family, firstName: person.given };
 }
 
+const ZOTERO_TYPES = {
+  book: "book", "article-journal": "journalArticle", chapter: "bookSection",
+  motion_picture: "film", document: "document"
+};
+
+// Zotero fields that carry a CSL work's container and locators, by type.
+function typeFields(source) {
+  const set = (name, value) => (value ? { [name]: value } : {});
+  switch (source.type) {
+    case "article-journal":
+      return { ...set("publication_title", source["container-title"]), ...set("volume", source.volume),
+        ...set("issue", source.issue), ...set("pages", source.page) };
+    case "chapter":
+      return { ...set("book_title", source["container-title"]), ...set("publisher", source.publisher),
+        ...set("pages", source.page) };
+    case "motion_picture":
+      return set("distributor", source.publisher);
+    default:
+      return {};
+  }
+}
+
+function sameCreators(current, wanted) {
+  const shape = creator => [creator.creatorType, creator.name || "", creator.lastName || "", creator.firstName || ""].join("|");
+  return current.length === wanted.length && current.every((creator, index) => shape(creator) === shape(wanted[index]));
+}
+
+// An item still carries the type the first backfill gave everything
+// ("book", "document") until someone converts it, so only those are retyped.
+const BACKFILL_DEFAULT_TYPES = new Set(["book", "document"]);
+
+// An item with a DOI took its metadata from CrossRef, not from inline text,
+// so inline text never corrects it. A retype only escapes the defaults.
 export function itemDataRepairs(work, data) {
-  const wanted = work?.kind === "csl" ? work.source.author || [] : [];
+  if (work?.kind !== "csl" || data.DOI) return {};
+  const source = work.source;
+  const wantedType = ZOTERO_TYPES[source.type];
+  const retype = wantedType && !BACKFILL_DEFAULT_TYPES.has(wantedType)
+    && wantedType !== data.itemType && BACKFILL_DEFAULT_TYPES.has(data.itemType);
+  const wanted = [
+    ...(source.author || []).map(person => zoteroCreator(person, "author")),
+    ...(source.director || []).map(person => zoteroCreator(person, "director"))
+  ];
   const current = data.creators || [];
   const broken = current.some(creator => BROKEN_NAME.test(creator.lastName || creator.name || ""))
-    || current.some((creator, index) => creator.name && wanted[index]?.family);
-  const year = work?.kind === "csl" ? work.source.issued?.["date-parts"]?.[0]?.[0] : null;
+    || current.some((creator, index) => creator.name && wanted[index]?.lastName)
+    || current.some((creator, index) => creator.lastName && wanted[index]?.name)
+    || current.some((creator, index) => wanted[index] && creator.creatorType !== wanted[index].creatorType);
+  const year = source.issued?.["date-parts"]?.[0]?.[0];
+  const replaceCreators = wanted.length && (!current.length || broken || retype) && !sameCreators(current, wanted);
   return {
-    ...(wanted.length && (!current.length || broken) ? { creators: wanted.map(zoteroCreator) } : {}),
-    ...(!data.date && year ? { date: String(year) } : {})
+    ...(replaceCreators ? { creators: wanted } : {}),
+    ...(!data.date && year ? { date: String(year) } : {}),
+    ...(retype ? { itemType: wantedType, fields: { title: source.title, ...typeFields(source) } } : {})
   };
 }
 
@@ -359,7 +404,7 @@ async function planItemRepair(service, call, item, work, assignedKeys) {
   const data = item.data;
   const itemKey = item.key || data.key;
   const repairs = itemDataRepairs(work, data);
-  const repaired = { ...data, ...repairs };
+  const repaired = { ...data, ...repairs, ...(repairs.fields?.title ? { title: repairs.fields.title } : {}) };
   const fromKey = data.citationKey || "";
   let toKey = null;
   if (citationKeyNeedsRepair(fromKey, repaired)) {
@@ -371,12 +416,13 @@ async function planItemRepair(service, call, item, work, assignedKeys) {
     if (toKey === fromKey) toKey = null;
     else assignedKeys.add(toKey);
   }
-  if (!repairs.creators && !repairs.date && !toKey) return null;
+  if (!repairs.creators && !repairs.date && !repairs.itemType && !toKey) return null;
   return {
     itemKey,
     title: data.title,
     ...(repairs.creators ? { creators: repairs.creators, creatorsFrom: creatorList(data.creators), creatorsTo: creatorList(repairs.creators) } : {}),
     ...(repairs.date ? { date: repairs.date } : {}),
+    ...(repairs.itemType ? { itemTypeFrom: data.itemType, itemType: repairs.itemType, fields: repairs.fields } : {}),
     fromKey,
     ...(toKey ? { toKey } : {})
   };
@@ -386,6 +432,7 @@ async function writeItemRepair(service, call, repair) {
   await service.updateItem(repair.itemKey, {
     creators: repair.creators || null,
     fields: {
+      ...(repair.itemType ? { item_type: repair.itemType, ...repair.fields } : {}),
       ...(repair.date ? { date: repair.date } : {}),
       ...(repair.toKey ? { citation_key: repair.toKey } : {})
     }
