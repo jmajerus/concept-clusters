@@ -3,7 +3,7 @@ name: zotero-mcp
 description: Find and verify Zotero records while authoring or checking Concept Clusters citations.
 ---
 
-# Zotero citation lookup
+# Zotero references
 
 Use the project `zotero` MCP connection, backed by the `jmajerus/zotero-mcp`
 fork, for read-only source lookup. Do not change the Zotero library during
@@ -20,14 +20,33 @@ citation lookup.
 - Better BibTeX generates the assigned citekey from the project's rule,
   `auth.lower + year + title.skipwords.select(1, 1).lower`. Do not calculate,
   copy into a puzzle, or keep track of a citekey while authoring.
-- The planned source-resolution action will accept a DOI, URL, title, or
-  Zotero record. The authoring service will store Zotero's assigned citekey and
-  source revision in the citation-source domain, leaving them out of
-  agent-facing puzzle schemas. The planned citation search action may accept
-  and return a citekey for lookup, but the agent does not maintain it.
-- Until source resolution is implemented, record verified bibliographic
-  details in the current inline citation fields. Do not use a Zotero item key
-  as a citekey; it is an internal record ID.
+- Record verified bibliographic details in the current inline citation
+  fields, including puzzle-specific locators such as pages. Filing a source
+  does not replace these fields. Do not use a Zotero item key as a citekey.
+
+## Optional local authoring pilot
+
+The local Postgres-backed `concept-clusters` MCP server offers:
+
+- `plan_puzzle_references` for read-only coverage planning. Supply a query
+  (topic, title, author, DOI, URL, or known citekey), category, or subcategory.
+  It returns source candidates, published citation usage, accessible draft
+  citations, and nearby puzzles. Published matches are inferred, ambiguous,
+  or unmatched; draft citations are unlinked. Check `usageIndex.freshness`
+  before treating missing usage as evidence of a gap. Review nearby puzzle
+  content before judging missing or excessive coverage.
+- `file_zotero_reference` to explicitly file a selected work in the Concept
+  Clusters Zotero collection and mirror its assigned citekey and metadata in
+  Postgres. Provide exactly one of `zotero_item_key`, `doi`, or `url`.
+  Call it only when filing the selected work is within the requested task;
+  a lookup or planning request alone does not authorize filing. This action
+  changes collection membership and may create a Zotero item for a DOI or URL.
+  It does not modify a puzzle or publish a citation.
+
+These pilot tools are optional and available only when exposed by the local
+server. Citekeys remain lookup aliases in the source domain; agents do not
+maintain them in puzzle documents. Authoritative citation bindings and pinning
+source revisions on publication remain planned.
 
 If the Zotero MCP tools are unavailable, say the lookup could not be performed;
 do not present a computed key as Zotero-verified.
