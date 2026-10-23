@@ -225,4 +225,39 @@ export async function resolveLocalAuthoringWorkspace({
   };
 }
 
+// The optional Zotero reference pilot, shared by the stdio and HTTP (tunnel)
+// MCP entries. Only a Postgres workspace carries the citation stores, so
+// callers register the pilot tools only when this returns non-null.
+export function createReferencePilot(resolveWorkspace) {
+  async function zotero() {
+    const service = (await resolveWorkspace()).zoteroReferences;
+    if (!service) throw new Error("Zotero filing requires the Postgres LAN workspace");
+    return service;
+  }
+  return {
+    async searchSources(args) {
+      const store = (await resolveWorkspace()).citationSources;
+      return store ? store.search(args) : [];
+    },
+    async searchUsage(args) {
+      const store = (await resolveWorkspace()).citationUsage;
+      return store ? store.search(args) : [];
+    },
+    async usageStatus() {
+      const store = (await resolveWorkspace()).citationUsage;
+      return store ? store.status() : { freshness: "unavailable" };
+    },
+    async searchZotero(query, options) {
+      const service = (await resolveWorkspace()).zoteroReferences;
+      return service ? service.search(query, options) : [];
+    },
+    async fileItem(itemKey) {
+      return (await zotero()).fileItem(itemKey);
+    },
+    async fileSource(args) {
+      return (await zotero()).fileSource(args);
+    }
+  };
+}
+
 export default resolveLocalAuthoringWorkspace;

@@ -6,6 +6,7 @@ import {
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
 import {
   LOCAL_PUBLICATION_ACTOR,
+  createReferencePilot,
   resolveLocalAuthoringWorkspace
 } from "./localAuthoringWorkspace.js";
 import {
@@ -181,34 +182,6 @@ export function createConceptClustersMcpServer({
       return store ? store.readAll() : new Map();
     }
   };
-  const referencePilot = {
-    async searchSources(args) {
-      const store = (await workspace()).citationSources;
-      return store ? store.search(args) : [];
-    },
-    async searchUsage(args) {
-      const store = (await workspace()).citationUsage;
-      return store ? store.search(args) : [];
-    },
-    async usageStatus() {
-      const store = (await workspace()).citationUsage;
-      return store ? store.status() : { freshness: "unavailable" };
-    },
-    async searchZotero(query, options) {
-      const service = (await workspace()).zoteroReferences;
-      return service ? service.search(query, options) : [];
-    },
-    async fileItem(itemKey) {
-      const service = (await workspace()).zoteroReferences;
-      if (!service) throw new Error("Zotero filing requires the Postgres LAN workspace");
-      return service.fileItem(itemKey);
-    },
-    async fileSource(args) {
-      const service = (await workspace()).zoteroReferences;
-      if (!service) throw new Error("Zotero filing requires the Postgres LAN workspace");
-      return service.fileSource(args);
-    }
-  };
   const server = createAuthoringMcpServer({
     draftRepository: sharedDraftRepository,
     contentDocuments: sharedContentDocuments,
@@ -219,7 +192,7 @@ export function createConceptClustersMcpServer({
     clientProbeTransport: "stdio",
     wikiLinkStore: sharedWikiLinkStore,
     referencePilot: authoringDatabaseUrl(env) && !remnantDraftStore
-      ? referencePilot : null,
+      ? createReferencePilot(workspace) : null,
     draftReviewBaseUrl: localDraftReviewUrl(),
     // A normal stdio server resolves its D1 adapter lazily from env, so
     // d1Database is usually null here even though content documents are

@@ -235,13 +235,13 @@ the base branch.
 
 These tools, their input schemas, result shapes, resources, and server
 instructions come from the same registration factory used by local stdio MCP.
-The reference pilot tools register only in the local Postgres-backed workspace;
-the hosted Worker has no Zotero or Postgres bridge. Refresh the derived
+The reference pilot tools register only in a Postgres-backed workspace, over
+both stdio and HTTP (including the tunnel). Refresh the derived
 published-citation coverage index with
 `npm run authoring:citations:refresh-usage` after applying the Postgres
 migrations; `npm run authoring:citations:sync-zotero` first mirrors works
-already filed directly in the curated Zotero collection. The hosted surface
-otherwise differs in transport, authentication, and analytics.
+already filed directly in the curated Zotero collection. The HTTP surface
+otherwise differs only in transport, authentication, and analytics.
 Neither surface exposes checkout installation any more (`preview_import` /
 `install_puzzle` were removed as cross-purposed with D1 being the source of
 truth); Admin Freeze is the only thing that writes the checkout.

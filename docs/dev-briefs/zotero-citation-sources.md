@@ -34,11 +34,12 @@ Later changes in Zotero will not alter a published puzzle. Refreshing a source
 will create a new authoring revision; a human will review and republish a puzzle
 to adopt it.
 
-Planning and filing are LAN-only through the local Postgres-backed MCP server.
-The hosted authoring Worker does not expose these tools or proxy requests
-through the tunnel to the LAN. Corpus coverage claims apply to that LAN
-service's published corpus and the caller's accessible drafts. Extending the
-hosted surface would be a separate decision.
+Planning and filing run in the Postgres-backed LAN authoring service. Every
+authoring client reaches that service, over stdio or over HTTP directly or
+through the public Cloudflare tunnel, and both transports register the same
+pilot tools behind the existing authoring access check. The public player
+Worker has no Zotero or Postgres bridge. Corpus coverage claims apply to the
+LAN service's published corpus and the caller's accessible drafts.
 
 After activation, the one-way replica will copy cited revisions to D1 in the
 same generation as the puzzle. The public Worker will resolve citation
