@@ -147,7 +147,7 @@ function subcategorySplit() {
   assert.equal(flat.get("category:physiology-medicine").items.size, 4);
   assert.equal(flat.has("subcategory:physiology-medicine/cardio"), false);
   assert.equal(flat.get("domain:health-medicine").name, "Health & Medicine");
-  const split = desiredCollections({ puzzles, registry, workItems, threshold: 3, minCategoryWorks: 1,
+  const split = desiredCollections({ puzzles, registry, workItems, threshold: 3, minCategoryWorks: 1, minSubcategoryWorks: 1,
     registryItemKeys: ["ITEM0000", "UNCITED1"] });
   assert.deepEqual([...split.get("subcategory:physiology-medicine/cardio").items], ["ITEM0000", "ITEM0001"]);
   assert.deepEqual([...split.get("category:physiology-medicine").items], ["ITEM0002", "ITEM0003"]);
@@ -156,6 +156,11 @@ function subcategorySplit() {
   const folded = desiredCollections({ puzzles, registry, workItems, minCategoryWorks: 5 });
   assert.equal(folded.has("category:physiology-medicine"), false);
   assert.equal(folded.get("domain:health-medicine").items.size, 4);
+  // A split category keeps a small subcategory's works in its own folder.
+  const kept = desiredCollections({ puzzles, registry, workItems, threshold: 3, minCategoryWorks: 1,
+    minSubcategoryWorks: 3 });
+  assert.equal(kept.has("subcategory:physiology-medicine/cardio"), false);
+  assert.equal(kept.get("category:physiology-medicine").items.size, 4);
 }
 
 async function publish(pool, document, kind = "puzzle") {

@@ -1,9 +1,9 @@
 // Generated browse subcollections under the Concept Clusters collection:
-// Domain -> Category -> Subcategory. A category citing fewer than
-// CATEGORY_MIN_WORKS works is folded into its domain collection rather than
-// getting a near-empty folder of its own, and the Subcategory level exists
-// only for a category citing more than SUBCATEGORY_SPLIT_THRESHOLD works. A
-// work can therefore sit directly in a domain. Membership comes from
+// Domain -> Category -> Subcategory. The Subcategory level exists only for a
+// category citing more than SUBCATEGORY_SPLIT_THRESHOLD works. A category or
+// subcategory citing fewer than MIN_COLLECTION_WORKS works is folded into its
+// parent rather than getting a near-empty folder of its own, so a work can
+// sit directly in a domain or category. Membership comes from
 // published puzzles' citations and their current classification, so a
 // reclassification moves works on the next sync. The sync owns these
 // collections: it adds, removes, renames, and deletes them to match, but
@@ -21,7 +21,7 @@ import { loadPublishedCorpus, recordedWorkItems } from "./citationBackfill.js";
 import { citationsOf, classifyCitation } from "./citationWorkKey.js";
 
 export const SUBCATEGORY_SPLIT_THRESHOLD = 30;
-export const CATEGORY_MIN_WORKS = 7;
+export const MIN_COLLECTION_WORKS = 7;
 export const UNCITED_COLLECTION_NAME = "Not yet cited";
 
 const DEPTH = { domain: 0, category: 1, subcategory: 2, uncited: 0 };
@@ -32,7 +32,8 @@ function depthOf(pathKey) {
 
 // pathKey -> { pathKey, name, parentPathKey, items: Set<itemKey> }
 export function desiredCollections({ puzzles, registry, workItems, registryItemKeys = [],
-  threshold = SUBCATEGORY_SPLIT_THRESHOLD, minCategoryWorks = CATEGORY_MIN_WORKS }) {
+  threshold = SUBCATEGORY_SPLIT_THRESHOLD, minCategoryWorks = MIN_COLLECTION_WORKS,
+  minSubcategoryWorks = MIN_COLLECTION_WORKS }) {
   const byCategory = new Map();
   const cited = new Set();
   for (const puzzle of puzzles) {
@@ -73,7 +74,7 @@ export function desiredCollections({ puzzles, registry, workItems, registryItemK
     const split = entry.all.size > threshold
       && [...entry.bySubcategory.keys()].some(subcategoryId => subcategoryId);
     for (const [subcategoryId, items] of entry.bySubcategory) {
-      const target = split && subcategoryId
+      const target = split && subcategoryId && items.size >= minSubcategoryWorks
         ? node(`subcategory:${categoryId}/${subcategoryId}`,
           subcategoryById(categoryId, subcategoryId, registry)?.title || subcategoryId, categoryKey)
         : category;
@@ -94,7 +95,7 @@ async function mappedCollections(pool) {
 }
 
 export async function planCollectionSync({ pool, service, threshold = SUBCATEGORY_SPLIT_THRESHOLD,
-  minCategoryWorks = CATEGORY_MIN_WORKS }) {
+  minCategoryWorks = MIN_COLLECTION_WORKS, minSubcategoryWorks = MIN_COLLECTION_WORKS }) {
   const [{ puzzles, registry }, workItems, mapped] = await Promise.all([
     loadPublishedCorpus(pool),
     recordedWorkItems(pool),
@@ -103,7 +104,7 @@ export async function planCollectionSync({ pool, service, threshold = SUBCATEGOR
   return service.withClient(async call => {
     const registryItemKeys = await service.collectionItemKeys(service.collectionKey, call);
     const desired = desiredCollections({
-      puzzles, registry, workItems, registryItemKeys, threshold, minCategoryWorks
+      puzzles, registry, workItems, registryItemKeys, threshold, minCategoryWorks, minSubcategoryWorks
     });
     const existing = await service.listCollections(call);
     const plan = { create: [], rename: [], add: [], remove: [], delete: [] };

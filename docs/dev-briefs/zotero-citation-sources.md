@@ -98,7 +98,9 @@ citation to its work through that record before the DOI, URL, and title tiers.
 
 `npm run authoring:citations:collections` prints the generated browse tree
 under the collection, Domain → Category, with Subcategory children only for a
-category citing more than 30 works, plus "Not yet cited". `-- --apply`
+category citing more than 30 works, plus "Not yet cited". A category or
+subcategory citing fewer than 7 works folds into its parent, so a work can sit
+directly in a domain or category. `-- --apply`
 writes it. Membership follows current published classification; the sync
 owns these subcollections and undoes hand-filing inside them, but never
 changes the parent collection or deletes an item. Items created through the
