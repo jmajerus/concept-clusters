@@ -5,6 +5,8 @@ import {
   categoryIdFor,
   subcategoryIdForPuzzle
 } from "../puzzles/categories.js";
+import { recordedWorkItems } from "./citationBackfill.js";
+import { classifyCitation } from "./citationWorkKey.js";
 import { nonCryptographicHash } from "./nonCryptographicHash.js";
 import { withTransaction } from "./postgresPool.js";
 
@@ -48,13 +50,21 @@ function topicsOf(document) {
   }));
 }
 
-function matchSource(citation, sources) {
+// workItems: work key -> Zotero item key, recorded by the backfill. It links
+// a citation to its work even when inline text differs from Zotero's
+// metadata (an OpenStax section URL, a differently written author list).
+function matchSource(citation, sources, workItems = new Map()) {
   const doi = doiOf(citation);
   const url = normalizedUrl(citation.url);
   const title = normalized(citation.title);
   const year = normalized(citation.year);
   const author = normalized(citation.author);
+  const work = classifyCitation(citation);
+  const workItem = work.scholarly ? workItems.get(work.workKey) : null;
   const tiers = [
+    ["work_key", source => workItem
+      && source.zoteroLibrary === workItem.zotero_library
+      && source.zoteroItemKey === workItem.zotero_item_key],
     ["doi", source => doi && normalized(source.metadata?.doi) === doi],
     ["url", source => url && normalizedUrl(source.metadata?.url) === url],
     ["title_author_year", source => title && year && author
@@ -74,6 +84,7 @@ function matchSource(citation, sources) {
 
 export async function refreshPublishedCitationUsage(pool, sourceRepository) {
   const sources = await sourceRepository.listAll();
+  const workItems = await recordedWorkItems(pool);
   const indexedAt = new Date().toISOString();
   const published = await pool.query(`
     SELECT id, title, document FROM published_documents
@@ -90,7 +101,7 @@ export async function refreshPublishedCitationUsage(pool, sourceRepository) {
       const entries = citationList(document);
       for (let index = 0; index < entries.length; index++) {
         const citation = entries[index];
-        const match = matchSource(citation, sources);
+        const match = matchSource(citation, sources, workItems);
         await client.query(`
           INSERT INTO citation_usage_observations (
             puzzle_id, citation_index, citation_json, citation_hash,

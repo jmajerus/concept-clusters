@@ -46,6 +46,8 @@
     "authoring:postgres:migrate": "node tools/postgres-migrate.mjs",
     "authoring:citations:refresh-usage": "node tools/sync-citation-usage.mjs",
     "authoring:citations:sync-zotero": "node tools/sync-zotero-citations.mjs",
+    "authoring:citations:backfill": "node tools/citation-backfill.mjs",
+    "authoring:citations:collections": "node tools/citation-collections.mjs",
     "authoring:postgres:dump": "node tools/postgres-dump.mjs",
     "authoring:postgres:copy": "node tools/copy-authoring-to-postgres.mjs",
     "mcp:hosted:release": "npm run authoring:d1:migrate:remote && npm run mcp:hosted:deploy",

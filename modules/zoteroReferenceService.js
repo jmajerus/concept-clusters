@@ -53,7 +53,7 @@ function citekeyOf(record) {
   return String(data.citationKey || data.extra?.match(/^Citation Key:\s*(\S+)/mi)?.[1] || "").trim();
 }
 
-function libraryOf(record) {
+export function libraryOf(record) {
   const library = record.library;
   if (!library?.type || library.id == null) {
     throw new Error("Zotero item has no library identity");
@@ -213,27 +213,15 @@ export class ZoteroReferenceService {
       let mirrored = 0;
       const skipped = [];
       const seen = new Set();
-      for (let offset = 0; ; offset += size) {
-        const page = await call("zotero_get_collection_items", {
-          collection_key: this.collectionKey,
-          detail: "summary",
-          limit: size,
-          offset
-        });
-        if (/^No items found in collection:/i.test(page.trim())) break;
-        const keys = itemKeyFromText(page);
-        if (!keys.length) throw new Error("Could not parse Zotero collection item keys");
-        for (const key of keys) {
-          scanned++;
-          seen.add(key);
-          try {
-            await this.mirrorRecord(await this.getItem(key, call));
-            mirrored++;
-          } catch (error) {
-            skipped.push({ zoteroItemKey: key, reason: error.message });
-          }
+      for (const key of await this.collectionItemKeys(this.collectionKey, call, size)) {
+        scanned++;
+        seen.add(key);
+        try {
+          await this.mirrorRecord(await this.getItem(key, call));
+          mirrored++;
+        } catch (error) {
+          skipped.push({ zoteroItemKey: key, reason: error.message });
         }
-        if (keys.length < size) break;
       }
       const existing = await this.sourceRepository.listAll();
       const missingFromCollection = existing
@@ -248,5 +236,103 @@ export class ZoteroReferenceService {
         missingFromCollection
       };
     });
+  }
+
+  // The methods below take the `call` of an open withClient session, so a
+  // backfill or collection sync reuses one connection for many requests.
+
+  // Every item key filed directly in a collection, paging through it.
+  async collectionItemKeys(collectionKey, call, pageSize = 100) {
+    const keys = [];
+    for (let offset = 0; ; offset += pageSize) {
+      const page = await call("zotero_get_collection_items", {
+        collection_key: collectionKey,
+        detail: "summary",
+        limit: pageSize,
+        offset
+      });
+      if (/^No items found in collection:/i.test(page.trim())) break;
+      const found = itemKeyFromText(page);
+      if (!found.length) throw new Error("Could not parse Zotero collection item keys");
+      keys.push(...found);
+      if (found.length < pageSize) break;
+    }
+    return keys;
+  }
+
+  // Library items whose title or creators contain the first words of title.
+  // Search falls back to looser matching, so callers compare titles strictly.
+  async titleCandidates(title, call, limit = 5) {
+    const query = String(title || "").split(/[:.,;(]/)[0].trim().split(/\s+/).slice(0, 6).join(" ");
+    if (!query) return [];
+    const result = await call("zotero_search_items", { query, qmode: "titleCreatorYear", limit });
+    if (/^No items found/i.test(result.trim())) return [];
+    const records = [];
+    for (const key of itemKeyFromText(result).slice(0, limit)) {
+      records.push(await this.getItem(key, call));
+    }
+    return records;
+  }
+
+  // Creates the item (or, for a DOI/PMID already in the library, reuses it)
+  // filed in the Concept Clusters collection, and returns its item key.
+  async addItem({ kind, source }, call) {
+    const sourceType = { doi: "doi", pmid: "pmid", url: "url", csl: "csl_json" }[kind];
+    if (!sourceType) throw new Error(`Cannot add a Zotero item of kind ${kind}`);
+    const response = await call("zotero_add_item", {
+      source: kind === "csl" ? JSON.stringify(source) : String(source),
+      source_type: sourceType,
+      collections: [this.collectionKey],
+      if_exists: "file",
+      attach_mode: "none"
+    });
+    const key = response.match(/\bItem key:\s*`?([A-Z0-9]{8})`?/i)?.[1];
+    if (!key || /^(Error|Failed)/im.test(response)) {
+      throw new Error(`Zotero did not add the item: ${response.slice(0, 300)}`);
+    }
+    return { itemKey: key, reused: /Already in library|reused/i.test(response) };
+  }
+
+  async setItemCollections(itemKeys, { add = [], remove = [] }, call) {
+    if (!itemKeys.length || (!add.length && !remove.length)) return;
+    const response = await call("zotero_set_item_collections", {
+      item_keys: itemKeys,
+      ...(add.length ? { add_to: add } : {}),
+      ...(remove.length ? { remove_from: remove } : {})
+    });
+    if (/^(Error|Input error|Failed)/im.test(response)) {
+      throw new Error(`Zotero collection change failed: ${response.slice(0, 300)}`);
+    }
+  }
+
+  // Collection key -> name for every collection in the library.
+  async listCollections(call) {
+    const text = await call("zotero_get_collections", { limit: 5000 });
+    return new Map([...text.matchAll(/\*\*(.+?)\*\* \(Key: ([A-Z0-9]{8})\)/g)]
+      .map(match => [match[2], match[1]]));
+  }
+
+  async createCollection(name, parentKey, call) {
+    const response = await call("zotero_create_collection", {
+      name,
+      parent_collection: parentKey
+    });
+    const key = response.match(/Collection key:\s*`([A-Z0-9]{8})`/)?.[1];
+    if (!key) throw new Error(`Zotero did not create collection ${name}: ${response.slice(0, 300)}`);
+    return key;
+  }
+
+  async renameCollection(collectionKey, name, call) {
+    const response = await call("zotero_update_collection", { collection_key: collectionKey, name });
+    if (!/^(Updated|No change)/.test(response.trim())) {
+      throw new Error(`Zotero did not rename collection ${collectionKey}: ${response.slice(0, 300)}`);
+    }
+  }
+
+  async deleteCollection(collectionKey, call) {
+    const response = await call("zotero_delete_collection", { collection_key: collectionKey });
+    if (!/^Deleted collection/.test(response.trim())) {
+      throw new Error(`Zotero did not delete collection ${collectionKey}: ${response.slice(0, 300)}`);
+    }
   }
 }

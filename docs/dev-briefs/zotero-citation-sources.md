@@ -76,6 +76,35 @@ collection.
 The usage index is refreshed manually and reports its freshness; a stale or
 uninitialized index must not be treated as evidence of no coverage.
 
+### Backfill and browse collections
+
+Only scholarly works become Zotero items: a DOI, PubMed, PMC, or RFC
+identifier; an open textbook (OpenStax, LibreTexts, BCcampus); a host in
+`SCHOLARLY_HOSTS`; or a book or article cited without a URL (or with an
+edition in its title). Encyclopedias, dictionaries, and general web pages
+stay inline. `modules/citationWorkKey.js` groups citations into works, so an
+open textbook's sections become one book item and the section stays a puzzle
+locator.
+
+`npm run authoring:citations:backfill -- plan` reads published puzzles and
+writes a JSON plan and Markdown report under
+`.concept-clusters/authoring/reports/citation-backfill/`. It files a work that
+already exists in the library under an exact title and edition, looks up a
+CrossRef DOI for a dated work cited without one, and lists the rest for
+creation. A person resolves review entries in the JSON, then runs
+`… -- apply <plan.json>`. Apply records each item in `citation_work_items` as
+soon as it exists, so a rerun never duplicates one; the usage index links a
+citation to its work through that record before the DOI, URL, and title tiers.
+
+`npm run authoring:citations:collections` prints the generated browse tree
+under the collection, Domain → Category, with Subcategory children only for a
+category citing more than 30 works, plus "Not yet cited". `-- --apply`
+writes it. Membership follows current published classification; the sync
+owns these subcollections and undoes hand-filing inside them, but never
+changes the parent collection or deletes an item. Items created through the
+Web API receive a Better BibTeX citekey after desktop Zotero syncs; run
+`authoring:citations:sync-zotero` after that to mirror them in Postgres.
+
 ## Phase 2: authoritative bindings
 
 After the pilot confirms matching quality and review flow, link citations to
