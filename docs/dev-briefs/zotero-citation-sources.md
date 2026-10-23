@@ -8,6 +8,11 @@ authoring database, run `npm run authoring:postgres:migrate`, then
 `npm run authoring:citations:refresh-usage`. Puzzle bindings, publication,
 replica, and freeze changes remain planned.
 
+Remaining pilot work includes ISBN and edition metadata, persisted source
+availability flags, mirror-first planning lookup, and a complete migration
+report. The decisions below specify that work and activation behavior; they
+do not imply those features are already implemented.
+
 ## Decision
 
 An authoring agent identifies a work by DOI, URL, title, or Zotero record. The
@@ -24,10 +29,16 @@ but never has to put one in a puzzle. A browser reviews Postgres records
 through the authoring service.
 
 After activation, publication will pin an immutable metadata revision for each
-citation. That published revision will be the authority for play and freeze.
+bound citation. That published revision will be the authority for play and freeze.
 Later changes in Zotero will not alter a published puzzle. Refreshing a source
 will create a new authoring revision; a human will review and republish a puzzle
 to adopt it.
+
+Planning and filing are LAN-only through the local Postgres-backed MCP server.
+The hosted authoring Worker does not expose these tools or proxy requests
+through the tunnel to the LAN. Corpus coverage claims apply to that LAN
+service's published corpus and the caller's accessible drafts. Extending the
+hosted surface would be a separate decision.
 
 After activation, the one-way replica will copy cited revisions to D1 in the
 same generation as the puzzle. The public Worker will resolve citation
@@ -73,6 +84,54 @@ Introduce publication checks only when existing citations are migrated or have
 a deliberate compatibility path. This activation is a separate change from
 the additive pilot.
 
+### Display and review
+
+For a bound citation, author, title, year, publisher, URL, and other source
+identity metadata come from the pinned revision. Puzzle-specific locators,
+including pages and chapter, come from the authored inline object. Apply the
+same composition rule in review, publication, LAN and D1 play, and freeze.
+Review shows the authored text, the resolved citation that will render, and
+any divergence. A missing identity field in the source revision remains
+visible for correction or an explicit disposition before publication; it
+must not silently fall back to conflicting inline identity text.
+
+### Human-approved unbound citations
+
+A human may approve an `unbound` disposition for a citation that will remain
+outside Zotero. Record the reviewer, approval time, reason, and identity
+fingerprint in the separate citation domain. Publication archives the full
+approved inline citation, including its locators, as an immutable snapshot.
+Replicate that snapshot to D1 and use it for play and freeze. No Zotero record
+is required for this disposition. An identity edit invalidates the approval;
+locator-only edits retain it and are included in normal puzzle review.
+Unresolved citations still need either a reviewed source binding or this
+human-approved disposition before activation publication can proceed.
+
+### Reconciliation and source recovery
+
+Fingerprint source identity fields only, excluding locators and list position.
+Include edition and identifiers when present, preserve URL path and query
+case, and normalize only fields whose comparison rules permit it. Reconcile
+by identity fingerprint first; a reorder or locator edit preserves an
+unambiguous binding. Position is a fallback only when the ordered identity
+list is unchanged. Duplicate fingerprints or competing source candidates
+require review rather than an arbitrary positional choice.
+
+The internal Postgres source id survives Zotero item re-imports and library
+moves. Retain DOI, ISBN, edition, and citekey alias metadata to help identify
+replacement Zotero records. Treat edition conflicts, including textbook
+edition changes, as ambiguous even when titles and authors agree. Recovery
+requires a verified replacement and recorded identity history; it never
+rewrites an existing published pin or silently merges sources.
+
+Read native `citationKey` first, with an Extra line as fallback. A citekey-only
+refresh updates the searchable alias without changing the source identity,
+metadata revision, or published pins. Persist availability findings for
+trashed items, verified deletions, and collection removals, and show affected
+citing puzzles in review. An outage or failed lookup is an unknown status,
+not evidence of deletion. Retain source snapshots and published pins in all
+these cases.
+
 ## Data shape
 
 - `citation_sources` in Postgres identifies a Zotero work by library and item
@@ -88,8 +147,8 @@ the additive pilot.
   The planning tool separately reads accessible drafts at request time and
   labels their citations `draft_unlinked`. The pilot has no confirmed or
   authoritative citation bindings. After
-  activation, authoritative binding rows record citation position, content
-  fingerprint, source identity, and the published metadata revision; content
+  activation, authoritative binding rows record citation position for display,
+  an identity-only fingerprint, source identity, and the published metadata revision; content
   saves then reconcile changed citations. Both forms support corpus-wide
   coverage searches and report puzzle identity, status, citation location,
   and source metadata. Published usage rows also carry the puzzle's
@@ -108,8 +167,8 @@ the additive pilot.
   agent-facing puzzle schemas or tool responses. Citekeys appear only as
   optional search terms or source metadata, never as puzzle fields.
 - D1 holds only revisions referenced by current published puzzles, keyed by
-  source id and revision. It is a replica of the Postgres published data, not
-  another authoring database.
+  source id and revision, along with their approved unbound citation snapshots.
+  It is a replica of the Postgres published data, not another authoring database.
 - A frozen citation carries the resolved display metadata, so the Git artifact
   remains self-contained. Citekeys stay in the source domain.
 
@@ -130,7 +189,10 @@ the additive pilot.
    `zotero_add_item` with `collections` and `if_exists: "file"`. Do this only
    after the author selects the work, and never create a duplicate merely to
    place it in the collection. Store the resulting citekey and metadata in
-   the source tables. Make a new revision only when metadata changes. A known
+   the source tables. Make a new revision only when metadata changes. Read
+   native `citationKey` before Extra; a citekey-only refresh updates the alias
+   without a bibliographic revision. Retain DOI, ISBN, and edition metadata
+   for matching and source recovery. A known
    citekey is an optional lookup term. Show ambiguous matches for selection;
    do not treat an unresolved reference as an exact match. Reconcile collection membership
    against the mirror, including items added directly in Zotero; do not
@@ -145,8 +207,10 @@ the additive pilot.
    `search_puzzles`, and an explicit uncertainty note for ambiguous matches.
    It can group results by the derived puzzle topics and optionally rank the
    primary category first, while allowing a global search across disciplines.
-   It may query Zotero when a work is absent from the local mirror, but does
-   not file a candidate
+   Planned lookup optimization: resolve against the mirror first and batch
+   Zotero requests only for misses, respecting rate limits and retry guidance.
+   Currently every text query contacts Zotero; published usage refresh already
+   reads Postgres only. Planning does not file a candidate
    in the Concept Clusters collection or mutate a draft. It covers published
    content and drafts the caller may access. Zero exact citations alone does
    not establish a coverage gap, and repeated citation alone does not
@@ -157,36 +221,53 @@ the additive pilot.
    a verified Zotero work and file selected works in the Concept Clusters
    collection. Store source bindings in Postgres outside the puzzle document.
    Preserve unchanged bindings through other content edits and pedagogy saves.
+   Use identity-only fingerprints to preserve bindings across locator edits
+   and reorders, with the positional fallback and ambiguity rules above.
    Ambiguity leaves the citation visible in the draft and flags it for human
    resolution; it must not silently bind to the wrong work. A Zotero outage
    must not fail the ordinary draft save: queue the unresolved work and show
-   its status in review. Publication waits for resolution.
+   its status in review. Publication waits for a reviewed binding or a
+   human-approved `unbound` disposition.
 5. **Pin on publication (activation).** In the Postgres publish transaction, bind each
-   citation to an exact source revision in published sidecar rows and include
-   those pins in the public snapshot hash and revision history. Keep the
+   bound citation to an exact source revision in published sidecar rows and
+   archive each approved unbound citation as a complete immutable snapshot.
+   Include both forms in the public snapshot hash and revision history. Keep the
    authored document shape intact. Do not fetch Zotero as a side effect of
-   publishing. Publish fails clearly if a reference was not resolved and
-   reviewed. A later Zotero refresh does not rewrite a published binding.
+   publishing. Publish fails clearly if a reference has neither a reviewed
+   binding nor an approved unbound disposition. Review displays the composed
+   citation and any divergence from inline identity fields. A later Zotero
+   refresh does not rewrite a published binding.
 6. **Replicate cited revisions with the puzzle (activation).** Extend
    `modules/publishedReplica.js` and the D1 schema to send the bound revision
-   rows before, or atomically with, their puzzle generation. A retry must be
+   rows and approved unbound snapshots before, or atomically with, their
+   puzzle generation. A retry must be
    idempotent, and a puzzle must not become visible with a missing citation.
    Retain a revision while any published puzzle references it.
 7. **Resolve for public play (activation).** Have `modules/publicPlayService.js` bulk-load
-   cited revisions for the publication index and load only a puzzle's
-   revisions for its route. Resolve before `puzzleBrowseFromDocument` and
+   cited revisions and unbound snapshots for the publication index and load
+   only a puzzle's citations for its route. Resolve before `puzzleBrowseFromDocument` and
    `compilePublishedPuzzle`, preserving current citation rendering, Library
    search, and content fingerprints. Apply the same resolution to LAN play
    from Postgres.
 8. **Materialize only at freeze (activation).** In `modules/contentFreezeApply.js`, resolve
    the published puzzle's pinned revisions from Postgres before writing its
-   canonical JSON and generated module. Freeze uses no live Zotero lookup and
-   fails if a pinned revision is missing.
+   canonical JSON and generated module, composing pinned identity metadata
+   with puzzle locators and including approved unbound snapshots. Freeze uses
+   no live Zotero lookup and fails if a pinned revision or approved snapshot
+   is missing.
 9. **Migrate existing citations (before activation).** Match inline citations to Zotero records
    where unambiguous. Preserve unmatched inline entries for human resolution;
    do not generate citekeys from incomplete metadata or silently discard
    citations. Keep inline authoring after existing publications and drafts
    remain readable; no agent-facing schema migration is required.
+   Produce a complete report grouped by puzzle, listing every unmatched or
+   ambiguous citation with its position, authored metadata, candidates,
+   match basis, and edition conflicts. Include index freshness and report
+   scope; do not truncate this work queue to planning-tool result limits.
+   Prepare the physiology pilot by adding and verifying the cited editions
+   of Guyton and Hall, Boron & Boulpaep, OpenStax, and the cited papers before
+   measuring matching quality. Missing library coverage is reported as
+   unmatched rather than used to infer that a puzzle lacks references.
 
 ## Pilot acceptance criteria
 
@@ -200,18 +281,28 @@ the additive pilot.
 - Existing content and pedagogy saves retain their current input shape and
   guidance size; the optional planning tool returns source information without
   writing a puzzle or Zotero collection.
+- The migration report lists every unmatched and ambiguous citation per
+  puzzle, with candidates and enough metadata for human resolution.
 
 ## Activation acceptance criteria
 
 - Human review shows a citation's actual metadata and the revision that
-  publication will pin.
-- A cited Zotero item belongs to the configured Concept Clusters collection;
+  publication will pin, highlights divergence from authored identity text,
+  and renders pinned identity fields with inline locators consistently.
+- Every citation has either a reviewed binding or a human-approved unbound
+  disposition. Approved unbound snapshots survive publication, replication,
+  play, and freeze without a Zotero dependency.
+- Reordering citations and editing locators preserve unambiguous bindings;
+  duplicate identities and edition conflicts require review.
+- Missing, trashed, or moved Zotero items produce visible status or recovery
+  work without altering source identity, archived revisions, or existing pins.
+- A bound Zotero item belongs to the configured Concept Clusters collection;
   filing an existing item preserves its other collection memberships.
 - An agent can add a source without generating, entering, or remembering its
   citekey, internal source id, or publication revision; the authoring service
   handles these in the source domain. A known citekey can be used as a search
   shortcut without becoming part of the puzzle.
-- An authoring agent can find all accessible puzzles citing an exact work and
+- A LAN authoring agent can find all accessible puzzles citing an exact work and
   search nearby topics to judge missing or excessive coverage. Category and
   subcategory filters reflect current published puzzle classifications, not
   permanent attributes of the Zotero work.
