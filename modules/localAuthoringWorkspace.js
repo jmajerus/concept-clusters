@@ -21,6 +21,13 @@ import { PostgresDraftRepository } from "./postgresDraftRepository.js";
 import { PostgresFreezePublicationRepository } from "./postgresFreezePublicationRepository.js";
 import { PostgresModelSuggestionRepository } from "./postgresModelSuggestionRepository.js";
 import { PostgresReviewEventStore } from "./postgresReviewEvents.js";
+import { PostgresCitationSourceRepository } from "./postgresCitationSourceRepository.js";
+import { PostgresCitationUsagePilot } from "./postgresCitationUsagePilot.js";
+import {
+  ZoteroReferenceService,
+  DEFAULT_ZOTERO_MCP_URL,
+  CONCEPT_CLUSTERS_COLLECTION_KEY
+} from "./zoteroReferenceService.js";
 import { authoringDatabaseUrl, getAuthoringPool } from "./postgresPool.js";
 
 export const LOCAL_PUBLICATION_ACTOR = Object.freeze({ subject: "local" });
@@ -196,6 +203,7 @@ export async function resolveLocalAuthoringWorkspace({
     pool,
     publishedDocuments: published
   });
+  const citationSources = new PostgresCitationSourceRepository(pool);
   return {
     actor: resolvedActor,
     draftStore: createRepositoryDraftStore({ repository, actor: resolvedActor }),
@@ -206,7 +214,14 @@ export async function resolveLocalAuthoringWorkspace({
       replicate: enqueueSiteSettingsReplica
     }),
     freezeRepository: contentDocuments.freezeRepository,
-    modelSuggestions: contentDocuments.modelSuggestions
+    modelSuggestions: contentDocuments.modelSuggestions,
+    citationSources,
+    citationUsage: new PostgresCitationUsagePilot(pool),
+    zoteroReferences: new ZoteroReferenceService({
+      url: env.ZOTERO_MCP_URL || DEFAULT_ZOTERO_MCP_URL,
+      collectionKey: env.CONCEPT_CLUSTERS_ZOTERO_COLLECTION_KEY || CONCEPT_CLUSTERS_COLLECTION_KEY,
+      sourceRepository: citationSources
+    })
   };
 }
 

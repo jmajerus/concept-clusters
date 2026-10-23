@@ -44,6 +44,8 @@
     "authoring:d1:migrate:local": "wrangler d1 migrations apply concept-clusters-authoring --local -c wrangler.authoring.jsonc",
     "authoring:d1:migrate:remote": "wrangler d1 migrations apply concept-clusters-authoring --remote -c wrangler.authoring.jsonc",
     "authoring:postgres:migrate": "node tools/postgres-migrate.mjs",
+    "authoring:citations:refresh-usage": "node tools/sync-citation-usage.mjs",
+    "authoring:citations:sync-zotero": "node tools/sync-zotero-citations.mjs",
     "authoring:postgres:dump": "node tools/postgres-dump.mjs",
     "authoring:postgres:copy": "node tools/copy-authoring-to-postgres.mjs",
     "mcp:hosted:release": "npm run authoring:d1:migrate:remote && npm run mcp:hosted:deploy",
@@ -68,6 +70,7 @@
     "wrangler": "^4.118.0"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@modelcontextprotocol/server": "2.0.0",
     "agents": "^0.20.1",
     "jose": "^6.2.7",
