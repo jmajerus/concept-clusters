@@ -95,6 +95,9 @@ function classification() {
   assert.equal(classifyCitation({ title: "Airway resistance", url: "https://en.wikipedia.org/wiki/Airway_resistance" }).scholarly, false);
   assert.equal(classifyCitation({ title: "Just a title" }).scholarly, false);
   assert.deepEqual(splitEdition("Medical Physiology, 3rd ed., ch. 5 Transport"), { title: "Medical Physiology", edition: "3" });
+  for (const nye of ["Joseph S. Nye Jr.", "Joseph S. Nye, Jr.", "Nye, Joseph S., Jr."]) {
+    assert.deepEqual(cslAuthors(nye), [{ family: "Nye", given: "Joseph S., Jr." }]);
+  }
   assert.deepEqual(cslAuthors("Honig, Jan Willem, and Norbert Both"),
     [{ family: "Honig", given: "Jan Willem" }, { family: "Both", given: "Norbert" }]);
   assert.equal(compareTitleCandidate(book, { data: { title: "Guyton and Hall Textbook of Medical Physiology", edition: "13" } }), "edition");

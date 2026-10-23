@@ -81,20 +81,33 @@ function titleCaseSlug(slug) {
     .join(" ");
 }
 
-function personName(name) {
+const NAME_SUFFIX = /^(?:jr|sr|ii|iii|iv)\.?$/i;
+
+// Zotero has no suffix field; its convention is a given name of
+// "Joseph S., Jr." so the surname -- and the citekey built from it -- is Nye.
+function withSuffix(given, suffix) {
+  return suffix ? `${given}, ${suffix}` : given;
+}
+
+function personName([name, listedSuffix = null]) {
   if (name.includes(",")) {
     const [family, given] = name.split(",").map(piece => piece.trim());
-    return given ? { family, given } : { literal: family };
+    return given ? { family, given: withSuffix(given, listedSuffix) } : { literal: family };
   }
   const words = name.split(/\s+/);
+  const suffix = listedSuffix
+    || (words.length > 2 && NAME_SUFFIX.test(words.at(-1)) ? words.pop() : null);
   if (words.length < 2 || words.length > 4) return { literal: name };
-  return { family: words.at(-1), given: words.slice(0, -1).join(" ") };
+  // A particle stays with the given name ("Gennep, Arnold van"), as Zotero
+  // and Chicago file it.
+  return { family: words.at(-1), given: withSuffix(words.slice(0, -1).join(" "), suffix) };
 }
 
 // Inline authors are free text: "John E. Hall and Michael E. Hall",
 // "Dettmer, Katja; Aronov, Pavel", "Machiavelli, Niccolò", "Longinus",
-// "Honig, Jan Willem, and Norbert Both". A comma is "Family, Given" when
-// the part before it is one word, and a list separator otherwise.
+// "Honig, Jan Willem, and Norbert Both", "Joseph S. Nye, Jr.". A comma is
+// "Family, Given" when the part before it is one word, a suffix when the
+// part after it is Jr./Sr./II-IV, and a list separator otherwise.
 export function cslAuthors(author) {
   const text = String(author || "").trim();
   if (!text) return [];
@@ -104,11 +117,13 @@ export function cslAuthors(author) {
     const pieces = chunk.split(/\s*,\s*/).filter(Boolean);
     for (let index = 0; index < pieces.length; index++) {
       const single = !/\s/.test(pieces[index]);
-      if (single && pieces[index + 1]) {
-        names.push(`${pieces[index]}, ${pieces[index + 1]}`);
+      if (NAME_SUFFIX.test(pieces[index]) && names.length) {
+        names.at(-1)[1] = pieces[index];
+      } else if (single && pieces[index + 1]) {
+        names.push([`${pieces[index]}, ${pieces[index + 1]}`, null]);
         index++;
       } else {
-        names.push(pieces[index]);
+        names.push([pieces[index], null]);
       }
     }
   }
