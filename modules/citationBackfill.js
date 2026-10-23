@@ -5,6 +5,11 @@
 // so a rerun after a failure never creates a second copy.
 
 import { listMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
+import {
+  citationKeyNeedsRepair,
+  proposedCitationKey,
+  uniqueCitationKey
+} from "./citationKeys.js";
 import { classifyCitation, citationsOf, normalizedText, splitEdition } from "./citationWorkKey.js";
 import { PostgresPublishedRepository } from "./postgresPublishedRepository.js";
 import { libraryOf } from "./zoteroReferenceService.js";
@@ -279,6 +284,7 @@ export async function applyBackfill({ pool, service, plan, fetchImpl = fetch, on
     ["file", "create"].includes(work.action) && !recorded.has(work.workKey));
   const result = { filed: 0, created: 0, reused: 0, failed: [] };
   let library = null;
+  const assignedKeys = new Set();
   await service.withClient(async call => {
     for (const [position, work] of pending.entries()) {
       onProgress(position + 1, pending.length, work.workKey);
@@ -304,12 +310,116 @@ export async function applyBackfill({ pool, service, plan, fetchImpl = fetch, on
             origin = "created";
           }
         }
-        library ??= libraryOf(await service.getItem(itemKey, call));
+        const item = await service.getItem(itemKey, call);
+        library ??= libraryOf(item);
         await recordWorkItem(pool, { workKey: work.workKey, library, itemKey, origin });
+        if (origin === "created") {
+          const repair = await planItemRepair(service, call, item, work, assignedKeys);
+          if (repair) await writeItemRepair(service, call, repair);
+        }
       } catch (error) {
         result.failed.push({ workKey: work.workKey, label: work.label, reason: error.message });
       }
     }
   });
   return result;
+}
+
+// Repairs to items the backfill created: names an earlier parser broke
+// ("Jr." or "al." as a surname, an unsplit "Nicholas J. Cepeda et al."),
+// missing creators and dates the work now supplies, and a citekey that is
+// missing, misshapen, or not led by the author. Better BibTeX pins a key at
+// creation and cannot refresh it, so the key is written directly. Edits made
+// in Zotero survive: only demonstrably broken names and empty fields change.
+const BROKEN_NAME = /^(?:al|jr|sr)\.?$|\bet al\b/i;
+
+function zoteroCreator(person) {
+  return person.literal
+    ? { creatorType: "author", name: person.literal }
+    : { creatorType: "author", lastName: person.family, firstName: person.given };
+}
+
+export function itemDataRepairs(work, data) {
+  const wanted = work?.kind === "csl" ? work.source.author || [] : [];
+  const current = data.creators || [];
+  const broken = current.some(creator => BROKEN_NAME.test(creator.lastName || creator.name || ""))
+    || current.some((creator, index) => creator.name && wanted[index]?.family);
+  const year = work?.kind === "csl" ? work.source.issued?.["date-parts"]?.[0]?.[0] : null;
+  return {
+    ...(wanted.length && (!current.length || broken) ? { creators: wanted.map(zoteroCreator) } : {}),
+    ...(!data.date && year ? { date: String(year) } : {})
+  };
+}
+
+function creatorList(creators = []) {
+  return creators.map(creator => creator.name || [creator.lastName, creator.firstName].filter(Boolean).join(", ")).join("; ");
+}
+
+async function planItemRepair(service, call, item, work, assignedKeys) {
+  const data = item.data;
+  const itemKey = item.key || data.key;
+  const repairs = itemDataRepairs(work, data);
+  const repaired = { ...data, ...repairs };
+  const fromKey = data.citationKey || "";
+  let toKey = null;
+  if (citationKeyNeedsRepair(fromKey, repaired)) {
+    toKey = await uniqueCitationKey(proposedCitationKey(repaired), async key => {
+      if (assignedKeys.has(key)) return true;
+      const owner = await service.citationKeyOwner(key, call);
+      return Boolean(owner) && owner !== itemKey;
+    });
+    if (toKey === fromKey) toKey = null;
+    else assignedKeys.add(toKey);
+  }
+  if (!repairs.creators && !repairs.date && !toKey) return null;
+  return {
+    itemKey,
+    title: data.title,
+    ...(repairs.creators ? { creators: repairs.creators, creatorsFrom: creatorList(data.creators), creatorsTo: creatorList(repairs.creators) } : {}),
+    ...(repairs.date ? { date: repairs.date } : {}),
+    fromKey,
+    ...(toKey ? { toKey } : {})
+  };
+}
+
+async function writeItemRepair(service, call, repair) {
+  await service.updateItem(repair.itemKey, {
+    creators: repair.creators || null,
+    fields: {
+      ...(repair.date ? { date: repair.date } : {}),
+      ...(repair.toKey ? { citation_key: repair.toKey } : {})
+    }
+  }, call);
+}
+
+export async function planItemRepairs({ pool, service, onProgress = () => {} }) {
+  const { puzzles } = await loadPublishedCorpus(pool);
+  const works = new Map(citedWorks(puzzles).works.map(work => [work.workKey, work]));
+  const created = [...(await recordedWorkItems(pool)).values()].filter(row => row.origin === "created");
+  const assignedKeys = new Set();
+  return service.withClient(async call => {
+    const repairs = [];
+    for (const [position, row] of created.entries()) {
+      onProgress(position + 1, created.length, row.work_key);
+      const item = await service.getItem(row.zotero_item_key, call);
+      const repair = await planItemRepair(service, call, item, works.get(row.work_key), assignedKeys);
+      if (repair) repairs.push(repair);
+    }
+    return repairs;
+  });
+}
+
+export async function applyItemRepairs({ service, repairs, onProgress = () => {} }) {
+  const failed = [];
+  await service.withClient(async call => {
+    for (const [position, repair] of repairs.entries()) {
+      onProgress(position + 1, repairs.length, repair.itemKey);
+      try {
+        await writeItemRepair(service, call, repair);
+      } catch (error) {
+        failed.push({ itemKey: repair.itemKey, reason: error.message });
+      }
+    }
+  });
+  return { repaired: repairs.length - failed.length, failed };
 }

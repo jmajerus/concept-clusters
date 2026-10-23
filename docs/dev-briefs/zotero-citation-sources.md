@@ -96,6 +96,17 @@ creation. A person resolves review entries in the JSON, then runs
 soon as it exists, so a rerun never duplicates one; the usage index links a
 citation to its work through that record before the DOI, URL, and title tiers.
 
+Better BibTeX pins a citekey when an item is created and cannot refresh it,
+so apply writes each created item's key itself (`modules/citationKeys.js`):
+the project rule, author + year + first title word, using Better BibTeX's
+skipwords, with an institution's short name when no person is named
+(`openstax2018biology`, `ussenate2008inquiry`) and a title word that does
+not repeat the author (`feynman1963lectures`). `… -- repair` lists name,
+date, and key repairs to items the backfill created, and `… -- repair-apply
+<repairs.json>` writes them. It rewrites only keys that are missing,
+misshapen, or not led by the author, and never touches items filed from the
+existing library.
+
 `npm run authoring:citations:collections` prints the generated browse tree
 under the collection, Domain → Category, with Subcategory children only for a
 category citing more than 30 works, plus "Not yet cited". A category or

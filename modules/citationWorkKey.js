@@ -22,6 +22,12 @@ export const SCHOLARLY_HOSTS = Object.freeze([
   "feynmanlectures.caltech.edu"
 ]);
 
+// Publishing agencies that stand in as author for their unsigned documents.
+const HOST_INSTITUTIONS = Object.freeze({
+  "usgs.gov": "USGS",
+  "nist.gov": "NIST"
+});
+
 function hostOf(url) {
   try {
     return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
@@ -37,7 +43,7 @@ function onHost(host, domain) {
 export function normalizedText(value) {
   return String(value || "")
     .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
@@ -82,6 +88,7 @@ function titleCaseSlug(slug) {
 }
 
 const NAME_SUFFIX = /^(?:jr|sr|ii|iii|iv)\.?$/i;
+const NAME_PARTICLES = new Set(["van", "von", "de", "der", "den", "du", "da", "di", "del", "della", "la", "le", "ter", "ten"]);
 
 // Zotero has no suffix field; its convention is a given name of
 // "Joseph S., Jr." so the surname -- and the citekey built from it -- is Nye.
@@ -97,9 +104,17 @@ function personName([name, listedSuffix = null]) {
   const words = name.split(/\s+/);
   const suffix = listedSuffix
     || (words.length > 2 && NAME_SUFFIX.test(words.at(-1)) ? words.pop() : null);
-  if (words.length < 2 || words.length > 4) return { literal: name };
-  // A particle stays with the given name ("Gennep, Arnold van"), as Zotero
-  // and Chicago file it.
+  if (words.length > 4) {
+    // "Manfred F. R. Kets de Vries": a compound surname runs from the word
+    // before an inner particle.
+    const particle = words.findIndex((word, index) => index >= 2 && NAME_PARTICLES.has(word.toLowerCase()));
+    return particle > 0
+      ? { family: words.slice(particle - 1).join(" "), given: withSuffix(words.slice(0, particle - 1).join(" "), suffix) }
+      : { literal: name };
+  }
+  if (words.length < 2) return { literal: name };
+  // A trailing particle stays with the given name ("Gennep, Arnold van"), as
+  // Zotero and Chicago file it.
   return { family: words.at(-1), given: withSuffix(words.slice(0, -1).join(" "), suffix) };
 }
 
@@ -109,7 +124,8 @@ function personName([name, listedSuffix = null]) {
 // "Family, Given" when the part before it is one word, a suffix when the
 // part after it is Jr./Sr./II-IV, and a list separator otherwise.
 export function cslAuthors(author) {
-  const text = String(author || "").trim();
+  // "et al." names no one; the list is simply incomplete.
+  const text = String(author || "").trim().replace(/,?\s*et\s+al\.?$/i, "");
   if (!text) return [];
   const chunks = text.split(/\s*;\s*|,?\s+and\s+|\s*&\s*/).filter(Boolean);
   const names = [];
@@ -161,9 +177,12 @@ function articleCsl({ title, citation, journal }) {
   };
 }
 
-function bookCsl({ title, edition = null, citation, publisher = null, url = null }) {
+// An institution stands in as author when no person is named, so the item
+// and its citekey lead with "OpenStax" rather than nothing.
+function bookCsl({ title, edition = null, citation, publisher = null, url = null, institution = null }) {
   const year = yearOf(citation);
-  const authors = cslAuthors(citation.author);
+  const people = cslAuthors(citation.author);
+  const authors = people.length || !institution ? people : [{ literal: institution }];
   return {
     type: "book",
     title,
@@ -209,7 +228,7 @@ export function classifyCitation(citation) {
     return {
       scholarly: true, workKey: `openstax:${slug}`, kind: "csl", label: title,
       source: bookCsl({
-        title, citation: { year: citation.year }, publisher: "OpenStax",
+        title, citation: { year: citation.year }, publisher: "OpenStax", institution: "OpenStax",
         url: `https://openstax.org/books/${slug}`
       })
     };
@@ -224,7 +243,7 @@ export function classifyCitation(citation) {
         scholarly: true, workKey: `libretexts:${host}/${normalizedText(name).replace(/ /g, "-")}`,
         kind: "csl", label: title,
         source: bookCsl({
-          title, citation: {}, publisher: "LibreTexts",
+          title, citation: {}, publisher: "LibreTexts", institution: "LibreTexts",
           url: `https://${host}/${parts.slice(0, 3).join("/")}`
         })
       };
@@ -237,7 +256,9 @@ export function classifyCitation(citation) {
       const title = titleCaseSlug(slug);
       return {
         scholarly: true, workKey: `pressbooks:opentextbc.ca/${slug.toLowerCase()}`, kind: "csl", label: title,
-        source: bookCsl({ title, citation: {}, publisher: "BCcampus", url: `https://opentextbc.ca/${slug}/` })
+        source: bookCsl({
+          title, citation: {}, publisher: "BCcampus", institution: "BCcampus", url: `https://opentextbc.ca/${slug}/`
+        })
       };
     }
   }
@@ -249,7 +270,10 @@ export function classifyCitation(citation) {
       const title = `The Feynman Lectures on Physics, Vol. ${volume}`;
       return {
         scholarly: true, workKey: `feynman:${volume}`, kind: "csl", label: title,
-        source: bookCsl({ title, citation: { author: "Richard P. Feynman, Robert B. Leighton, and Matthew Sands" },
+        source: bookCsl({ title, citation: {
+          author: "Richard P. Feynman, Robert B. Leighton, and Matthew Sands",
+          year: { I: "1963", II: "1964", III: "1965" }[volume]
+        },
           publisher: "California Institute of Technology", url: "https://www.feynmanlectures.caltech.edu/" })
       };
     }
@@ -282,7 +306,9 @@ export function classifyCitation(citation) {
       return { scholarly: true, workKey: `url:${url.toLowerCase()}`, kind: "url", source: url, label: citation.title };
     }
     const year = yearOf(citation);
-    const authors = cslAuthors(citation.author);
+    const people = cslAuthors(citation.author);
+    const institution = Object.entries(HOST_INSTITUTIONS).find(([domain]) => onHost(host, domain))?.[1];
+    const authors = people.length || !institution ? people : [{ literal: institution }];
     return {
       scholarly: true, workKey: `url:${url.replace(/#.*$/, "").replace(/\/$/, "")}`, kind: "csl",
       label: citation.title,

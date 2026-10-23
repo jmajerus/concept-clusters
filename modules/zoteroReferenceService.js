@@ -335,4 +335,24 @@ export class ZoteroReferenceService {
       throw new Error(`Zotero did not delete collection ${collectionKey}: ${response.slice(0, 300)}`);
     }
   }
+
+  // fields: Zotero field names, e.g. { date, citation_key }; creators replaces
+  // the whole list when given.
+  async updateItem(itemKey, { creators = null, fields = {} }, call) {
+    const response = await call("zotero_update_item", {
+      item_key: itemKey,
+      ...(creators ? { creators } : {}),
+      ...(Object.keys(fields).length ? { fields } : {})
+    });
+    if (!/^Successfully updated item/.test(response.trim())) {
+      throw new Error(`Zotero did not update ${itemKey}: ${response.slice(0, 300)}`);
+    }
+  }
+
+  // The item key holding a citekey, or null when it is free.
+  async citationKeyOwner(citekey, call) {
+    const response = await call("zotero_search_by_citation_key", { citekey });
+    if (/^No item found with citation key/i.test(response.trim())) return null;
+    return itemKeyFromText(response)[0] || "unknown";
+  }
 }

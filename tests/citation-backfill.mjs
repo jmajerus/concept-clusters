@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { PGlite } from "@electric-sql/pglite";
 import { applyPostgresMigrations } from "../tools/postgres-migrate.mjs";
 import { classifyCitation, cslAuthors, splitEdition } from "../modules/citationWorkKey.js";
-import { applyBackfill, compareTitleCandidate, crossrefDoi, planBackfill } from "../modules/citationBackfill.js";
+import {
+  applyBackfill, compareTitleCandidate, crossrefDoi, itemDataRepairs, planBackfill
+} from "../modules/citationBackfill.js";
+import { citationKeyNeedsRepair, proposedCitationKey, uniqueCitationKey } from "../modules/citationKeys.js";
 import { applyCollectionSync, desiredCollections, planCollectionSync } from "../modules/citationCollectionSync.js";
 import { PostgresCitationSourceRepository } from "../modules/postgresCitationSourceRepository.js";
 import { refreshPublishedCitationUsage } from "../modules/postgresCitationUsagePilot.js";
@@ -37,7 +40,11 @@ function fakeZotero() {
     async addItem({ kind, source }) {
       service.calls.push(["add", kind]);
       const itemKey = key("IT");
-      items.set(itemKey, { title: kind === "csl" ? source.title : String(source) });
+      items.set(itemKey, {
+        title: kind === "csl" ? source.title : String(source),
+        creators: (source.author || []).map(person => ({ creatorType: "author", name: person.literal })),
+        date: String(source.issued?.["date-parts"]?.[0]?.[0] || "")
+      });
       collections.get("CCROOT01").items.add(itemKey);
       return { itemKey, reused: false };
     },
@@ -61,6 +68,15 @@ function fakeZotero() {
     },
     async deleteCollection(collectionKey) {
       collections.delete(collectionKey);
+    },
+    async citationKeyOwner(citekey) {
+      return [...items].find(([, data]) => data.citationKey === citekey)?.[0] || null;
+    },
+    async updateItem(itemKey, { creators, fields = {} }) {
+      const data = items.get(itemKey);
+      if (creators) data.creators = creators;
+      if (fields.date) data.date = fields.date;
+      if (fields.citation_key) data.citationKey = fields.citation_key;
     }
   };
   return { service, items, collections };
@@ -126,6 +142,31 @@ async function crossrefGuards() {
   }]))).source, "10.1126/science.1238041");
 }
 
+async function citekeys() {
+  const key = data => proposedCitationKey(data);
+  assert.equal(key({ title: "The Future of Power", date: "2011",
+    creators: [{ creatorType: "author", lastName: "Nye", firstName: "Joseph S., Jr." }] }), "nye2011future");
+  assert.equal(key({ title: "Inquiry into the Treatment of Detainees", date: "2008",
+    creators: [{ creatorType: "author", name: "U.S. Senate Committee on Armed Services" }] }), "ussenate2008inquiry");
+  assert.equal(key({ title: "The Feynman Lectures on Physics", date: "1963",
+    creators: [{ creatorType: "author", lastName: "Feynman" }] }), "feynman1963lectures");
+  assert.equal(key({ title: "Macbeth", creators: [{ creatorType: "author", lastName: "Shakespeare" }] }), "shakespearemacbeth");
+  const openstax = { title: "Biology 2e", date: "2018", creators: [{ creatorType: "author", name: "OpenStax" }] };
+  assert.equal(citationKeyNeedsRepair("2018biology", openstax), true);
+  assert.equal(citationKeyNeedsRepair("openstax2018biology", openstax), false);
+  // A well-formed Better BibTeX key that merely differs is kept.
+  assert.equal(citationKeyNeedsRepair("hall2020guyton", { title: "Guyton and Hall", date: "2020",
+    creators: [{ creatorType: "author", lastName: "Hall" }] }), false);
+  const taken = new Set(["nye2011future", "nye2011futurea"]);
+  assert.equal(await uniqueCitationKey("nye2011future", async candidate => taken.has(candidate)), "nye2011futureb");
+
+  const work = classifyCitation({ title: "Distributed practice", author: "Nicholas J. Cepeda et al.", year: "2006" });
+  assert.deepEqual(itemDataRepairs(work, { creators: [{ creatorType: "author", name: "Nicholas J. Cepeda et al." }], date: "2006" }),
+    { creators: [{ creatorType: "author", lastName: "Cepeda", firstName: "Nicholas J." }] });
+  // A name someone corrected in Zotero is not overwritten.
+  assert.deepEqual(itemDataRepairs(work, { creators: [{ creatorType: "author", lastName: "Cepeda", firstName: "N." }], date: "2006" }), {});
+}
+
 function subcategorySplit() {
   const registry = {
     "Physiology & Medicine": {
@@ -185,7 +226,7 @@ async function backfillAndSync() {
   await publish(pool, {
     id: "membranes", title: "Membranes", category: "biology",
     info: { citations: [
-      { title: "1.1 Cells", url: "https://openstax.org/books/biology-2e/pages/1-1" },
+      { title: "1.1 Cells", url: "https://openstax.org/books/biology-2e/pages/1-1", year: "2018" },
       { title: "4.2 Membranes", url: "https://openstax.org/books/biology-2e/pages/4-2", pages: "ch. 4" },
       { title: "Cell membrane", url: "https://en.wikipedia.org/wiki/Cell_membrane" }
     ] }
@@ -199,6 +240,8 @@ async function backfillAndSync() {
   const first = await applyBackfill({ pool, service, plan });
   assert.deepEqual([first.created, first.failed.length], [1, 0]);
   // A rerun of the same plan (after a crash, say) creates nothing new.
+  const [created] = collections.get("CCROOT01").items;
+  assert.equal((await service.getItem(created)).data.citationKey, "openstax2018biology");
   const again = await applyBackfill({ pool, service, plan });
   assert.equal(again.created, 0);
   assert.equal(service.calls.length, 1);
@@ -240,6 +283,7 @@ async function backfillAndSync() {
 export async function run() {
   classification();
   await crossrefGuards();
+  await citekeys();
   subcategorySplit();
   await backfillAndSync();
 }
