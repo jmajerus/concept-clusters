@@ -143,15 +143,19 @@ function subcategorySplit() {
       }
     });
   }
-  const flat = desiredCollections({ puzzles, registry, workItems, threshold: 10 });
+  const flat = desiredCollections({ puzzles, registry, workItems, threshold: 10, minCategoryWorks: 1 });
   assert.equal(flat.get("category:physiology-medicine").items.size, 4);
   assert.equal(flat.has("subcategory:physiology-medicine/cardio"), false);
   assert.equal(flat.get("domain:health-medicine").name, "Health & Medicine");
-  const split = desiredCollections({ puzzles, registry, workItems, threshold: 3,
+  const split = desiredCollections({ puzzles, registry, workItems, threshold: 3, minCategoryWorks: 1,
     registryItemKeys: ["ITEM0000", "UNCITED1"] });
   assert.deepEqual([...split.get("subcategory:physiology-medicine/cardio").items], ["ITEM0000", "ITEM0001"]);
   assert.deepEqual([...split.get("category:physiology-medicine").items], ["ITEM0002", "ITEM0003"]);
   assert.deepEqual([...split.get("uncited").items], ["UNCITED1"]);
+  // Below the minimum, a category's works go straight into its domain.
+  const folded = desiredCollections({ puzzles, registry, workItems, minCategoryWorks: 5 });
+  assert.equal(folded.has("category:physiology-medicine"), false);
+  assert.equal(folded.get("domain:health-medicine").items.size, 4);
 }
 
 async function publish(pool, document, kind = "puzzle") {
@@ -206,18 +210,18 @@ async function backfillAndSync() {
   assert.deepEqual(rows.slice(0, 2).map(row => [row.source_id, row.match_basis]),
     [[source.id, "work_key"], [source.id, "work_key"]]);
 
-  const syncPlan = await planCollectionSync({ pool, service });
+  const syncPlan = await planCollectionSync({ pool, service, minCategoryWorks: 1 });
   assert.deepEqual(syncPlan.create.map(entry => entry.pathKey), ["domain:life-sciences", "category:biology"]);
   await applyCollectionSync({ pool, service, plan: syncPlan });
   const byName = name => [...collections.values()].find(entry => entry.name === name);
   assert.deepEqual([...byName("Biology").items], [itemKey]);
-  const settled = await planCollectionSync({ pool, service });
+  const settled = await planCollectionSync({ pool, service, minCategoryWorks: 1 });
   assert.equal(settled.summary.create + settled.summary.itemsAdded + settled.summary.delete, 0);
 
   // Withdrawing the only citing puzzle moves the work to "Not yet cited"
   // and removes the now-empty generated collections.
   await pool.query("UPDATE published_documents SET withdrawn_at = '2026-02-01'");
-  const after = await planCollectionSync({ pool, service });
+  const after = await planCollectionSync({ pool, service, minCategoryWorks: 1 });
   assert.deepEqual(after.delete.map(entry => entry.pathKey), ["category:biology", "domain:life-sciences"]);
   await applyCollectionSync({ pool, service, plan: after });
   assert.equal(byName("Biology"), undefined);
