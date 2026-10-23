@@ -44,8 +44,8 @@ will never depend on Zotero or Git.
   index independently of draft save and publication transactions.
 - Offer a read-only `plan_puzzle_references` MCP tool. It returns Zotero or
   mirrored source candidates, current citation usage, and nearby puzzles, with
-  category and subcategory filters. It labels exact links separately from
-  matches inferred from existing inline citation text.
+  category and subcategory filters. It labels inferred source matches,
+  ambiguous or unmatched published citations, and unlinked draft citations.
 - Allow an explicit opt-in action to file a selected work in the Concept
   Clusters Zotero collection and refresh its Postgres mirror. A planning search
   never files a work. Existing agent authoring guidance gets at most a short
@@ -82,9 +82,12 @@ the additive pilot.
   refreshed without changing published snapshots. The collection may contain
   curated works not currently cited by a puzzle; the link index determines
   actual usage.
-- In the pilot, a citation-to-puzzle usage index is derived from existing
-  published documents and accessible drafts. It marks Zotero matches as
-  confirmed or inferred, with ambiguous matches left unlinked. After
+- In the pilot, the persisted citation-to-puzzle usage index is derived only
+  from non-withdrawn published puzzle documents. It labels matches as
+  `inferred`, `ambiguous`, or `unmatched`; ambiguous matches remain unlinked.
+  The planning tool separately reads accessible drafts at request time and
+  labels their citations `draft_unlinked`. The pilot has no confirmed or
+  authoritative citation bindings. After
   activation, authoritative binding rows record citation position, content
   fingerprint, source identity, and the published metadata revision; content
   saves then reconcile changed citations. Both forms support corpus-wide
@@ -138,7 +141,7 @@ the additive pilot.
    authoring MCP tool with a topic or work query and optional category and
    subcategory filters. It accepts a citekey, DOI, URL, title, author, or free
    text. It returns verified candidate works as ordinary citation metadata,
-   citing puzzles from confirmed or clearly labelled inferred usage, nearby puzzles from
+   citing puzzles from clearly labelled inferred usage, nearby puzzles from
    `search_puzzles`, and an explicit uncertainty note for ambiguous matches.
    It can group results by the derived puzzle topics and optionally rank the
    primary category first, while allowing a global search across disciplines.
@@ -190,8 +193,8 @@ the additive pilot.
 - Existing draft saves, review, publication, D1 play, and freeze produce the
   same results with the pilot features unused or Zotero unavailable.
 - The planning tool shows reference candidates and topic-filtered puzzle
-  coverage, clearly distinguishing confirmed source links from inferred
-  matches and displaying ambiguity.
+  coverage, labeling inferred matches, ambiguity, unmatched published
+  citations, and draft citations without implying authoritative source links.
 - Filing a selected work in the Zotero collection is explicit and opt-in;
   searching or viewing a candidate never writes to Zotero.
 - Existing content and pedagogy saves retain their current input shape and
