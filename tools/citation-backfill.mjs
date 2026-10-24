@@ -1,8 +1,9 @@
 // Backfill the Concept Clusters Zotero collection from published citations.
 //   plan             read-only; writes a JSON plan and a Markdown report
 //   apply <plan>     files and creates the plan's reviewed entries in Zotero
-//   repair           read-only; lists name, date, and citekey repairs to
-//                    items the backfill created, saved as a JSON file
+//   repair [--rekey] read-only; lists name, date, type, and citekey repairs
+//                    to items the backfill created, saved as a JSON file;
+//                    --rekey lists only citekeys that differ from the rule
 //   repair-apply <file>  writes those repairs to Zotero
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -39,7 +40,7 @@ if (isMain) {
   if (!url || !["plan", "apply", "repair", "repair-apply"].includes(command)
       || (command.endsWith("apply") && !planPath)) {
     console.error("Usage: npm run authoring:citations:backfill -- "
-      + "plan | apply <plan.json> | repair | repair-apply <repairs.json>"
+      + "plan | apply <plan.json> | repair [--rekey] | repair-apply <repairs.json>"
       + (url ? "" : "\nAUTHORING_DATABASE_URL is required"));
     process.exitCode = 1;
   } else {
@@ -63,7 +64,9 @@ if (isMain) {
         const plan = JSON.parse(await readFile(planPath, "utf8"));
         console.log(JSON.stringify(await applyBackfill({ pool, service, plan, onProgress: progress }), null, 2));
       } else if (command === "repair") {
-        const repairs = await planItemRepairs({ pool, service, onProgress: progress });
+        const repairs = await planItemRepairs({
+          pool, service, rekey: process.argv.includes("--rekey"), onProgress: progress
+        });
         await mkdir(REPORT_DIRECTORY, { recursive: true });
         const repairPath = join(REPORT_DIRECTORY, `repairs-${new Date().toISOString().replace(/[:.]/g, "-")}.json`);
         await writeFile(repairPath, `${JSON.stringify(repairs, null, 2)}\n`);

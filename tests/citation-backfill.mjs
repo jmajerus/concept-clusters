@@ -153,6 +153,13 @@ async function citekeys() {
   assert.equal(key({ title: "The Feynman Lectures on Physics", date: "1963",
     creators: [{ creatorType: "author", lastName: "Feynman" }] }), "feynman1963lectures");
   assert.equal(key({ title: "Macbeth", creators: [{ creatorType: "author", lastName: "Shakespeare" }] }), "shakespearemacbeth");
+  // Better BibTeX keeps hyphenated words whole and writes ligatures out.
+  assert.equal(key({ title: "Test-Enhanced Learning", date: "2006",
+    creators: [{ creatorType: "author", lastName: "Roediger" }] }), "roediger2006testenhanced");
+  assert.equal(key({ title: "Philosophiæ Naturalis Principia Mathematica", date: "1687",
+    creators: [{ creatorType: "author", lastName: "Newton" }] }), "newton1687philosophiae");
+  assert.equal(key({ title: "The Severity of an Earthquake", date: "2000",
+    creators: [{ creatorType: "author", name: "U.S. Geological Survey" }] }), "usgs2000severity");
   const openstax = { title: "Biology 2e", date: "2018", creators: [{ creatorType: "author", name: "OpenStax" }] };
   assert.equal(citationKeyNeedsRepair("2018biology", openstax), true);
   assert.equal(citationKeyNeedsRepair("openstax2018biology", openstax), false);
@@ -178,10 +185,15 @@ async function citekeys() {
     creators: [{ creatorType: "author", lastName: "Sweller", firstName: "John" }] }), {});
   const nist = classifyCitation({ title: "Advanced Encryption Standard", author: "National Institute of Standards and Technology",
     publisher: "NIST", year: "2001", url: "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf" });
+  // A person where the inline text names an institution may be a correction
+  // made in Zotero (OpenStax's actual authors), so it is kept.
   assert.deepEqual(itemDataRepairs(nist, { itemType: "document", date: "2001", creators: [
-    { creatorType: "author", lastName: "Standards", firstName: "National Institute of" },
-    { creatorType: "author", lastName: "Technology", firstName: "" }] }).creators,
-  [{ creatorType: "author", name: "National Institute of Standards and Technology" }]);
+    { creatorType: "author", lastName: "Dworkin", firstName: "Morris J." }] }), {});
+  const namedOpenstax = classifyCitation({ title: "26.4 Acid-Base Balance", author: "J. Gordon Betts, Kelly A. Young",
+    year: "2022", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/26-4" });
+  assert.deepEqual(namedOpenstax.source.author, [{ family: "Betts", given: "J. Gordon" }, { family: "Young", given: "Kelly A." }]);
+  assert.deepEqual(classifyCitation({ title: "1.1", url: "https://openstax.org/books/biology-2e/pages/1-1" }).source.author,
+    [{ literal: "OpenStax" }]);
   const film = classifyCitation({ title: "Requiem for the American Dream (documentary film)",
     author: "dir. Peter D. Hutchison and Kelly Nyks", publisher: "PDA Films", year: "2015" });
   const filmRepair = itemDataRepairs(film, { itemType: "book", date: "2015", creators: [

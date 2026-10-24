@@ -383,10 +383,10 @@ export function itemDataRepairs(work, data) {
     ...(source.director || []).map(person => zoteroCreator(person, "director"))
   ];
   const current = data.creators || [];
-  const broken = current.some(creator => BROKEN_NAME.test(creator.lastName || creator.name || ""))
-    || current.some((creator, index) => creator.name && wanted[index]?.lastName)
-    || current.some((creator, index) => creator.lastName && wanted[index]?.name)
-    || current.some((creator, index) => wanted[index] && creator.creatorType !== wanted[index].creatorType);
+  // Only names no person would enter count as broken. A name that merely
+  // differs from the inline text (a person where it gave "OpenStax") may be
+  // someone's correction in Zotero, so it stays.
+  const broken = current.some(creator => BROKEN_NAME.test(creator.lastName || creator.name || ""));
   const year = source.issued?.["date-parts"]?.[0]?.[0];
   const replaceCreators = wanted.length && (!current.length || broken || retype) && !sameCreators(current, wanted);
   return {
@@ -400,14 +400,17 @@ function creatorList(creators = []) {
   return creators.map(creator => creator.name || [creator.lastName, creator.firstName].filter(Boolean).join(", ")).join("; ");
 }
 
-async function planItemRepair(service, call, item, work, assignedKeys) {
+// rekey: only the citekey, recomputed from the item as it stands in Zotero
+// and rewritten whenever it differs -- for after a metadata cleanup, when
+// the author, year, or title a key was built from has changed.
+async function planItemRepair(service, call, item, work, assignedKeys, { rekey = false } = {}) {
   const data = item.data;
   const itemKey = item.key || data.key;
-  const repairs = itemDataRepairs(work, data);
+  const repairs = rekey ? {} : itemDataRepairs(work, data);
   const repaired = { ...data, ...repairs, ...(repairs.fields?.title ? { title: repairs.fields.title } : {}) };
   const fromKey = data.citationKey || "";
   let toKey = null;
-  if (citationKeyNeedsRepair(fromKey, repaired)) {
+  if (rekey ? fromKey !== proposedCitationKey(repaired) : citationKeyNeedsRepair(fromKey, repaired)) {
     toKey = await uniqueCitationKey(proposedCitationKey(repaired), async key => {
       if (assignedKeys.has(key)) return true;
       const owner = await service.citationKeyOwner(key, call);
@@ -439,7 +442,7 @@ async function writeItemRepair(service, call, repair) {
   }, call);
 }
 
-export async function planItemRepairs({ pool, service, onProgress = () => {} }) {
+export async function planItemRepairs({ pool, service, rekey = false, onProgress = () => {} }) {
   const { puzzles } = await loadPublishedCorpus(pool);
   const works = new Map(citedWorks(puzzles).works.map(work => [work.workKey, work]));
   const created = [...(await recordedWorkItems(pool)).values()].filter(row => row.origin === "created");
@@ -449,7 +452,7 @@ export async function planItemRepairs({ pool, service, onProgress = () => {} }) 
     for (const [position, row] of created.entries()) {
       onProgress(position + 1, created.length, row.work_key);
       const item = await service.getItem(row.zotero_item_key, call);
-      const repair = await planItemRepair(service, call, item, works.get(row.work_key), assignedKeys);
+      const repair = await planItemRepair(service, call, item, works.get(row.work_key), assignedKeys, { rekey });
       if (repair) repairs.push(repair);
     }
     return repairs;

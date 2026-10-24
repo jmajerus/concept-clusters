@@ -227,8 +227,9 @@ function filmCsl({ title, citation }) {
   };
 }
 
-// An institution stands in as author when no person is named, so the item
-// and its citekey lead with "OpenStax" rather than nothing.
+// The authors a citation names come first; an institution stands in only
+// when it names none, so the item and its citekey lead with "OpenStax"
+// rather than nothing.
 function bookCsl({ title, edition = null, citation, publisher = null, url = null, institution = null }) {
   const year = yearOf(citation);
   const people = cslAuthors(citation.author);
@@ -278,7 +279,7 @@ export function classifyCitation(citation) {
     return {
       scholarly: true, workKey: `openstax:${slug}`, kind: "csl", label: title,
       source: bookCsl({
-        title, citation: { year: citation.year }, publisher: "OpenStax", institution: "OpenStax",
+        title, citation: { year: citation.year, author: citation.author }, publisher: "OpenStax", institution: "OpenStax",
         url: `https://openstax.org/books/${slug}`
       })
     };
@@ -293,7 +294,7 @@ export function classifyCitation(citation) {
         scholarly: true, workKey: `libretexts:${host}/${normalizedText(name).replace(/ /g, "-")}`,
         kind: "csl", label: title,
         source: bookCsl({
-          title, citation: {}, publisher: "LibreTexts", institution: "LibreTexts",
+          title, citation: { author: citation.author }, publisher: "LibreTexts", institution: "LibreTexts",
           url: `https://${host}/${parts.slice(0, 3).join("/")}`
         })
       };
@@ -307,7 +308,8 @@ export function classifyCitation(citation) {
       return {
         scholarly: true, workKey: `pressbooks:opentextbc.ca/${slug.toLowerCase()}`, kind: "csl", label: title,
         source: bookCsl({
-          title, citation: {}, publisher: "BCcampus", institution: "BCcampus", url: `https://opentextbc.ca/${slug}/`
+          title, citation: { author: citation.author }, publisher: "BCcampus", institution: "BCcampus",
+          url: `https://opentextbc.ca/${slug}/`
         })
       };
     }

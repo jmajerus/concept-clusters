@@ -106,9 +106,11 @@ when the publisher field gives one (`nist2001advanced`). `… -- repair` lists
 name, date, item type, container, and key repairs to items the backfill
 created, and `… -- repair-apply <repairs.json>` writes them. It retypes only
 items still in the backfill's default book or document type, never corrects
-an item whose metadata came from a DOI, rewrites only keys that are missing,
+an item whose metadata came from a DOI, replaces only names no person would
+enter ("et al.", "Jr." as a surname), rewrites only keys that are missing,
 misshapen, or not led by the author, and never touches items filed from the
-existing library.
+existing library. After a metadata cleanup in Zotero, `… -- repair --rekey`
+lists only citekeys that differ from the rule as the items now stand.
 
 `npm run authoring:citations:collections` prints the generated browse tree
 under the collection, Domain → Category, with Subcategory children only for a

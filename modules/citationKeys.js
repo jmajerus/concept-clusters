@@ -18,21 +18,31 @@ const SKIP_WORDS = new Set((
 ).split(","));
 const INSTITUTION_SKIP_WORDS = new Set([...SKIP_WORDS, "committee", "department", "office"]);
 
+// Letters NFKD does not decompose, written out as Better BibTeX does
+// ("Philosophiæ" -> "philosophiae").
+const LIGATURES = { "æ": "ae", "œ": "oe", "ø": "o", "ß": "ss", "ł": "l", "đ": "d", "ð": "d", "þ": "th" };
+
 function ascii(value) {
-  return String(value || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return String(value || "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[æœøßłđðþ]/g, letter => LIGATURES[letter]);
 }
 
 function letters(value) {
   return ascii(value).replace(/[^a-z]/g, "");
 }
 
-// First two significant words: "U.S. Senate Committee on Armed Services" ->
-// "ussenate", "National Research Council" -> "nationalresearch".
+// An acronym when it stays short ("U.S. Geological Survey" -> "usgs",
+// "National Institute of Standards and Technology" -> "nist"), else the
+// first two significant words ("U.S. Senate Committee on Armed Services" ->
+// "ussenate", "Nature Education" -> "natureeducation"). A dotted
+// abbreviation counts whole ("U.S." -> "us").
 export function institutionKey(name) {
-  return ascii(name).split(/\s+/)
-    .map(word => word.replace(/[^a-z]/g, ""))
-    .filter(word => word && !INSTITUTION_SKIP_WORDS.has(word))
-    .slice(0, 2).join("");
+  const words = String(name || "").split(/\s+/)
+    .map(word => ({ dotted: /^(?:[A-Za-z]\.){2,}$/.test(word), text: ascii(word).replace(/[^a-z]/g, "") }))
+    .filter(word => word.text && !INSTITUTION_SKIP_WORDS.has(word.text));
+  const acronym = words.map(word => (word.dotted ? word.text : word.text[0])).join("");
+  if (words.length >= 3 && acronym.length <= 4) return acronym;
+  return words.slice(0, 2).map(word => word.text).join("");
 }
 
 export function authorPart(data) {
@@ -54,7 +64,8 @@ export function authorPart(data) {
 export function proposedCitationKey(data) {
   const auth = authorPart(data);
   const year = String(data.date || "").match(/\b(\d{4})\b/)?.[1] || "";
-  const word = String(data.title || "").split(/[\s\-–—/:]+/)
+  // Hyphenated words stay whole ("Test-Enhanced" -> "testenhanced").
+  const word = String(data.title || "").split(/[\s–—/:]+/)
     .map(letters)
     .find(candidate => candidate && !SKIP_WORDS.has(candidate) && candidate !== auth) || "";
   return `${auth}${year}${word}`;
