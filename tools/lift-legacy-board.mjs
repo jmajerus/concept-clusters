@@ -36,7 +36,6 @@ import {
 import { draftMatchesCheckout, readCheckoutDocument } from "../modules/localDraftReview.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-loadProjectEnv({ repositoryRoot: root });
 
 export const LIFT_ACTOR = "legacy-board-lift";
 
@@ -240,6 +239,9 @@ async function main() {
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
+  // Only when run as a command: importing this module (as tests do) must
+  // not load the real .env into process.env.
+  loadProjectEnv({ repositoryRoot: root });
   main().catch(error => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;

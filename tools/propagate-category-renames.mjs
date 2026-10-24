@@ -30,7 +30,6 @@ import { isCuedForFreeze } from "../modules/contentFreezePlan.js";
 import { storedDomainDocuments, assembleAuthoredDocumentFromDraftRow } from "../modules/authoringDomains.js";
 
 const root = join(fileURLToPath(new URL("..", import.meta.url)));
-loadProjectEnv({ repositoryRoot: root });
 
 function parseArgs(argv) {
   return {
@@ -568,6 +567,9 @@ async function main() {
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
+  // Only when run as a command: importing this module (as tests do) must
+  // not load the real .env into process.env.
+  loadProjectEnv({ repositoryRoot: root });
   main().catch(error => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;

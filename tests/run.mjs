@@ -23,6 +23,8 @@
 // Every suite also accepts `--side=play`, `--side=authoring`, or
 // `--side=shared`. Play and authoring slices include shared tests; the shared
 // slice is available when only cross-cutting infrastructure is relevant.
+// Must stay the first import: see isolate-env.mjs.
+import "./isolate-env.mjs";
 import { chromium } from "playwright";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
