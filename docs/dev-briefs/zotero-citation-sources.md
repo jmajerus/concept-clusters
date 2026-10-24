@@ -66,10 +66,10 @@ will never depend on Zotero or Git.
   freeze behavior unchanged. Pilot data cannot block or alter publication.
   Nothing in the current puzzle schema gains a citekey or source id.
 
-The pilot filing action accepts an existing Zotero item key, DOI, or URL. It
+The pilot filing action accepts an existing Zotero item key, DOI, URL, or ISBN. It
 files that work in collection `64GU7Y4Y`, verifies membership and its assigned
-citekey, then mirrors the bibliographic metadata in Postgres. DOI and URL
-filing use Zotero's `if_exists: "file"` behavior to reuse a matching library
+citekey, then mirrors the bibliographic metadata in Postgres. DOI, URL, and
+ISBN filing use Zotero's `if_exists: "file"` behavior to reuse a matching library
 item. The separate
 `authoring:citations:sync-zotero` command mirrors items placed directly in the
 collection.

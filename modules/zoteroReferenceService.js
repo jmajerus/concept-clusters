@@ -49,6 +49,19 @@ function itemMetadata(record) {
   };
 }
 
+// Zotero resolves an ISBN through Open Library and Google Books, so a mistyped
+// digit can file the wrong book. Reject it before anything is created.
+function normalizedIsbn(value) {
+  const isbn = String(value || "").replace(/^isbn(?:-1[03])?:?/i, "").replace(/[\s-]/g, "").toUpperCase();
+  const digits = [...isbn].map(char => (char === "X" ? 10 : Number(char)));
+  const valid = /^\d{9}[\dX]$/.test(isbn)
+    ? digits.reduce((sum, digit, index) => sum + digit * (10 - index), 0) % 11 === 0
+    : /^97[89]\d{10}$/.test(isbn)
+      && digits.reduce((sum, digit, index) => sum + digit * (index % 2 ? 3 : 1), 0) % 10 === 0;
+  if (!valid) throw new Error("Provide a valid ISBN-10 or ISBN-13");
+  return isbn;
+}
+
 function citekeyOf(record) {
   return assignedCitationKey(record.data || {});
 }
@@ -153,11 +166,14 @@ export class ZoteroReferenceService {
     });
   }
 
-  async fileSource({ doi = null, url = null } = {}) {
-    const source = String(doi || url || "").trim();
-    if (Boolean(doi) === Boolean(url) || !source) {
-      throw new Error("Provide exactly one DOI or URL");
+  async fileSource({ doi = null, url = null, isbn = null } = {}) {
+    const given = { doi, url, isbn };
+    const kinds = Object.keys(given).filter(kind => given[kind]);
+    if (kinds.length !== 1 || !String(given[kinds[0]]).trim()) {
+      throw new Error("Provide exactly one DOI, URL, or ISBN");
     }
+    const [kind] = kinds;
+    const source = kind === "isbn" ? normalizedIsbn(isbn) : String(given[kind]).trim();
     if (doi && !/^10\.\d{4,9}\/\S+$/i.test(source)) {
       throw new Error("Provide a DOI beginning with 10.");
     }
@@ -168,7 +184,7 @@ export class ZoteroReferenceService {
     return this.withClient(async call => {
       const response = await call("zotero_add_item", {
         source,
-        source_type: doi ? "doi" : "url",
+        source_type: kind,
         collections: [this.collectionKey],
         if_exists: "file",
         attach_mode: "none"
