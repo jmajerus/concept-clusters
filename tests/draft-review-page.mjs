@@ -7,6 +7,7 @@ import {
 import { listMergedCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "../modules/authoredPuzzleDocument.js";
 import { CATEGORIES } from "../puzzles/categories.js";
+import { citationStatusesFrom } from "../modules/citationSourceStatus.js";
 
 export const name = "draft review page: content rendering and GitHub snapshot badges";
 
@@ -1532,6 +1533,33 @@ export async function run() {
     /links:<\/span> <span class="empty">\(none\)<\/span>/
   );
   assert.match(overlappingLinksPage, /citations:[\s\S]*https:\/\/example\.org\/source/);
+
+  // Each puzzle citation shows where it stands in the Zotero pilot.
+  const sourcedCitations = [
+    { title: "Guyton and Hall Textbook of Medical Physiology, 14th ed.", author: "John E. Hall", year: "2021" },
+    { title: "Cognitive load", url: "https://en.wikipedia.org/wiki/Cognitive_load" },
+    { title: "A New Book", author: "Ann Author", publisher: "Press", year: "2024" }
+  ];
+  const sourcedPage = renderDraftPage({
+    ...baseDraft,
+    document: { ...baseDraft.document, info: { text: "Info.", citations: sourcedCitations } }
+  }, {
+    citationSources: citationStatusesFrom(sourcedCitations, {
+      workItems: new Map([["book:guyton and hall textbook of medical physiology|ed14",
+        { zotero_library: "user:827407", zotero_item_key: "8XDXS32D" }]]),
+      sources: new Map([["user:827407/8XDXS32D", { citekey: "hall2020guyton", itemType: "book" }]])
+    })
+  });
+  assert.match(sourcedPage, /badge-ok">Zotero<\/span><code>hall2020guyton<\/code> book/);
+  assert.match(sourcedPage, /href="zotero:\/\/select\/library\/items\/8XDXS32D"/);
+  assert.match(sourcedPage, /href="https:\/\/www\.zotero\.org\/users\/827407\/items\/8XDXS32D"/);
+  assert.match(sourcedPage, /title="en\.wikipedia\.org: not a listed scholarly host"><span class="badge badge-neutral">inline only/);
+  assert.match(sourcedPage, /badge-warn">not in Zotero/);
+  // Without statuses (off the Postgres workspace) the list renders as before.
+  assert.doesNotMatch(renderDraftPage({
+    ...baseDraft,
+    document: { ...baseDraft.document, info: { text: "Info.", citations: sourcedCitations } }
+  }), /class="citation-source"/);
   assert.doesNotMatch(overlappingLinksPage, /was: Puzzle note\./);
   assert.match(overlappingLinksPage, /Use published wording/);
   assert.equal(

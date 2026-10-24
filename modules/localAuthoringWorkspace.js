@@ -23,6 +23,7 @@ import { PostgresModelSuggestionRepository } from "./postgresModelSuggestionRepo
 import { PostgresReviewEventStore } from "./postgresReviewEvents.js";
 import { PostgresCitationSourceRepository } from "./postgresCitationSourceRepository.js";
 import { PostgresCitationUsagePilot } from "./postgresCitationUsagePilot.js";
+import { createCitationSourceStatus } from "./citationSourceStatus.js";
 import {
   ZoteroReferenceService,
   DEFAULT_ZOTERO_MCP_URL,
@@ -217,6 +218,7 @@ export async function resolveLocalAuthoringWorkspace({
     modelSuggestions: contentDocuments.modelSuggestions,
     citationSources,
     citationUsage: new PostgresCitationUsagePilot(pool),
+    citationSourceStatus: createCitationSourceStatus(pool),
     zoteroReferences: new ZoteroReferenceService({
       url: env.ZOTERO_MCP_URL || DEFAULT_ZOTERO_MCP_URL,
       collectionKey: env.CONCEPT_CLUSTERS_ZOTERO_COLLECTION_KEY || CONCEPT_CLUSTERS_COLLECTION_KEY,
