@@ -41,6 +41,7 @@
     "mcp:hosted:dev": "wrangler dev -c wrangler.authoring.jsonc",
     "mcp:hosted:deploy": "wrangler deploy -c wrangler.authoring.jsonc",
     "authoring:deploy": "node tools/authoring-deploy.mjs",
+    "zotero:deploy": "node tools/zotero-deploy.mjs",
     "authoring:d1:migrate:local": "wrangler d1 migrations apply concept-clusters-authoring --local -c wrangler.authoring.jsonc",
     "authoring:d1:migrate:remote": "wrangler d1 migrations apply concept-clusters-authoring --remote -c wrangler.authoring.jsonc",
     "authoring:postgres:migrate": "node tools/postgres-migrate.mjs",
