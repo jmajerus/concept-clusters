@@ -202,7 +202,11 @@
 // 6.20: same review bar. create_puzzle_draft and save_puzzle_draft name
 // draftId and revision and omit the document. Read the stored draft with
 // get_puzzle_draft.
+// 6.21: same review bar. Cite a book's current edition; an existing puzzle
+// adopts a newer edition when next revised for other reasons, unless the
+// cited one is wrong for the claim, two or more editions behind, or a
+// superseded open-textbook edition.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 20
+  minor: 21
 });

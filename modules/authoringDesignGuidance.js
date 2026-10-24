@@ -438,6 +438,11 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   content-domain save after the lesson exists, starting from the cluster
   links. The server does not insert them. A book, edition, or page range
   a link cannot carry belongs there too.
+  Cite a book's current edition. An existing puzzle moves to a newer
+  edition when it is next revised for other reasons, not when one is
+  published, unless the cited edition is wrong for what the puzzle claims,
+  is two or more editions behind, or is a superseded edition of a free,
+  maintained open textbook such as OpenStax.
   The same URL may stay on its cluster, term, or bridge. Do not also put
   it on info.links or learningIntroduction.links. Use those link lists
   only for destinations that are not already in citations.

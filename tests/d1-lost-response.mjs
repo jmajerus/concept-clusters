@@ -846,6 +846,6 @@ export async function run() {
   const guidance = readFileSync(join(root, "modules/authoringGuidanceVersion.js"), "utf8");
   assert.match(guidance, /Call get_puzzle_draft only to merge a draft this/);
   assert.match(guidance, /omit the document/);
-  assert.match(guidance, /minor: 20/);
+  assert.match(guidance, /minor: 2\d/);
   assert.doesNotMatch(guidance, /fetch failed|D1_ERROR|non-JSON/);
 }

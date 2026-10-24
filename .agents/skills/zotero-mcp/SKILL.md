@@ -5,6 +5,8 @@ description: Find and verify Zotero records while authoring or checking Concept 
 
 # Zotero references
 
+Skill rev `93d6e9f2` · 2026-10-24
+
 Use the project `zotero` MCP connection, backed by the `jmajerus/zotero-mcp`
 fork, for read-only source lookup. Do not change the Zotero library during
 citation lookup.
