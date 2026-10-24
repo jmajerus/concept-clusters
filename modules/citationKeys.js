@@ -45,6 +45,12 @@ export function institutionKey(name) {
   return words.slice(0, 2).map(word => word.text).join("");
 }
 
+// The key Better BibTeX assigned: Zotero's native field, else the
+// "Citation Key:" line it writes to Extra when the field is absent.
+export function assignedCitationKey(data) {
+  return String(data?.citationKey || data?.extra?.match(/^Citation Key:\s*(\S+)/mi)?.[1] || "").trim();
+}
+
 export function authorPart(data) {
   const creators = data.creators || [];
   const first = creators.find(creator => creator.creatorType === "author")

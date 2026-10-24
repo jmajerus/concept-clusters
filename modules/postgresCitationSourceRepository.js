@@ -98,7 +98,9 @@ export class PostgresCitationSourceRepository {
   async getByCitekey({ zoteroLibrary, citekey }) {
     const result = await this.pool.query(`
       SELECT * FROM citation_sources
-      WHERE zotero_library = $1 AND citekey = $2
+      WHERE zotero_library = $1 AND LOWER(citekey) = LOWER($2)
+      ORDER BY (citekey = $2) DESC
+      LIMIT 1
     `, [nonEmpty(zoteroLibrary, "Zotero library"), nonEmpty(citekey, "Citekey")]);
     return readRevision(this.pool, result.rows[0]);
   }

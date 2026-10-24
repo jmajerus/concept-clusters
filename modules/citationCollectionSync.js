@@ -117,7 +117,12 @@ export async function planCollectionSync({ pool, service, threshold = SUBCATEGOR
       // children with it, since they were nested in the deleted one.
       if (!alive || row.parent_path_key !== want.parentPathKey || recreated.has(want.parentPathKey)) {
         recreated.add(pathKey);
-        if (alive) plan.delete.push({ pathKey, collectionKey: row.zotero_collection_key, name: row.name, moved: true });
+        // A mapping whose collection was deleted in Zotero is cleared
+        // (stale) before its replacement takes the same path key.
+        if (row) {
+          plan.delete.push({ pathKey, collectionKey: row.zotero_collection_key, name: row.name,
+            ...(alive ? { moved: true } : { stale: true }) });
+        }
         plan.create.push({ pathKey, name: want.name, parentPathKey: want.parentPathKey, items: [...want.items] });
         continue;
       }

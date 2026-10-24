@@ -5,7 +5,9 @@ import { classifyCitation, cslAuthors, splitEdition } from "../modules/citationW
 import {
   applyBackfill, compareTitleCandidate, crossrefDoi, itemDataRepairs, planBackfill
 } from "../modules/citationBackfill.js";
-import { citationKeyNeedsRepair, proposedCitationKey, uniqueCitationKey } from "../modules/citationKeys.js";
+import {
+  assignedCitationKey, citationKeyNeedsRepair, proposedCitationKey, uniqueCitationKey
+} from "../modules/citationKeys.js";
 import { applyCollectionSync, desiredCollections, planCollectionSync } from "../modules/citationCollectionSync.js";
 import { PostgresCitationSourceRepository } from "../modules/postgresCitationSourceRepository.js";
 import { refreshPublishedCitationUsage } from "../modules/postgresCitationUsagePilot.js";
@@ -166,6 +168,11 @@ async function citekeys() {
   // A well-formed Better BibTeX key that merely differs is kept.
   assert.equal(citationKeyNeedsRepair("hall2020guyton", { title: "Guyton and Hall", date: "2020",
     creators: [{ creatorType: "author", lastName: "Hall" }] }), false);
+  // A key Better BibTeX kept only in Extra counts as assigned.
+  const extraOnly = { title: "The Future of Power", date: "2011", extra: "tex.note: x\nCitation Key: nye2011future",
+    creators: [{ creatorType: "author", lastName: "Nye" }] };
+  assert.equal(assignedCitationKey(extraOnly), "nye2011future");
+  assert.equal(citationKeyNeedsRepair(assignedCitationKey(extraOnly), extraOnly), false);
   const taken = new Set(["nye2011future", "nye2011futurea"]);
   assert.equal(await uniqueCitationKey("nye2011future", async candidate => taken.has(candidate)), "nye2011futureb");
 
@@ -313,6 +320,16 @@ async function backfillAndSync() {
   assert.deepEqual([...byName("Biology").items], [itemKey]);
   const settled = await planCollectionSync({ pool, service, minCategoryWorks: 1 });
   assert.equal(settled.summary.create + settled.summary.itemsAdded + settled.summary.delete, 0);
+
+  // A generated collection deleted in Zotero is recreated, its stale
+  // mapping cleared first rather than colliding on the path key.
+  const biologyKey = [...collections].find(([, entry]) => entry.name === "Biology")[0];
+  collections.delete(biologyKey);
+  const recovery = await planCollectionSync({ pool, service, minCategoryWorks: 1 });
+  assert.deepEqual(recovery.delete.map(entry => [entry.pathKey, entry.stale]), [["category:biology", true]]);
+  assert.deepEqual(recovery.create.map(entry => entry.pathKey), ["category:biology"]);
+  await applyCollectionSync({ pool, service, plan: recovery });
+  assert.deepEqual([...byName("Biology").items], [itemKey]);
 
   // Withdrawing the only citing puzzle moves the work to "Not yet cited"
   // and removes the now-empty generated collections.

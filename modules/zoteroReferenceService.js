@@ -3,6 +3,7 @@
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { assignedCitationKey } from "./citationKeys.js";
 
 export const DEFAULT_ZOTERO_MCP_URL = "http://zotero-mcp.localdomain:8000/mcp";
 export const CONCEPT_CLUSTERS_COLLECTION_KEY = "64GU7Y4Y";
@@ -49,8 +50,7 @@ function itemMetadata(record) {
 }
 
 function citekeyOf(record) {
-  const data = record.data || {};
-  return String(data.citationKey || data.extra?.match(/^Citation Key:\s*(\S+)/mi)?.[1] || "").trim();
+  return assignedCitationKey(record.data || {});
 }
 
 export function libraryOf(record) {

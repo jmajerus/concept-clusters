@@ -54,6 +54,7 @@ async function citationSchemaAndMatching(pool) {
   assert.equal(revised.currentRevision, 2);
   assert.equal((await sources.getRevision({ id: original.id, revision: 1 })).metadata.title, "Original");
   assert.equal((await sources.search({ query: "AUTHOR2026PAPER" }))[0].id, original.id);
+  assert.equal((await sources.getByCitekey({ zoteroLibrary: "user:1", citekey: "Author2026Paper" })).id, original.id);
   const pathVariant = await sources.upsertFromZotero({
     ...identity, zoteroItemKey: "SOURCE02", citekey: "author2026path",
     metadata: { title: "Different path", url: "https://example.org/papera?token=AbC" }

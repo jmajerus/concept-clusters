@@ -6,6 +6,7 @@
 
 import { listMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import {
+  assignedCitationKey,
   citationKeyNeedsRepair,
   proposedCitationKey,
   uniqueCitationKey
@@ -408,7 +409,7 @@ async function planItemRepair(service, call, item, work, assignedKeys, { rekey =
   const itemKey = item.key || data.key;
   const repairs = rekey ? {} : itemDataRepairs(work, data);
   const repaired = { ...data, ...repairs, ...(repairs.fields?.title ? { title: repairs.fields.title } : {}) };
-  const fromKey = data.citationKey || "";
+  const fromKey = assignedCitationKey(data);
   let toKey = null;
   if (rekey ? fromKey !== proposedCitationKey(repaired) : citationKeyNeedsRepair(fromKey, repaired)) {
     toKey = await uniqueCitationKey(proposedCitationKey(repaired), async key => {
