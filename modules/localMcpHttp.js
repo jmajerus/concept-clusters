@@ -7,7 +7,7 @@ import {
   recordAuthoringMcpRejected,
   summarizeMcpBody
 } from "./authoringMcpHealth.js";
-import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
+import { createReferencePilot, resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 
 function jsonError(status, error) {
   return Response.json({ error }, { status });
@@ -152,6 +152,8 @@ export async function handleLocalMcpRequest(req, res, {
     draftRepository: workspace.draftRepository,
     contentDocuments: workspace.contentDocuments,
     wikiLinkStore: workspace.wikiLinkStore,
+    referencePilot: workspace.zoteroReferences
+      ? createReferencePilot(async () => workspace) : null,
     actor: authenticated.actor,
     authInfo: authenticated.authInfo
   });

@@ -6,6 +6,8 @@ import { PostgresModelSuggestionRepository } from "../modules/postgresModelSugge
 import { postgresConnectionDropped, withTransaction } from "../modules/postgresPool.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { applyPostgresMigrations } from "../tools/postgres-migrate.mjs";
+import { PostgresCitationSourceRepository } from "../modules/postgresCitationSourceRepository.js";
+import { refreshPublishedCitationUsage, PostgresCitationUsagePilot } from "../modules/postgresCitationUsagePilot.js";
 
 export const name = "Postgres draft writes: one transaction, conflict rolls back";
 
@@ -30,6 +32,82 @@ async function historyCount(pool, draftId) {
   return Number(rows[0].count);
 }
 
+async function citationSchemaAndMatching(pool) {
+  const sources = new PostgresCitationSourceRepository(pool);
+  const identity = {
+    zoteroLibrary: "user:1",
+    zoteroItemKey: "SOURCE01",
+    zoteroCollectionKey: "COLLECT1",
+    citekey: "author2026paper"
+  };
+  const original = await sources.upsertFromZotero({
+    ...identity, metadata: { title: "Original", url: "https://example.org/PaperA?token=AbC" }
+  });
+  const unchanged = await sources.upsertFromZotero({
+    ...identity, metadata: original.metadata
+  });
+  assert.equal(unchanged.currentRevision, 1);
+  const revised = await sources.upsertFromZotero({
+    ...identity, metadata: { ...original.metadata, title: "Revised" }
+  });
+  assert.equal(revised.id, original.id);
+  assert.equal(revised.currentRevision, 2);
+  assert.equal((await sources.getRevision({ id: original.id, revision: 1 })).metadata.title, "Original");
+  assert.equal((await sources.search({ query: "AUTHOR2026PAPER" }))[0].id, original.id);
+  assert.equal((await sources.getByCitekey({ zoteroLibrary: "user:1", citekey: "Author2026Paper" })).id, original.id);
+  const pathVariant = await sources.upsertFromZotero({
+    ...identity, zoteroItemKey: "SOURCE02", citekey: "author2026path",
+    metadata: { title: "Different path", url: "https://example.org/papera?token=AbC" }
+  });
+  const queryVariant = await sources.upsertFromZotero({
+    ...identity, zoteroItemKey: "SOURCE03", citekey: "author2026query",
+    metadata: { title: "Different query", url: "https://example.org/PaperA?token=abc" }
+  });
+  await sources.upsertFromZotero({
+    ...identity, zoteroItemKey: "SOURCE04", citekey: "author2026relative",
+    metadata: { title: "Relative URL", url: "PaperA?token=AbC" }
+  });
+  const document = {
+    id: "citation-case", title: "Citation case", category: "biology",
+    subcategories: { biology: "genomics" },
+    info: { citations: [
+      { title: "Host normalization", url: "HTTPS://EXAMPLE.ORG/PaperA?token=AbC#section" },
+      { title: "Path case", url: "https://example.org/papera?token=AbC" },
+      { title: "Query case", url: "https://example.org/PaperA?token=abc" },
+      { title: "No matching URL", url: "https://example.org/papera?token=abc" },
+      { title: "Relative mismatch", url: "papera?token=abc" }
+    ] }
+  };
+  await pool.query(`
+    INSERT INTO published_documents
+      (kind, id, title, document, content_hash, revision, published_by, published_at, updated_at)
+    VALUES ('puzzle', $1, $2, $3, 'fixture', 1, 'author-1', '2026-01-01', '2026-01-01')
+  `, [document.id, document.title, JSON.stringify(document)]);
+  const refreshed = await refreshPublishedCitationUsage(pool, sources);
+  assert.equal(refreshed.citations, 5);
+  assert.equal(refreshed.inferred, 3);
+  const usage = new PostgresCitationUsagePilot(pool);
+  const matches = await usage.search({ category: "biology", subcategory: "genomics" });
+  assert.deepEqual(matches.map(row => row.sourceId), [original.id, pathVariant.id, queryVariant.id, null, null]);
+  assert.deepEqual(matches.map(row => row.matchStatus), ["inferred", "inferred", "inferred", "unmatched", "unmatched"]);
+  assert.equal((await usage.status()).observations, 5);
+  assert.equal((await pool.query(`
+    SELECT indexname FROM pg_indexes WHERE indexname = 'citation_sources_citekey_lookup'
+  `)).rows.length, 1);
+  await assert.rejects(() => pool.query(`
+    UPDATE citation_usage_observations SET match_status = 'confirmed'
+    WHERE puzzle_id = $1
+  `, [document.id]), /check constraint/i);
+  await assert.rejects(() => pool.query(
+    "DELETE FROM citation_sources WHERE id = $1", [original.id]
+  ), /foreign key constraint/i);
+  // A refresh removes withdrawn publications and their derived topic rows.
+  await pool.query("UPDATE published_documents SET withdrawn_at = '2026-02-01' WHERE id = $1", [document.id]);
+  await refreshPublishedCitationUsage(pool, sources);
+  assert.equal((await usage.search({ category: "biology" })).length, 0);
+  assert.equal((await pool.query("SELECT * FROM citation_usage_topics")).rows.length, 0);
+}
+
 export async function run() {
   assert.equal(postgresConnectionDropped(Object.assign(new Error("Connection terminated"), { code: "57P01" })), true);
   assert.equal(postgresConnectionDropped(new Error("duplicate key value")), false);
@@ -40,8 +118,14 @@ export async function run() {
   assert.deepEqual(applied, [
     "0001_authoring.sql",
     "0002_model_suggestion_catalog.sql",
-    "0003_published_corpus.sql"
+    "0003_published_corpus.sql",
+    "0004_citation_sources.sql",
+    "0005_citation_usage_pilot.sql",
+    "0006_citation_citekey_lookup.sql",
+    "0007_citation_work_items.sql"
   ]);
+  assert.deepEqual(await applyPostgresMigrations(pool), []);
+  await citationSchemaAndMatching(pool);
 
   const repository = new PostgresDraftRepository({ pool });
   const content = createHostedAuthoringContentService();
@@ -168,4 +252,5 @@ export async function run() {
     "INSERT INTO authoring_model_suggestion_catalog (id, version) VALUES (1, 1)"
   );
   assert.deepEqual(await models.listForFreeze(), ["Muse Spark 9"]);
+  await db.close();
 }

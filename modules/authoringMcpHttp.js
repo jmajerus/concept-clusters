@@ -67,6 +67,7 @@ async function readBoundedJson(request) {
  *   draftRepository: object,
  *   contentDocuments: object,
  *   wikiLinkStore?: object | null,
+ *   referencePilot?: object | null,
  *   actor: { subject: string },
  *   authInfo: { token: string, clientId: string, scopes: string[] },
  *   analytics?: object | null,
@@ -77,6 +78,7 @@ export async function handleAuthoringMcpRequest(request, {
   draftRepository,
   contentDocuments,
   wikiLinkStore = null,
+  referencePilot = null,
   actor,
   authInfo,
   analytics = null,
@@ -93,6 +95,7 @@ export async function handleAuthoringMcpRequest(request, {
         actor,
         analytics,
         wikiLinkStore,
+        referencePilot,
         ...(serverName ? { serverName } : {})
       }),
       {

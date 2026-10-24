@@ -1,0 +1,396 @@
+// Which inline citations name a scholarly work, and which work. The work key
+// groups citations of one work (all OpenStax pages of one book, every
+// citation of one DOI) so that work becomes one Zotero item, while the page
+// or chapter stays a locator on the puzzle. Pure: no network, no database.
+//
+// Only positive picks become Zotero items: an identifier (DOI, PubMed, PMC,
+// RFC), an open-textbook host, a listed scholarly host, or a book cited
+// without a URL. Everything else -- encyclopedias, dictionaries, general web
+// pages -- stays an inline citation. To widen the scope, add a host below.
+
+// Hosts whose pages are scholarly documents even without an identifier.
+export const SCHOLARLY_HOSTS = Object.freeze([
+  "arxiv.org",
+  "cambridge.org",
+  "academic.oup.com",
+  "link.springer.com",
+  "nature.com",
+  "science.org",
+  "jstor.org",
+  "nvlpubs.nist.gov",
+  "pubs.usgs.gov",
+  "feynmanlectures.caltech.edu"
+]);
+
+// Publishing agencies that stand in as author for their unsigned documents.
+const HOST_INSTITUTIONS = Object.freeze({
+  "usgs.gov": "USGS",
+  "nist.gov": "NIST"
+});
+
+function hostOf(url) {
+  try {
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+function onHost(host, domain) {
+  return host === domain || host?.endsWith(`.${domain}`);
+}
+
+export function normalizedText(value) {
+  return String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+const EDITION = /,?\s*\(?(\d+)(?:st|nd|rd|th)\s+(?:ed\.?|edition)\)?/i;
+
+// "Guyton and Hall Textbook of Medical Physiology, 14th ed." -> title + "14".
+// Text after the edition ("…, 3rd ed., ch. 5 Transport") is a locator.
+export function splitEdition(title) {
+  const text = String(title || "").trim();
+  const match = text.match(EDITION);
+  return match && match.index > 0
+    ? { title: text.slice(0, match.index).replace(/[,\s]+$/, ""), edition: match[1] }
+    : { title: text, edition: null };
+}
+
+export function doiOf(citation) {
+  const direct = String(citation.doi || citation.DOI || "").trim()
+    .replace(/^doi:\s*/i, "").replace(/^https?:\/\/(?:dx\.)?doi\.org\//i, "");
+  if (/^10\.\d{4,9}\/\S+$/.test(direct)) return direct.toLowerCase();
+  // doi.org/10.x/y, …/doi/abs/10.x/y, …/content/journals/10.x/y
+  const fromUrl = String(citation.url || "")
+    .match(/(?:doi\.org\/|\/)(10\.\d{4,9}\/[^?#\s]+)/i)?.[1]
+    ?.replace(/\/(?:full|abs|pdf|epdf)$/i, "");
+  return fromUrl ? decodeURIComponent(fromUrl).toLowerCase() : null;
+}
+
+const MINOR_WORDS = new Set(["a", "an", "and", "at", "for", "in", "of", "on", "the", "to"]);
+
+// A URL slug is the best title available for an open textbook; the inline
+// citation title is usually the section. Review corrects it in Zotero.
+function titleCaseSlug(slug) {
+  return decodeURIComponent(slug)
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((word, index) => index > 0 && MINOR_WORDS.has(word.toLowerCase())
+      ? word.toLowerCase()
+      : /^\d+e$/i.test(word) ? word.toLowerCase() : word[0].toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+const NAME_SUFFIX = /^(?:jr|sr|ii|iii|iv)\.?$/i;
+const NAME_PARTICLES = new Set(["van", "von", "de", "der", "den", "du", "da", "di", "del", "della", "la", "le", "ter", "ten"]);
+
+// Zotero has no suffix field; its convention is a given name of
+// "Joseph S., Jr." so the surname -- and the citekey built from it -- is Nye.
+function withSuffix(given, suffix) {
+  return suffix ? `${given}, ${suffix}` : given;
+}
+
+function personName([name, listedSuffix = null]) {
+  if (name.includes(",")) {
+    const [family, given] = name.split(",").map(piece => piece.trim());
+    return given ? { family, given: withSuffix(given, listedSuffix) } : { literal: family };
+  }
+  const words = name.split(/\s+/);
+  const suffix = listedSuffix
+    || (words.length > 2 && NAME_SUFFIX.test(words.at(-1)) ? words.pop() : null);
+  if (words.length > 4) {
+    // "Manfred F. R. Kets de Vries": a compound surname runs from the word
+    // before an inner particle.
+    const particle = words.findIndex((word, index) => index >= 2 && NAME_PARTICLES.has(word.toLowerCase()));
+    return particle > 0
+      ? { family: words.slice(particle - 1).join(" "), given: withSuffix(words.slice(0, particle - 1).join(" "), suffix) }
+      : { literal: name };
+  }
+  if (words.length < 2) return { literal: name };
+  // A trailing particle stays with the given name ("Gennep, Arnold van"), as
+  // Zotero and Chicago file it.
+  return { family: words.at(-1), given: withSuffix(words.slice(0, -1).join(" "), suffix) };
+}
+
+// Inline authors are free text: "John E. Hall and Michael E. Hall",
+// "Dettmer, Katja; Aronov, Pavel", "Machiavelli, Niccolò", "Longinus",
+// "Honig, Jan Willem, and Norbert Both", "Joseph S. Nye, Jr.". A comma is
+// "Family, Given" when the part before it is one word, a suffix when the
+// part after it is Jr./Sr./II-IV, and a list separator otherwise.
+// An organization is one name, never split at its "and": "National
+// Institute of Standards and Technology"; "Nature Education / Scitable" is
+// the organization Nature Education.
+const INSTITUTION_WORDS = /\b(?:institute|university|committee|council|department|agency|office|association|society|survey|senate|organi[sz]ation|foundation|cent(?:er|re)|bureau|commission|education|administration|academy|ministry|program(?:me)?)\b/i;
+
+export function institutionName(author) {
+  const text = String(author || "").split(" / ")[0].trim();
+  return text && !text.includes(",") && INSTITUTION_WORDS.test(text) ? text : null;
+}
+
+export function cslAuthors(author) {
+  // "et al." names no one; the list is simply incomplete. A "dir." prefix
+  // marks directors (see cslDirectors).
+  const text = String(author || "").trim()
+    .replace(/,?\s*et\s+al\.?$/i, "").replace(/^dir\.\s*/i, "");
+  if (!text) return [];
+  const institution = institutionName(text);
+  if (institution) return [{ literal: institution }];
+  const chunks = text.split(/\s*;\s*|,?\s+and\s+|\s*&\s*/).filter(Boolean);
+  const names = [];
+  for (const chunk of chunks) {
+    const pieces = chunk.split(/\s*,\s*/).filter(Boolean);
+    for (let index = 0; index < pieces.length; index++) {
+      const single = !/\s/.test(pieces[index]);
+      if (NAME_SUFFIX.test(pieces[index]) && names.length) {
+        names.at(-1)[1] = pieces[index];
+      } else if (single && pieces[index + 1]) {
+        names.push([`${pieces[index]}, ${pieces[index + 1]}`, null]);
+        index++;
+      } else {
+        names.push([pieces[index], null]);
+      }
+    }
+  }
+  return names.map(personName);
+}
+
+function yearOf(citation) {
+  return String(citation.year || "").match(/^\d{4}$/)?.[0] || null;
+}
+
+// Authors put a journal in "publisher": "Psychological Science 17(3)",
+// "Journal of Management, 13(1)", "Administrative Science Quarterly".
+// A trailing volume alone ("Cognitive Science 12", "Fortschritte der
+// Medizin 2") also marks a journal.
+const JOURNAL = /^(.*?)(?:,?\s+(\d+)(?:\s*\((\d+)\))?)?\s*$/;
+const JOURNAL_WORDS = /\b(journal|review|quarterly|proceedings|annals|bulletin|letters|transactions|zeitschrift|fortschritte|archiv|annalen|jahrbuch|revue|rivista)\b/i;
+
+function journalOf(publisher) {
+  const text = String(publisher || "").trim();
+  const [, name, volume, issue] = text.match(JOURNAL) || [];
+  if (!volume && !JOURNAL_WORDS.test(text)) return null;
+  return { name: name.trim(), volume, issue };
+}
+
+function articleCsl({ title, citation, journal }) {
+  const year = yearOf(citation);
+  const authors = cslAuthors(citation.author);
+  return {
+    type: "article-journal",
+    title,
+    ...(authors.length ? { author: authors } : {}),
+    "container-title": journal.name,
+    ...(journal.volume ? { volume: journal.volume } : {}),
+    ...(journal.issue ? { issue: journal.issue } : {}),
+    ...(citation.pages ? { page: citation.pages } : {}),
+    ...(year ? { issued: { "date-parts": [[Number(year)]] } } : {})
+  };
+}
+
+// "Two Concepts of Liberty, in Four Essays on Liberty": a chapter or essay
+// in a named book. "…, in his lectures" is too vague to be a container.
+const IN_CONTAINER = /^(.+?),\s+in\s+(?=[A-Z])(.+)$/;
+
+function chapterCsl({ title, container, citation }) {
+  const year = yearOf(citation);
+  const authors = cslAuthors(citation.author);
+  return {
+    type: "chapter",
+    title,
+    "container-title": container,
+    ...(authors.length ? { author: authors } : {}),
+    ...(citation.publisher ? { publisher: citation.publisher } : {}),
+    ...(citation.pages ? { page: citation.pages } : {}),
+    ...(year ? { issued: { "date-parts": [[Number(year)]] } } : {})
+  };
+}
+
+const FILM = /\s*\((?:documentary\s+)?film\)\s*$/i;
+
+// CSL "director" is not imported as such by the Zotero bridge; the backfill
+// repair sets the creator role after creation.
+function filmCsl({ title, citation }) {
+  const year = yearOf(citation);
+  const directors = cslAuthors(citation.author);
+  return {
+    type: "motion_picture",
+    title: title.replace(FILM, ""),
+    ...(directors.length ? { director: directors } : {}),
+    ...(citation.publisher ? { publisher: citation.publisher } : {}),
+    ...(year ? { issued: { "date-parts": [[Number(year)]] } } : {})
+  };
+}
+
+// The authors a citation names come first; an institution stands in only
+// when it names none, so the item and its citekey lead with "OpenStax"
+// rather than nothing.
+function bookCsl({ title, edition = null, citation, publisher = null, url = null, institution = null }) {
+  const year = yearOf(citation);
+  const people = cslAuthors(citation.author);
+  const authors = people.length || !institution ? people : [{ literal: institution }];
+  return {
+    type: "book",
+    title,
+    ...(edition ? { edition } : {}),
+    ...(authors.length ? { author: authors } : {}),
+    ...((publisher || citation.publisher) ? { publisher: publisher || citation.publisher } : {}),
+    ...(year ? { issued: { "date-parts": [[Number(year)]] } } : {}),
+    ...(url ? { URL: url } : {})
+  };
+}
+
+/**
+ * @returns {{ scholarly: true, workKey: string, kind: string, source: any, label: string }
+ *   | { scholarly: false, reason: string, host: string | null }}
+ */
+export function classifyCitation(citation) {
+  if (!citation || typeof citation !== "object" || !String(citation.title || "").trim()) {
+    return { scholarly: false, reason: "no title", host: null };
+  }
+  const url = String(citation.url || "").trim();
+  const host = url ? hostOf(url) : null;
+
+  const rfc = url.match(/(?:rfc-editor\.org\/(?:rfc|info)\/|datatracker\.ietf\.org\/doc\/(?:html\/)?)rfc(\d+)/i)?.[1];
+  if (rfc) {
+    const doi = `10.17487/rfc${rfc}`;
+    return { scholarly: true, workKey: `doi:${doi}`, kind: "doi", source: doi, label: `RFC ${rfc}` };
+  }
+  const doi = doiOf(citation);
+  if (doi) return { scholarly: true, workKey: `doi:${doi}`, kind: "doi", source: doi, label: citation.title };
+
+  const pmid = url.match(/(?:pubmed\.ncbi\.nlm\.nih\.gov|ncbi\.nlm\.nih\.gov\/pubmed)\/(\d+)/i)?.[1];
+  if (pmid) return { scholarly: true, workKey: `pmid:${pmid}`, kind: "pmid", source: pmid, label: citation.title };
+  const pmcid = url.match(/\/(PMC\d+)/i)?.[1];
+  if (pmcid && onHost(host, "nih.gov")) {
+    const id = pmcid.toUpperCase();
+    return { scholarly: true, workKey: `pmcid:${id}`, kind: "pmcid", source: id, label: citation.title };
+  }
+
+  const openstax = url.match(/openstax\.org\/(?:details\/)?books\/([^/?#]+)/i)?.[1];
+  if (openstax) {
+    const slug = openstax.toLowerCase();
+    const title = titleCaseSlug(slug);
+    return {
+      scholarly: true, workKey: `openstax:${slug}`, kind: "csl", label: title,
+      source: bookCsl({
+        title, citation: { year: citation.year, author: citation.author }, publisher: "OpenStax", institution: "OpenStax",
+        url: `https://openstax.org/books/${slug}`
+      })
+    };
+  }
+  if (onHost(host, "libretexts.org")) {
+    // /Bookshelves/<shelf>/<book>/... or /Courses/<institution>/<course>/...
+    const parts = new URL(url).pathname.split("/").filter(Boolean);
+    const name = parts[2];
+    if (name && ["Bookshelves", "Courses"].includes(parts[0])) {
+      const title = titleCaseSlug(name);
+      return {
+        scholarly: true, workKey: `libretexts:${host}/${normalizedText(name).replace(/ /g, "-")}`,
+        kind: "csl", label: title,
+        source: bookCsl({
+          title, citation: { author: citation.author }, publisher: "LibreTexts", institution: "LibreTexts",
+          url: `https://${host}/${parts.slice(0, 3).join("/")}`
+        })
+      };
+    }
+  }
+
+  if (onHost(host, "opentextbc.ca")) {
+    const slug = new URL(url).pathname.split("/").filter(Boolean)[0];
+    if (slug) {
+      const title = titleCaseSlug(slug);
+      return {
+        scholarly: true, workKey: `pressbooks:opentextbc.ca/${slug.toLowerCase()}`, kind: "csl", label: title,
+        source: bookCsl({
+          title, citation: { author: citation.author }, publisher: "BCcampus", institution: "BCcampus",
+          url: `https://opentextbc.ca/${slug}/`
+        })
+      };
+    }
+  }
+  if (onHost(host, "feynmanlectures.caltech.edu")) {
+    const roman = { 1: "I", 2: "II", 3: "III" };
+    const volume = url.match(/\/(I{1,3})_\d+/)?.[1]
+      || String(citation.title).match(/\bVol\.?\s*(I{1,3}|[123])\b/i)?.[1]?.toUpperCase().replace(/^[123]$/, digit => roman[digit]);
+    if (volume) {
+      const title = `The Feynman Lectures on Physics, Vol. ${volume}`;
+      return {
+        scholarly: true, workKey: `feynman:${volume}`, kind: "csl", label: title,
+        source: bookCsl({ title, citation: {
+          author: "Richard P. Feynman, Robert B. Leighton, and Matthew Sands",
+          year: { I: "1963", II: "1964", III: "1965" }[volume]
+        },
+          publisher: "California Institute of Technology", url: "https://www.feynmanlectures.caltech.edu/" })
+      };
+    }
+  }
+
+  // A book cited without a URL, or with an edition ("14th ed.") whatever
+  // its URL -- textbooks are often cited through a publisher's shop page.
+  const { title: bookTitle, edition } = splitEdition(citation.title);
+  if (!url || edition) {
+    if (!String(citation.author || "").trim() && !String(citation.publisher || "").trim()) {
+      return { scholarly: false, reason: "title only, no author or publisher", host };
+    }
+    const workKey = `book:${normalizedText(bookTitle)}${edition ? `|ed${edition}` : ""}`;
+    if (FILM.test(bookTitle) || /^dir\.\s/i.test(String(citation.author || ""))) {
+      return { scholarly: true, workKey, kind: "csl", label: bookTitle,
+        source: filmCsl({ title: bookTitle, citation }) };
+    }
+    const chapter = edition ? null : bookTitle.match(IN_CONTAINER);
+    if (chapter) {
+      return { scholarly: true, workKey, kind: "csl", label: bookTitle,
+        source: chapterCsl({ title: chapter[1], container: chapter[2], citation }) };
+    }
+    const journal = edition ? null : journalOf(citation.publisher);
+    if (journal) {
+      return {
+        scholarly: true, workKey: `book:${normalizedText(bookTitle)}`, kind: "csl", label: bookTitle,
+        source: articleCsl({ title: bookTitle, citation, journal })
+      };
+    }
+    return {
+      scholarly: true,
+      workKey: `book:${normalizedText(bookTitle)}${edition ? `|ed${edition}` : ""}`,
+      kind: "csl", label: edition ? `${bookTitle} (${edition} ed.)` : bookTitle,
+      source: bookCsl({ title: bookTitle, edition, citation })
+    };
+  }
+
+  if (SCHOLARLY_HOSTS.some(domain => onHost(host, domain))) {
+    if (onHost(host, "arxiv.org")) {
+      return { scholarly: true, workKey: `url:${url.toLowerCase()}`, kind: "url", source: url, label: citation.title };
+    }
+    const year = yearOf(citation);
+    const people = cslAuthors(citation.author);
+    const institution = Object.entries(HOST_INSTITUTIONS).find(([domain]) => onHost(host, domain))?.[1];
+    const authors = people.length || !institution ? people : [{ literal: institution }];
+    return {
+      scholarly: true, workKey: `url:${url.replace(/#.*$/, "").replace(/\/$/, "")}`, kind: "csl",
+      label: citation.title,
+      source: {
+        type: "document",
+        title: citation.title,
+        ...(authors.length ? { author: authors } : {}),
+        ...(citation.publisher ? { publisher: citation.publisher } : {}),
+        ...(year ? { issued: { "date-parts": [[Number(year)]] } } : {}),
+        URL: url
+      }
+    };
+  }
+  return { scholarly: false, reason: "not a listed scholarly host", host };
+}
+
+export function citationsOf(document) {
+  return [
+    ...(Array.isArray(document?.info?.citations) ? document.info.citations : []),
+    ...(Array.isArray(document?.learningIntroduction?.citations)
+      ? document.learningIntroduction.citations : [])
+  ].filter(citation => citation && typeof citation === "object" && !Array.isArray(citation));
+}

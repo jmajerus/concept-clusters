@@ -226,6 +226,7 @@ The tools are:
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `reassign_puzzle_classifications`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_catalogue_creation`, `preview_update_catalogue` |
 | Categories and catalogues | `create_category`, `update_category`, `create_catalogue`, `update_catalogue`, `update_meta_catalogue` |
+| LAN reference pilot | `plan_puzzle_references` (read-only), `file_zotero_reference` (explicit Zotero collection and Postgres mirror write) |
 
 Published puzzles, the authoring guidance, and the simplified-puzzle v1 schema
 are also available as MCP resources. There is deliberately no arbitrary
@@ -234,7 +235,13 @@ the base branch.
 
 These tools, their input schemas, result shapes, resources, and server
 instructions come from the same registration factory used by local stdio MCP.
-The hosted surface differs only in transport, authentication, and analytics.
+The reference pilot tools register only in a Postgres-backed workspace, over
+both stdio and HTTP (including the tunnel). Refresh the derived
+published-citation coverage index with
+`npm run authoring:citations:refresh-usage` after applying the Postgres
+migrations; `npm run authoring:citations:sync-zotero` first mirrors works
+already filed directly in the curated Zotero collection. The HTTP surface
+otherwise differs only in transport, authentication, and analytics.
 Neither surface exposes checkout installation any more (`preview_import` /
 `install_puzzle` were removed as cross-purposed with D1 being the source of
 truth); Admin Freeze is the only thing that writes the checkout.
