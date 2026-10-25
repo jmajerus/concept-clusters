@@ -67,6 +67,11 @@ async function citationSchemaAndMatching(pool) {
     ...identity, zoteroItemKey: "SOURCE04", citekey: "author2026relative",
     metadata: { title: "Relative URL", url: "PaperA?token=AbC" }
   });
+  // A DOI stored as a doi.org URL matches the bare DOI Zotero keeps.
+  const doiSource = await sources.upsertFromZotero({
+    ...identity, zoteroItemKey: "SOURCE05", citekey: "author2026doi",
+    metadata: { title: "DOI source", doi: "10.1234/Example" }
+  });
   const document = {
     id: "citation-case", title: "Citation case", category: "biology",
     subcategories: { biology: "genomics" },
@@ -75,7 +80,8 @@ async function citationSchemaAndMatching(pool) {
       { title: "Path case", url: "https://example.org/papera?token=AbC" },
       { title: "Query case", url: "https://example.org/PaperA?token=abc" },
       { title: "No matching URL", url: "https://example.org/papera?token=abc" },
-      { title: "Relative mismatch", url: "papera?token=abc" }
+      { title: "Relative mismatch", url: "papera?token=abc" },
+      { title: "DOI as URL", doi: "https://doi.org/10.1234/example" }
     ] }
   };
   await pool.query(`
@@ -84,13 +90,14 @@ async function citationSchemaAndMatching(pool) {
     VALUES ('puzzle', $1, $2, $3, 'fixture', 1, 'author-1', '2026-01-01', '2026-01-01')
   `, [document.id, document.title, JSON.stringify(document)]);
   const refreshed = await refreshPublishedCitationUsage(pool, sources);
-  assert.equal(refreshed.citations, 5);
-  assert.equal(refreshed.inferred, 3);
+  assert.equal(refreshed.citations, 6);
+  assert.equal(refreshed.inferred, 4);
   const usage = new PostgresCitationUsagePilot(pool);
   const matches = await usage.search({ category: "biology", subcategory: "genomics" });
-  assert.deepEqual(matches.map(row => row.sourceId), [original.id, pathVariant.id, queryVariant.id, null, null]);
-  assert.deepEqual(matches.map(row => row.matchStatus), ["inferred", "inferred", "inferred", "unmatched", "unmatched"]);
-  assert.equal((await usage.status()).observations, 5);
+  assert.deepEqual(matches.map(row => row.sourceId), [original.id, pathVariant.id, queryVariant.id, null, null, doiSource.id]);
+  assert.deepEqual(matches.map(row => row.matchStatus),
+    ["inferred", "inferred", "inferred", "unmatched", "unmatched", "inferred"]);
+  assert.equal((await usage.status()).observations, 6);
   assert.equal((await pool.query(`
     SELECT indexname FROM pg_indexes WHERE indexname = 'citation_sources_citekey_lookup'
   `)).rows.length, 1);

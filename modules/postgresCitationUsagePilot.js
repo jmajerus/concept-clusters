@@ -6,7 +6,7 @@ import {
   subcategoryIdForPuzzle
 } from "../puzzles/categories.js";
 import { recordedWorkItems } from "./citationBackfill.js";
-import { classifyCitation } from "./citationWorkKey.js";
+import { classifyCitation, doiOf } from "./citationWorkKey.js";
 import { nonCryptographicHash } from "./nonCryptographicHash.js";
 import { withTransaction } from "./postgresPool.js";
 
@@ -22,13 +22,6 @@ function normalizedUrl(value) {
   } catch {
     return String(value || "").trim().replace(/\/$/, "");
   }
-}
-
-function doiOf(citation) {
-  const direct = normalized(citation.doi || citation.DOI).replace(/^doi:/, "");
-  if (direct) return direct;
-  const url = String(citation.url || "");
-  return normalized(url.match(/^https?:\/\/(?:dx\.)?doi\.org\/(.+)$/i)?.[1]);
 }
 
 function citationList(document) {
