@@ -1,9 +1,8 @@
 // The published taxonomy as a corpus-vocabulary/1 file, the tag vocabulary
 // corpus-mcp loads (its README, "Categories"). Term ids nest with ".":
-// domain, domain.category, domain.category.subcategory. Domains only group,
-// except one that is also a domainless category of the same slug
-// (interdisciplinary-studies): that is a single assignable term whose
-// children are its domain's categories and its own subcategories.
+// domain, domain.category, domain.category.subcategory. Domains only group;
+// a category without one (Trivia, Vocabulary) is a top-level term, and one
+// sharing a domain's slug fails the export as a duplicate id.
 
 import { DOMAINS } from "../puzzles/domains.js";
 import { nonCryptographicHash } from "./nonCryptographicHash.js";
@@ -24,28 +23,17 @@ export function taxonomyVocabulary(registry, { generatedAt = new Date().toISOStr
   const categories = Object.entries(registry)
     .filter(([, category]) => category.registered)
     .sort(([left], [right]) => left.localeCompare(right));
-  const domainless = new Map(categories
-    .filter(([, category]) => !DOMAINS[category.domain])
-    .map(([name, category]) => [category.slug, { name, category }]));
   const addSubcategories = (category, parent) => {
     Object.entries(category.subcategories || {})
       .sort(([, left], [, right]) => left.title.localeCompare(right.title))
       .forEach(([id, subcategory]) => add(id, subcategory.title, parent));
   };
   for (const [slug, domain] of Object.entries(DOMAINS).sort(([, left], [, right]) => left.title.localeCompare(right.title))) {
-    const merged = domainless.get(slug);
-    add(slug, domain.title, null, merged ? {} : { assignable: false });
-    if (merged) {
-      addSubcategories(merged.category, slug);
-      domainless.delete(slug);
-    }
+    add(slug, domain.title, null, { assignable: false });
   }
   for (const [name, category] of categories) {
-    if (domainless.has(category.slug)) {
-      addSubcategories(category, add(category.slug, name, null));
-    } else if (DOMAINS[category.domain]) {
-      addSubcategories(category, add(category.slug, name, category.domain));
-    }
+    const domain = DOMAINS[category.domain] ? category.domain : null;
+    addSubcategories(category, add(category.slug, name, domain));
   }
   if (problems.length) throw new Error(`The taxonomy is not a valid vocabulary:\n${problems.join("\n")}`);
   const list = [...terms.values()];

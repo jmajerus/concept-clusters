@@ -10,9 +10,6 @@ export async function run() {
       cognition: { title: "Cognition" }
     } },
     "Science, Technology & Society": { slug: "science-technology-society", domain: "interdisciplinary-studies", registered: true },
-    "Interdisciplinary Studies": { slug: "interdisciplinary-studies", domain: "", registered: true, subcategories: {
-      "systems-thinking": { title: "Systems Thinking" }
-    } },
     Trivia: { slug: "trivia", domain: "", registered: true },
     "Draft Only": { slug: "draft-only", domain: "humanities", registered: false }
   };
@@ -27,11 +24,8 @@ export async function run() {
     { id: "social-sciences.psychology.cognition", label: "Cognition", parent: "social-sciences.psychology" },
     { id: "social-sciences.psychology.social-psychology", label: "Social Psychology", parent: "social-sciences.psychology" }
   ]);
-  // A domain that is also a domainless category is one assignable term,
-  // parent of its domain's categories and its own subcategories.
   assert.deepEqual(vocabulary.terms.filter(entry => entry.id.startsWith("interdisciplinary-studies")), [
-    { id: "interdisciplinary-studies", label: "Interdisciplinary Studies" },
-    { id: "interdisciplinary-studies.systems-thinking", label: "Systems Thinking", parent: "interdisciplinary-studies" },
+    { id: "interdisciplinary-studies", label: "Interdisciplinary Studies", assignable: false },
     { id: "interdisciplinary-studies.science-technology-society", label: "Science, Technology & Society",
       parent: "interdisciplinary-studies" }
   ]);
@@ -42,6 +36,9 @@ export async function run() {
 
   assert.throws(() => taxonomyVocabulary({ ...registry, "U.S. History": { slug: "us-history", domain: "humanities", registered: true } }),
     /humanities\.us-history: label "U\.S\. History" may not contain/);
+  // A domainless category named like its domain is a leftover, not a second term.
+  assert.throws(() => taxonomyVocabulary({ ...registry, "Interdisciplinary Studies": {
+    slug: "interdisciplinary-studies", domain: "", registered: true } }), /interdisciplinary-studies: two terms share this id/);
   assert.throws(() => taxonomyVocabulary({ ...registry, Odd: { slug: "Odd_Slug", domain: "humanities", registered: true } }),
     /humanities\.Odd_Slug: id segment/);
 }
