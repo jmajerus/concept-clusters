@@ -1,48 +1,61 @@
-// The published taxonomy as plain JSON, for vocabularies kept outside this
-// project (corpus-mcp's Calibre tags, written "Domain.Category.Subcategory").
-// A name containing the tag separator fails the export instead of silently
-// adding a level to every consumer's hierarchy. A comma, Calibre's tag-list
-// separator, is only a warning: corpus-mcp drops it and maps by slug.
+// The published taxonomy as a corpus-vocabulary/1 file, the tag vocabulary
+// corpus-mcp loads (its README, "Categories"). Term ids nest with ".":
+// domain, domain.category, domain.category.subcategory. Domains only group,
+// except one that is also a domainless category of the same slug
+// (interdisciplinary-studies): that is a single assignable term whose
+// children are its domain's categories and its own subcategories.
 
 import { DOMAINS } from "../puzzles/domains.js";
+import { nonCryptographicHash } from "./nonCryptographicHash.js";
 
-const byName = (left, right) => left.name.localeCompare(right.name);
+const SEGMENT = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-export function taxonomySnapshot(registry) {
-  const dotted = [];
-  const named = (name, where) => {
-    if (String(name).includes(".")) dotted.push(where);
-    return name;
+export function taxonomyVocabulary(registry, { generatedAt = new Date().toISOString() } = {}) {
+  const problems = [];
+  const terms = new Map();
+  const add = (segment, label, parent, extra = {}) => {
+    const id = parent ? `${parent}.${segment}` : segment;
+    if (!SEGMENT.test(String(segment))) problems.push(`${id}: id segment must be lowercase letters, digits, and single hyphens`);
+    if (/[.›]/.test(String(label))) problems.push(`${id}: label "${label}" may not contain "." or "›"`);
+    if (terms.has(id)) problems.push(`${id}: two terms share this id`);
+    terms.set(id, { id, label, ...(parent ? { parent } : {}), ...extra });
+    return id;
   };
-  const domains = Object.entries(DOMAINS)
-    .map(([slug, domain]) => ({ slug, name: named(domain.title, `domain ${slug}`) }))
-    .sort(byName);
   const categories = Object.entries(registry)
     .filter(([, category]) => category.registered)
-    .map(([name, category]) => ({
-      slug: category.slug,
-      name: named(name, `category ${category.slug}`),
-      // Trivia and Vocabulary belong to no domain.
-      domain: DOMAINS[category.domain] ? category.domain : null,
-      subcategories: Object.entries(category.subcategories || {})
-        .map(([id, subcategory]) => ({ id, title: named(subcategory.title, `subcategory ${category.slug}/${id}`) }))
-        .sort((left, right) => left.title.localeCompare(right.title))
-    }))
-    .sort(byName);
-  if (dotted.length) {
-    throw new Error(`Taxonomy names may not contain ".", the tag separator: ${dotted.join(", ")}`);
+    .sort(([left], [right]) => left.localeCompare(right));
+  const domainless = new Map(categories
+    .filter(([, category]) => !DOMAINS[category.domain])
+    .map(([name, category]) => [category.slug, { name, category }]));
+  const addSubcategories = (category, parent) => {
+    Object.entries(category.subcategories || {})
+      .sort(([, left], [, right]) => left.title.localeCompare(right.title))
+      .forEach(([id, subcategory]) => add(id, subcategory.title, parent));
+  };
+  for (const [slug, domain] of Object.entries(DOMAINS).sort(([, left], [, right]) => left.title.localeCompare(right.title))) {
+    const merged = domainless.get(slug);
+    add(slug, domain.title, null, merged ? {} : { assignable: false });
+    if (merged) {
+      addSubcategories(merged.category, slug);
+      domainless.delete(slug);
+    }
   }
-  return { domains, categories };
-}
-
-export function taxonomyWarnings({ domains, categories }) {
-  const names = [
-    ...domains.map(domain => [domain.name, `domain ${domain.slug}`]),
-    ...categories.flatMap(category => [
-      [category.name, `category ${category.slug}`],
-      ...category.subcategories.map(subcategory => [subcategory.title, `subcategory ${category.slug}/${subcategory.id}`])
-    ])
-  ];
-  return names.filter(([name]) => name.includes(","))
-    .map(([name, where]) => `${where} "${name}" contains a comma, Calibre's tag separator`);
+  for (const [name, category] of categories) {
+    if (domainless.has(category.slug)) {
+      addSubcategories(category, add(category.slug, name, null));
+    } else if (DOMAINS[category.domain]) {
+      addSubcategories(category, add(category.slug, name, category.domain));
+    }
+  }
+  if (problems.length) throw new Error(`The taxonomy is not a valid vocabulary:\n${problems.join("\n")}`);
+  const list = [...terms.values()];
+  return {
+    format: "corpus-vocabulary/1",
+    // Changes exactly when a term does, so an unchanged taxonomy re-exports as the same version.
+    version: nonCryptographicHash(JSON.stringify(list)),
+    generatedAt,
+    terms: list,
+    // Kept by hand until Concept Clusters records subcategory id changes.
+    retired: []
+  };
 }

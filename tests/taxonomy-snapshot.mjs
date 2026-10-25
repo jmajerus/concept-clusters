@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { taxonomySnapshot, taxonomyWarnings } from "../modules/taxonomySnapshot.js";
+import { taxonomyVocabulary } from "../modules/taxonomySnapshot.js";
 
-export const name = "Taxonomy snapshot: published domains, categories, and subcategories as JSON";
+export const name = "Taxonomy vocabulary: the published taxonomy as a corpus-vocabulary/1 file";
 
 export async function run() {
   const registry = {
@@ -9,23 +9,39 @@ export async function run() {
       "social-psychology": { title: "Social Psychology" },
       cognition: { title: "Cognition" }
     } },
+    "Science, Technology & Society": { slug: "science-technology-society", domain: "interdisciplinary-studies", registered: true },
+    "Interdisciplinary Studies": { slug: "interdisciplinary-studies", domain: "", registered: true, subcategories: {
+      "systems-thinking": { title: "Systems Thinking" }
+    } },
     Trivia: { slug: "trivia", domain: "", registered: true },
     "Draft Only": { slug: "draft-only", domain: "humanities", registered: false }
   };
-  const snapshot = taxonomySnapshot(registry);
-  assert.deepEqual(snapshot.domains.find(domain => domain.slug === "social-sciences"),
-    { slug: "social-sciences", name: "Social Sciences" });
-  // Unpublished working copies are left out; a category without a domain says so.
-  assert.deepEqual(snapshot.categories, [
-    { slug: "psychology", name: "Psychology", domain: "social-sciences", subcategories: [
-      { id: "cognition", title: "Cognition" }, { id: "social-psychology", title: "Social Psychology" }] },
-    { slug: "trivia", name: "Trivia", domain: null, subcategories: [] }
+  const vocabulary = taxonomyVocabulary(registry, { generatedAt: "2026-10-25T12:00:00Z" });
+  assert.equal(vocabulary.format, "corpus-vocabulary/1");
+  assert.deepEqual(vocabulary.retired, []);
+  const term = id => vocabulary.terms.find(entry => entry.id === id);
+  // Domains only group; labels may hold commas, since tags are ids.
+  assert.deepEqual(term("social-sciences"), { id: "social-sciences", label: "Social Sciences", assignable: false });
+  assert.deepEqual(vocabulary.terms.filter(entry => entry.id.startsWith("social-sciences.")), [
+    { id: "social-sciences.psychology", label: "Psychology", parent: "social-sciences" },
+    { id: "social-sciences.psychology.cognition", label: "Cognition", parent: "social-sciences.psychology" },
+    { id: "social-sciences.psychology.social-psychology", label: "Social Psychology", parent: "social-sciences.psychology" }
   ]);
-  assert.deepEqual(taxonomyWarnings(snapshot), []);
-  // A comma only warns: Calibre splits tag lists on it, and corpus-mcp drops it.
-  assert.deepEqual(taxonomyWarnings(taxonomySnapshot({ ...registry, "Theatre, Dance & Performance": {
-    slug: "theatre-dance-performance", domain: "art-design", registered: true } })),
-  ['category theatre-dance-performance "Theatre, Dance & Performance" contains a comma, Calibre\'s tag separator']);
-  assert.throws(() => taxonomySnapshot({ ...registry, "U.S. History": { slug: "us-history", domain: "humanities", registered: true,
-    subcategories: { civil: { title: "Civil War Era" } } } }), /may not contain "\."[^]*category us-history$/);
+  // A domain that is also a domainless category is one assignable term,
+  // parent of its domain's categories and its own subcategories.
+  assert.deepEqual(vocabulary.terms.filter(entry => entry.id.startsWith("interdisciplinary-studies")), [
+    { id: "interdisciplinary-studies", label: "Interdisciplinary Studies" },
+    { id: "interdisciplinary-studies.systems-thinking", label: "Systems Thinking", parent: "interdisciplinary-studies" },
+    { id: "interdisciplinary-studies.science-technology-society", label: "Science, Technology & Society",
+      parent: "interdisciplinary-studies" }
+  ]);
+  assert.deepEqual(term("trivia"), { id: "trivia", label: "Trivia" });
+  assert.equal(term("humanities.draft-only"), undefined);
+  // The version follows the terms, not the export time.
+  assert.equal(taxonomyVocabulary(registry, { generatedAt: "2027-01-01T00:00:00Z" }).version, vocabulary.version);
+
+  assert.throws(() => taxonomyVocabulary({ ...registry, "U.S. History": { slug: "us-history", domain: "humanities", registered: true } }),
+    /humanities\.us-history: label "U\.S\. History" may not contain/);
+  assert.throws(() => taxonomyVocabulary({ ...registry, Odd: { slug: "Odd_Slug", domain: "humanities", registered: true } }),
+    /humanities\.Odd_Slug: id segment/);
 }
