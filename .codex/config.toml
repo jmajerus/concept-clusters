@@ -2,3 +2,12 @@
 command = "/usr/bin/node"
 args = ["/home/john/Workspace/concept-clusters/tools/mcp-server.mjs"]
 enabled = true
+
+[mcp_servers.zotero]
+url = "http://zotero-mcp.localdomain:8000/mcp"
+enabled = true
+enabled_tools = [
+  "zotero_search_by_citation_key",
+  "zotero_search_items",
+  "zotero_get_item_metadata",
+]

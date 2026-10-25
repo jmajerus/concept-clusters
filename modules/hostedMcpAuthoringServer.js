@@ -13,6 +13,7 @@ import * as z from "zod/v4";
 import { settleAgentPresentationColors } from "./colorPalette.js";
 import { checkDocumentLinks } from "./wikiLinkCheck.js";
 import { DOMAINS } from "../puzzles/domains.js";
+import { categoryIdFor, subcategoryIdForPuzzle } from "../puzzles/categories.js";
 import {
   authoringGuidanceResult,
   authoringWorkflowGuidanceResult,
@@ -688,6 +689,8 @@ export function createAuthoringMcpServer({
   // Durable Wikipedia resolutions (wikiLinkCheckStore.js). Null means every
   // check_puzzle_links call asks Wikipedia afresh.
   wikiLinkStore = null,
+  // Optional LAN-only pilot. The public Worker has no Postgres or Zotero bridge.
+  referencePilot = null,
   // The LAN review page (…/admin/drafts) that pending waiver requests point
   // to when the client cannot ask its user in the chat. Null omits the link.
   draftReviewBaseUrl = null
@@ -1116,6 +1119,135 @@ export function createAuthoringMcpServer({
       authoringResult
     );
   })));
+
+  if (referencePilot) {
+    server.registerTool("plan_puzzle_references", {
+      title: "Plan puzzle references",
+      description:
+        "Optional read-only lookup for candidate references, published citation usage, and nearby puzzles. " +
+        "Search by topic, title, author, DOI, URL, or citekey; category and subcategory narrow coverage and can be used alone. " +
+        "Existing citation links are inferred from text and need review. This tool never files a Zotero item or changes a puzzle.",
+      inputSchema: z.object({
+        query: z.string().optional(),
+        category: z.string().min(1).optional(),
+        subcategory: z.string().min(1).optional(),
+        limit: z.number().int().min(1).max(25).optional()
+      }),
+      annotations: READ_ONLY
+    }, tracked("plan_puzzle_references", safe(async ({
+      query = "", category = null, subcategory = null, limit = 10
+    }) => {
+      if (!query.trim() && !category && !subcategory) {
+        throw new Error("Provide a query, category, or subcategory");
+      }
+      const taxonomy = await taxonomyContext();
+      const categoryId = category
+        ? categoryIdFor(category, taxonomy.categoryRegistry) : null;
+      const drafts = await ownerDrafts();
+      const puzzles = mergeAuthoringSearchPuzzles({
+        publishedRows: taxonomy.publishedPuzzles,
+        drafts,
+        categoryRegistry: taxonomy.categoryRegistry
+      });
+      const nearby = query.trim()
+        ? searchAuthoringPuzzles(puzzles, taxonomy.categoryRegistry, {
+          query, category: categoryId, subcategory, limit
+        })
+        : { matches: [] };
+      const [sources, usage, usageIndex, zoteroResult] = await Promise.all([
+        query.trim() ? referencePilot.searchSources({ query, limit }) : [],
+        referencePilot.searchUsage({ query, category: categoryId, subcategory, limit }),
+        referencePilot.usageStatus(),
+        referencePilot.searchZotero(query, { limit: Math.min(limit, 5) })
+          .then(items => ({ items, warning: null }))
+          .catch(error => ({ items: [], warning: `Zotero lookup unavailable: ${error.message}` }))
+      ]);
+      const draftCitationUsage = [];
+      const term = query.trim().toLowerCase();
+      for (const draft of drafts) {
+        const document = draft.document;
+        if (!document) continue;
+        const authoredCategories = Array.isArray(document.categories) && document.categories.length
+          ? document.categories : [document.category];
+        const topics = [...new Set(authoredCategories
+          .map(value => categoryIdFor(value, taxonomy.categoryRegistry))
+          .filter(Boolean))].map((categoryId, index) => ({
+          categoryId,
+          subcategoryId: subcategoryIdForPuzzle(
+            document, categoryId, taxonomy.categoryRegistry
+          ),
+          isPrimary: index === 0
+        }));
+        if (categoryId && !topics.some(topic => topic.categoryId === categoryId
+            && (!subcategory || topic.subcategoryId === subcategory))) continue;
+        if (!categoryId && subcategory && !topics.some(topic => topic.subcategoryId === subcategory)) continue;
+        const citations = [
+          ...(Array.isArray(document.info?.citations) ? document.info.citations : []),
+          ...(Array.isArray(document.learningIntroduction?.citations)
+            ? document.learningIntroduction.citations : [])
+        ];
+        for (const [citationIndex, citation] of citations.entries()) {
+          if (!citation || typeof citation !== "object" || Array.isArray(citation)) continue;
+          if (term && ![citation.title, citation.author, citation.url, citation.doi]
+            .some(value => String(value || "").toLowerCase().includes(term))) continue;
+          draftCitationUsage.push({
+            draftId: draft.draftId,
+            puzzleId: draft.puzzleId,
+            puzzleTitle: draft.title || document.title,
+            citationIndex,
+            citation,
+            topics,
+            matchStatus: "draft_unlinked"
+          });
+          if (draftCitationUsage.length >= limit) break;
+        }
+        if (draftCitationUsage.length >= limit) break;
+      }
+      const output = {
+        query,
+        filters: { category: categoryId, subcategory },
+        mirroredSources: sources.map(({
+          id, currentRevision, contentHash, createdAt, updatedAt, capturedAt, ...candidate
+        }) => candidate),
+        zoteroCandidates: zoteroResult.items,
+        citationUsage: usage.map(({ sourceId, ...observation }) => observation),
+        draftCitationUsage,
+        usageIndex,
+        nearbyPuzzles: nearby.matches.map(({ source, ...match }) => match),
+        ...(zoteroResult.warning ? { warning: zoteroResult.warning } : {}),
+        interpretation: "Published citation links are inferred from inline metadata; ambiguous and unmatched entries are not exact source reuse. Nearby puzzles require content review before judging coverage."
+      };
+      return success("Reference planning results.", output);
+    })));
+
+    server.registerTool("file_zotero_reference", {
+      title: "File selected Zotero reference",
+      description:
+        "Explicitly file one selected Zotero item, DOI, URL, ISBN, or BibTeX @book entry in the Concept Clusters " +
+        "collection and mirror its assigned citekey and metadata in Postgres. Provide exactly one identifier. " +
+        "An ISBN resolves through Open Library and Google Books, so check the returned citation against the book. " +
+        "A BibTeX entry is filed from its own metadata with no lookup: a book already in the collection " +
+        "(same ISBN, else same title, first author, and year) is reused, and a new item gets the entry's key " +
+        "or the first free key after it. Returns the assigned citekey. " +
+        "This does not change a puzzle or publish a citation.",
+      inputSchema: z.object({
+        zotero_item_key: z.string().regex(/^[A-Z0-9]{8}$/).optional(),
+        doi: z.string().min(1).optional(),
+        url: z.string().url().optional(),
+        isbn: z.string().min(1).optional(),
+        bibtex: z.string().min(1).optional()
+      }),
+      annotations: WRITE
+    }, tracked("file_zotero_reference", safe(async ({ zotero_item_key, doi, url, isbn, bibtex }) => {
+      if ([zotero_item_key, doi, url, isbn, bibtex].filter(Boolean).length !== 1) {
+        throw new Error("Provide exactly one Zotero item key, DOI, URL, ISBN, or BibTeX entry");
+      }
+      const filed = zotero_item_key ? await referencePilot.fileItem(zotero_item_key)
+        : bibtex ? await referencePilot.fileBibtex(bibtex)
+          : await referencePilot.fileSource({ doi, url, isbn });
+      return success("Filed the selected Zotero reference in the Concept Clusters collection.", filed);
+    })));
+  }
 
   server.registerTool("list_categories", {
     title: "List categories",

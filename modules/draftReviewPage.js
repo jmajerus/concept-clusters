@@ -365,12 +365,33 @@ function labeledLine(label, inner) {
   return `<p class="info-link"><span class="field-label">${escapeHtml(label)}:</span> ${inner}</p>`;
 }
 
-function renderCitationList(citations) {
+// Where a citation stands in the Zotero pilot (citationSourceStatus.js).
+// Statuses are absent off the Postgres workspace; the list then renders as
+// before.
+function renderCitationSource(status) {
+  if (!status) return "";
+  if (status.state === "zotero") {
+    const title = status.citekey ? "" : ' title="Citekey appears after desktop Zotero syncs and the mirror is refreshed (authoring:citations:sync-zotero)."';
+    const links = status.links
+      ? ` <a href="${escapeHtml(status.links.desktop)}">open in Zotero</a> · <a href="${escapeHtml(status.links.web)}" target="_blank" rel="noopener">web</a>`
+      : "";
+    return ` <span class="citation-source"${title}>${badge("Zotero", "ok")}`
+      + `${status.citekey ? `<code>${escapeHtml(status.citekey)}</code>` : `<code>${escapeHtml(status.itemKey)}</code>`}`
+      + `${status.itemType ? ` ${escapeHtml(status.itemType)}` : ""}${links}</span>`;
+  }
+  if (status.state === "unfiled") {
+    return ` <span class="citation-source" title="A scholarly work the backfill has not filed in the Concept Clusters Zotero collection yet.">${badge("not in Zotero", "warn")}</span>`;
+  }
+  return ` <span class="citation-source" title="${escapeHtml(status.reason || "")}">${badge("inline only")}</span>`;
+}
+
+function renderCitationList(citations, statuses = null) {
   if (!Array.isArray(citations) || citations.length === 0) return "";
-  const items = citations.map(citation => {
+  const items = citations.map((citation, index) => {
     const bits = [citation.title, citation.author, citation.publisher, citation.year]
       .filter(Boolean).map(escapeHtml).join(", ");
-    return `<li>${bits}${citation.url ? ` (${escapeHtml(citation.url)})` : ""}</li>`;
+    return `<li>${bits}${citation.url ? ` (${escapeHtml(citation.url)})` : ""}`
+      + `${renderCitationSource(statuses?.[index])}</li>`;
   }).join("");
   return `<p class="field-label">citations:</p><ul class="citations">${items}</ul>`;
 }
@@ -383,7 +404,11 @@ function renderLinkList(links) {
   }).join("; ");
 }
 
-function renderReferences(info, { always = false, hideLinksOverlappingCitations = false } = {}) {
+function renderReferences(info, {
+  always = false,
+  hideLinksOverlappingCitations = false,
+  citationSources = null
+} = {}) {
   const object = info && typeof info === "object" && !Array.isArray(info) ? info : {};
   const parts = [];
   const links = hideLinksOverlappingCitations
@@ -392,7 +417,7 @@ function renderReferences(info, { always = false, hideLinksOverlappingCitations 
   const linkText = renderLinkList(links);
   if (linkText) parts.push(labeledLine("links", linkText));
   else if (always) parts.push(labeledLine("links", emptyValue()));
-  const citations = renderCitationList(object.citations);
+  const citations = renderCitationList(object.citations, citationSources);
   if (citations) parts.push(citations);
   else if (always) parts.push(labeledLine("citations", emptyValue()));
   return parts.join("\n");
@@ -404,7 +429,11 @@ function renderReferences(info, { always = false, hideLinksOverlappingCitations 
 // Puzzle-level review always shows links and citations so a human can see
 // the whole agent-editable record, even when those slots are empty.
 // Cluster/term/bridge info still omits empty optional slots.
-function renderInfo(info, { alwaysShowReferences = false, hideLinksOverlappingCitations = false } = {}) {
+function renderInfo(info, {
+  alwaysShowReferences = false,
+  hideLinksOverlappingCitations = false,
+  citationSources = null
+} = {}) {
   const parts = [];
   if (typeof info === "string") {
     parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info)}</p>`);
@@ -413,7 +442,8 @@ function renderInfo(info, { alwaysShowReferences = false, hideLinksOverlappingCi
   }
   parts.push(renderReferences(info, {
     always: alwaysShowReferences,
-    hideLinksOverlappingCitations
+    hideLinksOverlappingCitations,
+    citationSources
   }));
   return parts.filter(Boolean).join("\n");
 }
@@ -694,6 +724,8 @@ const PAGE_STYLE = `
   .info-link { color: #666; font-size: 13px; }
   .empty { color: #999; font-style: italic; }
   .citations { margin: 4px 0 12px 1.2em; }
+  .citation-source { font-size: 12px; white-space: nowrap; }
+  .citation-source code { margin-right: 4px; }
   .connects { font-weight: 600; }
   pre.learning-content { white-space: pre-wrap; background: #fafafa; padding: 12px; border-radius: 6px; border: 1px solid #eee; }
   details.raw { margin-top: 32px; }
@@ -2884,7 +2916,9 @@ export function renderDraftPage(draft, {
   customModelSuggestions = null,
   relatedPuzzleOptions = [],
   categoryRegistry,
-  notice = null
+  notice = null,
+  // Per-citation Zotero status for document.info.citations, by position.
+  citationSources = null
 } = {}) {
   // No git-only default: in the authoring environment D1 is the upstream
   // source of truth and the first, overriding choice, never a fallback.
@@ -2964,7 +2998,8 @@ export function renderDraftPage(draft, {
     })}
     ${renderInfo(document.info, {
       alwaysShowReferences: true,
-      hideLinksOverlappingCitations: true
+      hideLinksOverlappingCitations: true,
+      citationSources
     })}
     ${renderWas(diff?.fields?.["info.text"])}
     ${renderCopyField({

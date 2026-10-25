@@ -21,6 +21,14 @@ import { PostgresDraftRepository } from "./postgresDraftRepository.js";
 import { PostgresFreezePublicationRepository } from "./postgresFreezePublicationRepository.js";
 import { PostgresModelSuggestionRepository } from "./postgresModelSuggestionRepository.js";
 import { PostgresReviewEventStore } from "./postgresReviewEvents.js";
+import { PostgresCitationSourceRepository } from "./postgresCitationSourceRepository.js";
+import { PostgresCitationUsagePilot } from "./postgresCitationUsagePilot.js";
+import { createCitationSourceStatus } from "./citationSourceStatus.js";
+import {
+  ZoteroReferenceService,
+  DEFAULT_ZOTERO_MCP_URL,
+  CONCEPT_CLUSTERS_COLLECTION_KEY
+} from "./zoteroReferenceService.js";
 import { authoringDatabaseUrl, getAuthoringPool } from "./postgresPool.js";
 
 export const LOCAL_PUBLICATION_ACTOR = Object.freeze({ subject: "local" });
@@ -196,6 +204,7 @@ export async function resolveLocalAuthoringWorkspace({
     pool,
     publishedDocuments: published
   });
+  const citationSources = new PostgresCitationSourceRepository(pool);
   return {
     actor: resolvedActor,
     draftStore: createRepositoryDraftStore({ repository, actor: resolvedActor }),
@@ -206,7 +215,53 @@ export async function resolveLocalAuthoringWorkspace({
       replicate: enqueueSiteSettingsReplica
     }),
     freezeRepository: contentDocuments.freezeRepository,
-    modelSuggestions: contentDocuments.modelSuggestions
+    modelSuggestions: contentDocuments.modelSuggestions,
+    citationSources,
+    citationUsage: new PostgresCitationUsagePilot(pool),
+    citationSourceStatus: createCitationSourceStatus(pool),
+    zoteroReferences: new ZoteroReferenceService({
+      url: env.ZOTERO_MCP_URL || DEFAULT_ZOTERO_MCP_URL,
+      collectionKey: env.CONCEPT_CLUSTERS_ZOTERO_COLLECTION_KEY || CONCEPT_CLUSTERS_COLLECTION_KEY,
+      sourceRepository: citationSources
+    })
+  };
+}
+
+// The optional Zotero reference pilot, shared by the stdio and HTTP (tunnel)
+// MCP entries. Only a Postgres workspace carries the citation stores, so
+// callers register the pilot tools only when this returns non-null.
+export function createReferencePilot(resolveWorkspace) {
+  async function zotero() {
+    const service = (await resolveWorkspace()).zoteroReferences;
+    if (!service) throw new Error("Zotero filing requires the Postgres LAN workspace");
+    return service;
+  }
+  return {
+    async searchSources(args) {
+      const store = (await resolveWorkspace()).citationSources;
+      return store ? store.search(args) : [];
+    },
+    async searchUsage(args) {
+      const store = (await resolveWorkspace()).citationUsage;
+      return store ? store.search(args) : [];
+    },
+    async usageStatus() {
+      const store = (await resolveWorkspace()).citationUsage;
+      return store ? store.status() : { freshness: "unavailable" };
+    },
+    async searchZotero(query, options) {
+      const service = (await resolveWorkspace()).zoteroReferences;
+      return service ? service.search(query, options) : [];
+    },
+    async fileItem(itemKey) {
+      return (await zotero()).fileItem(itemKey);
+    },
+    async fileSource(args) {
+      return (await zotero()).fileSource(args);
+    },
+    async fileBibtex(bibtex) {
+      return (await zotero()).fileBibtex(bibtex);
+    }
   };
 }
 

@@ -1,0 +1,13 @@
+interface:
+  display_name: "Zotero Citekeys"
+  short_description: "Find Zotero records and verify citation keys"
+  default_prompt: "Use $zotero-mcp to find or verify a Concept Clusters citation in Zotero."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "zotero"
+      description: "Read-only citation lookup through the LAN Zotero MCP fork"
+      transport: "streamable_http"
+      url: "http://zotero-mcp.localdomain:8000/mcp"
+policy:
+  allow_implicit_invocation: true

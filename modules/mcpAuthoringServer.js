@@ -6,6 +6,7 @@ import {
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
 import {
   LOCAL_PUBLICATION_ACTOR,
+  createReferencePilot,
   resolveLocalAuthoringWorkspace
 } from "./localAuthoringWorkspace.js";
 import {
@@ -15,6 +16,7 @@ import {
 import { resolveLocalDraftActor } from "./localD1Config.js";
 import { createAuthoringMcpServer } from "./hostedMcpAuthoringServer.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
+import { authoringDatabaseUrl } from "./postgresPool.js";
 
 export { LOCAL_AUTHORING_GUIDANCE };
 
@@ -189,6 +191,8 @@ export function createConceptClustersMcpServer({
     clientProbeLogRoot: repositoryRoot,
     clientProbeTransport: "stdio",
     wikiLinkStore: sharedWikiLinkStore,
+    referencePilot: authoringDatabaseUrl(env) && !remnantDraftStore
+      ? createReferencePilot(workspace) : null,
     draftReviewBaseUrl: localDraftReviewUrl(),
     // A normal stdio server resolves its D1 adapter lazily from env, so
     // d1Database is usually null here even though content documents are

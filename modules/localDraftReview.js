@@ -679,9 +679,24 @@ export function createLocalDraftReviewHandler({
   // (autoLayoutWatcher.js), on the server that runs the pass; else null.
   readAutoLayoutStatuses = null,
   // The corpus list's per-row checks, kept across loads (derivedRowMemo.js).
-  rowMemo = createDerivedRowMemo()
+  rowMemo = createDerivedRowMemo(),
+  // Zotero pilot status per puzzle citation (citationSourceStatus.js); null
+  // off the Postgres workspace, where the page shows citations as before.
+  citationSourceStatus = null
 }) {
   if (!draftStore) throw new Error("draftStore is required");
+
+  // A status lookup that fails leaves the page without badges rather than
+  // failing the review page.
+  async function citationSourcesFor(document) {
+    if (!citationSourceStatus) return null;
+    try {
+      return await citationSourceStatus.statusesFor(document?.info?.citations || []);
+    } catch (error) {
+      console.warn(`Citation source status unavailable: ${error instanceof Error ? error.message : error}`);
+      return null;
+    }
+  }
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
 
   return async function handleLocalDraftReview(req, res) {
@@ -2419,7 +2434,8 @@ export function createLocalDraftReviewHandler({
           requestUrl.searchParams,
           publishedRow,
           { requireRevision: true }
-        )
+        ),
+        citationSources: await citationSourcesFor(draft.document)
       }));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -2475,6 +2491,7 @@ export function createDefaultLocalDraftReviewHandler({
         repositoryRoot,
         publicationActor: resolved.actor,
         wikiLinkStore: resolved.wikiLinkStore || null,
+        citationSourceStatus: resolved.citationSourceStatus || null,
         rowMemo,
         readAutoLayoutStatuses: env.AUTO_LAYOUT_PASS === "1"
           ? () => readAutoLayoutStatuses({
