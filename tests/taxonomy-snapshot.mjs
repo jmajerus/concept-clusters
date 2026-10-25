@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { taxonomySnapshot } from "../modules/taxonomySnapshot.js";
+import { taxonomySnapshot, taxonomyWarnings } from "../modules/taxonomySnapshot.js";
 
 export const name = "Taxonomy snapshot: published domains, categories, and subcategories as JSON";
 
@@ -21,6 +21,11 @@ export async function run() {
       { id: "cognition", title: "Cognition" }, { id: "social-psychology", title: "Social Psychology" }] },
     { slug: "trivia", name: "Trivia", domain: null, subcategories: [] }
   ]);
+  assert.deepEqual(taxonomyWarnings(snapshot), []);
+  // A comma only warns: Calibre splits tag lists on it, and corpus-mcp drops it.
+  assert.deepEqual(taxonomyWarnings(taxonomySnapshot({ ...registry, "Theatre, Dance & Performance": {
+    slug: "theatre-dance-performance", domain: "art-design", registered: true } })),
+  ['category theatre-dance-performance "Theatre, Dance & Performance" contains a comma, Calibre\'s tag separator']);
   assert.throws(() => taxonomySnapshot({ ...registry, "U.S. History": { slug: "us-history", domain: "humanities", registered: true,
     subcategories: { civil: { title: "Civil War Era" } } } }), /may not contain "\."[^]*category us-history$/);
 }

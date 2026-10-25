@@ -1,7 +1,8 @@
 // The published taxonomy as plain JSON, for vocabularies kept outside this
 // project (corpus-mcp's Calibre tags, written "Domain.Category.Subcategory").
 // A name containing the tag separator fails the export instead of silently
-// adding a level to every consumer's hierarchy.
+// adding a level to every consumer's hierarchy. A comma, Calibre's tag-list
+// separator, is only a warning: corpus-mcp drops it and maps by slug.
 
 import { DOMAINS } from "../puzzles/domains.js";
 
@@ -32,4 +33,16 @@ export function taxonomySnapshot(registry) {
     throw new Error(`Taxonomy names may not contain ".", the tag separator: ${dotted.join(", ")}`);
   }
   return { domains, categories };
+}
+
+export function taxonomyWarnings({ domains, categories }) {
+  const names = [
+    ...domains.map(domain => [domain.name, `domain ${domain.slug}`]),
+    ...categories.flatMap(category => [
+      [category.name, `category ${category.slug}`],
+      ...category.subcategories.map(subcategory => [subcategory.title, `subcategory ${category.slug}/${subcategory.id}`])
+    ])
+  ];
+  return names.filter(([name]) => name.includes(","))
+    .map(([name, where]) => `${where} "${name}" contains a comma, Calibre's tag separator`);
 }
