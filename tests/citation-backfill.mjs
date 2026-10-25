@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { PGlite } from "@electric-sql/pglite";
 import { applyPostgresMigrations } from "../tools/postgres-migrate.mjs";
 import { classifyCitation, cslAuthors, splitEdition } from "../modules/citationWorkKey.js";
@@ -145,23 +146,10 @@ async function crossrefGuards() {
 }
 
 async function citekeys() {
-  const key = data => proposedCitationKey(data);
-  assert.equal(key({ title: "The Future of Power", date: "2011",
-    creators: [{ creatorType: "author", lastName: "Nye", firstName: "Joseph S., Jr." }] }), "nye2011future");
-  assert.equal(key({ title: "Inquiry into the Treatment of Detainees", date: "2008",
-    creators: [{ creatorType: "author", name: "U.S. Senate Committee on Armed Services" }] }), "ussenate2008inquiry");
-  assert.equal(key({ title: "Advanced Encryption Standard", date: "2001", publisher: "NIST",
-    creators: [{ creatorType: "author", name: "National Institute of Standards and Technology" }] }), "nist2001advanced");
-  assert.equal(key({ title: "The Feynman Lectures on Physics", date: "1963",
-    creators: [{ creatorType: "author", lastName: "Feynman" }] }), "feynman1963lectures");
-  assert.equal(key({ title: "Macbeth", creators: [{ creatorType: "author", lastName: "Shakespeare" }] }), "shakespearemacbeth");
-  // Better BibTeX keeps hyphenated words whole and writes ligatures out.
-  assert.equal(key({ title: "Test-Enhanced Learning", date: "2006",
-    creators: [{ creatorType: "author", lastName: "Roediger" }] }), "roediger2006testenhanced");
-  assert.equal(key({ title: "Philosophiæ Naturalis Principia Mathematica", date: "1687",
-    creators: [{ creatorType: "author", lastName: "Newton" }] }), "newton1687philosophiae");
-  assert.equal(key({ title: "The Severity of an Earthquake", date: "2000",
-    creators: [{ creatorType: "author", name: "U.S. Geological Survey" }] }), "usgs2000severity");
+  // Shared with corpus-mcp (src/citekey.ts), which proposes keys from Calibre
+  // metadata; both copies of the file stay identical.
+  const { cases } = JSON.parse(await readFile(new URL("./citekey-cases.json", import.meta.url), "utf8"));
+  for (const { input, key } of cases) assert.equal(proposedCitationKey(input), key, input.title);
   const openstax = { title: "Biology 2e", date: "2018", creators: [{ creatorType: "author", name: "OpenStax" }] };
   assert.equal(citationKeyNeedsRepair("2018biology", openstax), true);
   assert.equal(citationKeyNeedsRepair("openstax2018biology", openstax), false);

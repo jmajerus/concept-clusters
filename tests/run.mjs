@@ -168,6 +168,7 @@ import * as lanAuthoringAccess from "./lan-authoring-access.mjs";
 import * as postgresDraftTransaction from "./postgres-draft-transaction.mjs";
 import * as citationBackfill from "./citation-backfill.mjs";
 import * as zoteroDeployPlan from "./zotero-deploy-plan.mjs";
+import * as zoteroBibtexFiling from "./zotero-bibtex-filing.mjs";
 import * as publishedReplica from "./published-replica.mjs";
 import * as dispatchPlayDeploy from "./dispatch-play-deploy.mjs";
 import * as mcpPortalSync from "./mcp-portal-sync.mjs";
@@ -189,7 +190,7 @@ const allTests = [
   nonCryptographicHash,
   skillRevisionStamp,
   wikiLinkCheck, d1LargeColumnCache, d1LostResponse, derivedRowMemo,
-  lanAuthoringAccess, postgresDraftTransaction, citationBackfill, zoteroDeployPlan, publishedReplica, dispatchPlayDeploy,
+  lanAuthoringAccess, postgresDraftTransaction, citationBackfill, zoteroDeployPlan, zoteroBibtexFiling, publishedReplica, dispatchPlayDeploy,
   mcpPortalSync, mcpToolCatalog
 ];
 
@@ -209,7 +210,7 @@ const quickTests = [
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
   circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, layoutPassJobs, autoLayoutWatcher, singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck, d1LargeColumnCache, d1LostResponse, derivedRowMemo,
-  lanAuthoringAccess, postgresDraftTransaction, citationBackfill, zoteroDeployPlan, publishedReplica, dispatchPlayDeploy,
+  lanAuthoringAccess, postgresDraftTransaction, citationBackfill, zoteroDeployPlan, zoteroBibtexFiling, publishedReplica, dispatchPlayDeploy,
   mcpPortalSync, mcpToolCatalog
 ];
 
@@ -261,7 +262,7 @@ const sideTests = {
     localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks,
     localDevHttp, localDevHousekeep, playCorpus, boardAdministration, domains, wikiLinkCheck,
     boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, autoLayoutWatcher, legacyBoardLift, firstPublishedBackfill, d1LargeColumnCache, d1LostResponse, derivedRowMemo,
-    lanAuthoringAccess, postgresDraftTransaction, citationBackfill, zoteroDeployPlan, publishedReplica, dispatchPlayDeploy,
+    lanAuthoringAccess, postgresDraftTransaction, citationBackfill, zoteroDeployPlan, zoteroBibtexFiling, publishedReplica, dispatchPlayDeploy,
     mcpPortalSync, mcpToolCatalog
   ]),
   shared: new Set([

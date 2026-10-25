@@ -258,6 +258,9 @@ export function createReferencePilot(resolveWorkspace) {
     },
     async fileSource(args) {
       return (await zotero()).fileSource(args);
+    },
+    async fileBibtex(bibtex) {
+      return (await zotero()).fileBibtex(bibtex);
     }
   };
 }

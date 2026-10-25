@@ -1223,24 +1223,28 @@ export function createAuthoringMcpServer({
     server.registerTool("file_zotero_reference", {
       title: "File selected Zotero reference",
       description:
-        "Explicitly file one selected Zotero item, DOI, URL, or ISBN in the Concept Clusters collection " +
-        "and mirror its assigned citekey and metadata in Postgres. Provide exactly one identifier. " +
+        "Explicitly file one selected Zotero item, DOI, URL, ISBN, or BibTeX @book entry in the Concept Clusters " +
+        "collection and mirror its assigned citekey and metadata in Postgres. Provide exactly one identifier. " +
         "An ISBN resolves through Open Library and Google Books, so check the returned citation against the book. " +
+        "A BibTeX entry is filed from its own metadata with no lookup: a book already in the collection " +
+        "(same ISBN, else same title, first author, and year) is reused, and a new item gets the entry's key " +
+        "or the first free key after it. Returns the assigned citekey. " +
         "This does not change a puzzle or publish a citation.",
       inputSchema: z.object({
         zotero_item_key: z.string().regex(/^[A-Z0-9]{8}$/).optional(),
         doi: z.string().min(1).optional(),
         url: z.string().url().optional(),
-        isbn: z.string().min(1).optional()
+        isbn: z.string().min(1).optional(),
+        bibtex: z.string().min(1).optional()
       }),
       annotations: WRITE
-    }, tracked("file_zotero_reference", safe(async ({ zotero_item_key, doi, url, isbn }) => {
-      if ([zotero_item_key, doi, url, isbn].filter(Boolean).length !== 1) {
-        throw new Error("Provide exactly one Zotero item key, DOI, URL, or ISBN");
+    }, tracked("file_zotero_reference", safe(async ({ zotero_item_key, doi, url, isbn, bibtex }) => {
+      if ([zotero_item_key, doi, url, isbn, bibtex].filter(Boolean).length !== 1) {
+        throw new Error("Provide exactly one Zotero item key, DOI, URL, ISBN, or BibTeX entry");
       }
-      const filed = zotero_item_key
-        ? await referencePilot.fileItem(zotero_item_key)
-        : await referencePilot.fileSource({ doi, url, isbn });
+      const filed = zotero_item_key ? await referencePilot.fileItem(zotero_item_key)
+        : bibtex ? await referencePilot.fileBibtex(bibtex)
+          : await referencePilot.fileSource({ doi, url, isbn });
       return success("Filed the selected Zotero reference in the Concept Clusters collection.", filed);
     })));
   }

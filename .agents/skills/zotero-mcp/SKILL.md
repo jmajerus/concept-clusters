@@ -5,7 +5,7 @@ description: Find and verify Zotero records while authoring or checking Concept 
 
 # Zotero references
 
-Skill rev `1f13cf3f` · 2026-10-24
+Skill rev `ee8a3c43` · 2026-10-25
 
 Use the project `zotero` MCP connection, backed by the `jmajerus/zotero-mcp`
 fork, for read-only source lookup. Do not change the Zotero library during
@@ -39,11 +39,13 @@ The local Postgres-backed `concept-clusters` MCP server offers:
   content before judging missing or excessive coverage.
 - `file_zotero_reference` to explicitly file a selected work in the Concept
   Clusters Zotero collection and mirror its assigned citekey and metadata in
-  Postgres. Provide exactly one of `zotero_item_key`, `doi`, `url`, or `isbn`.
+  Postgres. Provide exactly one of `zotero_item_key`, `doi`, `url`, `isbn`,
+  or `bibtex` (one `@book` entry, filed from its own metadata with no lookup).
+  It returns the assigned citekey.
   Call it only when filing the selected work is within the requested task;
   a lookup or planning request alone does not authorize filing. This action
   changes collection membership and may create a Zotero item for a DOI, URL,
-  or ISBN. ISBN metadata comes from Open Library or Google Books; check the
+  ISBN, or BibTeX entry. ISBN metadata comes from Open Library or Google Books; check the
   returned citation against the book.
   It does not modify a puzzle or publish a citation.
 

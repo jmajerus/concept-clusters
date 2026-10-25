@@ -3,7 +3,9 @@
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { assignedCitationKey } from "./citationKeys.js";
+import { parseBookBibtex } from "./bibtexBook.js";
+import { assignedCitationKey, uniqueCitationKey } from "./citationKeys.js";
+import { normalizedText } from "./citationWorkKey.js";
 
 export const DEFAULT_ZOTERO_MCP_URL = "http://zotero-mcp.localdomain:8000/mcp";
 export const CONCEPT_CLUSTERS_COLLECTION_KEY = "64GU7Y4Y";
@@ -60,6 +62,53 @@ function normalizedIsbn(value) {
       && digits.reduce((sum, digit, index) => sum + digit * (index % 2 ? 3 : 1), 0) % 10 === 0;
   if (!valid) throw new Error("Provide a valid ISBN-10 or ISBN-13");
   return isbn;
+}
+
+function isbn13(isbn) {
+  if (isbn.length === 13) return isbn;
+  const body = `978${isbn.slice(0, 9)}`;
+  const sum = [...body].reduce((total, digit, index) => total + Number(digit) * (index % 2 ? 3 : 1), 0);
+  return `${body}${(10 - (sum % 10)) % 10}`;
+}
+
+// Zotero's ISBN field may hold several, space-separated ("9780306406157 0306406152").
+function itemIsbns(data) {
+  return String(data?.ISBN || "").split(/[\s,;]+/).flatMap(token => {
+    try {
+      return token ? [isbn13(normalizedIsbn(token))] : [];
+    } catch {
+      return [];
+    }
+  });
+}
+
+function firstCreatorName(names) {
+  return normalizedText(names[0] ? names[0].lastName || names[0].family || names[0].name || names[0].literal : "");
+}
+
+// A collection item is this book when an ISBN matches, else when title,
+// first author, and year all match and the ISBNs (when both have one) agree.
+function sameBook(entry, isbn, data) {
+  const isbns = itemIsbns(data);
+  if (isbn && isbns.includes(isbn13(isbn))) return "ISBN";
+  if (isbn && isbns.length) return null;
+  const authors = (data.creators || []).filter(creator => ["author", "editor"].includes(creator.creatorType));
+  const year = Number(String(data.date || "").match(/\b\d{4}\b/)?.[0]) || null;
+  return normalizedText(data.title) === normalizedText(entry.title)
+    && firstCreatorName(authors) === firstCreatorName(entry.author)
+    && year === entry.year ? "title, author, and year" : null;
+}
+
+function bookCsl(entry, isbn) {
+  return {
+    type: "book",
+    title: entry.title,
+    ...(entry.author.length ? { author: entry.author } : {}),
+    ...(entry.publisher ? { publisher: entry.publisher } : {}),
+    ...(entry.year ? { issued: { "date-parts": [[entry.year]] } } : {}),
+    ...(isbn ? { ISBN: isbn } : {}),
+    ...(entry.note ? { note: entry.note } : {})
+  };
 }
 
 function citekeyOf(record) {
@@ -160,8 +209,69 @@ export class ZoteroReferenceService {
       const summary = await this.mirrorRecord(record);
       return {
         citation: summary.citation,
+        citekey: summary.citekey,
         zoteroItemKey: key,
         collectionKey: this.collectionKey
+      };
+    });
+  }
+
+  // Files a @book entry from its own metadata, with no external lookup. A
+  // book already in the collection is reused with its citekey; a new item
+  // gets the entry's key, or the first free key after it.
+  async fileBibtex(bibtex) {
+    const entry = parseBookBibtex(bibtex);
+    const isbn = entry.isbn ? normalizedIsbn(entry.isbn) : null;
+    if (!this.sourceRepository) throw new Error("Postgres citation source storage is unavailable");
+    return this.withClient(async call => {
+      const candidates = (await this.titleCandidates(entry.title, call, 10))
+        .filter(record => record.data?.collections?.includes(this.collectionKey));
+      let record = null;
+      let matchedBy = null;
+      for (const candidate of candidates) {
+        matchedBy = sameBook(entry, isbn, candidate.data);
+        if (matchedBy) {
+          record = candidate;
+          break;
+        }
+      }
+      let created = false;
+      if (!record) {
+        // zotero_add_item reuses a library item with this ISBN outside the
+        // collection, filing it here, rather than creating a second copy.
+        const added = await this.addItem({ kind: "csl", source: bookCsl(entry, isbn) }, call);
+        record = await this.getItem(added.itemKey, call);
+        created = !added.reused;
+        if (added.reused) matchedBy = "ISBN, elsewhere in the library";
+      }
+      const itemKey = String(record.key || record.data?.key || "");
+      const extra = String(record.data?.extra || "");
+      const fields = {};
+      if (entry.note && !extra.split("\n").includes(entry.note)) {
+        fields.extra = extra ? `${extra.trimEnd()}\n${entry.note}` : entry.note;
+      }
+      if (created) {
+        const citekey = await uniqueCitationKey(entry.citekey, async key => {
+          const owner = await this.citationKeyOwner(key, call);
+          return Boolean(owner) && owner !== itemKey;
+        });
+        if (citekey !== assignedCitationKey(record.data)) fields.citation_key = citekey;
+      }
+      if (Object.keys(fields).length) {
+        await this.updateItem(itemKey, { fields }, call);
+        record = await this.getItem(itemKey, call);
+      }
+      if (fields.citation_key && assignedCitationKey(record.data) !== fields.citation_key) {
+        throw new Error(`Zotero did not keep citekey ${fields.citation_key} on ${itemKey}`);
+      }
+      const summary = await this.mirrorRecord(record);
+      return {
+        citation: summary.citation,
+        citekey: summary.citekey,
+        zoteroItemKey: itemKey,
+        collectionKey: this.collectionKey,
+        created,
+        ...(matchedBy ? { matchedBy } : {})
       };
     });
   }
@@ -196,6 +306,7 @@ export class ZoteroReferenceService {
       const summary = await this.mirrorRecord(record);
       return {
         citation: summary.citation,
+        citekey: summary.citekey,
         zoteroItemKey: key,
         collectionKey: this.collectionKey,
         ...(response.includes("Note:") ? { zoteroNote: response.slice(response.indexOf("Note:")) } : {})

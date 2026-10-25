@@ -70,7 +70,12 @@ The pilot filing action accepts an existing Zotero item key, DOI, URL, or ISBN. 
 files that work in collection `64GU7Y4Y`, verifies membership and its assigned
 citekey, then mirrors the bibliographic metadata in Postgres. DOI, URL, and
 ISBN filing use Zotero's `if_exists: "file"` behavior to reuse a matching library
-item. The separate
+item. A BibTeX `@book` entry (corpus-mcp builds one from a Calibre book's
+own metadata) is filed with no external lookup: an item already in the
+collection with the same ISBN, or else the same title, first author, and
+year, is reused with its citekey. A new item takes the entry's key, or the
+first free key after it, and the entry's `note` (its Calibre UUID) goes to
+Extra. Every filing returns the assigned citekey. The separate
 `authoring:citations:sync-zotero` command mirrors items placed directly in the
 collection.
 The usage index is refreshed manually and reports its freshness; a stale or
