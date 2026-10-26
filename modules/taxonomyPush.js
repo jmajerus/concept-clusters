@@ -30,9 +30,14 @@ export function vocabularyPushConfig(env = process.env) {
 }
 
 // One POST. Returns { outcome: "installed" | "unchanged" | "rejected" | "failed", ... };
-// never throws, and never includes the client secret in what it returns.
-export async function pushVocabulary(vocabulary, config, { fetchImpl = fetch } = {}) {
+// never throws, and never includes the client secret in what it returns. A
+// hung intake times out as a failure, so it cannot stall the drain loop.
+export async function pushVocabulary(vocabulary, config, { fetchImpl = fetch, timeoutMs = 10_000 } = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const { signal } = controller;
   let response;
+  let body;
   try {
     response = await fetchImpl(config.url, {
       method: "POST",
@@ -42,12 +47,16 @@ export async function pushVocabulary(vocabulary, config, { fetchImpl = fetch } =
         "CF-Access-Client-Secret": config.clientSecret
       },
       body: JSON.stringify(vocabulary),
-      redirect: "manual"
+      redirect: "manual",
+      signal
     });
+    body = await response.json().catch(() => null);
   } catch (error) {
-    return { outcome: "failed", error: error instanceof Error ? error.message : String(error) };
+    if (!signal.aborted) return { outcome: "failed", error: error instanceof Error ? error.message : String(error) };
+  } finally {
+    clearTimeout(timer);
   }
-  const body = await response.json().catch(() => null);
+  if (signal.aborted) return { outcome: "failed", error: `no response within ${timeoutMs} ms` };
   if (response.status === 200) {
     return { outcome: body?.unchanged ? "unchanged" : "installed", version: body?.version ?? vocabulary.version };
   }

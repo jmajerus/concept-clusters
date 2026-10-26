@@ -32,6 +32,14 @@ export async function run() {
     fetchImpl: async () => { throw new Error("connect ECONNREFUSED"); }
   });
   assert.deepEqual(network, { outcome: "failed", error: "connect ECONNREFUSED" });
+  // A hung intake fails instead of holding the drain loop's tick.
+  const hung = await pushVocabulary(vocabulary, vocabularyPushConfig(env), {
+    timeoutMs: 20,
+    fetchImpl: (url, init) => new Promise((resolve, reject) => {
+      init.signal.addEventListener("abort", () => reject(init.signal.reason));
+    })
+  });
+  assert.equal(hung.outcome, "failed");
 
   // The pusher sends only a version corpus-mcp has not already settled.
   let version = "v1";
