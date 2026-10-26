@@ -50,6 +50,7 @@
     "authoring:citations:backfill": "node tools/citation-backfill.mjs",
     "authoring:citations:collections": "node tools/citation-collections.mjs",
     "authoring:taxonomy:export": "node tools/export-taxonomy.mjs",
+    "authoring:taxonomy:push": "node tools/push-taxonomy.mjs",
     "authoring:postgres:dump": "node tools/postgres-dump.mjs",
     "authoring:postgres:copy": "node tools/copy-authoring-to-postgres.mjs",
     "mcp:hosted:release": "npm run authoring:d1:migrate:remote && npm run mcp:hosted:deploy",

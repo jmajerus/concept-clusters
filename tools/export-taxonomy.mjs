@@ -1,12 +1,11 @@
 // Print the published taxonomy as a corpus-vocabulary/1 file (corpus-mcp's
-// tag vocabulary), or write it to --out <file>. corpus-mcp installs it with
-// `npm run deploy -- --vocabulary=<file>`.
+// tag vocabulary), or write it to --out <file>. The authoring server pushes
+// it to corpus-mcp on its own (modules/taxonomyPush.js).
 import { writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 import { authoringDatabaseUrl, getAuthoringPool } from "../modules/postgresPool.js";
-import { loadPublishedCorpus } from "../modules/citationBackfill.js";
-import { taxonomyVocabulary } from "../modules/taxonomySnapshot.js";
+import { loadPublishedTaxonomy } from "../modules/taxonomyPush.js";
 
 const isMain = process.argv[1]
   && import.meta.url === pathToFileURL(process.argv[1]).href;
@@ -22,8 +21,7 @@ if (isMain) {
   } else {
     const pool = getAuthoringPool(url);
     try {
-      const { registry } = await loadPublishedCorpus(pool);
-      const json = `${JSON.stringify(taxonomyVocabulary(registry), null, 2)}\n`;
+      const json = `${JSON.stringify(await loadPublishedTaxonomy(pool), null, 2)}\n`;
       if (out) await writeFile(out, json);
       else process.stdout.write(json);
     } catch (error) {

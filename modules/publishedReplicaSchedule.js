@@ -1,10 +1,13 @@
 // Drains the published replica queue while the authoring server is up.
 // A missing D1 client leaves the queue pending; the next tick tries again.
+// Each tick also pushes the taxonomy to corpus-mcp when it has changed,
+// whether or not D1 is reachable.
 
 import { createHttpD1Database } from "./httpD1Database.js";
 import { LocalD1ConfigError, resolveLocalD1Config } from "./localD1Config.js";
 import { authoringDatabaseUrl, getAuthoringPool } from "./postgresPool.js";
 import { drainPublishedReplica } from "./publishedReplica.js";
+import { createTaxonomyPusher } from "./taxonomyPush.js";
 
 const DRAIN_INTERVAL_MS = 15_000;
 
@@ -45,10 +48,9 @@ export function startPublishedReplicaDrain({
   let timer = null;
   let running = false;
   let reportedWaiting = false;
+  const pushTaxonomy = createTaxonomyPusher({ pool, env });
 
-  async function tick() {
-    if (running) return;
-    running = true;
+  async function drain() {
     try {
       let d1;
       try {
@@ -72,6 +74,15 @@ export function startPublishedReplicaDrain({
       const message = error instanceof Error ? error.message : String(error);
       noteDrainStatus({ phase: "error", error: message });
       console.error("Public replica drain failed", message);
+    }
+  }
+
+  async function tick() {
+    if (running) return;
+    running = true;
+    try {
+      await drain();
+      await pushTaxonomy();
     } finally {
       running = false;
     }
