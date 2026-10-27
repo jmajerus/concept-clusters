@@ -91,12 +91,6 @@
           "description": "$(debug-stop) npm run dev:stop — however it was started"
         }
       ]
-    },
-    {
-      "label": "$(cloud-download) Import layout",
-      "task": "Import Star layout",
-      "tooltip": "npm run import:star-layout -- pick a layout JSON exported from Author Layout and save it as a curated Star override",
-      "alignment": "left"
     }
   ],
   "statusProbe.items": [
