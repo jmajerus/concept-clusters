@@ -110,7 +110,7 @@ function checkStatusProbe() {
     running, checkout: running, checkoutMoved: false,
     baseRef: "origin/main", behindBase: 10, upstreamRef: null, behindUpstream: null, fetchError: null
   }, { adminUrl });
-  assert.equal(stale.text, "$(server) main ↓10");
+  assert.equal(stale.text, "$(pulse) main ↓10");
   assert.equal(stale.level, "warn");
   assert.equal(stale.open, adminUrl);
   assert.match(stale.tooltip, /Behind origin\/main \| 10/);
@@ -121,7 +121,7 @@ function checkStatusProbe() {
     baseRef: "origin/main", behindBase: 0,
     upstreamRef: "origin/feature/authoring-deploy-guards", behindUpstream: 0, fetchError: null
   }, { adminUrl, prNumber: 267 });
-  assert.equal(fresh.text, "$(server) #267");
+  assert.equal(fresh.text, "$(pulse) #267");
   assert.equal(fresh.level, "ok");
 
   const drifted = formatAuthoringStatusProbe({
@@ -129,7 +129,7 @@ function checkStatusProbe() {
     baseRef: "origin/main", behindBase: 2,
     upstreamRef: "origin/feature/authoring-deploy-guards", behindUpstream: 1, fetchError: null
   }, { adminUrl });
-  assert.equal(drifted.text, "$(server) authoring-deplo… ↓1 ✗main ⟳");
+  assert.equal(drifted.text, "$(pulse) authoring-deplo… ↓1 ✗main ⟳");
   assert.equal(drifted.level, "warn");
 }
 
