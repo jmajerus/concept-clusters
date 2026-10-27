@@ -75,9 +75,13 @@ export async function run() {
   assert.deepEqual(sent, ["v1", "v1", "v1", "v2", "v3"]);
   assert.ok(logged.every(message => !message.includes("client-secret")));
 
-  // Without the service token the push is off and loads nothing.
+  // Without the service token the push is off, says so once, and loads nothing.
   let loads = 0;
-  const off = createTaxonomyPusher({ env: {}, load: async () => { loads += 1; } });
+  const offLog = [];
+  const off = createTaxonomyPusher({ env: {}, log: { log: message => offLog.push(message) }, load: async () => { loads += 1; } });
+  assert.deepEqual(await off(), { outcome: "skipped" });
   assert.deepEqual(await off(), { outcome: "skipped" });
   assert.equal(loads, 0);
+  assert.equal(offLog.length, 1);
+  assert.match(offLog[0], /Taxonomy push off/);
 }

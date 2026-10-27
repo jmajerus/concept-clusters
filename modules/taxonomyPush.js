@@ -87,7 +87,10 @@ export function createTaxonomyPusher({
     log[level](message);
   };
   return async function pushIfChanged() {
-    if (!config) return { outcome: "skipped" };
+    if (!config) {
+      note("log", "Taxonomy push off: CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET are not set.");
+      return { outcome: "skipped" };
+    }
     let vocabulary;
     try {
       vocabulary = await load();
