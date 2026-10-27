@@ -3,7 +3,7 @@
 // tools/authoring-status.mjs fetches /admin/server-revision.json and prints
 // this; the /admin Authoring server section is the long form.
 
-// $(server) is the Deploy Authoring button's; a status item takes its own glyph, so state never reads as an action.
+// $(server) is the Deploy Authoring button's icon; this status item uses its own, so state never reads as an action.
 const ICON = "$(pulse)";
 const MAX_BRANCH_LABEL = 16;
 
