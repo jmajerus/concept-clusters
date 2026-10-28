@@ -72,13 +72,19 @@ export function isAuthoringAdminIndexPath(pathname) {
   return pathname === "/admin" || pathname === "/admin/";
 }
 
+// Sibling servers' admin roots, set apart from this server's own pages.
+export const CORPUS_MCP_ADMIN_URL = "https://corpus-mcp.majerus.us/admin";
+export const QUOTE_MCP_ADMIN_URL = "https://quote-mcp.majerus.us/admin";
+
 export function authoringAdminNav() {
   return `<a href="/admin">Admin</a>
     · <a href="/admin/drafts">Puzzles</a>
     · <a href="/admin/catalogues">Catalogues</a>
     · <a href="/admin/categories">Categories</a>
     · <a href="/admin/link-health">Link health</a>
-    · <a href="/admin/model-suggestions">Model suggestions</a>`;
+    · <a href="/admin/model-suggestions">Model suggestions</a>
+    | <a href="${CORPUS_MCP_ADMIN_URL}">Corpus</a>
+    · <a href="${QUOTE_MCP_ADMIN_URL}">Quotes</a>`;
 }
 
 // ---- Wikipedia link health (wikiLinkCheck.js loadWikiLinkHealth) ----
