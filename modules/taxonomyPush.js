@@ -70,6 +70,8 @@ export async function pushVocabulary(vocabulary, config, { fetchImpl = fetch, ti
 // corpus-mcp accepted. A rejected version is not resent until the taxonomy
 // changes; a failure retries on the next call. Each distinct message is
 // logged once, so a 15 s tick does not repeat the same error.
+// pushIfChanged.status() is what the Admin index shows: the last attempt's
+// state, plus the last version corpus-mcp accepted, which survives a failure.
 export function createTaxonomyPusher({
   pool,
   env = process.env,
@@ -81,12 +83,16 @@ export function createTaxonomyPusher({
   let accepted = null;
   let rejected = null;
   let lastMessage = null;
+  let status = { state: config ? "pending" : "off", accepted: null };
+  const settle = fields => {
+    status = { state: fields.state, at: new Date().toISOString(), accepted: status.accepted, ...fields };
+  };
   const note = (level, message) => {
     if (message === lastMessage) return;
     lastMessage = message;
     log[level](message);
   };
-  return async function pushIfChanged() {
+  async function pushIfChanged() {
     if (!config) {
       note("log", "Taxonomy push off: CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET are not set.");
       return { outcome: "skipped" };
@@ -95,7 +101,9 @@ export function createTaxonomyPusher({
     try {
       vocabulary = await load();
     } catch (error) {
-      note("error", `Taxonomy push skipped: ${error instanceof Error ? error.message : error}`);
+      const message = error instanceof Error ? error.message : String(error);
+      note("error", `Taxonomy push skipped: ${message}`);
+      settle({ state: "invalid", error: message });
       return { outcome: "invalid" };
     }
     if (vocabulary.version === accepted || vocabulary.version === rejected) return { outcome: "current" };
@@ -103,13 +111,18 @@ export function createTaxonomyPusher({
     if (result.outcome === "installed" || result.outcome === "unchanged") {
       accepted = vocabulary.version;
       rejected = null;
+      settle({ state: result.outcome, version: vocabulary.version, accepted: { version: vocabulary.version, at: new Date().toISOString() } });
       note("log", `Taxonomy push: corpus-mcp ${result.outcome} vocabulary ${vocabulary.version}.`);
     } else if (result.outcome === "rejected") {
       rejected = vocabulary.version;
+      settle({ state: "rejected", version: vocabulary.version, problems: result.problems });
       note("error", `Taxonomy push: corpus-mcp rejected vocabulary ${vocabulary.version}:\n${result.problems.join("\n")}`);
     } else {
       note("error", `Taxonomy push failed (retrying): ${result.error}`);
+      settle({ state: "failed", version: vocabulary.version, error: result.error });
     }
     return result;
-  };
+  }
+  pushIfChanged.status = () => ({ ...status });
+  return pushIfChanged;
 }

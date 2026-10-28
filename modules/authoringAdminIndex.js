@@ -34,6 +34,12 @@ const PAGE_STYLE = `
   .replica-sync ul { margin: 8px 0 0; padding-left: 1.2em; }
   .replica-sync-behind { border-color: #f59e0b; background: #fffbeb; }
   .replica-sync-behind strong { color: #b45309; }
+  .taxonomy-push { margin: 20px 0; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+  .taxonomy-push h2 { margin: 0 0 4px; font-size: 18px; }
+  .taxonomy-push p { margin: 4px 0; }
+  .taxonomy-push ul { margin: 8px 0 0; padding-left: 1.2em; }
+  .taxonomy-push-warn { border-color: #f59e0b; background: #fffbeb; }
+  .taxonomy-push-warn strong { color: #b45309; }
   .mcp-health { margin: 20px 0; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
   .mcp-health h2 { margin: 0 0 4px; font-size: 18px; }
   .mcp-health p { margin: 4px 0; }
@@ -75,6 +81,11 @@ export function isAuthoringAdminIndexPath(pathname) {
 // Sibling servers' admin roots, set apart from this server's own pages.
 export const CORPUS_MCP_ADMIN_URL = "https://corpus-mcp.majerus.us/admin";
 export const QUOTE_MCP_ADMIN_URL = "https://quote-mcp.majerus.us/admin";
+
+// corpus-mcp's book list filtered to a vocabulary term and the terms under it.
+export function corpusBooksTaggedHref(termId) {
+  return `${CORPUS_MCP_ADMIN_URL}/books?tag=${encodeURIComponent(termId)}`;
+}
 
 export function authoringAdminNav() {
   return `<a href="/admin">Admin</a>
@@ -208,6 +219,54 @@ export function renderServerRevisionSection(status) {
     <p class="meta">${comparison}.</p>
     ${fix}
     ${fetchNote}
+  </section>`;
+}
+
+// ---- Taxonomy push (taxonomyPush.js createTaxonomyPusher status) ----
+
+function renderAcceptedVocabulary(accepted) {
+  if (!accepted) return "";
+  return `<p class="meta">Last accepted: vocabulary <code>${escapeHtml(accepted.version)}</code>
+    at ${escapeHtml(formatReplicaWhen(accepted.at))}.</p>`;
+}
+
+/** What corpus-mcp holds of the published taxonomy. Absent when the drain does not run. */
+export function renderTaxonomyPushSection(status) {
+  if (!status) return "";
+  const corpus = `<a href="${CORPUS_MCP_ADMIN_URL}/taxonomy">corpus-mcp's taxonomy page</a>`;
+  let summary;
+  let warn = false;
+  let detail = "";
+  if (status.state === "off") {
+    summary = "The push is off: <code>CF_ACCESS_CLIENT_ID</code> and <code>CF_ACCESS_CLIENT_SECRET</code> are not set.";
+  } else if (status.state === "pending") {
+    summary = "Not pushed yet since this server started.";
+  } else if (status.state === "installed" || status.state === "unchanged") {
+    const how = status.state === "installed" ? "installed" : "already had";
+    summary = `corpus-mcp ${how} vocabulary <code>${escapeHtml(status.version)}</code>
+      at ${escapeHtml(formatReplicaWhen(status.at))}.`;
+  } else if (status.state === "rejected") {
+    warn = true;
+    summary = `<strong>corpus-mcp rejected vocabulary <code>${escapeHtml(status.version)}</code></strong>.
+      It is not resent until the taxonomy changes.`;
+    const problems = Array.isArray(status.problems) ? status.problems : [];
+    detail = (problems.length
+      ? `<ul>${problems.map(problem => `<li>${escapeHtml(problem)}</li>`).join("")}</ul>`
+      : "") + renderAcceptedVocabulary(status.accepted);
+  } else {
+    warn = true;
+    const what = status.state === "invalid"
+      ? "The published taxonomy is not a valid vocabulary"
+      : "The push failed";
+    summary = `<strong>${what}</strong> (${escapeHtml(status.error || "no detail")}).
+      ${status.state === "failed" ? "Retrying each tick." : ""}`;
+    detail = renderAcceptedVocabulary(status.accepted);
+  }
+  return `<section class="taxonomy-push${warn ? " taxonomy-push-warn" : ""}">
+    <h2>Corpus vocabulary</h2>
+    <p>${summary}</p>
+    ${detail}
+    <p class="meta">Published categories are the tag vocabulary for corpus-mcp's books. See ${corpus}.</p>
   </section>`;
 }
 
@@ -603,6 +662,7 @@ export function renderAdminIndexPage({
   linkHealth = null,
   serverRevision = null,
   replicaStatus = null,
+  taxonomyPush = null,
   mcpHealth = null
 } = {}) {
   const intro = replicaStatus
@@ -614,6 +674,7 @@ export function renderAdminIndexPage({
     ${renderServerRevisionSection(serverRevision)}
     ${renderMcpHealthSection(mcpHealth)}
     ${renderReplicaSyncSection(replicaStatus)}
+    ${renderTaxonomyPushSection(taxonomyPush)}
     ${renderFreezeSection({ freezePlan, canApplyFreeze, canCueAllPublished })}
     ${renderGithubProductionSection({ githubProduction, canRefreshGithubProduction })}
     ${renderLinkHealthSummary(linkHealth)}
@@ -825,6 +886,7 @@ export async function handleAuthoringAdminIndex(req, res, {
   loadServerRevision = null,
   subscribeServerRevision = null,
   loadReplicaStatus = null,
+  loadTaxonomyPush = null,
   loadMcpHealth = null
 } = {}) {
   const urlPath = (req.url || "").split("?")[0];
@@ -1044,6 +1106,14 @@ export async function handleAuthoringAdminIndex(req, res, {
       };
     }
   }
+  let taxonomyPush = null;
+  if (loadTaxonomyPush && req.method !== "HEAD") {
+    try {
+      taxonomyPush = await loadTaxonomyPush();
+    } catch {
+      taxonomyPush = null;
+    }
+  }
   res.writeHead(200, {
     "Content-Type": "text/html; charset=utf-8",
     "Cache-Control": "no-store"
@@ -1057,6 +1127,7 @@ export async function handleAuthoringAdminIndex(req, res, {
     linkHealth,
     serverRevision,
     replicaStatus,
+    taxonomyPush,
     mcpHealth
   }));
   return true;

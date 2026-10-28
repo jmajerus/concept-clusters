@@ -216,6 +216,11 @@ export async function run() {
     }
   });
   assert.match(biology, /name="subcategory.foundations.title"/);
+  assert.match(
+    biology,
+    /href="https:\/\/corpus-mcp\.majerus\.us\/admin\/books\?tag=sciences-mathematics\.biology"/,
+    "a published category links to corpus books under its vocabulary term"
+  );
   assert.match(biology, /Foundations/);
   assert.match(biology, /Cells and variation/);
   assert.match(biology, /Registered browse partitions/);

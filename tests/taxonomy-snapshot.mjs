@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { taxonomyVocabulary } from "../modules/taxonomySnapshot.js";
+import { categoryTermId, taxonomyVocabulary } from "../modules/taxonomySnapshot.js";
 
 export const name = "Taxonomy vocabulary: the published taxonomy as a corpus-vocabulary/1 file";
 
@@ -17,6 +17,10 @@ export async function run() {
   assert.equal(vocabulary.format, "corpus-vocabulary/1");
   assert.deepEqual(vocabulary.retired, []);
   const term = id => vocabulary.terms.find(entry => entry.id === id);
+  // The admin's corpus links build term ids the same way the export does.
+  for (const category of Object.values(registry).filter(entry => entry.registered)) {
+    assert.ok(term(categoryTermId(category.slug, category.domain)), category.slug);
+  }
   // Domains only group; labels may hold commas, since tags are ids.
   assert.deepEqual(term("social-sciences"), { id: "social-sciences", label: "Social Sciences", assignable: false });
   assert.deepEqual(vocabulary.terms.filter(entry => entry.id.startsWith("social-sciences.")), [

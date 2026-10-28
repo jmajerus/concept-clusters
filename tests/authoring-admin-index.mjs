@@ -6,6 +6,7 @@ import {
   renderLinkHealthPage,
   isAuthoringAdminIndexPath,
   renderAdminIndexPage,
+  renderTaxonomyPushSection,
   renderFreezeResultPage,
   renderGithubRefreshResultPage
 } from "../modules/authoringAdminIndex.js";
@@ -259,6 +260,27 @@ export async function run(page) {
     replicaStatus: { error: "relation \"published_replica_queue\" does not exist" }
   });
   assert.match(unread, /Could not read the replica queue/);
+
+  // The taxonomy push card: absent without a drain, quiet when accepted,
+  // and a failure still names the last version corpus-mcp accepted.
+  assert.equal(renderTaxonomyPushSection(null), "");
+  assert.doesNotMatch(renderAdminIndexPage(), /Corpus vocabulary/);
+  const accepted = renderAdminIndexPage({
+    taxonomyPush: { state: "unchanged", version: "abc123", at: "2026-10-28T09:00:00.000Z", accepted: { version: "abc123", at: "2026-10-28T09:00:00.000Z" } }
+  });
+  assert.match(accepted, /<section class="taxonomy-push">/);
+  assert.match(accepted, /corpus-mcp already had vocabulary <code>abc123<\/code>/);
+  assert.match(accepted, /href="https:\/\/corpus-mcp\.majerus\.us\/admin\/taxonomy"/);
+  const failed = renderTaxonomyPushSection({
+    state: "failed", version: "def456", error: "HTTP 403", at: "2026-10-28T09:01:00.000Z",
+    accepted: { version: "abc123", at: "2026-10-28T09:00:00.000Z" }
+  });
+  assert.match(failed, /taxonomy-push-warn/);
+  assert.match(failed, /HTTP 403/);
+  assert.match(failed, /Last accepted: vocabulary <code>abc123<\/code>/);
+  const rejected = renderTaxonomyPushSection({ state: "rejected", version: "def456", problems: ["a.b: <bad>"], accepted: null });
+  assert.match(rejected, /<li>a\.b: &lt;bad&gt;<\/li>/);
+  assert.match(renderTaxonomyPushSection({ state: "off", accepted: null }), /push is off/);
   assert.match(unread, /relation &quot;published_replica_queue&quot; does not exist/);
   assert.match(unread, /<section class="replica-sync replica-sync-behind">/);
 

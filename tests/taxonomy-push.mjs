@@ -56,8 +56,10 @@ export async function run() {
       return replies.shift();
     }
   });
+  assert.equal(pushIfChanged.status().state, "pending");
   replies.push(respond(401, null), respond(401, null));
   assert.equal((await pushIfChanged()).outcome, "failed");
+  assert.equal(pushIfChanged.status().error, "HTTP 401");
   assert.equal((await pushIfChanged()).outcome, "failed");
   assert.equal(logged.length, 1, "a repeated failure is logged once");
   replies.push(respond(200, { version: "v1", terms: [], unchanged: true }));
@@ -69,10 +71,15 @@ export async function run() {
   replies.push(respond(422, { problems: ["a.b: label may not contain \".\""] }));
   assert.deepEqual(await pushIfChanged(), { outcome: "rejected", problems: ["a.b: label may not contain \".\""] });
   assert.equal((await pushIfChanged()).outcome, "current", "a rejected version waits for a change");
+  const rejectedStatus = pushIfChanged.status();
+  assert.equal(rejectedStatus.state, "rejected");
+  assert.equal(rejectedStatus.accepted.version, "v1", "a rejection keeps the last accepted version");
   version = "v3";
   replies.push(respond(200, { version: "v3", terms: [] }));
   assert.equal((await pushIfChanged()).outcome, "installed");
   assert.deepEqual(sent, ["v1", "v1", "v1", "v2", "v3"]);
+  assert.equal(pushIfChanged.status().state, "installed");
+  assert.equal(pushIfChanged.status().accepted.version, "v3");
   assert.ok(logged.every(message => !message.includes("client-secret")));
 
   // Without the service token the push is off, says so once, and loads nothing.
@@ -82,6 +89,7 @@ export async function run() {
   assert.deepEqual(await off(), { outcome: "skipped" });
   assert.deepEqual(await off(), { outcome: "skipped" });
   assert.equal(loads, 0);
+  assert.equal(off.status().state, "off");
   assert.equal(offLog.length, 1);
   assert.match(offLog[0], /Taxonomy push off/);
 }

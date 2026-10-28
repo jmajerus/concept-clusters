@@ -42,6 +42,7 @@ import { startWeeklyLinkHealth } from "./linkHealthSchedule.js";
 import { loadPublishedReplicaStatus } from "./publishedReplica.js";
 import {
   publishedReplicaDrainStatus,
+  taxonomyPushStatus,
   startPublishedReplicaDrain
 } from "./publishedReplicaSchedule.js";
 import { authoringDatabaseUrl, getAuthoringPool } from "./postgresPool.js";
@@ -190,6 +191,7 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
         const queue = await loadPublishedReplicaStatus(getAuthoringPool(databaseUrl));
         return { ...queue, drain: publishedReplicaDrainStatus() };
       },
+      loadTaxonomyPush: () => taxonomyPushStatus(),
       loadLinkHealth: async () => {
         const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
         if (!resolved.contentDocuments || !resolved.wikiLinkStore) return null;

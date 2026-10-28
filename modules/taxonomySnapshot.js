@@ -9,6 +9,11 @@ import { nonCryptographicHash } from "./nonCryptographicHash.js";
 
 const SEGMENT = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+// A category's term id, the tag corpus-mcp files books under.
+export function categoryTermId(slug, domain) {
+  return DOMAINS[domain] ? `${domain}.${slug}` : slug;
+}
+
 export function taxonomyVocabulary(registry, { generatedAt = new Date().toISOString() } = {}) {
   const problems = [];
   const terms = new Map();

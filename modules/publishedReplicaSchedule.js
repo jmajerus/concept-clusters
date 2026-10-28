@@ -22,6 +22,13 @@ export function publishedReplicaDrainStatus() {
   return { ...drainStatus };
 }
 
+// Null until the drain starts; the drain does not run without a database URL.
+let taxonomyPusher = null;
+
+export function taxonomyPushStatus() {
+  return taxonomyPusher ? taxonomyPusher.status() : null;
+}
+
 function noteDrainStatus({ phase, waiting = null, error = null }) {
   drainStatus.phase = phase;
   drainStatus.waiting = waiting;
@@ -49,6 +56,7 @@ export function startPublishedReplicaDrain({
   let running = false;
   let reportedWaiting = false;
   const pushTaxonomy = createTaxonomyPusher({ pool, env });
+  taxonomyPusher = pushTaxonomy;
 
   async function drain() {
     try {

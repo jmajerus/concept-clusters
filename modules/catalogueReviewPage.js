@@ -1,4 +1,5 @@
-import { authoringAdminNav } from "./authoringAdminIndex.js";
+import { authoringAdminNav, corpusBooksTaggedHref } from "./authoringAdminIndex.js";
+import { categoryTermId } from "./taxonomySnapshot.js";
 import {
   CUE_FOR_FREEZE_CONFIRM,
   HOLD_FROM_FREEZE_CONFIRM
@@ -382,6 +383,7 @@ export function renderMetaCatalogueEditPage({
     Freeze on <a href="/admin">Admin</a> writes the git module, including
     <code>kind: meta</code>.</p>
     <p class="meta">${lifecycleHint}</p>
+    ${activePublished ? renderCorpusBooksLink(categoryTermId(id, document.domain)) : ""}
     <form class="category-edit" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
       <input type="hidden" name="confirm" value="save-catalogue">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(revision))}">
@@ -601,6 +603,13 @@ export function renderCategoryListPage(categories, { notice = null } = {}) {
   return pageShell("Categories", body);
 }
 
+// Published categories are corpus-mcp's tag vocabulary; its filter takes in
+// the subcategories too.
+function renderCorpusBooksLink(termId) {
+  return `<p class="meta"><a href="${escapeHtml(corpusBooksTaggedHref(termId))}">Corpus books tagged
+    <code>${escapeHtml(termId)}</code></a> or a subcategory of it.</p>`;
+}
+
 export function renderCategoryEditPage({
   id,
   document,
@@ -642,6 +651,7 @@ export function renderCategoryEditPage({
     })}
     · ${navLinks()}</p>
     <p class="meta">${lifecycleHint}</p>
+    ${activePublished ? renderCorpusBooksLink(categoryTermId(id, document.domain)) : ""}
     <form class="category-edit" method="post" action="/admin/categories/${encodeURIComponent(id)}">
       <input type="hidden" name="confirm" value="save-category">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(revision))}">
