@@ -1,6 +1,8 @@
-// One Cloudflare Access check for the LAN authoring server. The authoring
-// Worker used to perform this same TEAM_DOMAIN / POLICY_AUD verification.
-// Remote MCP now terminates on the LAN server, so the check lives here.
+// One Cloudflare Access check for the LAN authoring server: the token must be
+// signed by the TEAM_DOMAIN team and carry a subject. The audience (which
+// Access application issued it) is not checked. Every application in the team
+// admits only the owner, and pinning one audience tag broke sign-in whenever
+// an application was recreated.
 
 import { createLocalJWKSet, createRemoteJWKSet, jwtVerify } from "jose";
 
@@ -27,7 +29,6 @@ export function devAccessActor(subject) {
 export async function verifyAccessToken({
   token,
   teamDomain,
-  policyAud,
   keys = null
 }) {
   const team = new URL(teamDomain);
@@ -35,10 +36,7 @@ export async function verifyAccessToken({
     throw new Error("TEAM_DOMAIN must use https");
   }
   const keySet = keys || createRemoteJWKSet(new URL("/cdn-cgi/access/certs", team));
-  const { payload } = await jwtVerify(token, keySet, {
-    issuer: team.origin,
-    audience: policyAud
-  });
+  const { payload } = await jwtVerify(token, keySet, { issuer: team.origin });
   const subject = stringClaim(payload, "sub");
   if (!subject) throw new Error("Access token has no subject");
   return {
@@ -82,14 +80,13 @@ export async function authenticateAuthoringAccess(request, env = process.env, {
   if (!token) {
     return { error: { status: 401, message: "Cloudflare Access authentication is required" } };
   }
-  if (!env.TEAM_DOMAIN || !env.POLICY_AUD) {
+  if (!env.TEAM_DOMAIN) {
     return { error: { status: 503, message: "Cloudflare Access is not configured" } };
   }
   try {
     return await verifyAccessToken({
       token,
       teamDomain: env.TEAM_DOMAIN,
-      policyAud: env.POLICY_AUD,
       keys
     });
   } catch (error) {

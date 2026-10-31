@@ -35,7 +35,6 @@ export async function run() {
   const verified = await verifyAccessToken({
     token,
     teamDomain: "https://team.example",
-    policyAud: "policy-aud",
     keys
   });
   assert.equal(verified.actor.subject, "author-subject");
@@ -45,15 +44,21 @@ export async function run() {
   const request = new Request("https://authoring.example/mcp", {
     headers: { "cf-access-jwt-assertion": token }
   });
+  // A stale POLICY_AUD left in an env file no longer matters.
   const signedIn = await authenticateAuthoringAccess(request, {
     TEAM_DOMAIN: "https://team.example",
-    POLICY_AUD: "policy-aud"
+    POLICY_AUD: "a-deleted-application"
   }, { keys });
   assert.equal(signedIn.actor.subject, "author-subject");
 
+  const otherTeam = await authenticateAuthoringAccess(request, {
+    TEAM_DOMAIN: "https://other-team.example"
+  }, { keys });
+  assert.equal(otherTeam.error.status, 401);
+
   const missing = await authenticateAuthoringAccess(
     new Request("https://authoring.example/mcp"),
-    { TEAM_DOMAIN: "https://team.example", POLICY_AUD: "policy-aud" }
+    { TEAM_DOMAIN: "https://team.example" }
   );
   assert.equal(missing.error.status, 401);
 

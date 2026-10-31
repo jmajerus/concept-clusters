@@ -78,9 +78,8 @@ export function recordAuthoringMcpRejected({
 
 export function authoringMcpHealth(env = process.env) {
   const team = typeof env?.TEAM_DOMAIN === "string" ? env.TEAM_DOMAIN.trim() : "";
-  const audience = typeof env?.POLICY_AUD === "string" ? env.POLICY_AUD.trim() : "";
   return {
-    accessConfigured: Boolean(team && audience),
+    accessConfigured: Boolean(team),
     accepted: state.accepted,
     rejected: state.rejected,
     lastAccepted: state.lastAccepted ? { ...state.lastAccepted } : null,
