@@ -64,7 +64,7 @@ const ssh = spawn(
   [
     "-o",
     "StrictHostKeyChecking=yes",
-    "authoring@authoring.localdomain",
+    "authoring@cc-authoring.localdomain",
     remoteCommand
   ],
   {

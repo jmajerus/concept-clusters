@@ -13,7 +13,7 @@ export const name = "mcp portal sync: choose the LAN server, list it, and accept
 const lan = {
   id: "srv-lan",
   name: "Authoring",
-  hostname: "https://authoring.majerus.us/mcp"
+  hostname: "https://cc-authoring.majerus.us/mcp"
 };
 const other = {
   id: "srv-other",
@@ -25,25 +25,25 @@ export async function run() {
   assert.equal(portalServerForOrigin([other, lan]).id, "srv-lan");
   assert.equal(
     portalServerForOrigin([
-      { id: "root", hostname: "https://authoring.majerus.us/" },
+      { id: "root", hostname: "https://cc-authoring.majerus.us/" },
       lan
     ]).id,
     "srv-lan"
   );
   assert.throws(
     () => portalServerForOrigin([other]),
-    /No MCP server for authoring\.majerus\.us/
+    /No MCP server for cc-authoring\.majerus\.us/
   );
   assert.throws(
-    () => portalServerForOrigin([{ id: "root", hostname: "https://authoring.majerus.us/" }]),
-    /No \/mcp server for authoring\.majerus\.us/
+    () => portalServerForOrigin([{ id: "root", hostname: "https://cc-authoring.majerus.us/" }]),
+    /No \/mcp server for cc-authoring\.majerus\.us/
   );
   assert.throws(
     () => portalServerForOrigin([
-      { id: "a", hostname: "https://authoring.majerus.us/mcp" },
-      { id: "b", hostname: "https://authoring.majerus.us/other/mcp" }
+      { id: "a", hostname: "https://cc-authoring.majerus.us/mcp" },
+      { id: "b", hostname: "https://cc-authoring.majerus.us/other/mcp" }
     ]),
-    /Several MCP servers use authoring\.majerus\.us/
+    /Several MCP servers use cc-authoring\.majerus\.us/
   );
 
   const ready = { success: true, result: { status: "ready" } };

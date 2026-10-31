@@ -1,7 +1,7 @@
 // Choose the LAN authoring server in a Cloudflare MCP portal catalog and
 // decide whether a capability sync replaced that catalog.
 
-export const MCP_PORTAL_ORIGIN_HOST = "authoring.majerus.us";
+export const MCP_PORTAL_ORIGIN_HOST = "cc-authoring.majerus.us";
 
 export function mcpServerHost(hostname) {
   if (typeof hostname !== "string" || !hostname) return "";

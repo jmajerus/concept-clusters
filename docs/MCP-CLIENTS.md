@@ -14,7 +14,7 @@ https://mcp.majerus.us/mcp
 ```
 
 That is the client-facing portal. It fronts the LAN origin
-`https://authoring.majerus.us/mcp`. Connect clients to the portal URL.
+`https://cc-authoring.majerus.us/mcp`. Connect clients to the portal URL.
 
 Do not enter a GitHub personal access token, Cloudflare service token, or
 Worker secret in an MCP client. A compatible client discovers Cloudflare's

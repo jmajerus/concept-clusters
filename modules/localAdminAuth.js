@@ -10,7 +10,7 @@
 //   - crypto.subtle.timingSafeEqual is a Workers-only extension, so this
 //     uses node:crypto's timingSafeEqual instead.
 //   - The cookie is NOT marked Secure: this same process also answers over
-//     plain HTTP on the LAN (authoring.localdomain:8787), where a Secure
+//     plain HTTP on the LAN (cc-authoring.localdomain:8787), where a Secure
 //     cookie would never be stored by the browser.
 //
 // The login page's inline script additionally caches the entered key in
