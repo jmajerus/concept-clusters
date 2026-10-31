@@ -169,10 +169,25 @@ function queryForm(query) {
   return (body.match(/^\s*([A-Za-z]+)/)?.[1] || "").toUpperCase();
 }
 
-// The passthrough. /query already refuses updates, so the only guards are
-// the result form (JSON results need SELECT or ASK) and SERVICE, which
-// would make the shared server fetch remote endpoints.
-export async function runReadQuery(store, { query, limit = ONTOLOGY_ROW_CAP } = {}) {
+// The Concept Clusters graphs the last sync recorded: what the passthrough
+// is allowed to see.
+export function ownedDataset(state) {
+  const graphs = [
+    ...[...(state?.puzzleHashes?.keys() || [])].sort().map(puzzleGraphIri),
+    ONTOLOGY_TAXONOMY_GRAPH,
+    ONTOLOGY_SYNC_GRAPH
+  ];
+  return { defaultGraphs: graphs, namedGraphs: graphs };
+}
+
+// The passthrough. Its dataset is pinned to Concept Clusters graphs, so the
+// default graph is their union and GRAPH ranges only over them; the shared
+// server's default graph and other tools' graphs stay out of reach. /query
+// already refuses updates. The text guards are the result form (JSON
+// results need SELECT or ASK) and SERVICE, which would make the shared
+// server fetch remote endpoints.
+export async function runReadQuery(store, { query, limit = ONTOLOGY_ROW_CAP, dataset } = {}) {
+  if (!dataset?.namedGraphs?.length) throw new Error("ontology_query needs the Concept Clusters graph list to scope the query.");
   const form = queryForm(query);
   if (form !== "SELECT" && form !== "ASK") {
     throw new Error(`ontology_query runs SELECT or ASK queries only; this query starts with ${form || "nothing recognizable"}.`);
@@ -180,7 +195,7 @@ export async function runReadQuery(store, { query, limit = ONTOLOGY_ROW_CAP } = 
   if (/\bSERVICE\b/i.test(query)) {
     throw new Error("ontology_query does not run SERVICE (federated) clauses.");
   }
-  const result = await store.select(query, { cap: Math.min(Math.trunc(limit), ONTOLOGY_ROW_CAP) });
+  const result = await store.select(query, { cap: Math.min(Math.trunc(limit), ONTOLOGY_ROW_CAP), dataset });
   return form === "ASK"
     ? { form, boolean: result.boolean }
     : { form, vars: result.vars, rows: result.rows, truncated: result.truncated };

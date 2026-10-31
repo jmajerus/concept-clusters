@@ -53,6 +53,8 @@ export function planOntologySync(hashRows, state) {
   };
 }
 
+// Graph updates, not documents: any number of category or catalogue
+// changes is one taxonomy rebuild.
 export function pendingCount(plan) {
   return plan.changed.length + plan.removed.length + (plan.taxonomyChanged ? 1 : 0);
 }
@@ -161,8 +163,9 @@ export function createOntologySyncer({
   return syncIfChanged;
 }
 
-// What the MCP servers receive: the store, plus a count of documents the
-// graphs have not caught up with when this process can reach Postgres.
+// What the MCP servers receive: the store, plus the number of graph
+// updates (one per changed or withdrawn puzzle, one for the taxonomy) the
+// sync has not made yet, when this process can reach Postgres.
 // Null when the store is off.
 export function createOntologyService({ env = process.env, fetchImpl } = {}) {
   const config = ontologyStoreConfig(env);

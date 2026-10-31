@@ -21,6 +21,12 @@ per-graph permissions, so ownership is enforced in code:
 - Every curated query names its graphs with `GRAPH` and a
   `STRSTARTS(STR(?g), "urn:concept-clusters:graph:")` filter. On this server
   the default graph does not include named graphs.
+- `ontology_query` pins its dataset to the Concept Clusters graphs the last
+  sync recorded, through the SPARQL protocol's `default-graph-uri` and
+  `named-graph-uri` parameters. Those override any `FROM` or `FROM NAMED` in
+  the query text. The default graph is the union of the Concept Clusters
+  graphs, `GRAPH ?g` ranges only over them, and the server's own default
+  graph and other tools' graphs are out of reach.
 
 ## Graph layout
 

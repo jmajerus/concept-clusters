@@ -10,7 +10,7 @@ import {
   taxonomyTriples
 } from "../modules/ontologyGraph.js";
 import { createOntologyStore, ontologyStoreConfig } from "../modules/ontologyStore.js";
-import { runReadQuery } from "../modules/ontologyAuthoringQueries.js";
+import { ownedDataset, runReadQuery } from "../modules/ontologyAuthoringQueries.js";
 
 export const name = "Ontology graph: published content as RDF in Concept Clusters' own named graphs";
 
@@ -110,14 +110,39 @@ export async function run() {
   assert.equal(requests[0].url, `http://store/store?graph=${encodeURIComponent("urn:concept-clusters:graph:puzzle:cell-energy")}`);
   assert.equal(requests[0].init.method, "PUT");
 
-  // The passthrough guard: SELECT/ASK only, no SERVICE, and a # inside an
-  // IRI is not a comment.
+  // A dataset goes out as protocol parameters, which override FROM in the
+  // query text.
+  const dataset = ownedDataset({ puzzleHashes: new Map([["cell-energy", "v1:h"]]) });
+  assert.deepEqual(dataset.namedGraphs, [puzzleGraphIri("cell-energy"), ONTOLOGY_TAXONOMY_GRAPH, ONTOLOGY_SYNC_GRAPH]);
+  const queried = [];
+  const querying = createOntologyStore({
+    baseUrl: "http://store",
+    fetchImpl: async (url, init) => {
+      queried.push({ url, init });
+      return { status: 200, text: async () => JSON.stringify({ head: { vars: ["n"] }, results: { bindings: [{ n: { type: "literal", value: "3", datatype: "http://www.w3.org/2001/XMLSchema#integer" } }] } }) };
+    }
+  });
+  assert.deepEqual((await querying.select("SELECT ?n WHERE {}", { dataset })).rows, [{ n: 3 }]);
+  const form = new URLSearchParams(queried[0].init.body);
+  assert.equal(queried[0].url, "http://store/query");
+  assert.equal(form.get("query"), "SELECT ?n WHERE {}");
+  assert.deepEqual(form.getAll("default-graph-uri"), dataset.defaultGraphs);
+  assert.deepEqual(form.getAll("named-graph-uri"), dataset.namedGraphs);
+
+  // The passthrough: always scoped, SELECT/ASK only, no SERVICE, and a #
+  // inside an IRI is not a comment.
+  const seen = [];
   const answering = {
-    select: async () => ({ vars: ["n"], rows: [{ n: 1 }], truncated: false })
+    select: async (query, options) => {
+      seen.push(options);
+      return { vars: ["n"], rows: [{ n: 1 }], truncated: false };
+    }
   };
-  const ok = await runReadQuery(answering, { query: `PREFIX cc: <${CC}>\n# note\nSELECT ?n WHERE { ?s cc:x ?n }` });
+  const ok = await runReadQuery(answering, { query: `PREFIX cc: <${CC}>\n# note\nSELECT ?n WHERE { ?s cc:x ?n }`, dataset });
   assert.equal(ok.form, "SELECT");
-  await assert.rejects(runReadQuery(answering, { query: "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }" }), /SELECT or ASK/);
-  await assert.rejects(runReadQuery(answering, { query: "DROP ALL" }), /SELECT or ASK/);
-  await assert.rejects(runReadQuery(answering, { query: "SELECT * WHERE { service <http://x> { ?s ?p ?o } }" }), /SERVICE/);
+  assert.equal(seen[0].dataset, dataset);
+  await assert.rejects(runReadQuery(answering, { query: "SELECT * WHERE { ?s ?p ?o }" }), /scope the query/);
+  await assert.rejects(runReadQuery(answering, { query: "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }", dataset }), /SELECT or ASK/);
+  await assert.rejects(runReadQuery(answering, { query: "DROP ALL", dataset }), /SELECT or ASK/);
+  await assert.rejects(runReadQuery(answering, { query: "SELECT * WHERE { service <http://x> { ?s ?p ?o } }", dataset }), /SERVICE/);
 }

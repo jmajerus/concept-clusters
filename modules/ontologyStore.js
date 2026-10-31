@@ -60,11 +60,17 @@ export function createOntologyStore({ baseUrl, timeoutMs = 10_000, fetchImpl = g
     return { status: response.status, body };
   }
 
-  async function sparql(query) {
+  // A dataset fixes what the query can see through the SPARQL protocol's
+  // default-graph-uri and named-graph-uri, which override any FROM or FROM
+  // NAMED in the query text.
+  async function sparql(query, dataset = null) {
+    const form = new URLSearchParams({ query });
+    for (const graph of dataset?.defaultGraphs || []) form.append("default-graph-uri", graph);
+    for (const graph of dataset?.namedGraphs || []) form.append("named-graph-uri", graph);
     const { status, body } = await call("/query", {
       method: "POST",
-      headers: { "Content-Type": "application/sparql-query" },
-      body: query
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString()
     }, "application/sparql-results+json");
     if (status !== 200) {
       throw new OntologyStoreError("bad-response", `Oxigraph rejected the query (HTTP ${status}): ${body.slice(0, 500)}`);
@@ -77,8 +83,8 @@ export function createOntologyStore({ baseUrl, timeoutMs = 10_000, fetchImpl = g
   }
 
   // Rows come back as plain { variable: value } objects, numbers parsed.
-  async function select(query, { cap = ONTOLOGY_ROW_CAP } = {}) {
-    const result = await sparql(query);
+  async function select(query, { cap = ONTOLOGY_ROW_CAP, dataset = null } = {}) {
+    const result = await sparql(query, dataset);
     if (typeof result.boolean === "boolean") return { vars: [], rows: [], truncated: false, boolean: result.boolean };
     const vars = result.head?.vars || [];
     const bindings = result.results?.bindings || [];

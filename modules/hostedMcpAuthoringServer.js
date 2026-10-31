@@ -89,12 +89,14 @@ import {
 import { AUTHORING_SETTINGS } from "./authoringSettings.js";
 import {
   ontologyCounts,
+  ownedDataset,
   readSyncState,
   relatedPuzzles,
   runReadQuery,
   sharedTerms
 } from "./ontologyAuthoringQueries.js";
-import { CC, ONTOLOGY_GRAPH_PREFIX, ONTOLOGY_PUZZLE_GRAPH_PREFIX, ONTOLOGY_TAXONOMY_GRAPH } from "./ontologyGraph.js";
+import { CC, ONTOLOGY_PUZZLE_GRAPH_PREFIX, ONTOLOGY_TAXONOMY_GRAPH } from "./ontologyGraph.js";
+import { OntologyStoreError } from "./ontologyStore.js";
 import { canonicalModelLabel } from "./authoringModelSuggestions.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
@@ -2663,7 +2665,7 @@ export function createAuthoringMcpServer({
     if (!state) {
       throw new Error("The ontology graph is empty. Run npm run ontology:load -- --full on the LAN authoring machine.");
     }
-    return { syncedAt: state.syncedAt, puzzleGraphs: state.puzzleHashes.size };
+    return { state, sync: { syncedAt: state.syncedAt, puzzleGraphs: state.puzzleHashes.size } };
   }
 
   server.registerTool("ontology_shared_terms", {
@@ -2681,7 +2683,7 @@ export function createAuthoringMcpServer({
     annotations: READ_ONLY
   }, tracked("ontology_shared_terms", safe(async ({ min_puzzles = 2, category = null, domain = null, limit = 50 }) => {
     const store = requireOntology();
-    const sync = await ontologyStamp(store);
+    const { sync } = await ontologyStamp(store);
     const result = await sharedTerms(store, { minPuzzles: min_puzzles, category, domain, limit });
     const scope = category ? ` in ${category}` : domain ? ` in domain ${domain}` : "";
     return success(
@@ -2702,7 +2704,7 @@ export function createAuthoringMcpServer({
     annotations: READ_ONLY
   }, tracked("ontology_related_puzzles", safe(async ({ puzzle_id, limit = 10 }) => {
     const store = requireOntology();
-    const sync = await ontologyStamp(store);
+    const { sync } = await ontologyStamp(store);
     const result = await relatedPuzzles(store, { puzzleId: puzzle_id, limit });
     return success(
       `${puzzle_id}: ${result.authored.length} authored related puzzle${result.authored.length === 1 ? "" : "s"}, ${result.candidates.length} unlinked candidate${result.candidates.length === 1 ? "" : "s"} (graph synced ${sync.syncedAt}).`,
@@ -2714,7 +2716,7 @@ export function createAuthoringMcpServer({
     title: "Ontology: SPARQL query",
     description:
       `Run one read-only SPARQL SELECT or ASK over published content; results cap at 200 rows. SERVICE clauses are refused. ` +
-      `The server is shared: scope every pattern to Concept Clusters graphs with GRAPH ?g { ... } FILTER(STRSTARTS(STR(?g), "${ONTOLOGY_GRAPH_PREFIX}")). ` +
+      `The query sees only Concept Clusters graphs: the default graph is their union, GRAPH ?g ranges over them, and FROM clauses are overridden. ` +
       `Each puzzle is the graph ${ONTOLOGY_PUZZLE_GRAPH_PREFIX}<id>; categories, subcategories, domains, and catalogues are in ${ONTOLOGY_TAXONOMY_GRAPH}. ` +
       `Vocabulary (prefix cc: <${CC}>, skos:, schema: <https://schema.org/>): cc:Puzzle, cc:Cluster, cc:Term, cc:Bridge, cc:Lens, cc:Category, cc:Subcategory, cc:Domain, cc:Catalogue, cc:MetaCatalogue; ` +
       'cc:hasCluster, cc:term, cc:inCluster, cc:role ("seed" or "floating"), cc:hasBridge, cc:connectsCluster, cc:relationKind, cc:hasLens, cc:targetsTerm, ' +
@@ -2727,8 +2729,8 @@ export function createAuthoringMcpServer({
     annotations: READ_ONLY
   }, tracked("ontology_query", safe(async ({ query, limit = 200 }) => {
     const store = requireOntology();
-    const sync = await ontologyStamp(store);
-    const result = await runReadQuery(store, { query, limit });
+    const { state, sync } = await ontologyStamp(store);
+    const result = await runReadQuery(store, { query, limit, dataset: ownedDataset(state) });
     const summary = result.form === "ASK"
       ? `ASK returned ${result.boolean}`
       : `Query returned ${result.rows.length} row${result.rows.length === 1 ? "" : "s"}${result.truncated ? " (capped)" : ""}`;
@@ -2739,16 +2741,35 @@ export function createAuthoringMcpServer({
     title: "Ontology: status",
     description:
       "Report whether the LAN Oxigraph ontology graph is reachable, when it last synced from published content, its puzzle, term, and triple counts, " +
-      "and how many published documents it has not caught up with yet.",
+      "and how many graph updates (changed or withdrawn puzzles, taxonomy) the sync has not made yet. An unreachable store is reported, not raised.",
     inputSchema: z.object({}),
     annotations: READ_ONLY
   }, tracked("ontology_status", safe(async () => {
     if (!ontology?.store) {
       return success("Ontology store not configured on this MCP server.", { configured: false });
     }
-    const state = await readSyncState(ontology.store);
-    const counts = await ontologyCounts(ontology.store);
-    const pending = typeof ontology.pending === "function" ? await ontology.pending() : null;
+    let state;
+    let counts;
+    let pending;
+    try {
+      state = await readSyncState(ontology.store);
+      counts = await ontologyCounts(ontology.store);
+      pending = typeof ontology.pending === "function" ? await ontology.pending() : null;
+    } catch (error) {
+      if (!(error instanceof OntologyStoreError)) throw error;
+      return success(`Ontology store unreachable: ${error.message}`, {
+        configured: true,
+        reachable: false,
+        baseUrl: ontology.store.baseUrl,
+        error: error.message,
+        syncedAt: null,
+        puzzleGraphs: null,
+        triples: null,
+        terms: null,
+        distinctLabels: null,
+        pendingGraphUpdates: null
+      });
+    }
     const output = {
       configured: true,
       reachable: true,
@@ -2756,9 +2777,9 @@ export function createAuthoringMcpServer({
       syncedAt: state?.syncedAt ?? null,
       puzzleGraphs: state?.puzzleHashes.size ?? 0,
       ...counts,
-      pendingDocuments: pending
+      pendingGraphUpdates: pending
     };
-    const behind = pending == null ? "" : pending ? `, ${pending} document${pending === 1 ? "" : "s"} not yet synced` : ", current";
+    const behind = pending == null ? "" : pending ? `, ${pending} graph update${pending === 1 ? "" : "s"} pending` : ", current";
     return success(
       state
         ? `Ontology synced ${state.syncedAt}: ${output.puzzleGraphs} puzzles, ${counts.triples} triples${behind}.`
