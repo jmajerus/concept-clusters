@@ -20,3 +20,5 @@ const fromFile = existsSync(path)
   : [];
 
 for (const name of new Set([...ALWAYS, ...fromFile])) process.env[name] = "";
+// Unset or empty means the LAN Oxigraph server, so this one is turned off.
+process.env.ONTOLOGY_SPARQL_BASE = "off";
