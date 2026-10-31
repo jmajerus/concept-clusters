@@ -107,6 +107,13 @@ export async function run() {
   const hasSubject = line => assert.ok(subjects.includes(line), `missing: ${line}`);
   hasSubject(`<${SUBJECTS_SCHEME}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <${SK}ConceptScheme> .`);
   hasSubject(`<${SUBJECTS_SCHEME}> <urn:terminology-mcp:vocab:hierarchy> "tree" .`);
+  hasSubject(`<${SUBJECTS_SCHEME}> <urn:terminology-mcp:vocab:slugUniqueDepth> "0"^^<http://www.w3.org/2001/XMLSchema#integer> .`);
+  hasSubject(`<${SUBJECTS_SCHEME}> <urn:terminology-mcp:vocab:slugUniqueDepth> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .`);
+  // Slugs are the stored ids, not re-derived from labels; a subcategory's
+  // is its own part, not the composed key.
+  hasSubject(`<urn:concept-clusters:domain:life-sciences> <urn:terminology-mcp:vocab:slug> "life-sciences" .`);
+  hasSubject(`<urn:concept-clusters:category:biology> <urn:terminology-mcp:vocab:slug> "biology" .`);
+  hasSubject(`<urn:concept-clusters:subcategory:biology--cell-biology> <urn:terminology-mcp:vocab:slug> "cell-biology" .`);
   hasSubject(`<${SUBJECTS_SCHEME}> <${SK}hasTopConcept> <urn:concept-clusters:domain:life-sciences> .`);
   hasSubject(`<urn:concept-clusters:domain:life-sciences> <${SK}topConceptOf> <${SUBJECTS_SCHEME}> .`);
   hasSubject(`<urn:concept-clusters:category:biology> <${SK}broader> <urn:concept-clusters:domain:life-sciences> .`);
@@ -117,7 +124,8 @@ export async function run() {
   assert.ok(!subjects.some(line => /category:trivia|category:orphan|Player copy|scopeNote/.test(line)));
   // Only SKOS and terminology-mcp's own predicates, so the import omits nothing.
   const allowed = new Set([`${SK}prefLabel`, `${SK}inScheme`, `${SK}broader`, `${SK}topConceptOf`, `${SK}hasTopConcept`,
-    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "urn:terminology-mcp:vocab:alias", "urn:terminology-mcp:vocab:hierarchy"]);
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "urn:terminology-mcp:vocab:alias", "urn:terminology-mcp:vocab:hierarchy",
+    "urn:terminology-mcp:vocab:slug", "urn:terminology-mcp:vocab:slugUniqueDepth"]);
   for (const line of subjects) assert.ok(allowed.has(line.match(/^<[^>]+> <([^>]+)>/)[1]), line);
 
   // Config: unset is the LAN server, "off" is off.

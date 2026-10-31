@@ -19,17 +19,30 @@ Concept Clusters shows three levels: domain, category, subcategory. The
 `subjects` scheme stays at those three levels; finer detail goes in links
 to other schemes, not in deeper `subjects` terms.
 
-## Slugs stay Concept Clusters' keys
+## Slugs come from terminology-mcp
 
 Puzzles keep `category: "history-society"` and
-`subcategories: { "history-society": "…" }`. Each `subjects` term records
-its Concept Clusters identity as a source IRI and alias
-(`urn:concept-clusters:category:<id>`, `cc-category:<id>`). Puzzle
-documents, catalogue ids, and player URLs do not change.
+`subcategories: { "history-society": "…" }`. Puzzle documents, catalogue
+ids, and player URLs do not change. Concept Clusters records each
+`subjects` term id next to the slug, and terminology-mcp keeps the Concept
+Clusters IRI as the term's source IRI and `cc-*` alias.
 
-A rename in terminology-mcp reaches Concept Clusters as a label change. A
-slug change is the breaking case: Concept Clusters gates it, as
-terminology-mcp's plan describes for slug-keyed consumers.
+The slug is a field terminology-mcp owns, so other consumers can share it:
+
+- Minted once, at creation, with Concept Clusters' `slugify`
+  (`puzzles/categories.js`) plus accent folding, an empty-result fallback,
+  and an 80-character cap. None of these change an existing slug.
+- Stored, never re-derived: the seed carries today's slugs as they are,
+  including the 20 that differ from their label.
+- Unique among siblings, and scheme-wide per depth where the scheme says
+  so: for `subjects`, among domains and among categories, separately.
+  Subcategory slugs repeat across categories (`bioinformatics`,
+  `hydrology`); Concept Clusters composes them as `<category>--<sub>`.
+- A rename changes the label only. A slug changes only through
+  terminology-mcp's explicit slug operation: breaking, previewed with its
+  impact, and gateable by slug-keyed consumers. The old slug moves to the
+  term's `formerSlugs` and stays reserved and resolvable, so old puzzle
+  references and URLs resolve while Concept Clusters migrates.
 
 ## LCC is a linked reference, not a source tree
 
@@ -72,8 +85,9 @@ graph follows it after a deploy.
 
 ## New subcategories
 
-An author or agent proposes a term while authoring. terminology-mcp
-creates it `provisional`; additions are not breaking, so it reaches
+An author or agent proposes a term while authoring, optionally with a
+slug hint. terminology-mcp mints or validates the slug and creates the term
+`provisional`; additions are not breaking, so it reaches
 Concept Clusters on the next sync and is usable at once, on drafts and on
 published puzzles.
 
@@ -93,6 +107,20 @@ short list names terms that arrived without player copy.
 
 Over MCP, `update_category` edits player copy only, and `create_category`
 and new subcategories become proposals to terminology-mcp.
+
+## What the subscriber applies
+
+| Change | Concept Clusters |
+|---|---|
+| Label change | Applied: new title, same slug |
+| A category moved to another domain | Applied: the domain is a field of the category |
+| Retired or merged into exactly one replacement | Applied: puzzles re-tagged |
+| A subcategory moved to another category | Held, alert: its composed key changes |
+| A depth change (retiring a category promotes its subcategories) | Held, alert |
+| Split, or retired with no or several replacements | Held: a person decides where puzzles go |
+| Slug change | Held until a person coordinates the migration |
+
+Holding stops the cursor at that change; later changes wait behind it.
 
 ## Sync
 

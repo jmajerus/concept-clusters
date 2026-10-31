@@ -19,7 +19,7 @@ export const ONTOLOGY_SYNC_SUBJECT = "urn:concept-clusters:ontology-sync";
 
 // Bump when the triples a document produces change, so the sync reloads
 // every graph instead of trusting hashes recorded by the older converter.
-export const ONTOLOGY_GRAPH_VERSION = "2";
+export const ONTOLOGY_GRAPH_VERSION = "3";
 
 export const CC = "https://concept-clusters.org/vocab#";
 export const SKOS = "http://www.w3.org/2004/02/skos/core#";
@@ -229,7 +229,11 @@ export function taxonomyTriples({ categories = [], catalogues = [], domains = {}
 // concepts, categories are narrower than their domain, subcategories
 // narrower than their category. Concepts keep the IRIs the taxonomy graph
 // uses, so terminology-mcp records them as source IRIs; the cc-* aliases
-// are the ids terminology-mcp's plan names. Categories with no domain are
+// are the ids terminology-mcp's plan names. Each concept carries its
+// current slug, which terminology-mcp stores rather than re-mints (20 of
+// them differ from their label). Slugs are unique among siblings, and
+// scheme-wide at the depths slugUniqueDepth names: domains and categories,
+// which Concept Clusters keys globally. Categories with no domain are
 // puzzle kinds (Trivia, Vocabulary) and stay out. No scope notes: the
 // player-facing `info` texts are not scope notes.
 const TERMINOLOGY = "urn:terminology-mcp:vocab:";
@@ -240,26 +244,29 @@ export function subjectsTriples({ categories = [], domains = {} } = {}) {
   t(scheme, RDF_TYPE, iri(`${SKOS}ConceptScheme`));
   t(scheme, `${SKOS}prefLabel`, literal("Concept Clusters subjects"));
   t(scheme, `${TERMINOLOGY}hierarchy`, literal("tree"));
-  const concept = (node, label, alias) => {
+  t(scheme, `${TERMINOLOGY}slugUniqueDepth`, literal(0, "integer"));
+  t(scheme, `${TERMINOLOGY}slugUniqueDepth`, literal(1, "integer"));
+  const concept = (node, label, alias, slug) => {
     t(node, RDF_TYPE, iri(`${SKOS}Concept`));
     t(node, `${SKOS}inScheme`, scheme);
     t(node, `${SKOS}prefLabel`, literal(label));
     t(node, `${TERMINOLOGY}alias`, literal(alias));
+    t(node, `${TERMINOLOGY}slug`, literal(slug));
   };
   for (const [id, domain] of Object.entries(domains)) {
     const D = iri(domainUrn(id));
-    concept(D, domain?.title || id, `cc-domain:${id}`);
+    concept(D, domain?.title || id, `cc-domain:${id}`, id);
     t(D, `${SKOS}topConceptOf`, scheme);
     t(scheme, `${SKOS}hasTopConcept`, D);
   }
   for (const category of categories) {
     if (!category.domain || !Object.hasOwn(domains, category.domain)) continue;
     const C = iri(categoryUrn(category.id));
-    concept(C, category.title || category.id, `cc-category:${category.id}`);
+    concept(C, category.title || category.id, `cc-category:${category.id}`, category.id);
     t(C, `${SKOS}broader`, iri(domainUrn(category.domain)));
     for (const [subId, sub] of Object.entries(category.subcategories || {})) {
       const S = iri(subcategoryUrn(category.id, subId));
-      concept(S, sub?.title || subId, `cc-subcategory:${category.id}--${subId}`);
+      concept(S, sub?.title || subId, `cc-subcategory:${category.id}--${subId}`, subId);
       t(S, `${SKOS}broader`, C);
     }
   }

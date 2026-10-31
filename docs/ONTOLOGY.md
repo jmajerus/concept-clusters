@@ -130,6 +130,14 @@ and subcategories as one `skos:ConceptScheme`,
   `urn:terminology-mcp:vocab:alias` (`cc-domain:<id>`, `cc-category:<id>`,
   `cc-subcategory:<category>--<sub>`). The scheme declares
   `urn:terminology-mcp:vocab:hierarchy "tree"`.
+- Each concept carries its current slug as `urn:terminology-mcp:vocab:slug`:
+  the domain or category id, or a subcategory's own part (not the composed
+  `<category>--<sub>`). terminology-mcp stores these rather than minting
+  them from labels; 20 of today's slugs differ from their label. The scheme
+  declares `urn:terminology-mcp:vocab:slugUniqueDepth` 0 and 1: domain slugs
+  are unique among domains and category slugs among categories, each depth
+  its own scope (the `humanities` category sits in the `humanities`
+  domain). Subcategory slugs are unique among siblings.
 - Categories with no domain (the Trivia and Vocabulary puzzle kinds) are
   left out.
 - No scope notes: `info` texts are player copy.
