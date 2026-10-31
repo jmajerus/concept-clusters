@@ -27,25 +27,28 @@ function versioned(hash) {
   return `v${ONTOLOGY_GRAPH_VERSION}:${hash}`;
 }
 
-// One hash over every live category and catalogue: any change rebuilds the
-// taxonomy graph.
-export function taxonomyHashOf(hashRows) {
+// One hash over every live category and catalogue and the domain registry:
+// any change rebuilds the taxonomy and subjects graphs. Domains are code
+// today (puzzles/domains.js), so an edit there arrives with a deploy and
+// is caught on the first tick after it.
+export function taxonomyHashOf(hashRows, domains = DOMAINS) {
   const lines = hashRows
     .filter(row => row.kind === "category" || row.kind === "catalogue")
     .map(row => `${row.kind}:${row.id}:${row.contentHash}`)
     .sort();
+  lines.push(`domains:${draftContentHash(JSON.stringify(domains))}`);
   return versioned(draftContentHash(lines.join("\n")));
 }
 
 // What a sync would do, given Postgres hashes and the recorded sync state.
-export function planOntologySync(hashRows, state) {
+export function planOntologySync(hashRows, state, domains = DOMAINS) {
   const recorded = state?.puzzleHashes || new Map();
   const live = new Map(hashRows
     .filter(row => row.kind === "puzzle")
     .map(row => [row.id, versioned(row.contentHash)]));
   const changed = [...live].filter(([id, hash]) => recorded.get(id) !== hash).map(([id]) => id);
   const removed = [...recorded.keys()].filter(id => !live.has(id));
-  const taxonomyHash = taxonomyHashOf(hashRows);
+  const taxonomyHash = taxonomyHashOf(hashRows, domains);
   return {
     live,
     changed,
@@ -77,7 +80,7 @@ export async function syncOntology({
   }
   const state = full ? null : await readSyncState(store);
   const hashRows = await repository.listPublishedHashes({ kinds: ["puzzle", "category", "catalogue"] });
-  const plan = planOntologySync(hashRows, state);
+  const plan = planOntologySync(hashRows, state, domains);
   if (state && !pendingCount(plan)) {
     return { outcome: "current", replaced: 0, removed: 0, taxonomy: false, dropped, puzzles: plan.live.size };
   }

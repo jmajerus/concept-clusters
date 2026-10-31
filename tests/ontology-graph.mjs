@@ -144,7 +144,7 @@ export async function run() {
   // A dataset goes out as protocol parameters, which override FROM in the
   // query text.
   const dataset = ownedDataset({ puzzleHashes: new Map([["cell-energy", "v1:h"]]) });
-  assert.deepEqual(dataset.namedGraphs, [puzzleGraphIri("cell-energy"), ONTOLOGY_TAXONOMY_GRAPH, ONTOLOGY_SYNC_GRAPH]);
+  assert.deepEqual(dataset.namedGraphs, [puzzleGraphIri("cell-energy"), ONTOLOGY_TAXONOMY_GRAPH, ONTOLOGY_SUBJECTS_GRAPH, ONTOLOGY_SYNC_GRAPH]);
   const queried = [];
   const querying = createOntologyStore({
     baseUrl: "http://store",

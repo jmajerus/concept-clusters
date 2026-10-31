@@ -100,6 +100,14 @@ export async function run() {
   assert.equal(third.taxonomy, false);
   assert.match(store.graphs.get(puzzleGraphIri("alpha")), /"carbon dioxide"/);
 
+  // A domain edit (code today) rebuilds the taxonomy and subjects graphs
+  // even when no published row changed.
+  store.writes.length = 0;
+  const renamed = await syncOntology({ repository, store, now, domains: { "life-sciences": { title: "Life Sciences" } } });
+  assert.equal(renamed.taxonomy, true);
+  assert.equal(renamed.replaced, 0);
+  assert.deepEqual(store.writes.map(([, graph]) => graph), [ONTOLOGY_TAXONOMY_GRAPH, ONTOLOGY_SUBJECTS_GRAPH, ONTOLOGY_SYNC_GRAPH]);
+
   // A full rebuild drops owned graphs only.
   const full = await syncOntology({ repository, store, now, domains: {}, full: true });
   assert.equal(full.dropped, 4);

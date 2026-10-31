@@ -4,7 +4,7 @@ import {
   LATEST_PROTOCOL_VERSION
 } from "@modelcontextprotocol/server";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
-import { ONTOLOGY_SYNC_GRAPH, ONTOLOGY_SYNC_SUBJECT, ONTOLOGY_TAXONOMY_GRAPH, puzzleGraphIri } from "../modules/ontologyGraph.js";
+import { ONTOLOGY_SUBJECTS_GRAPH, ONTOLOGY_SYNC_GRAPH, ONTOLOGY_SYNC_SUBJECT, ONTOLOGY_TAXONOMY_GRAPH, puzzleGraphIri } from "../modules/ontologyGraph.js";
 import { OntologyStoreError } from "../modules/ontologyStore.js";
 
 export const name = "MCP ontology tools: read-only joins across puzzles from the LAN graph";
@@ -182,7 +182,7 @@ export async function run() {
     const select = await live.call("ontology_query", { query: "SELECT ?n WHERE { ?s ?p ?n }" });
     assert.deepEqual(select.structuredContent.rows, [{ n: 1 }]);
     const scoped = datasets[queries.findIndex(query => query === "SELECT ?n WHERE { ?s ?p ?n }")];
-    const expected = [puzzleGraphIri("cell-energy"), puzzleGraphIri("energy-flow"), ONTOLOGY_TAXONOMY_GRAPH, ONTOLOGY_SYNC_GRAPH];
+    const expected = [puzzleGraphIri("cell-energy"), puzzleGraphIri("energy-flow"), ONTOLOGY_TAXONOMY_GRAPH, ONTOLOGY_SUBJECTS_GRAPH, ONTOLOGY_SYNC_GRAPH];
     assert.deepEqual(scoped, { defaultGraphs: expected, namedGraphs: expected });
     const construct = await live.call("ontology_query", { query: "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }" });
     assert.equal(construct.isError, true);

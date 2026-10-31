@@ -48,6 +48,28 @@ category, pick one class, and create a `subjects` term with a
 time. The links also let corpus-mcp roll LCC-shelved books up to Concept
 Clusters categories for reference planning.
 
+## Domains are data
+
+Domains are code today. `puzzles/domains.js` is read by the player's
+category browse (`modules/overviewRenderer.js`), by category validation
+(`modules/categoryValidation.js`, which refuses an unknown domain), by
+`create_category`'s domain enum, by the citation collection sync, and by
+the ontology sync. Adding a domain takes a commit and a deploy.
+
+Domains become top terms of `subjects` like any other term, so a new one
+is an addition in terminology-mcp, held to the taxonomy roadmap's
+admission test. Concept Clusters stores the domains it receives as
+published data beside its category rows. Those five readers use that
+registry instead of the module, and the player picks up a new domain from
+D1 without a deploy. `domains.js` becomes a generated snapshot for the
+public site and CI, like `puzzles/categories.js`. A domain's `info` text
+is player copy, edited in the category editor with the rest.
+
+Concept Clusters gets no domain editor of its own in the meantime. Until
+the subscriber exists, a domain change is still an edit to `domains.js`,
+and the ontology sync's taxonomy hash covers the registry, so the subjects
+graph follows it after a deploy.
+
 ## New subcategories
 
 An author or agent proposes a term while authoring. terminology-mcp
@@ -78,10 +100,10 @@ Concept Clusters subscribes to terminology-mcp's changelog from the
 authoring server's drain loop (`modules/publishedReplicaSchedule.js`),
 beside the taxonomy push and the ontology sync. It keeps an "applied
 through N" cursor, reads `/api/changes?since=N`, and writes the result
-into its published category rows. Everything downstream is unchanged: D1
-and the player, Freeze, and the git snapshot (`puzzles/categories.js`)
-that the public site and CI read. `puzzles/domains.js` becomes part of
-that snapshot.
+into its published category and domain data. Everything downstream is
+unchanged: D1 and the player, Freeze, and the git snapshots
+(`puzzles/categories.js`, and `puzzles/domains.js` once generated) that the
+public site and CI read.
 
 ## Order of work
 
@@ -97,9 +119,10 @@ that snapshot.
 3. **terminology-mcp:** subscribers with cursors, and `propose_term`
    creating provisional terms. Behind Access before MCP proposals come
    from outside the LAN.
-4. **Concept Clusters:** the changelog subscriber writing category rows;
-   the editor narrowed to player copy; `create_category` and new
-   subcategories as proposals; `domains.js` generated.
+4. **Concept Clusters:** the changelog subscriber writing category and
+   domain data; the five domain readers moved off `domains.js`, which
+   becomes a generated snapshot; the editor narrowed to player copy;
+   `create_category` and new subcategories as proposals.
 5. **Retire** the corpus-mcp taxonomy push (`modules/taxonomyPush.js`)
    once corpus-mcp subscribes to terminology-mcp directly.
 
