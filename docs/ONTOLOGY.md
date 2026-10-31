@@ -34,6 +34,7 @@ per-graph permissions, so ownership is enforced in code:
 | --- | --- |
 | `urn:concept-clusters:graph:puzzle:<id>` | One published puzzle: clusters, terms, bridges, lenses, relatedPuzzles, classification links |
 | `urn:concept-clusters:graph:taxonomy` | Categories, subcategories, domains, catalogues, meta catalogues |
+| `urn:concept-clusters:graph:subjects` | The subject taxonomy as a plain SKOS tree, for terminology-mcp's import (below) |
 | `urn:concept-clusters:graph:sync` | When the last sync ran, the converter version, and the versioned content hash loaded for each puzzle and for the taxonomy |
 
 No triple in one puzzle's graph points into another puzzle's graph.
@@ -94,8 +95,8 @@ syncer works like this:
    and catalogues from Postgres.
 2. It compares them with the versioned hashes in the sync graph.
 3. It replaces changed puzzle graphs, drops graphs for withdrawn or deleted
-   puzzles, and rebuilds the taxonomy graph when any category or catalogue
-   changed.
+   puzzles, and rebuilds the taxonomy and subjects graphs when any category
+   or catalogue changed.
 4. It rewrites the sync graph. When nothing changed, it writes nothing.
 
 A failure is logged once and retried on the next tick. The syncer reads
@@ -114,6 +115,31 @@ npm run ontology:load -- --full   # drop every urn:concept-clusters:graph:* grap
 
 Run `--full` for the first load and to recover from a store that was
 changed by hand. It needs `AUTHORING_DATABASE_URL`.
+
+## The subjects graph
+
+`urn:concept-clusters:graph:subjects` restates the domains, categories,
+and subcategories as one `skos:ConceptScheme`,
+`urn:concept-clusters:scheme:subjects`, so terminology-mcp can seed its
+`subjects` scheme from it. See
+[dev-briefs/subjects-from-terminology-mcp.md](dev-briefs/subjects-from-terminology-mcp.md).
+
+- Domains are top concepts. Categories are `skos:broader` their domain,
+  and subcategories their category.
+- Concepts keep the taxonomy graph's IRIs and carry terminology-mcp's
+  `urn:terminology-mcp:vocab:alias` (`cc-domain:<id>`, `cc-category:<id>`,
+  `cc-subcategory:<category>--<sub>`). The scheme declares
+  `urn:terminology-mcp:vocab:hierarchy "tree"`.
+- Categories with no domain (the Trivia and Vocabulary puzzle kinds) are
+  left out.
+- No scope notes: `info` texts are player copy.
+- The graph holds nothing but these statements, so the import omits
+  nothing and reports no warnings.
+
+To import, use terminology-mcp's **Import SKOS…** with the query endpoint
+`http://oxigraph.localdomain:7878/query` and the named graph
+`urn:concept-clusters:graph:subjects`, then choose
+`urn:concept-clusters:scheme:subjects`.
 
 ## Ad hoc queries
 

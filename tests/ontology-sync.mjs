@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { ONTOLOGY_GRAPH_PREFIX, ONTOLOGY_SYNC_GRAPH, ONTOLOGY_TAXONOMY_GRAPH, assertOwnedGraph, puzzleGraphIri } from "../modules/ontologyGraph.js";
+import { ONTOLOGY_GRAPH_PREFIX, ONTOLOGY_SUBJECTS_GRAPH, ONTOLOGY_SYNC_GRAPH, ONTOLOGY_TAXONOMY_GRAPH, assertOwnedGraph, puzzleGraphIri } from "../modules/ontologyGraph.js";
 import { createOntologySyncer, syncOntology } from "../modules/ontologySync.js";
 
 export const name = "Ontology sync: only changed puzzles are replaced, withdrawn ones dropped";
@@ -77,6 +77,7 @@ export async function run() {
   assert.equal(first.taxonomy, true);
   assert.ok(store.graphs.has(puzzleGraphIri("alpha")));
   assert.ok(store.graphs.has(ONTOLOGY_TAXONOMY_GRAPH));
+  assert.ok(store.graphs.has(ONTOLOGY_SUBJECTS_GRAPH));
 
   // Nothing changed: no writes at all.
   store.writes.length = 0;
@@ -101,7 +102,7 @@ export async function run() {
 
   // A full rebuild drops owned graphs only.
   const full = await syncOntology({ repository, store, now, domains: {}, full: true });
-  assert.equal(full.dropped, 3);
+  assert.equal(full.dropped, 4);
   assert.equal(full.replaced, 1);
   assert.equal(store.graphs.get("urn:terminology-mcp:vocab:lcc"), "<a> <b> <c> .");
 

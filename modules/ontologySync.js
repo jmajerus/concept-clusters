@@ -10,10 +10,12 @@ import { draftContentHash } from "./draftRepository.js";
 import { listOwnedGraphs, readSyncState } from "./ontologyAuthoringQueries.js";
 import {
   ONTOLOGY_GRAPH_VERSION,
+  ONTOLOGY_SUBJECTS_GRAPH,
   ONTOLOGY_SYNC_GRAPH,
   ONTOLOGY_TAXONOMY_GRAPH,
   puzzleGraphIri,
   puzzleTriples,
+  subjectsTriples,
   syncTriples,
   taxonomyTriples
 } from "./ontologyGraph.js";
@@ -97,13 +99,16 @@ export async function syncOntology({
       repository.listPublished({ kind: "category" }),
       repository.listPublished({ kind: "catalogue" })
     ]);
+    const categoryDocuments = categories.map(row => ({ ...row.document, id: row.id }));
     const graph = taxonomyTriples({
-      categories: categories.map(row => ({ ...row.document, id: row.id })),
+      categories: categoryDocuments,
       catalogues: catalogues.map(row => ({ ...row.document, id: row.id })),
       domains
     });
     await store.putGraph(ONTOLOGY_TAXONOMY_GRAPH, graph.ntriples);
-    triples += graph.triples;
+    const subjects = subjectsTriples({ categories: categoryDocuments, domains });
+    await store.putGraph(ONTOLOGY_SUBJECTS_GRAPH, subjects.ntriples);
+    triples += graph.triples + subjects.triples;
   }
   await store.putGraph(ONTOLOGY_SYNC_GRAPH, syncTriples({
     syncedAt: now(),

@@ -5,8 +5,11 @@ import {
   assertOwnedGraph,
   isOwnedGraph,
   labelKey,
+  ONTOLOGY_SUBJECTS_GRAPH,
+  SUBJECTS_SCHEME,
   puzzleGraphIri,
   puzzleTriples,
+  subjectsTriples,
   taxonomyTriples
 } from "../modules/ontologyGraph.js";
 import { createOntologyStore, ontologyStoreConfig } from "../modules/ontologyStore.js";
@@ -88,6 +91,34 @@ export async function run() {
   assert.match(taxonomy, /<urn:concept-clusters:subcategory:biology--cell-biology> <https:\/\/concept-clusters\.org\/vocab#inCategory> <urn:concept-clusters:category:biology> \./);
   assert.match(taxonomy, /<urn:concept-clusters:catalogue:energy> <https:\/\/concept-clusters\.org\/vocab#hasEntry> <urn:concept-clusters:puzzle:cell-energy> \./);
   assert.match(taxonomy, /<urn:concept-clusters:catalogue:series> <https:\/\/concept-clusters\.org\/vocab#hasChildCatalogue> <urn:concept-clusters:catalogue:energy> \./);
+
+  // The subjects graph is a plain SKOS tree for terminology-mcp's import:
+  // domains on top, puzzle kinds left out, Concept Clusters IRIs kept.
+  assert.equal(isOwnedGraph(ONTOLOGY_SUBJECTS_GRAPH), true);
+  const SK = "http://www.w3.org/2004/02/skos/core#";
+  const subjects = subjectsTriples({
+    domains: { "life-sciences": { title: "Life Sciences" } },
+    categories: [
+      { id: "biology", title: "Biology", domain: "life-sciences", info: { text: "Player copy." }, subcategories: { "cell-biology": { title: "Cell Biology" } } },
+      { id: "trivia", title: "Trivia" },
+      { id: "orphan", title: "Orphan", domain: "retired-domain" }
+    ]
+  }).ntriples.trim().split("\n");
+  const hasSubject = line => assert.ok(subjects.includes(line), `missing: ${line}`);
+  hasSubject(`<${SUBJECTS_SCHEME}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <${SK}ConceptScheme> .`);
+  hasSubject(`<${SUBJECTS_SCHEME}> <urn:terminology-mcp:vocab:hierarchy> "tree" .`);
+  hasSubject(`<${SUBJECTS_SCHEME}> <${SK}hasTopConcept> <urn:concept-clusters:domain:life-sciences> .`);
+  hasSubject(`<urn:concept-clusters:domain:life-sciences> <${SK}topConceptOf> <${SUBJECTS_SCHEME}> .`);
+  hasSubject(`<urn:concept-clusters:category:biology> <${SK}broader> <urn:concept-clusters:domain:life-sciences> .`);
+  hasSubject(`<urn:concept-clusters:category:biology> <urn:terminology-mcp:vocab:alias> "cc-category:biology" .`);
+  hasSubject(`<urn:concept-clusters:subcategory:biology--cell-biology> <${SK}broader> <urn:concept-clusters:category:biology> .`);
+  hasSubject(`<urn:concept-clusters:subcategory:biology--cell-biology> <${SK}inScheme> <${SUBJECTS_SCHEME}> .`);
+  hasSubject(`<urn:concept-clusters:subcategory:biology--cell-biology> <urn:terminology-mcp:vocab:alias> "cc-subcategory:biology--cell-biology" .`);
+  assert.ok(!subjects.some(line => /category:trivia|category:orphan|Player copy|scopeNote/.test(line)));
+  // Only SKOS and terminology-mcp's own predicates, so the import omits nothing.
+  const allowed = new Set([`${SK}prefLabel`, `${SK}inScheme`, `${SK}broader`, `${SK}topConceptOf`, `${SK}hasTopConcept`,
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "urn:terminology-mcp:vocab:alias", "urn:terminology-mcp:vocab:hierarchy"]);
+  for (const line of subjects) assert.ok(allowed.has(line.match(/^<[^>]+> <([^>]+)>/)[1]), line);
 
   // Config: unset is the LAN server, "off" is off.
   assert.equal(ontologyStoreConfig({}).baseUrl, "http://oxigraph.localdomain:7878");
