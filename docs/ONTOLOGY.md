@@ -115,6 +115,116 @@ npm run ontology:load -- --full   # drop every urn:concept-clusters:graph:* grap
 Run `--full` for the first load and to recover from a store that was
 changed by hand. It needs `AUTHORING_DATABASE_URL`.
 
+## Ad hoc queries
+
+Oxigraph serves a SPARQL editor (YASGUI) at
+[http://oxigraph.localdomain:7878/](http://oxigraph.localdomain:7878/).
+It queries the whole server, so wrap Concept Clusters patterns in
+`GRAPH ?g { … }` with the prefix filter; the default graph holds
+terminology-mcp's data. YASGUI keeps tabs in the browser, so a query pasted
+once stays. These start with the same prefixes:
+
+```sparql
+PREFIX cc: <https://concept-clusters.org/vocab#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX schema: <https://schema.org/>
+```
+
+### Labels shared by the most puzzles
+
+```sparql
+SELECT ?key (COUNT(DISTINCT ?puzzle) AS ?puzzles) (GROUP_CONCAT(DISTINCT ?title; separator=" · ") AS ?titles)
+WHERE {
+  GRAPH ?g { ?t cc:labelKey ?key ; cc:inPuzzle ?puzzle . ?puzzle schema:name ?title }
+  FILTER(STRSTARTS(STR(?g), "urn:concept-clusters:graph:puzzle:"))
+}
+GROUP BY ?key
+HAVING (COUNT(DISTINCT ?puzzle) > 1)
+ORDER BY DESC(?puzzles) ?key
+LIMIT 50
+```
+
+### Where one label appears
+
+Change `"atp"` to the label key: lowercase, with accents and extra spaces removed.
+
+```sparql
+SELECT ?title ?label ?placement ?role
+WHERE {
+  GRAPH ?g {
+    ?t cc:labelKey "atp" ; skos:prefLabel ?label ; cc:inPuzzle ?puzzle .
+    ?puzzle schema:name ?title .
+    OPTIONAL { ?t cc:inCluster/schema:name ?cluster }
+    OPTIONAL { ?t cc:role ?role }
+    BIND(IF(EXISTS { ?t a cc:Bridge }, "bridge", ?cluster) AS ?placement)
+  }
+  FILTER(STRSTARTS(STR(?g), "urn:concept-clusters:graph:puzzle:"))
+}
+ORDER BY ?title
+```
+
+### Unlinked neighbours of one puzzle
+
+Ranked by shared labels. Change the puzzle id in the graph IRI.
+
+```sparql
+SELECT ?other ?title (COUNT(DISTINCT ?key) AS ?shared) (GROUP_CONCAT(DISTINCT ?label; separator=", ") AS ?labels)
+WHERE {
+  GRAPH <urn:concept-clusters:graph:puzzle:cellular-energy> {
+    ?t cc:labelKey ?key ; skos:prefLabel ?label .
+    ?self a cc:Puzzle .
+  }
+  GRAPH ?g { ?t2 cc:labelKey ?key ; cc:inPuzzle ?other . ?other schema:name ?title }
+  FILTER(STRSTARTS(STR(?g), "urn:concept-clusters:graph:puzzle:") && ?other != ?self)
+  FILTER NOT EXISTS { GRAPH ?any { ?self cc:relatedPuzzle ?other } }
+}
+GROUP BY ?other ?title
+ORDER BY DESC(?shared)
+LIMIT 20
+```
+
+### Puzzles per domain and primary category
+
+```sparql
+SELECT ?domain ?category (COUNT(DISTINCT ?puzzle) AS ?puzzles)
+WHERE {
+  GRAPH ?g { ?puzzle cc:primaryCategory ?c }
+  FILTER(STRSTARTS(STR(?g), "urn:concept-clusters:graph:puzzle:"))
+  GRAPH <urn:concept-clusters:graph:taxonomy> {
+    ?c schema:name ?category .
+    OPTIONAL { ?c cc:inDomain ?d . ?d schema:name ?domain }
+  }
+}
+GROUP BY ?domain ?category
+ORDER BY ?domain DESC(?puzzles)
+```
+
+### Bridge relation kinds across the corpus
+
+```sparql
+SELECT ?kind (COUNT(*) AS ?bridges)
+WHERE {
+  GRAPH ?g { ?b a cc:Bridge . OPTIONAL { ?b cc:relationKind ?k } }
+  FILTER(STRSTARTS(STR(?g), "urn:concept-clusters:graph:puzzle:"))
+  BIND(COALESCE(?k, "(none)") AS ?kind)
+}
+GROUP BY ?kind
+ORDER BY DESC(?bridges)
+```
+
+### Published puzzles with no lenses
+
+```sparql
+SELECT ?category ?title
+WHERE {
+  GRAPH ?g { ?puzzle a cc:Puzzle ; schema:name ?title ; cc:primaryCategory ?c }
+  FILTER(STRSTARTS(STR(?g), "urn:concept-clusters:graph:puzzle:"))
+  FILTER NOT EXISTS { GRAPH ?g { ?puzzle cc:hasLens ?lens } }
+  GRAPH <urn:concept-clusters:graph:taxonomy> { ?c schema:name ?category }
+}
+ORDER BY ?category ?title
+```
+
 ## Configuration
 
 | Variable | Default | Effect |
