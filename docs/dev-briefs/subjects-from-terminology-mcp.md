@@ -148,9 +148,11 @@ drain tick (15 s), or holds them as described under
 
 ## New subcategories
 
-An author or agent proposes a term while authoring, optionally with a
-slug hint. terminology-mcp mints or validates the slug and creates the term
-`provisional`; additions are not breaking, so it reaches Concept Clusters
+An agent proposes a term while authoring by copying it from a reference
+vocabulary (`propose_term` with a required `source`, optionally a slug
+hint); a person adds one in terminology-mcp's editor, where copying from a
+reference vocabulary is optional. terminology-mcp mints or validates the
+slug and creates the term `provisional`; additions are not breaking, so it reaches Concept Clusters
 on the next sync and is usable at once, on drafts and on published
 puzzles.
 
@@ -185,8 +187,11 @@ Over MCP there is no category structure write. `update_subject_copy`
 writes the blurb and links of a category and its subcategories (saved to the
 working copy and, with `publish_to_authoring`, published onto the current
 row the same way), or of a domain. A missing subject is proposed with
-terminology-mcp's own `propose_term` tool and arrives through the
-subscriber.
+terminology-mcp's own `propose_term` tool, which requires a `source`: an
+entry from a reference vocabulary such as `loc-classification`, found with
+`search_terms` (`excludeScheme: cc-subjects`). The new term records that
+entry as a reference link and in its proposal, so every agent-added subject
+has provenance. It arrives through the subscriber.
 
 ## What the subscriber applies
 

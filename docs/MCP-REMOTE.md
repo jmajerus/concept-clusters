@@ -265,9 +265,10 @@ category exists. An unresolved category string found in a published D1 puzzle
 may still be shown for repair, but it is explicitly `registered: false` until
 the category document is published.
 
-A new category or subcategory is proposed in terminology-mcp's `cc-subjects`
-(its `propose_term` tool); the subjects subscriber publishes it here within a
-minute, before puzzles reference it. Set the puzzle document's `category` to
+A new category or subcategory is copied into terminology-mcp's `cc-subjects`
+from a reference vocabulary: `search_terms` with `excludeScheme: cc-subjects`,
+then `propose_term` with that hit as `source`. The subjects subscriber
+publishes it here, normally within a minute, before puzzles reference it. Set the puzzle document's `category` to
 that category's stable id. `update_subject_copy` writes a subject's blurb and
 links. It, `create_catalogue`, `update_catalogue`, and `update_meta_catalogue` accept
 `publish_to_authoring: true` to publish that valid working copy onto the

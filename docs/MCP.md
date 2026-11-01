@@ -218,7 +218,9 @@ The following progressive workflow remains useful for agents that need it:
 
 1. Call `list_categories` or `get_category` for the live D1 taxonomy. A
    genuinely new subject is proposed in terminology-mcp's `cc-subjects`
-   (its `propose_term` tool) and published here by the subjects subscriber
+   by copying it from a reference vocabulary (`search_terms` with
+   `excludeScheme: cc-subjects`, then `propose_term` with `source`) and
+   published here by the subjects subscriber
    within a minute; that published category document is the registration
    event, even if no puzzle references it yet. Do not infer
    absence from `puzzles/categories.js` or another Git checkout, and do not

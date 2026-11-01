@@ -90,7 +90,7 @@ export function validateSubcategoryAssignments(
         fail(
           scope,
           `"${id}" is not registered under "${category}" (${registered}). ` +
-          "If this is genuinely new, propose it in terminology-mcp (propose_term); it is added to the category within a minute, then reference it from the puzzle."
+          "If this is genuinely new, copy it into terminology-mcp from a reference vocabulary (search_terms, then propose_term with source); once it is added to the category, reference it from the puzzle."
         );
       }
     }
@@ -155,7 +155,7 @@ export function validateCategoryDocument(
       errors.push(`Category title "${title}" is already used by "${matchByTitle.id}"`);
     }
   } else if (id && !matchById) {
-    errors.push(`Category "${id}" does not exist -- propose a new category in terminology-mcp (propose_term)`);
+    errors.push(`Category "${id}" does not exist -- copy a new category into terminology-mcp from a reference vocabulary (search_terms, then propose_term with source)`);
   } else if (matchByTitle) {
     errors.push(`Category title "${title}" is already used by "${matchByTitle.id}"`);
   }

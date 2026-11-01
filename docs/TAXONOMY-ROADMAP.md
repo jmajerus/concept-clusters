@@ -373,7 +373,8 @@ Collected here so the eventual change is not archaeology.
 - **MCP surface.** `list_categories` and `get_category` return each
   category's `domain` and the domains. Domains, categories, and
   subcategories are added in terminology-mcp (agents use its
-  `propose_term`) and arrive through the subjects subscriber;
+  `propose_term`, which requires a `source` entry from a reference
+  vocabulary) and arrive through the subjects subscriber;
   `update_subject_copy` writes their blurbs and links.
 - **JSON-LD.** The interchange format needs no change, since domain is not
   a puzzle property. Only the category registry serializes it.
