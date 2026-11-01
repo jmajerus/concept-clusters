@@ -1,7 +1,7 @@
 # Subjects from terminology-mcp
 
-**Status: steps 1–3 done; the subscriber (step 4, first part) is built and
-off until `SUBJECTS_SYNC=on`; LCC linking under way.** terminology-mcp
+**Status: steps 1–3 done; the subscriber (step 4, first part) is live on
+the authoring server; domains as data is built; LCC linking under way.** terminology-mcp
 (`http://terminology-mcp.localdomain:8000`) holds Concept Clusters' subject
 taxonomy as the `cc-subjects` scheme and is becoming its authority: which
 domains, categories, and subcategories exist, what they are called, and how
@@ -100,44 +100,51 @@ copy them into category rows.
 
 ## Domains are data
 
-Domains are code today. `puzzles/domains.js` is read by the player's
-category browse (`modules/overviewRenderer.js`), by category validation
-(`modules/categoryValidation.js`, which refuses an unknown domain), by
-`create_category`'s domain enum, by the citation collection sync, and by
-the ontology sync. Adding a domain takes a commit and a deploy.
+Domains are top terms of `cc-subjects` like any other term, so a new one
+is an addition in terminology-mcp, held to the taxonomy roadmap's
+admission test. Concept Clusters publishes each as a `domain` document
+(`{ id, title, info? }`) beside its categories, and the subscriber
+creates, renames, and merges them like categories.
 
-Domains become top terms of `cc-subjects` like any other term, so a new
-one is an addition in terminology-mcp, held to the taxonomy roadmap's
-admission test. Concept Clusters stores the domains it receives as
-published data beside its category rows. Those five readers use that
-registry instead of the module, and the player picks up a new domain from
-D1 without a deploy. `domains.js` becomes a generated snapshot for the
-public site and CI, like `puzzles/categories.js`. A domain's `info` text
-is player copy, edited in the category editor with the rest.
+Every reader still imports `DOMAINS` from `puzzles/domains.js`; the live
+rows replace that object in place (`modules/domainRegistry.js`):
 
-Concept Clusters gets no domain editor of its own in the meantime.
+- the player, from the play corpus or the public index (`domains`, present
+  once any domain is published), so a new domain reaches players from D1
+  without a deploy;
+- the authoring server, from Postgres on every drain tick and whenever MCP
+  loads the taxonomy, so category validation, `create_category`, the
+  ontology sync, the taxonomy push, and the citation collections follow
+  the rows. `list_categories` returns the domains a category may name.
 
-## Until the subscriber exists
+`puzzles/domains.js` is a snapshot that every Freeze rewrites from the
+published rows (`modules/domainsSnapshot.js`); the public site's static
+fallback, CI, and `validate.mjs` read it. With no domain rows, everything
+keeps reading the snapshot. The generated `other` domain stays in code and
+is never published.
 
-terminology-mcp is the master for `cc-subjects` already; nothing carries
-its changes to Concept Clusters yet. A new domain, category, or
-subcategory is created in terminology-mcp first, then mirrored into
-Concept Clusters by hand (the category editor, or `domains.js` for a
-domain) with the same slug, or left until the subscriber picks it up.
+A domain's `info` text is player copy. A new domain's first row takes it
+from the snapshot when there is one; otherwise it arrives with its title
+only. Editing it in the category editor comes with the editor's narrowing
+to player copy.
 
+## Working with the subscriber
+
+terminology-mcp is the master for `cc-subjects`. Structural changes are
+made there; the subscriber carries them into Concept Clusters within a
+drain tick (15 s), or holds them as described under
+[What the subscriber applies](#what-the-subscriber-applies).
+
+- A term arrives with its title only. Its `info` text and wiki link are
+  added in the category editor, and a later rename keeps them.
 - Changes made only in Concept Clusters (the category editor,
-  `create_category`, `update_category`, `domains.js`) do not reach
-  `cc-subjects`, and re-importing the subjects graph is refused (409, the
-  source scheme is already imported). Mirror them into terminology-mcp:
-  **+ Narrower term** under the parent, then **Change slug…** if the
-  minted slug differs from Concept Clusters' id.
-- A rename in terminology-mcp reaches players only once Concept Clusters'
-  title is changed to match, by hand or by the subscriber.
-
-Keep structural changes rare until then. The ontology sync keeps the
-subjects graph current with Concept Clusters' side, so the graph and
-`cc-subjects` can be compared with a SPARQL query on one side and
-`/api/state?scheme=cc-subjects` on the other.
+  `create_category`, `update_category`) do not reach `cc-subjects`. Avoid
+  structural edits there; if one is made, add the term in terminology-mcp
+  too (**+ Narrower term**, then **Change slug…** if the minted slug
+  differs from Concept Clusters' id). The bootstrap reports such terms as
+  `not-in-cc-subjects`.
+- terminology-mcp's **Subscribers** panel shows where Concept Clusters is
+  and why it is held.
 
 ## New subcategories
 
@@ -168,6 +175,7 @@ and new subcategories become proposals to terminology-mcp.
 
 | Change | Concept Clusters |
 |---|---|
+| A new domain, category, or subcategory | Applied: published, provisional included |
 | Label change | Applied: new title, same slug |
 | A category moved to another domain | Applied: the domain is a field of the category |
 | Retired or merged into exactly one replacement | Applied: puzzles re-tagged |
@@ -210,8 +218,9 @@ It writes the result into Concept Clusters' published category documents
   is kept. A retire re-tags published puzzles, then removes
   the subcategory or withdraws the category. Working copies are not
   re-tagged; one that still names the old key fails validation on publish.
-- New, renamed, or retired domains are held (`new-domain`, `domain-rename`,
-  `domain-retire`) while domains are code.
+- A new or renamed domain is published; a domain merged into another
+  moves its categories to the replacement and is withdrawn. A domain is
+  withdrawn only once no live category names it (`still-referenced`).
 - A hold is reported as `blocked` with one of the codes above, and stays
   until a person handles the change and runs
   `npm run subjects:sync -- --accept <n>`.
@@ -222,8 +231,8 @@ It writes the result into Concept Clusters' published category documents
 where it would stop. `--apply` runs one pass and reports.
 `TERMINOLOGY_BASE` overrides the server (`off` disables it); the drain loop
 runs the pass only with `SUBJECTS_SYNC=on`. Everything downstream is unchanged: D1 and the player, Freeze, and
-the git snapshots (`puzzles/categories.js`, and `puzzles/domains.js` once
-generated) that the public site and CI read.
+the git snapshots (`puzzles/categories.js` and `puzzles/domains.js`) that
+the public site and CI read.
 
 ## Order of work
 
@@ -241,9 +250,9 @@ generated) that the public site and CI read.
    provisional terms with a slug hint, and a scheme depth limit
    (`cc-subjects`: 2). Usage reports are still planned.
 4. **Concept Clusters:** the changelog subscriber writing category data
-   (built); domains as published data, with the five readers moved off
-   `domains.js`, which becomes a generated snapshot; the editor narrowed to
-   player copy; `create_category` and new subcategories as proposals.
+   (live); domains as published documents (built); the editor narrowed to
+   player copy, including domain copy; `create_category` and new
+   subcategories as proposals.
 5. **Retire** the corpus-mcp taxonomy push (`modules/taxonomyPush.js`)
    once corpus-mcp subscribes to terminology-mcp directly.
 

@@ -76,8 +76,8 @@ so most puzzles won't have one set for a long time. See
 `catalogueRegistry.js`'s `levelCatalogue`/`levelCatalogues`.
 
 A domain catalogue (`domain-humanities`, `domain-life-sciences`, ...) is
-All Puzzles filtered to one domain in `puzzles/domains.js`'s
-`DOMAINS`: every puzzle with at least one category -- primary or
+All Puzzles filtered to one domain in `DOMAINS` (the published domains;
+`puzzles/domains.js` is their snapshot): every puzzle with at least one category -- primary or
 additional -- in that domain, so a multidisciplinary puzzle appears under
 several domains by the same mechanism it appears under several
 categories. This is the domain "landing page" TAXONOMY-ROADMAP.md

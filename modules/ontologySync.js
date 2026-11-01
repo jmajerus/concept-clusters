@@ -28,9 +28,9 @@ function versioned(hash) {
 }
 
 // One hash over every live category and catalogue and the domain registry:
-// any change rebuilds the taxonomy and subjects graphs. Domains are code
-// today (puzzles/domains.js), so an edit there arrives with a deploy and
-// is caught on the first tick after it.
+// any change rebuilds the taxonomy and subjects graphs. DOMAINS follows
+// the published domain rows (modules/domainRegistry.js), refreshed earlier
+// in the same tick.
 export function taxonomyHashOf(hashRows, domains = DOMAINS) {
   const lines = hashRows
     .filter(row => row.kind === "category" || row.kind === "catalogue")

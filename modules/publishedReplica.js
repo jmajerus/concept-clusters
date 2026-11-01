@@ -156,8 +156,8 @@ export async function enqueueDocumentReplica(client, { kind, id }) {
       "SELECT id FROM published_replica_queue WHERE kind = 'puzzle'"
     );
     for (const row of pending.rows) await addPuzzle(row.id);
-  } else if (kind === "catalogue") {
-    add(await oneRow(client, "catalogue", id));
+  } else if (kind === "catalogue" || kind === "domain") {
+    add(await oneRow(client, kind, id));
   }
   for (const member of members.values()) {
     await upsertQueue(client, member, generation, now);
@@ -298,12 +298,13 @@ function settingsStatements(desired, d1Rows) {
   return statements;
 }
 
-// Categories first, then a puzzle that is still public, then catalogues,
+// Domains, then categories, then a puzzle that is still public, then catalogues,
 // then withdrawals. A failed later statement leaves the category in place
 // and the puzzle unsent. A catalogue that drops a puzzle is written before
 // that puzzle is withdrawn.
 export function replicaWriteOrder(rows) {
   const rank = row => {
+    if (row.kind === "domain") return -1;
     if (row.kind === "category") return 0;
     if (row.kind === "puzzle" && !row.withdrawn_at) return 1;
     if (row.kind === "catalogue") return 2;
@@ -455,6 +456,21 @@ export async function drainPublishedReplica({ pool, d1 } = {}) {
       const row = await oneRow(pool, "puzzle", queued.id);
       if (row && !row.withdrawn_at) livePuzzleIds.add(row.id);
     }
+    // A live domain ships alone and first: categories name it. A withdrawn
+    // one waits until the categories moved off it have shipped (below).
+    const domains = pending.filter(row => row.kind === "domain");
+    let liveDomain = null;
+    for (const queued of domains) {
+      const row = await oneRow(pool, "domain", queued.id);
+      if (!row || !row.withdrawn_at) {
+        liveDomain = queued;
+        break;
+      }
+    }
+    if (liveDomain) {
+      shipped += await shipQueuedDocument(pool, d1, liveDomain);
+      continue;
+    }
     const category = pending.find(row => row.kind === "category");
     if (category) {
       shipped += await shipQueuedDocument(pool, d1, category);
@@ -513,6 +529,11 @@ export async function drainPublishedReplica({ pool, d1 } = {}) {
       }
       shipped += await shipDocuments(pool, d1, members);
       heldPuzzles.clear();
+      continue;
+    }
+    const withdrawnDomain = domains[0];
+    if (withdrawnDomain) {
+      shipped += await shipQueuedDocument(pool, d1, withdrawnDomain);
       continue;
     }
     const settings = pending.find(row => row.kind === "site_settings");

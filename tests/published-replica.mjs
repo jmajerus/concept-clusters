@@ -377,6 +377,22 @@ export async function run() {
   await drainPublishedReplica({ pool, d1 });
   assert.equal(d1.statements.length, afterSettings);
 
+  // A domain merge: the new domain ships first, then the category moved
+  // onto it, and the withdrawn domain last.
+  await published.publish({ kind: "domain", id: "old-domain", document: { id: "old-domain", title: "Old" }, actor });
+  await published.publish({ kind: "category", id: "moved", document: { id: "moved", title: "Moved", domain: "old-domain" }, actor });
+  await drainPublishedReplica({ pool, d1 });
+  assert.equal(d1.documents.has("domain:old-domain"), true);
+  await published.unpublish({ kind: "domain", id: "old-domain", actor });
+  await published.publish({ kind: "domain", id: "new-domain", document: { id: "new-domain", title: "New" }, actor });
+  await published.publish({ kind: "category", id: "moved", document: { id: "moved", title: "Moved", domain: "new-domain" }, actor });
+  const beforeMerge = d1.statements.length;
+  await drainPublishedReplica({ pool, d1 });
+  const mergeOrder = d1.statements.slice(beforeMerge).map(statement => statement.id)
+    .filter(id => ["old-domain", "new-domain", "moved"].includes(id));
+  assert.deepEqual(mergeOrder, ["new-domain", "moved", "old-domain"]);
+  assert.equal(d1.documents.get("domain:old-domain").withdrawn_at == null, false);
+
   const notice = renderContentPublicationNotice({
     kind: "catalogue",
     id: "life",

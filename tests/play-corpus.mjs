@@ -310,7 +310,7 @@ export async function run(page) {
     corpusCalls.push(listCalls - before);
   }
   assert.ok(corpusCalls[0] > corpusCalls[1], `the first corpus request seeds: ${corpusCalls.join(", ")}`);
-  assert.equal(corpusCalls[1], 3, "a later request only lists the three kinds it serves");
+  assert.equal(corpusCalls[1], 4, "a later request only lists the four kinds it serves");
   assert.equal(seedState.seeded, true);
   // Concurrent first requests share one seed rather than each running it.
   const concurrentState = { seeded: false };

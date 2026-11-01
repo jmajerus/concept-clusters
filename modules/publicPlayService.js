@@ -1,5 +1,6 @@
 // Public, read-only projections of the D1 publication ledger. The routes using
 // this module never expose drafts, review history, or publication actors.
+import { domainsRegistryFromDocuments } from "./domainRegistry.js";
 import { ContentDocumentNotFoundError, D1ContentDocumentRepository } from "./contentDocumentRepository.js";
 import { categoriesRegistryFromDocuments, catalogueFromDocument, compilePublishedPuzzle } from "./playCorpus.js";
 import { puzzleBrowseFromDocument } from "./puzzleBrowse.js";
@@ -42,13 +43,15 @@ function byFirstPublication(left, right) {
 }
 
 export async function buildPublicPlayIndex(repository, { staticManifest = [], siteSettings = null } = {}) {
-  const [puzzles, categories, catalogues, settings] = await Promise.all([
+  const [puzzles, categories, catalogues, domainRows, settings] = await Promise.all([
     repository.listPublished({ kind: "puzzle" }),
     repository.listPublished({ kind: "category" }),
     repository.listPublished({ kind: "catalogue" }),
+    repository.listPublished({ kind: "domain" }),
     readSiteSettingsOrDefaults(siteSettings)
   ]);
   const categoryRegistry = categoriesRegistryFromDocuments(categories.map(row => row.document));
+  const domains = domainsRegistryFromDocuments(domainRows.map(row => row.document));
   const staticById = new Map(staticManifest.map(entry => [entry.id, entry]));
   const entries = [...puzzles].sort(byFirstPublication).map(row => {
     const { puzzle, errors } = compilePublishedPuzzle(row.document);
@@ -74,6 +77,8 @@ export async function buildPublicPlayIndex(repository, { staticManifest = [], si
   return {
     puzzles: entries,
     categories: categoryRegistry,
+    // Absent until domains are published; the player keeps its snapshot.
+    ...(Object.keys(domains).length ? { domains } : {}),
     catalogues: [...catalogues].sort(byFirstPublication)
       .map(row => catalogueFromDocument(row.document)).filter(Boolean),
     settings

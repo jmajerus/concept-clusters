@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { PGlite } from "@electric-sql/pglite";
+import { DOMAINS } from "../puzzles/domains.js";
+import { DOMAINS_SNAPSHOT, replaceDomainsRegistry } from "../modules/domainRegistry.js";
 import { PostgresPublishedRepository } from "../modules/postgresPublishedRepository.js";
 import {
   CursorMovedError,
@@ -76,8 +78,7 @@ function planUnits() {
   assert.deepEqual(category.edits, [{ op: "category", id: "ecology", title: "Ecology", domain: "life-sciences" }]);
 
   const domain = planChange({ n: 11, kind: "added", terms: ["d9"], after: term("d9", "astronomy", "Astronomy") }, terms);
-  assert.equal(domain.action, "hold");
-  assert.equal(domain.code, "new-domain");
+  assert.deepEqual(domain.edits, [{ op: "domain", id: "astronomy", title: "Astronomy" }]);
 
   const relabel = planChange({
     n: 12, kind: "labelled", terms: ["s1"], after: term("s1", "genomics", "Genome Science", "c1"),
@@ -89,7 +90,21 @@ function planUnits() {
     n: 12, kind: "labelled", terms: ["d2"], after: term("d2", "humanities", "The Humanities"),
     afterTerms: [term("d2", "humanities", "The Humanities")]
   }, terms);
-  assert.equal(domainRename.code, "domain-rename");
+  assert.deepEqual(domainRename.edits, [{ op: "domain", id: "humanities", title: "The Humanities" }]);
+
+  // A domain merged into another takes its categories along.
+  const domainMerge = planChange({
+    n: 12, kind: "merged", terms: ["d2", "d1", "c2"],
+    afterTerms: [
+      term("d2", "humanities", "Humanities", null, { status: "retired", replacedBy: ["d1"] }),
+      term("d1", "life-sciences", "Life Sciences"),
+      term("c2", "history", "History", "d1")
+    ]
+  }, terms);
+  assert.deepEqual(domainMerge.edits, [
+    { op: "category", id: "history", domain: "life-sciences" },
+    { op: "withdraw-domain", id: "humanities" }
+  ]);
 
   const categoryMove = planChange({
     n: 13, kind: "moved", terms: ["c2"], after: term("c2", "history", "History", "d1"),
@@ -163,8 +178,9 @@ function reconcileUnits() {
     { id: "biology", title: "Biology", domain: "life-sciences", subcategories: { genomics: { title: "Genomics" }, palaeogenomics: { title: "Palaeogenomics" } } },
     { id: "chemistry", title: "Chemistry", domain: "life-sciences" },
     { id: "trivia", title: "Trivia" }
-  ]);
+  ], { domains: [{ id: "life-sciences", title: "Life Sciences" }] });
   assert.deepEqual(edits, [
+    { op: "domain", id: "humanities", title: "Humanities" },
     { op: "category", id: "history", title: "History", domain: "humanities" },
     { op: "subcategory", category: "biology", sub: "epigenomics", title: "Epigenomics" }
   ]);
@@ -205,7 +221,11 @@ async function endToEnd() {
   // Dry run writes nothing.
   const dry = await runSubjectsSync({ client, store, repository, apply: false });
   assert.equal(dry.outcome, "bootstrap");
-  assert.deepEqual(dry.planned, ["category history, title \"History\", domain humanities"]);
+  assert.deepEqual(dry.planned, [
+    "domain life-sciences, title \"Life Sciences\"",
+    "domain humanities, title \"Humanities\"",
+    "category history, title \"History\", domain humanities"
+  ]);
   assert.equal(await store.read(), null);
 
   const boot = await runSubjectsSync({ client, store, repository });
@@ -213,6 +233,11 @@ async function endToEnd() {
   assert.equal(boot.through, 10);
   assert.equal(boot.reset, true);
   assert.equal((await repository.getPublished({ kind: "category", id: "history" })).document.domain, "humanities");
+  // Domains are seeded from cc-subjects with the snapshot's player copy,
+  // and the registry follows them.
+  const humanities = (await repository.getPublished({ kind: "domain", id: "humanities" })).document;
+  assert.deepEqual(humanities, { id: "humanities", title: "Humanities", info: DOMAINS_SNAPSHOT.humanities.info });
+  assert.deepEqual(Object.keys(DOMAINS).sort(), ["humanities", "life-sciences"]);
 
   // A rename keeps player copy and records the old title; an addition lands
   // under its category; a retire re-tags puzzles and removes the old entry.
@@ -329,10 +354,52 @@ async function categoryRetireAndRebuild() {
   assert.equal((await runSubjectsSync({ client, store, repository })).outcome, "bootstrapped");
 }
 
+async function domainChanges() {
+  const db = new PGlite();
+  const pool = poolFrom(db);
+  await applyPostgresMigrations(pool);
+  const repository = new PostgresPublishedRepository(pool);
+  const store = createSubscriptionStore(pool);
+  const client = fakeClient({
+    terms: [term("d1", "life-sciences", "Life Sciences"), term("d2", "humanities", "Humanities"),
+      term("c1", "biology", "Biology", "d1"), term("c2", "history", "History", "d2")]
+  });
+  assert.equal((await runSubjectsSync({ client, store, repository })).outcome, "bootstrapped");
+  client.log.push(
+    // A new domain and a category under it in the same pass.
+    { n: 11, kind: "added", terms: ["d3"], after: term("d3", "astronomy", "Astronomy") },
+    { n: 12, kind: "added", terms: ["c3"], after: term("c3", "cosmology", "Cosmology", "d3") },
+    { n: 13, kind: "labelled", terms: ["d2"], after: term("d2", "humanities", "The Humanities"), afterTerms: [term("d2", "humanities", "The Humanities")] },
+    {
+      n: 14, kind: "merged", terms: ["d2", "d1", "c2"],
+      afterTerms: [
+        term("d2", "humanities", "The Humanities", null, { status: "retired", replacedBy: ["d1"] }),
+        term("d1", "life-sciences", "Life Sciences"),
+        term("c2", "history", "History", "d1")
+      ]
+    }
+  );
+  const run = await runSubjectsSync({ client, store, repository });
+  assert.equal(run.outcome, "applied", JSON.stringify(run.blocked));
+  assert.equal((await repository.getPublished({ kind: "domain", id: "astronomy" })).document.title, "Astronomy");
+  assert.equal((await repository.getPublished({ kind: "category", id: "cosmology" })).document.domain, "astronomy");
+  assert.equal((await repository.getPublished({ kind: "category", id: "history" })).document.domain, "life-sciences");
+  const humanities = await repository.getPublished({ kind: "domain", id: "humanities" });
+  assert.equal(humanities.document.title, "The Humanities");
+  assert.ok(humanities.withdrawnAt);
+  assert.deepEqual(Object.keys(DOMAINS).sort(), ["astronomy", "life-sciences"]);
+}
+
 export async function run() {
-  planUnits();
-  reconcileUnits();
-  retagUnits();
-  await endToEnd();
-  await categoryRetireAndRebuild();
+  try {
+    planUnits();
+    reconcileUnits();
+    retagUnits();
+    await endToEnd();
+    await categoryRetireAndRebuild();
+    await domainChanges();
+  } finally {
+    // The runs install their domain rows in DOMAINS; later tests expect the snapshot.
+    replaceDomainsRegistry(JSON.parse(JSON.stringify(DOMAINS_SNAPSHOT)));
+  }
 }

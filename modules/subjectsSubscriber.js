@@ -11,9 +11,11 @@
 // with `npm run subjects:sync -- --accept <n>`.
 //
 // The drain loop runs this only when SUBJECTS_SYNC=on; the npm script
-// dry-runs by default.
+// dry-runs by default. Domains are published documents too, so a new,
+// renamed, or merged domain is applied like a category.
 
-import { DOMAINS } from "../puzzles/domains.js";
+import { RESERVED_DOMAIN_IDS } from "../puzzles/domains.js";
+import { DOMAINS_SNAPSHOT, refreshDomainsRegistry, validateDomainDocument } from "./domainRegistry.js";
 import { existingCategoryRecords } from "./authoringMcpTaxonomy.js";
 import { validateCategoryDocument } from "./categoryValidation.js";
 import { PostgresPublishedRepository } from "./postgresPublishedRepository.js";
@@ -123,9 +125,10 @@ function primaryId(change) {
 
 // The subscriber policy (dev-brief, "What the subscriber applies"). Returns
 // { action: "apply" | "skip" | "hold", edits, code?, reason?, terms }, where
-// terms is the map after the change. Domains are still code, so a new,
-// renamed, or retired domain is held until they become data.
-export function planChange(change, terms, { domains = DOMAINS } = {}) {
+// terms is the map after the change. Whether a domain exists is checked
+// when an edit is applied, since an earlier change in the same pass may
+// have added it.
+export function planChange(change, terms) {
   const after = termsAfter(terms, change);
   const plan = (action, extra = {}) => ({ action, edits: [], ...extra, terms: after });
   const hold = (code, reason) => plan("hold", { code, reason });
@@ -149,14 +152,7 @@ export function planChange(change, terms, { domains = DOMAINS } = {}) {
       const key = id ? keyOf(after, id) : null;
       if (!key) return hold("unexpected-change", `Added term ${id} has no place in the tree`);
       const title = after[id].label;
-      if (key.depth === 0) {
-        return Object.hasOwn(domains, key.domain)
-          ? plan("skip")
-          : hold("new-domain", `New domain ${nameOf(after, id)}: domains are still puzzles/domains.js`);
-      }
-      if (!Object.hasOwn(domains, key.domain)) {
-        return hold("unknown-domain", `${nameOf(after, id)} is under a domain Concept Clusters does not have`);
-      }
+      if (key.depth === 0) return plan("apply", { edits: [{ op: "domain", id: key.domain, title }] });
       if (key.depth === 1) {
         return plan("apply", { edits: [{ op: "category", id: key.category, title, domain: key.domain }] });
       }
@@ -171,7 +167,7 @@ export function planChange(change, terms, { domains = DOMAINS } = {}) {
       const key = id ? keyOf(after, id) : null;
       if (!key || shifted.length) return hold("unexpected-change", `A label change also moved ${nameOf(after, shifted[0] || id)}`);
       const title = after[id].label;
-      if (key.depth === 0) return hold("domain-rename", `Domain ${nameOf(after, id)} renamed: domain titles are still puzzles/domains.js`);
+      if (key.depth === 0) return plan("apply", { edits: [{ op: "domain", id: key.domain, title }] });
       if (key.depth === 1) return plan("apply", { edits: [{ op: "category", id: key.category, title }] });
       if (key.depth === 2) return plan("apply", { edits: [{ op: "subcategory", category: key.category, sub: key.sub, title }] });
       return hold("depth-change", `${nameOf(after, id)} is deeper than Concept Clusters' three levels`);
@@ -184,9 +180,6 @@ export function planChange(change, terms, { domains = DOMAINS } = {}) {
       if (!before || !now) return hold("unexpected-change", `Moved term ${id} has no place in the tree`);
       if (before.depth !== now.depth) return hold("depth-change", `${nameOf(after, id)} moved to another level`);
       if (now.depth === 1) {
-        if (!Object.hasOwn(domains, now.domain)) {
-          return hold("unknown-domain", `${nameOf(after, id)} moved under a domain Concept Clusters does not have`);
-        }
         return plan("apply", { edits: [{ op: "category", id: now.category, domain: now.domain }] });
       }
       if (now.depth === 2) {
@@ -212,7 +205,22 @@ export function planChange(change, terms, { domains = DOMAINS } = {}) {
       if (!from || !to || after[replacement].status === "retired") {
         return hold("retire-ambiguous", `${nameOf(terms, id)} retired into a term Concept Clusters cannot place`);
       }
-      const carried = shifted.find(other => other !== id && after[other].status !== "retired");
+      const carriedAll = shifted.filter(other => other !== id && after[other].status !== "retired");
+      if (from.depth === 0 && to.depth === 0) {
+        // A domain merged into another: its categories move with it.
+        const strays = carriedAll.filter(other => keyOf(after, other).depth !== 1 && !carriedAll.includes(after[other].broader[0]));
+        const categories = carriedAll.filter(other => keyOf(after, other).depth === 1);
+        if (strays.length || categories.some(other => after[other].broader[0] !== replacement)) {
+          return hold("depth-change", `Retiring ${nameOf(terms, id)} also moves terms to another level`);
+        }
+        return plan("apply", {
+          edits: [
+            ...categories.map(other => ({ op: "category", id: after[other].slug, domain: to.domain })),
+            { op: "withdraw-domain", id: from.domain }
+          ]
+        });
+      }
+      const carried = carriedAll[0];
       if (carried) {
         const depthChanged = keyOf(terms, carried).depth !== keyOf(after, carried).depth;
         return hold(
@@ -221,7 +229,6 @@ export function planChange(change, terms, { domains = DOMAINS } = {}) {
         );
       }
       if (from.depth !== to.depth) return hold("depth-change", `${nameOf(terms, id)} retired into a term at another level`);
-      if (from.depth === 0) return hold("domain-retire", `Domain ${nameOf(terms, id)} retired: domains are still puzzles/domains.js`);
       if (from.depth === 1) {
         const child = Object.keys(after).find(other => after[other].broader[0] === id && after[other].status !== "retired");
         if (child) return hold("depth-change", `${nameOf(terms, id)} retired while ${nameOf(after, child)} is still under it`);
@@ -259,14 +266,18 @@ export function planChange(change, terms, { domains = DOMAINS } = {}) {
   }
 }
 
-// The edits that bring the published categories in line with a snapshot,
-// for the bootstrap. It adds and renames; anything it would have to delete
-// or cannot place is a problem to report, never an edit.
-export function reconcilePlan(terms, categories, { domains = DOMAINS } = {}) {
+// The edits that bring the published domains and categories in line with
+// a snapshot, for the bootstrap. It adds and renames; anything it would
+// have to delete or cannot place is a problem to report, never an edit.
+// `domains` is the published domain documents.
+export function reconcilePlan(terms, categories, { domains = [] } = {}) {
   const byId = new Map(categories.map(document => [document.id, document]));
+  const domainsById = new Map(domains.map(document => [document.id, document]));
+  const domainEdits = [];
   const categoryEdits = [];
   const subcategoryEdits = [];
   const problems = [];
+  const liveDomains = new Set();
   const liveCategories = new Set();
   const liveSubcategories = new Set();
   const retired = [];
@@ -281,16 +292,11 @@ export function reconcilePlan(terms, categories, { domains = DOMAINS } = {}) {
       continue;
     }
     if (key.depth === 0) {
-      if (!Object.hasOwn(domains, key.domain)) {
-        problems.push({ code: "new-domain", reason: `Domain ${nameOf(terms, id)} is not in puzzles/domains.js` });
+      liveDomains.add(key.domain);
+      if (domainsById.get(key.domain)?.title !== term.label) {
+        domainEdits.push({ op: "domain", id: key.domain, title: term.label });
       }
-      continue;
-    }
-    if (!Object.hasOwn(domains, key.domain)) {
-      problems.push({ code: "unknown-domain", reason: `${nameOf(terms, id)} is under a domain Concept Clusters does not have` });
-      continue;
-    }
-    if (key.depth === 1) {
+    } else if (key.depth === 1) {
       liveCategories.add(key.category);
       const document = byId.get(key.category);
       if (!document || document.title !== term.label || document.domain !== key.domain) {
@@ -307,7 +313,9 @@ export function reconcilePlan(terms, categories, { domains = DOMAINS } = {}) {
     }
   }
   for (const [id, key] of retired) {
-    const stillPublished = key.depth === 1
+    const stillPublished = key.depth === 0
+      ? domainsById.has(key.domain) && !liveDomains.has(key.domain)
+      : key.depth === 1
       ? byId.has(key.category) && !liveCategories.has(key.category)
       : key.depth === 2
         && Boolean(byId.get(key.category)?.subcategories?.[key.sub])
@@ -316,10 +324,15 @@ export function reconcilePlan(terms, categories, { domains = DOMAINS } = {}) {
       problems.push({ code: "retired-in-terminology", reason: `${nameOf(terms, id)} is retired in terminology-mcp but published here` });
     }
   }
+  for (const document of domains) {
+    if (!liveDomains.has(document.id)) {
+      problems.push({ code: "not-in-cc-subjects", reason: `Domain ${document.id} is not in cc-subjects` });
+    }
+  }
   // Categories without a subject domain (Trivia, Vocabulary, the generated
   // `other`) are Concept Clusters' own.
   for (const document of categories) {
-    if (!document.domain || !Object.hasOwn(domains, document.domain)) continue;
+    if (!document.domain || RESERVED_DOMAIN_IDS.has(document.domain)) continue;
     if (!liveCategories.has(document.id)) {
       problems.push({ code: "not-in-cc-subjects", reason: `Category ${document.id} is not in cc-subjects` });
       continue;
@@ -330,7 +343,7 @@ export function reconcilePlan(terms, categories, { domains = DOMAINS } = {}) {
       }
     }
   }
-  return { edits: [...categoryEdits, ...subcategoryEdits], problems };
+  return { edits: [...domainEdits, ...categoryEdits, ...subcategoryEdits], problems };
 }
 
 export function describeEdit(edit) {
@@ -344,6 +357,10 @@ export function describeEdit(edit) {
       return `re-tag puzzles ${[edit.from.category, edit.from.sub].filter(Boolean).join("--")} -> ${[edit.to.category, edit.to.sub].filter(Boolean).join("--")}`;
     case "withdraw-category":
       return `withdraw category ${edit.id}`;
+    case "domain":
+      return `domain ${edit.id}, title "${edit.title}"`;
+    case "withdraw-domain":
+      return `withdraw domain ${edit.id}`;
     case "remove-subcategory":
       return `remove subcategory ${edit.category}--${edit.sub}`;
     default:
@@ -422,6 +439,8 @@ async function applyEdit(edit, { repository, actor }) {
     return count ? `${describeEdit(edit)}: ${count} puzzle${count === 1 ? "" : "s"}` : null;
   }
 
+  if (edit.op === "domain" || edit.op === "withdraw-domain") return applyDomainEdit(edit, { repository, actor });
+
   const rows = await repository.listPublished({ kind: "category", includeWithdrawn: true });
   const id = edit.op === "category" || edit.op === "withdraw-category" ? edit.id : edit.category;
   const row = rows.find(candidate => candidate.id === id) || null;
@@ -480,6 +499,34 @@ async function applyEdit(edit, { repository, actor }) {
   if (!Object.keys(subcategories).length) delete next.subcategories;
   const held = await publishCategory(repository, rows, next, "update", actor);
   return held || describeEdit(edit);
+}
+
+// A domain is created (with the snapshot's player copy when there is no row
+// yet), renamed, or withdrawn once no live category names it. The registry
+// is reloaded after a write so the categories that follow validate against it.
+async function applyDomainEdit(edit, { repository, actor }) {
+  const rows = await repository.listPublished({ kind: "domain", includeWithdrawn: true });
+  const row = rows.find(candidate => candidate.id === edit.id) || null;
+  const live = row && !row.withdrawnAt ? row.document : null;
+  if (edit.op === "withdraw-domain") {
+    if (!live) return null;
+    const categories = await repository.listPublished({ kind: "category" });
+    const users = categories.filter(category => category.document?.domain === edit.id).map(category => category.id);
+    if (users.length) {
+      return { hold: { code: "still-referenced", reason: `Domain ${edit.id} is still used by ${users.slice(0, 5).join(", ")}${users.length > 5 ? ` and ${users.length - 5} more` : ""}` } };
+    }
+    await repository.unpublish({ kind: "domain", id: edit.id, actor });
+    await refreshDomainsRegistry(repository);
+    return describeEdit(edit);
+  }
+  const snapshot = DOMAINS_SNAPSHOT[edit.id];
+  const base = live || row?.document || { id: edit.id, ...(snapshot?.info ? { info: snapshot.info } : {}) };
+  const validation = validateDomainDocument({ ...base, id: edit.id, title: edit.title });
+  if (!validation.valid) return { hold: { code: "invalid-domain", reason: validation.errors.join("; ") } };
+  if (live && JSON.stringify(live) === JSON.stringify(validation.document)) return null;
+  await repository.publish({ kind: "domain", id: edit.id, document: validation.document, actor });
+  await refreshDomainsRegistry(repository);
+  return `${live ? "updated" : "published"} ${describeEdit(edit)}`;
 }
 
 export async function applyEdits(edits, { repository, actor = SUBSCRIBER_ACTOR }) {
@@ -548,10 +595,11 @@ export function createSubscriptionStore(pool) {
   };
 }
 
-async function bootstrap({ client, store, repository, apply, domains }) {
+async function bootstrap({ client, store, repository, apply }) {
   const state = await client.state();
   const terms = termsFromState(state);
   const categories = (await repository.listPublished({ kind: "category" })).map(row => row.document);
+  const domains = (await repository.listPublished({ kind: "domain" })).map(row => row.document);
   const { edits, problems } = reconcilePlan(terms, categories, { domains });
   const base = { log: state.log, through: state.version, head: state.head ?? state.version, problems };
   if (!apply) return { outcome: "bootstrap", ...base, planned: edits.map(describeEdit) };
@@ -563,9 +611,12 @@ async function bootstrap({ client, store, repository, apply, domains }) {
 
 // One pass. With apply false nothing is written: the result lists what the
 // pass would do (`planned`) and where it would stop (`blocked`).
-export async function runSubjectsSync({ client, store, repository, apply = true, domains = DOMAINS }) {
+export async function runSubjectsSync({ client, store, repository, apply = true }) {
+  // Category validation reads DOMAINS; this process may not have loaded
+  // the published domains yet.
+  await refreshDomainsRegistry(repository);
   const cursor = await store.read();
-  if (!cursor) return bootstrap({ client, store, repository, apply, domains });
+  if (!cursor) return bootstrap({ client, store, repository, apply });
   let response;
   try {
     response = await client.changes(cursor.through);
@@ -583,7 +634,7 @@ export async function runSubjectsSync({ client, store, repository, apply = true,
   const applied = [];
   const planned = [];
   for (const change of response.changes || []) {
-    const plan = planChange(change, terms, { domains });
+    const plan = planChange(change, terms);
     if (plan.action === "hold") {
       blocked = { at: change.n, code: plan.code, reason: plan.reason };
       break;
