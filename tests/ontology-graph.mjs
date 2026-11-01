@@ -109,8 +109,9 @@ export async function run() {
   hasSubject(`<${SUBJECTS_SCHEME}> <urn:terminology-mcp:vocab:hierarchy> "tree" .`);
   hasSubject(`<${SUBJECTS_SCHEME}> <urn:terminology-mcp:vocab:slugUniqueDepth> "0"^^<http://www.w3.org/2001/XMLSchema#integer> .`);
   hasSubject(`<${SUBJECTS_SCHEME}> <urn:terminology-mcp:vocab:slugUniqueDepth> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .`);
-  // Slugs are the stored ids, not re-derived from labels; a subcategory's
-  // is its own part, not the composed key.
+  // Slugs are the stored ids, not re-derived from labels. A subcategory's
+  // slug is its own part ("cell-biology"), not the composed
+  // "biology--cell-biology" key.
   hasSubject(`<urn:concept-clusters:domain:life-sciences> <urn:terminology-mcp:vocab:slug> "life-sciences" .`);
   hasSubject(`<urn:concept-clusters:category:biology> <urn:terminology-mcp:vocab:slug> "biology" .`);
   hasSubject(`<urn:concept-clusters:subcategory:biology--cell-biology> <urn:terminology-mcp:vocab:slug> "cell-biology" .`);
