@@ -674,7 +674,8 @@ function managedCategoryForm(id, document, revision, managed) {
   return `<p class="meta">Title, domain, and subcategories come from
     terminology-mcp's <code>cc-subjects</code> ${termLink(managed.termHref, "(open this term)")}.
     Rename, add, or move them there; this page writes the player copy.
-    Domain: ${escapeHtml(DOMAINS[document.domain]?.title || document.domain || "—")}.</p>
+    Domain: ${escapeHtml(DOMAINS[document.domain]?.title || document.domain || "—")}
+    ${termLink(managed.domainHref)}.</p>
     <form class="category-edit" method="post" action="/admin/categories/${encodeURIComponent(id)}">
       <input type="hidden" name="confirm" value="save-category">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(revision))}">

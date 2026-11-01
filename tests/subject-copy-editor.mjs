@@ -3,7 +3,7 @@ import { createContentInterchangeService } from "../modules/contentInterchangeSe
 import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 import { DOMAINS_SNAPSHOT, replaceDomainsRegistry } from "../modules/domainRegistry.js";
 import { createLocalCatalogueReviewHandler } from "../modules/localCatalogueReview.js";
-import { applyCopy, copyOf, missingCopy } from "../modules/subjectCopy.js";
+import { applyCopy, copyDiffers, copyOf, missingCopy } from "../modules/subjectCopy.js";
 
 export const name = "Category editor: subjects terminology-mcp owns take player copy only";
 
@@ -64,6 +64,12 @@ function units() {
     subcategories: { genomics: { title: "Genomics", info: { text: "Genomes." } }, glycomics: { title: "Glycomics" } }
   });
   assert.deepEqual(missingCopy(applyCopy(structure, copy)), [{ id: "biology", sub: "glycomics", title: "Glycomics" }]);
+  // A legacy string blurb counts as copy.
+  assert.deepEqual(missingCopy({ id: "x", title: "X", info: "A blurb.", subcategories: { y: { title: "Y", info: "Also." } } }), []);
+  // Copy for a subcategory the published row dropped is not a change.
+  const published = applyCopy(structure, copy);
+  assert.equal(copyDiffers({ ...published, subcategories: { ...published.subcategories, gone: { title: "Gone", info: { text: "Old." } } } }, published), false);
+  assert.equal(copyDiffers({ ...published, info: { text: "New." } }, published), true);
 }
 
 export async function run() {
@@ -101,6 +107,7 @@ export async function run() {
   assert.doesNotMatch(page.body, /value="unpublish"/);
   assert.match(page.body, /name="subcategory\.genomics\.info"/);
   assert.match(page.body, /href="http:\/\/terminology\.test\/\?scheme=cc-subjects#c1"/);
+  assert.match(page.body, /href="http:\/\/terminology\.test\/\?scheme=cc-subjects#d1"/);
 
   // The subscriber renames the category and adds a subcategory while the
   // working copy (opened above) still has the old structure.
@@ -155,6 +162,36 @@ export async function run() {
   const refused = await post(handleRequest, "/admin/categories/biology", { confirm: "unpublish" });
   assert.equal(refused.status, 400);
   assert.match(refused.body, /Retire or merge it there/);
+
+  // Retired in terminology-mcp and withdrawn here: no full editor, and no
+  // republishing from this page.
+  const live = await contentDocuments.getPublished({ kind: "category", id: "biology" });
+  await contentDocuments.unpublish({ kind: "category", id: "biology", actor: subscriber });
+  terms.c1 = { ...terms.c1, status: "retired" };
+  const retiredPage = await get(handleRequest, "/admin/categories/biology");
+  assert.doesNotMatch(retiredPage.body, /name="new_subcategory_id"/);
+  assert.match(retiredPage.body, /retired it or not synced it yet/);
+  const republish = await post(handleRequest, "/admin/categories/biology", { confirm: "publish" });
+  assert.equal(republish.status, 400);
+  assert.ok((await contentDocuments.getPublished({ kind: "category", id: "biology" })).withdrawnAt);
+  terms.c1 = { ...terms.c1, status: "active" };
+  await contentDocuments.publish({ kind: "category", id: "biology", document: live.document, actor: subscriber });
+
+  // A mirror that cannot be read fails closed rather than unlocking the
+  // full editor.
+  const savedTerms = terms;
+  terms = undefined;
+  const failing = createLocalCatalogueReviewHandler({
+    contentDocuments,
+    actor,
+    contentService,
+    repositoryRoot: contentService.repositoryRoot,
+    subjectTerms: async () => { throw new Error("relation does not exist"); }
+  });
+  const failed = await get(failing, "/admin/categories/biology");
+  assert.doesNotMatch(failed.body, /name="new_subcategory_id"/);
+  assert.match(failed.body, /relation does not exist/);
+  terms = savedTerms;
 
   // Domain copy is published onto the current row; its title is kept.
   try {

@@ -49,6 +49,7 @@ import {
   applyCopy,
   copyDiffers,
   copyOf,
+  hasBlurb,
   missingCopy,
   subjectIndex,
   terminologyTermHref
@@ -692,32 +693,41 @@ export function createLocalCatalogueReviewHandler({
     .replace(/\/+$/, "") || null;
 
   // Which subjects terminology-mcp owns, from the subscriber's mirror. Null
-  // without one: every category is then edited in full, as before.
+  // only without one (no cursor yet): every category is then edited in full.
+  // A failed read throws, so a managed category never falls back to the
+  // full editor.
   async function loadSubjectIndex() {
     if (typeof subjectTerms !== "function") return null;
-    try {
-      return subjectIndex(await subjectTerms());
-    } catch {
-      return null;
-    }
+    return subjectIndex(await subjectTerms());
   }
 
   function termHref(termId) {
     return terminologyUrl && termId ? terminologyTermHref(terminologyUrl, termId) : null;
   }
 
-  // A category terminology-mcp owns and that is live: its editor writes
-  // player copy only.
+  // A category terminology-mcp owns: { live: true, ... } when its row is
+  // published, so the editor writes player copy only; { live: false } when
+  // it is retired there or not yet synced, so nothing here may publish it.
+  // Null for Concept Clusters' own categories.
   function managedCategory(index, categoryId, published) {
     const termId = index?.categories.get(categoryId);
-    if (!termId || !published || published.withdrawnAt) return null;
+    if (!termId) return index?.retiredCategories.has(categoryId) ? { live: false } : null;
+    if (!published || published.withdrawnAt) return { live: false };
     const subcategoryHrefs = {};
     for (const sub of Object.keys(published.document?.subcategories || {})) {
       const href = termHref(index.subcategories.get(`${categoryId}--${sub}`));
       if (href) subcategoryHrefs[sub] = href;
     }
-    return { termHref: termHref(termId), subcategoryHrefs };
+    return {
+      live: true,
+      termHref: termHref(termId),
+      domainHref: termHref(index.domains.get(published.document?.domain)),
+      subcategoryHrefs
+    };
   }
+
+  const NOT_LIVE_MESSAGE = "This category belongs to terminology-mcp, which has retired it or not synced it yet. "
+    + "It is restored or changed there, not here.";
 
   // The copy a managed-category form submits, applied onto the current
   // published structure.
@@ -894,7 +904,7 @@ export function createLocalCatalogueReviewHandler({
         loadSubjectIndex()
       ]);
       const needsCopy = [
-        ...domains.filter(row => !row.document?.info?.text?.trim())
+        ...domains.filter(row => !hasBlurb(row.document?.info))
           .map(row => ({ kind: "domain", id: row.id, title: row.document?.title || row.id })),
         ...published.filter(row => !row.withdrawnAt).flatMap(row => missingCopy(row.document)
           .map(item => ({ kind: "category", ...item, categoryTitle: row.document?.title })))
@@ -1395,6 +1405,14 @@ export function createLocalCatalogueReviewHandler({
         );
         const publication = cataloguePublicationState(record, published);
         const managed = managedCategory(await loadSubjectIndex(), categoryId, published);
+        if (managed && !managed.live) {
+          html(res, renderContentLifecycleResultPage({
+            title: record.document.title || categoryId,
+            message: NOT_LIVE_MESSAGE,
+            backHref: "/admin/categories"
+          }));
+          return true;
+        }
         html(res, renderCategoryEditPage({
           id: categoryId,
           document: managed ? applyCopy(published.document, copyOf(record.document)) : record.document,
@@ -1461,6 +1479,9 @@ export function createLocalCatalogueReviewHandler({
         }
         const publishedRow = await publishedCategory(categoryId);
         const managed = managedCategory(await loadSubjectIndex(), categoryId, publishedRow);
+        if (managed && !managed.live && confirm !== DELETE_DRAFT_CONFIRM) {
+          throw Object.assign(new Error(NOT_LIVE_MESSAGE), { status: 400 });
+        }
         if (confirm === SAVE_CATEGORY_CONFIRM && managed) {
           const current = await loadOrSeedCategory(categoryId);
           const expectedRevision = Number(body?.expected_revision ?? params.get("expected_revision"));

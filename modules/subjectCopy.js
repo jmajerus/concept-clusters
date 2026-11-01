@@ -35,18 +35,25 @@ export function applyCopy(structure, copy) {
   return next;
 }
 
-export function copyDiffers(left, right) {
-  return JSON.stringify(copyOf(left)) !== JSON.stringify(copyOf(right));
+// Whether publishing `working` onto `published` would change its copy.
+// Copy for a subcategory the published row no longer has does not count.
+export function copyDiffers(working, published) {
+  return JSON.stringify(copyOf(applyCopy(published, copyOf(working)))) !== JSON.stringify(copyOf(published));
 }
 
 // Which ids the subjects mirror holds, with their terminology-mcp term ids
-// for links: { domains: Map, categories: Map, subcategories: Map("cat--sub") }.
-// Null without a mirror (no subscriber cursor yet).
+// for links: { domains: Map, categories: Map, subcategories: Map("cat--sub"),
+// retiredCategories: Set }. A retired category is still terminology-mcp's:
+// it is not restored here. Null without a mirror (no subscriber cursor yet).
 export function subjectIndex(terms) {
   if (!terms) return null;
-  const index = { domains: new Map(), categories: new Map(), subcategories: new Map() };
+  const index = { domains: new Map(), categories: new Map(), subcategories: new Map(), retiredCategories: new Set() };
   for (const [termId, term] of Object.entries(terms)) {
-    if (term.status === "retired") continue;
+    if (term.status === "retired") {
+      const key = keyOf(terms, termId);
+      if (key?.depth === 1) index.retiredCategories.add(key.category);
+      continue;
+    }
     const key = keyOf(terms, termId);
     if (key?.depth === 0) index.domains.set(key.domain, termId);
     else if (key?.depth === 1) index.categories.set(key.category, termId);
@@ -57,13 +64,21 @@ export function subjectIndex(terms) {
 
 // Subjects a player would see without a blurb: the category or domain
 // itself and each subcategory, as { id, sub?, title }.
+function blurbOf(info) {
+  return (typeof info === "string" ? info : info?.text || "").trim();
+}
+
 export function missingCopy(document) {
   const missing = [];
-  if (!document?.info?.text?.trim()) missing.push({ id: document.id, title: document.title || document.id });
+  if (!blurbOf(document?.info)) missing.push({ id: document.id, title: document.title || document.id });
   for (const [sub, definition] of Object.entries(document?.subcategories || {})) {
-    if (!definition?.info?.text?.trim()) missing.push({ id: document.id, sub, title: definition?.title || sub });
+    if (!blurbOf(definition?.info)) missing.push({ id: document.id, sub, title: definition?.title || sub });
   }
   return missing;
+}
+
+export function hasBlurb(info) {
+  return Boolean(blurbOf(info));
 }
 
 export function terminologyTermHref(baseUrl, termId) {
