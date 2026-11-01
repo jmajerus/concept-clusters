@@ -691,7 +691,7 @@ function serverInstructions() {
     "create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for that draft_id. " +
     "A draft that has never been created uses create_puzzle_draft. " +
     mcpPublicationBoundaryGuidance() + " " +
-    "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. create_puzzle_draft takes category, categories, and subcategories on the complete document. Leave tags and level unset there. A later shelf edit saves them with domain=classification. Associate catalogues via get_catalogue then update_catalogue. A category is registered when its document is published to D1, and it should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Domains, categories, and subcategories come from terminology-mcp's cc-subjects scheme: propose a missing one with its propose_term tool, and it is published here within a minute. update_subject_copy writes their blurbs and links; with publish_to_authoring=true that publish is live on the player. Cue and Freeze only snapshot git. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
+    "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. create_puzzle_draft takes category, categories, and subcategories on the complete document. Leave tags and level unset there. A later shelf edit saves them with domain=classification. Associate catalogues via get_catalogue then update_catalogue. A category is registered when its document is published to D1, and it should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Domains, categories, and subcategories come from terminology-mcp's cc-subjects scheme: propose a missing one with its propose_term tool, and the subjects subscriber publishes it here, normally within a minute; check list_categories before relying on it. update_subject_copy writes their blurbs and links; with publish_to_authoring=true that publish is live on the player. Cue and Freeze only snapshot git. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
 }
 
 export function createAuthoringMcpServer({
@@ -2612,7 +2612,7 @@ export function createAuthoringMcpServer({
     description:
       "Write player copy -- the blurb (text), link, and extra link -- for one category and its subcategories, or for one domain. " +
       "Which domains, categories, and subcategories exist, and their titles and nesting, belong to terminology-mcp's cc-subjects scheme: " +
-      "propose a new subject there with its propose_term tool, and it arrives here within a minute. " +
+      "propose a new subject there with its propose_term tool; the subjects subscriber publishes it here, normally within a minute. " +
       "The patch merges: omit a field to keep it, send null to remove it. Subcategory keys must be existing subcategory ids. " +
       "A category's copy is saved to the D1 working copy; set publish_to_authoring=true to also publish it onto the current published row, live on the player. " +
       "A domain has no working copy, so domain copy needs publish_to_authoring=true. " +
@@ -2684,13 +2684,19 @@ export function createAuthoringMcpServer({
         .flatMap(([sub, definition]) => validateInfo(definition.info, `subcategories.${sub}.info`, { requireObject: true }))
     ];
     if (errors.length) return success(`Cannot save copy for ${id}: ${errors.join("; ")}`, { valid: false, errors });
+    if (publish_to_authoring && !live) {
+      throw new Error(`Category ${id} is not published, so its copy cannot be published. Nothing was written; call again without publish_to_authoring to save it to the working copy.`);
+    }
     const record = await upsertCategoryDraft(contentDocuments, { document: next, actor });
     let publication = null;
     if (publish_to_authoring) {
-      if (!live) throw new Error(`Category ${id} is not published; its copy was saved to the working copy only.`);
-      publication = await contentDocuments.publish({
-        kind: "category", id, document: applyCopy(live.document, copyOf(next)), actor, expectedRevision: live.revision
-      });
+      try {
+        publication = await contentDocuments.publish({
+          kind: "category", id, document: applyCopy(live.document, copyOf(next)), actor, expectedRevision: live.revision
+        });
+      } catch (error) {
+        throw new Error(`Saved the copy for ${id} to the working copy, but publishing failed: ${error?.message || error}. Call again with publish_to_authoring=true to publish onto the current row.`);
+      }
     }
     return success(
       publication

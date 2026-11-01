@@ -397,6 +397,14 @@ export async function run() {
       category: "lab-subject", subcategories: { nowhere: { text: "No." } }
     });
     assert.match(unknownSub.error, /added in terminology-mcp/);
+    // Publishing an unpublished category is refused before anything is written.
+    const draftBefore = await contentDocuments.getDraft({ kind: "category", id: "draft-only-subject", actor });
+    const unpublishedPublish = await call("update_subject_copy", {
+      category: "draft-only-subject", info: { text: "Changed." }, publish_to_authoring: true
+    });
+    assert.match(unpublishedPublish.error, /Nothing was written/);
+    const draftAfter = await contentDocuments.getDraft({ kind: "category", id: "draft-only-subject", actor });
+    assert.equal(draftAfter.revision, draftBefore.revision);
     const domainNeedsPublish = await call("update_subject_copy", { domain: "humanities", info: { text: "Texts." } });
     assert.match(domainNeedsPublish.error, /publish_to_authoring=true/);
     const both = await call("update_subject_copy", { category: "lab-subject", domain: "humanities" });
