@@ -162,14 +162,28 @@ Clusters' Review shows a provisional subcategory as a note, not a blocker.
 
 ## The category editor
 
-The editor stays, as a player-copy editor. Structure (which terms exist,
-labels, nesting) shows read-only with a link to the term in
-terminology-mcp. What remains editable is Concept Clusters' own: the
-`info` text and wiki link of each domain, category, and subcategory. A
-short list names terms that arrived without player copy.
+The editor (`/admin/categories`) is a player-copy editor for every
+category the subscriber's mirror holds (`modules/subjectCopy.js`):
 
-Over MCP, `update_category` edits player copy only, and `create_category`
-and new subcategories become proposals to terminology-mcp.
+- Title, domain, and subcategories show read-only, each linked to its term
+  in terminology-mcp's editor (`TERMINOLOGY_EDITOR_URL`, else
+  `TERMINOLOGY_BASE`). The blurb, link, and extra link of the category and
+  of each subcategory are editable. Unpublishing is refused: terminology-mcp
+  decides whether a subject exists.
+- The working copy carries only that copy. Saving and publishing apply it
+  onto the current published row, so a working copy opened before a synced
+  change cannot undo it.
+- **Needs player copy** at the top of the list names every live domain,
+  category, and subcategory without a blurb, linked to its field.
+- A domain's blurb is edited on `/admin/domains/<id>`. Domains have no
+  working copy; the copy is published straight onto the current row.
+
+Categories outside the mirror (Trivia, Vocabulary) keep the full editor,
+and without a mirror every category does.
+
+Over MCP, `update_category` still writes whole documents, and
+`create_category` creates them. Both become copy-only writes and proposals
+to terminology-mcp in a later change.
 
 ## What the subscriber applies
 
@@ -250,9 +264,9 @@ the public site and CI read.
    provisional terms with a slug hint, and a scheme depth limit
    (`cc-subjects`: 2). Usage reports are still planned.
 4. **Concept Clusters:** the changelog subscriber writing category data
-   (live); domains as published documents (built); the editor narrowed to
-   player copy, including domain copy; `create_category` and new
-   subcategories as proposals.
+   (live); domains as published documents (live); the editor narrowed to
+   player copy, including domain copy (built); `update_category` copy-only
+   and `create_category` and new subcategories as proposals.
 5. **Retire** the corpus-mcp taxonomy push (`modules/taxonomyPush.js`)
    once corpus-mcp subscribes to terminology-mcp directly.
 

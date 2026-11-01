@@ -1,3 +1,4 @@
+import { createSubscriptionStore } from "./subjectsSubscriber.js";
 import { D1DraftRepository } from "./d1DraftRepository.js";
 import { D1ContentDocumentRepository } from "./contentDocumentRepository.js";
 import { D1FreezePublicationRepository } from "./d1FreezePublicationRepository.js";
@@ -217,6 +218,9 @@ export async function resolveLocalAuthoringWorkspace({
     freezeRepository: contentDocuments.freezeRepository,
     modelSuggestions: contentDocuments.modelSuggestions,
     citationSources,
+    // The subjects subscriber's term map (null before its first bootstrap):
+    // which categories terminology-mcp owns, for the category editor.
+    subjectTerms: async () => (await createSubscriptionStore(pool).read())?.terms ?? null,
     citationUsage: new PostgresCitationUsagePilot(pool),
     citationSourceStatus: createCitationSourceStatus(pool),
     zoteroReferences: new ZoteroReferenceService({
