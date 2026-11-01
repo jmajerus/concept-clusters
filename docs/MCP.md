@@ -277,12 +277,24 @@ require a complete valid puzzle.
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft` (working copy only; a person publishes the puzzle), `list_puzzle_drafts`, `delete_puzzle_draft`, `reassign_puzzle_classifications` (`publish_to_authoring: true` publishes the shelf onto the live puzzle) | Both |
 | Validation | `validate_puzzle_draft` | Both |
 | Categories and catalogues | `create_category`, `update_category`, `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue`, `update_meta_catalogue` (`publish_to_authoring: true` publishes that document onto the player; Cue/Freeze only snapshot git) | Both |
+| Ontology | `ontology_shared_terms`, `ontology_related_puzzles`, `ontology_query`, `ontology_status` (read-only joins across published puzzles, from the LAN Oxigraph server) | Both, when the machine can reach Oxigraph |
 
 `search_puzzles` covers the authoring corpus and your working copies
 (one row per id; a draft overlays the active authoring document). Set
 `full_text: true` to search facts, lessons, and other prose without a
 `text:` prefix. Structured title/term/tag matching stays the default for
 gap-fill checks.
+
+The ontology tools read Concept Clusters' named graphs on the LAN Oxigraph
+server, which the authoring server's drain loop keeps in step with published
+content. They find board labels shared across puzzles and unlinked neighbors
+for `relatedPuzzles`; existence checks stay with `search_puzzles`, which also
+sees drafts. Every response carries the graph's sync time. The tools are
+always listed, so the tool catalog is the same everywhere, and say why they
+cannot answer when Oxigraph is unreachable. `ONTOLOGY_SPARQL_BASE` overrides
+the default `http://oxigraph.localdomain:7878`; `off` turns the store off.
+`ONTOLOGY_TIMEOUT_MS` (default 10000) bounds each request. Vocabulary, graph
+layout, and the load procedure are in [ONTOLOGY.md](./ONTOLOGY.md).
 
 JSON-LD interchange (reading a puzzle/catalogue as portable JSON-LD,
 exporting one without writing a file) isn't on this MCP tool surface --

@@ -106,6 +106,17 @@ export class PostgresPublishedRepository {
       );
   }
 
+  // Kind, id, and content hash of each live row, without parsing documents:
+  // what a downstream copy compares on every drain tick.
+  async listPublishedHashes({ kinds = PUBLISHED_DOCUMENT_KINDS } = {}) {
+    kinds.forEach(assertKind);
+    const { rows } = await this.pool.query(
+      "SELECT kind, id, content_hash FROM published_documents WHERE withdrawn_at IS NULL AND kind = ANY($1) ORDER BY kind, id",
+      [kinds]
+    );
+    return rows.map(row => ({ kind: row.kind, id: row.id, contentHash: row.content_hash }));
+  }
+
   async seedPublishedIfAbsent({ kind, id, document, layout = null }) {
     await this.seedPublishedManyIfAbsent([{ kind, id, document, layout }]);
     return this.getPublished({ kind, id });

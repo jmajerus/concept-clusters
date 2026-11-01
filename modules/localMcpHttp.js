@@ -8,6 +8,7 @@ import {
   summarizeMcpBody
 } from "./authoringMcpHealth.js";
 import { createReferencePilot, resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
+import { createOntologyService } from "./ontologySync.js";
 
 function jsonError(status, error) {
   return Response.json({ error }, { status });
@@ -154,6 +155,7 @@ export async function handleLocalMcpRequest(req, res, {
     wikiLinkStore: workspace.wikiLinkStore,
     referencePilot: workspace.zoteroReferences
       ? createReferencePilot(async () => workspace) : null,
+    ontology: createOntologyService({ env }),
     actor: authenticated.actor,
     authInfo: authenticated.authInfo
   });

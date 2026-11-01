@@ -87,6 +87,16 @@ import {
   toolCatalogReport
 } from "./mcpToolCatalog.js";
 import { AUTHORING_SETTINGS } from "./authoringSettings.js";
+import {
+  ontologyCounts,
+  ownedDataset,
+  readSyncState,
+  relatedPuzzles,
+  runReadQuery,
+  sharedTerms
+} from "./ontologyAuthoringQueries.js";
+import { CC, ONTOLOGY_PUZZLE_GRAPH_PREFIX, ONTOLOGY_TAXONOMY_GRAPH } from "./ontologyGraph.js";
+import { OntologyStoreError } from "./ontologyStore.js";
 import { canonicalModelLabel } from "./authoringModelSuggestions.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
@@ -693,7 +703,10 @@ export function createAuthoringMcpServer({
   referencePilot = null,
   // The LAN review page (…/admin/drafts) that pending waiver requests point
   // to when the client cannot ask its user in the chat. Null omits the link.
-  draftReviewBaseUrl = null
+  draftReviewBaseUrl = null,
+  // LAN-only Oxigraph store ({ store, pending() }, ontologySync.js). The
+  // ontology tools register either way and explain themselves when null.
+  ontology = null
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
@@ -2631,6 +2644,147 @@ export function createAuthoringMcpServer({
         ? `Saved and published category ${record.id} onto the player. Cue and Freeze only snapshot git.`
         : `Saved category working copy ${record.id}.`,
       { valid: true, errors: [], category: record, published }
+    );
+  })));
+
+  // Read-only joins across published puzzles, from Concept Clusters' named
+  // graphs on the shared LAN Oxigraph server (docs/ONTOLOGY.md). Every
+  // response carries the sync time, so a stale graph is visible.
+  function requireOntology() {
+    if (!ontology?.store) {
+      throw new Error(
+        "The ontology tools need the LAN Oxigraph server, and this MCP server has none configured. " +
+        "They run on the LAN authoring server; set ONTOLOGY_SPARQL_BASE there if it is not the default."
+      );
+    }
+    return ontology.store;
+  }
+
+  async function ontologyStamp(store) {
+    const state = await readSyncState(store);
+    if (!state) {
+      throw new Error("The ontology graph is empty. Run npm run ontology:load -- --full on the LAN authoring machine.");
+    }
+    return { state, sync: { syncedAt: state.syncedAt, puzzleGraphs: state.puzzleHashes.size } };
+  }
+
+  server.registerTool("ontology_shared_terms", {
+    title: "Ontology: shared terms",
+    description:
+      "List board term labels that appear in at least min_puzzles published puzzles (default 2), matched ignoring case, accents, and spacing. " +
+      "Narrow by category or domain id to count only puzzles there. Use it to find terms worth reusing or connecting across puzzles. " +
+      "A shared label is evidence of a connection, not proof the puzzles mean the same thing. For whether a planned board already exists, use search_puzzles, which also sees drafts.",
+    inputSchema: z.object({
+      min_puzzles: z.number().int().min(2).max(50).optional(),
+      category: z.string().min(1).optional(),
+      domain: z.string().min(1).optional(),
+      limit: z.number().int().min(1).max(200).optional()
+    }),
+    annotations: READ_ONLY
+  }, tracked("ontology_shared_terms", safe(async ({ min_puzzles = 2, category = null, domain = null, limit = 50 }) => {
+    const store = requireOntology();
+    const { sync } = await ontologyStamp(store);
+    const result = await sharedTerms(store, { minPuzzles: min_puzzles, category, domain, limit });
+    const scope = category ? ` in ${category}` : domain ? ` in domain ${domain}` : "";
+    return success(
+      `Found ${result.terms.length} label${result.terms.length === 1 ? "" : "s"} shared by at least ${min_puzzles} puzzles${scope} (graph synced ${sync.syncedAt}).`,
+      { sync, ...result }
+    );
+  })));
+
+  server.registerTool("ontology_related_puzzles", {
+    title: "Ontology: related puzzles",
+    description:
+      "For one published puzzle, return its authored relatedPuzzles with the board labels each shares with it, " +
+      "plus unlinked puzzles ranked by shared labels as candidates for relatedPuzzles or a bridge. Candidates need a reason before they are authored.",
+    inputSchema: z.object({
+      puzzle_id: z.string().min(1),
+      limit: z.number().int().min(1).max(50).optional()
+    }),
+    annotations: READ_ONLY
+  }, tracked("ontology_related_puzzles", safe(async ({ puzzle_id, limit = 10 }) => {
+    const store = requireOntology();
+    const { sync } = await ontologyStamp(store);
+    const result = await relatedPuzzles(store, { puzzleId: puzzle_id, limit });
+    return success(
+      `${puzzle_id}: ${result.authored.length} authored related puzzle${result.authored.length === 1 ? "" : "s"}, ${result.candidates.length} unlinked candidate${result.candidates.length === 1 ? "" : "s"} (graph synced ${sync.syncedAt}).`,
+      { sync, ...result }
+    );
+  })));
+
+  server.registerTool("ontology_query", {
+    title: "Ontology: SPARQL query",
+    description:
+      `Run one read-only SPARQL SELECT or ASK over published content; results cap at 200 rows. SERVICE clauses are refused. ` +
+      `The query sees only Concept Clusters graphs: the default graph is their union, GRAPH ?g ranges over them, and FROM clauses are overridden. ` +
+      `Each puzzle is the graph ${ONTOLOGY_PUZZLE_GRAPH_PREFIX}<id>; categories, subcategories, domains, and catalogues are in ${ONTOLOGY_TAXONOMY_GRAPH}. ` +
+      `Vocabulary (prefix cc: <${CC}>, skos:, schema: <https://schema.org/>): cc:Puzzle, cc:Cluster, cc:Term, cc:Bridge, cc:Lens, cc:Category, cc:Subcategory, cc:Domain, cc:Catalogue, cc:MetaCatalogue; ` +
+      'cc:hasCluster, cc:term, cc:inCluster, cc:role ("seed" or "floating"), cc:hasBridge, cc:connectsCluster, cc:relationKind, cc:hasLens, cc:targetsTerm, ' +
+      "cc:inPuzzle, cc:labelKey (normalized label, the cross-puzzle join key), skos:prefLabel, schema:name, cc:fact, cc:prompt, " +
+      "cc:primaryCategory, cc:inCategory, cc:inSubcategory, cc:inDomain, cc:hasSubcategory, cc:relatedPuzzle, cc:hasEntry, cc:hasChildCatalogue, cc:puzzleKind, cc:level, cc:tag.",
+    inputSchema: z.object({
+      query: z.string().min(1).max(20000),
+      limit: z.number().int().min(1).max(200).optional()
+    }),
+    annotations: READ_ONLY
+  }, tracked("ontology_query", safe(async ({ query, limit = 200 }) => {
+    const store = requireOntology();
+    const { state, sync } = await ontologyStamp(store);
+    const result = await runReadQuery(store, { query, limit, dataset: ownedDataset(state) });
+    const summary = result.form === "ASK"
+      ? `ASK returned ${result.boolean}`
+      : `Query returned ${result.rows.length} row${result.rows.length === 1 ? "" : "s"}${result.truncated ? " (capped)" : ""}`;
+    return success(`${summary} (graph synced ${sync.syncedAt}).`, { sync, ...result });
+  })));
+
+  server.registerTool("ontology_status", {
+    title: "Ontology: status",
+    description:
+      "Report whether the LAN Oxigraph ontology graph is reachable, when it last synced from published content, its puzzle, term, and triple counts, " +
+      "and how many graph updates (changed or withdrawn puzzles, taxonomy) the sync has not made yet. An unreachable store is reported, not raised.",
+    inputSchema: z.object({}),
+    annotations: READ_ONLY
+  }, tracked("ontology_status", safe(async () => {
+    if (!ontology?.store) {
+      return success("Ontology store not configured on this MCP server.", { configured: false });
+    }
+    let state;
+    let counts;
+    let pending;
+    try {
+      state = await readSyncState(ontology.store);
+      counts = await ontologyCounts(ontology.store);
+      pending = typeof ontology.pending === "function" ? await ontology.pending() : null;
+    } catch (error) {
+      if (!(error instanceof OntologyStoreError)) throw error;
+      return success(`Ontology store unreachable: ${error.message}`, {
+        configured: true,
+        reachable: false,
+        baseUrl: ontology.store.baseUrl,
+        error: error.message,
+        syncedAt: null,
+        puzzleGraphs: null,
+        triples: null,
+        terms: null,
+        distinctLabels: null,
+        pendingGraphUpdates: null
+      });
+    }
+    const output = {
+      configured: true,
+      reachable: true,
+      baseUrl: ontology.store.baseUrl,
+      syncedAt: state?.syncedAt ?? null,
+      puzzleGraphs: state?.puzzleHashes.size ?? 0,
+      ...counts,
+      pendingGraphUpdates: pending
+    };
+    const behind = pending == null ? "" : pending ? `, ${pending} graph update${pending === 1 ? "" : "s"} pending` : ", current";
+    return success(
+      state
+        ? `Ontology synced ${state.syncedAt}: ${output.puzzleGraphs} puzzles, ${counts.triples} triples${behind}.`
+        : "Ontology graph is empty; run npm run ontology:load -- --full on the LAN authoring machine.",
+      output
     );
   })));
 

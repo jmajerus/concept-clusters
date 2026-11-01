@@ -16,6 +16,7 @@ import {
 import { resolveLocalDraftActor } from "./localD1Config.js";
 import { createAuthoringMcpServer } from "./hostedMcpAuthoringServer.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
+import { createOntologyService } from "./ontologySync.js";
 import { authoringDatabaseUrl } from "./postgresPool.js";
 
 export { LOCAL_AUTHORING_GUIDANCE };
@@ -194,6 +195,7 @@ export function createConceptClustersMcpServer({
     referencePilot: authoringDatabaseUrl(env) && !remnantDraftStore
       ? createReferencePilot(workspace) : null,
     draftReviewBaseUrl: localDraftReviewUrl(),
+    ontology: createOntologyService({ env }),
     // A normal stdio server resolves its D1 adapter lazily from env, so
     // d1Database is usually null here even though content documents are
     // available. A file-backed draft remnant without an explicit D1 content
