@@ -96,9 +96,8 @@ syncer works like this:
 2. It compares them with the versioned hashes in the sync graph.
 3. It replaces changed puzzle graphs, drops graphs for withdrawn or deleted
    puzzles, and rebuilds the taxonomy and subjects graphs when any category
-   or catalogue changed, or the domain registry (`puzzles/domains.js`) did.
-   A domain edit ships with a deploy, so the first tick after it rebuilds
-   both graphs.
+   or catalogue changed, or the domains did (`DOMAINS`, which follows the
+   published domain rows).
 4. It rewrites the sync graph. When nothing changed, it writes nothing.
 
 A failure is logged once and retried on the next tick. The syncer reads

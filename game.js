@@ -18,6 +18,7 @@ import {
   subcategoriesForPuzzleSet
 } from "./puzzles/categories.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
+import { replaceDomainsRegistry } from "./modules/domainRegistry.js";
 import { cataloguesForPuzzle, domainCatalogues, setCatalogueRegistry } from "./modules/catalogueRegistry.js";
 import {
   createCorpusPuzzleLoader,
@@ -96,6 +97,7 @@ if (playCorpusUrl) {
   const corpus = await loadPlayCorpus(playCorpusUrl);
   playSource = "d1";
   replaceCategoriesRegistry(corpus.categories || {});
+  replaceDomainsRegistry(corpus.domains);
   CATALOGUES = corpus.catalogues;
   setCatalogueRegistry(CATALOGUES);
   puzzleLoader = createCorpusPuzzleLoader(corpus);
@@ -116,6 +118,7 @@ if (playCorpusUrl) {
   ]);
   if (index) {
     replaceCategoriesRegistry(index.categories);
+    replaceDomainsRegistry(index.domains);
     CATALOGUES = index.catalogues;
     setCatalogueRegistry(CATALOGUES);
     puzzleLoader = createPublicPuzzleLoader(PUZZLE_MANIFEST, index);

@@ -5,10 +5,12 @@
 // and syncs the ontology graphs on the LAN Oxigraph server, whether or not
 // D1 is reachable.
 
+import { refreshDomainsRegistry } from "./domainRegistry.js";
 import { createHttpD1Database } from "./httpD1Database.js";
 import { LocalD1ConfigError, resolveLocalD1Config } from "./localD1Config.js";
 import { authoringDatabaseUrl, getAuthoringPool } from "./postgresPool.js";
 import { createOntologySyncer } from "./ontologySync.js";
+import { PostgresPublishedRepository } from "./postgresPublishedRepository.js";
 import { drainPublishedReplica } from "./publishedReplica.js";
 import { createSubjectsSyncer } from "./subjectsSubscriber.js";
 import { createTaxonomyPusher } from "./taxonomyPush.js";
@@ -77,6 +79,20 @@ export function startPublishedReplicaDrain({
   ontologySyncer = syncOntology;
   const syncSubjects = createSubjectsSyncer({ pool, env });
   subjectsSyncer = syncSubjects;
+  const published = new PostgresPublishedRepository(pool);
+  let domainRefreshError = null;
+  // This process's DOMAINS follows the published domain rows, so a domain
+  // added in terminology-mcp validates here without a deploy.
+  async function refreshDomains() {
+    try {
+      await refreshDomainsRegistry(published);
+      domainRefreshError = null;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message !== domainRefreshError) console.error("Domain registry refresh failed (retrying)", message);
+      domainRefreshError = message;
+    }
+  }
 
   async function drain() {
     try {
@@ -110,6 +126,7 @@ export function startPublishedReplicaDrain({
     running = true;
     try {
       await drain();
+      await refreshDomains();
       // Before the push and the ontology sync, so both see its changes.
       await syncSubjects();
       await pushTaxonomy();

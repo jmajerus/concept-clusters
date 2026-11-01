@@ -2,6 +2,7 @@
 // the player already uses. Derived catalogues (all, new, level-*, domain-*) stay
 // computed on the client. Git modules are not consulted here.
 
+import { domainsRegistryFromDocuments } from "./domainRegistry.js";
 import { isReservedCatalogueId } from "./contentDocumentSeed.js";
 import { puzzleBrowseFromDocument } from "./puzzleBrowse.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
@@ -76,6 +77,7 @@ export function assemblePlayCorpus({
   puzzleRows = [],
   catalogueRows = [],
   categoryRows = [],
+  domainRows = [],
   draftRows = [],
   puzzleOrder = [],
   settings = {}
@@ -83,6 +85,7 @@ export function assemblePlayCorpus({
   const categories = categoriesRegistryFromDocuments(
     categoryRows.map(row => row?.document).filter(Boolean)
   );
+  const domains = domainsRegistryFromDocuments(domainRows.map(row => row?.document).filter(Boolean));
   const puzzles = sortPuzzles(puzzleRows, puzzleOrder).flatMap(row => {
     const document = row?.document;
     if (!document?.id) return [];
@@ -116,6 +119,8 @@ export function assemblePlayCorpus({
     drafts,
     catalogues,
     categories,
+    // Absent until domains are published; the player keeps its snapshot.
+    ...(Object.keys(domains).length ? { domains } : {}),
     settings: normalizeSiteSettings(settings)
   };
 }

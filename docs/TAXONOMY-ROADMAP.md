@@ -3,7 +3,8 @@
 **Status: the "Now" stage below is implemented, and domain landing pages
 arrived early (2026-09-22) as derived catalogues -- see below; the rest
 is still roadmap.** Category records in `puzzles/categories.js` carry a
-`domain` id from the fixed vocabulary in `puzzles/domains.js`. It groups the
+`domain` id, one of the published domain documents (snapshot in
+`puzzles/domains.js`). It groups the
 category-browse screen's cards under headings, and each non-empty
 domain is a derived `domain-<id>` catalogue with its own Library card. This document records decisions made in advance so
 that vocabulary stays stable as the catalog grows, and so that navigation
@@ -55,8 +56,9 @@ course-catalog home page actually is.
 ## Domains are a property of the category registry, not of a puzzle
 
 The category's `domain` assignment lives in `puzzles/categories.js`,
-alongside `slug` and `info`; the stable domain vocabulary lives separately
-in `puzzles/domains.js`. A domain is never a field on a puzzle.
+alongside `slug` and `info`; the domains are their own published
+documents, with `puzzles/domains.js` as their snapshot. A domain is never a
+field on a puzzle.
 
 ```js
 export const CATEGORIES = {
@@ -336,8 +338,9 @@ authority: new domains, categories, and subcategories are added there,
 slugs are minted and stored there, and each term can link to the Library
 of Congress Classification class that fits it. Concept Clusters'
 subscriber applies those changes to its published category documents and
-keeps the player copy; puzzles key on the same slugs. Domains are still
-`puzzles/domains.js`, so domain changes wait for a code change. The admission test for future domains (above) stays
+keeps the player copy; puzzles key on the same slugs. Domains are
+published documents too, and `puzzles/domains.js` is the snapshot Freeze
+writes from them. The admission test for future domains (above) stays
 the rule for new top terms. See
 [dev-briefs/subjects-from-terminology-mcp.md](dev-briefs/subjects-from-terminology-mcp.md).
 
@@ -370,8 +373,8 @@ Collected here so the eventual change is not archaeology.
 - **MCP surface.** `create_category` / `update_category` write D1 category
   documents with optional `domain` alongside `title`, `id` (slug), `info`,
   and `subcategories`. `list_categories` and `get_category` return it. No
-  authoring tool needs a new domain-creation call — the domain set is
-  fixed vocabulary in `puzzles/domains.js`, not user-extensible content.
+  authoring tool needs a domain-creation call: domains are added in
+  terminology-mcp and arrive through the subjects subscriber.
 - **JSON-LD.** The interchange format needs no change, since domain is not
   a puzzle property. Only the category registry serializes it.
 - **Emoji.** The icons in the table above are editorial shorthand for this

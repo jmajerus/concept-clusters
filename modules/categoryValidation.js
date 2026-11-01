@@ -127,7 +127,7 @@ export function validateCategoryDocument(
     errors.push("title must not have surrounding whitespace");
   }
   if (raw.domain !== undefined && !Object.hasOwn(DOMAINS, raw.domain)) {
-    errors.push(`domain "${raw.domain}" is not a registered domain`);
+    errors.push(`domain "${raw.domain}" is not a registered domain (one of: ${Object.keys(DOMAINS).sort().join(", ")})`);
   }
   if (raw.info !== undefined) {
     errors.push(...validateInfo(raw.info, "info", { requireObject: true }));

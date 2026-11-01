@@ -131,15 +131,17 @@ export async function buildPlayCorpusPayload({
     contentService,
     puzzleIdsFromService(contentService)
   );
-  const [puzzleRows, catalogueRows, categoryRows] = await Promise.all([
+  const [puzzleRows, catalogueRows, categoryRows, domainRows] = await Promise.all([
     contentDocuments.listPublished({ kind: "puzzle" }),
     contentDocuments.listPublished({ kind: "catalogue" }),
-    contentDocuments.listPublished({ kind: "category" })
+    contentDocuments.listPublished({ kind: "category" }),
+    contentDocuments.listPublished({ kind: "domain" })
   ]);
   return assemblePlayCorpus({
     puzzleRows,
     catalogueRows,
     categoryRows,
+    domainRows,
     puzzleOrder: puzzleIdsFromService(contentService)
   });
 }
@@ -315,10 +317,11 @@ export function createLocalPlayCorpusHandler({
       const timing = createServerTiming();
       await ensureSeeded();
       timing.phase("seed");
-      const [puzzleRows, catalogueRows, categoryRows, draftRows, settings] = await Promise.all([
+      const [puzzleRows, catalogueRows, categoryRows, domainRows, draftRows, settings] = await Promise.all([
         timing.timed("published-puzzles", contentDocuments.listPublished({ kind: "puzzle" })),
         timing.timed("published-catalogues", contentDocuments.listPublished({ kind: "catalogue" })),
         timing.timed("published-categories", contentDocuments.listPublished({ kind: "category" })),
+        timing.timed("published-domains", contentDocuments.listPublished({ kind: "domain" })),
         timing.timed("working-copies", typeof listDrafts === "function" ? listDrafts() : []),
         timing.timed("site-settings", readSiteSettingsOrDefaults(siteSettings))
       ]);
@@ -327,6 +330,7 @@ export function createLocalPlayCorpusHandler({
         puzzleRows,
         catalogueRows,
         categoryRows,
+        domainRows,
         draftRows: Array.isArray(draftRows) ? draftRows : [],
         puzzleOrder: puzzleIdsFromService(contentService),
         settings

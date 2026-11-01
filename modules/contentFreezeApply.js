@@ -8,6 +8,8 @@ import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleForCanonicalPublication } from "./puzzleSimplified.js";
 import { layoutDocumentForMode, liftLegacyBoard } from "./layoutDocument.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
+import { domainsRegistryFromDocuments } from "./domainRegistry.js";
+import { renderDomainsSource } from "./domainsSnapshot.js";
 import { replaceAuthoringModelSuggestionsSource } from "./authoringModelSuggestions.js";
 import {
   formattedJson,
@@ -273,6 +275,18 @@ export async function applyContentFreeze({
     await remember(modelSuggestionsPath);
     queueWrite(files, modelSuggestionsPath,
       replaceAuthoringModelSuggestionsSource(modelSuggestionsSource, labels));
+  }
+
+  // Domains have no cue of their own: every Freeze rewrites the snapshot
+  // from the published domain rows, so git never lags them.
+  const domainRows = typeof contentDocuments.listPublished === "function"
+    ? await contentDocuments.listPublished({ kind: "domain" })
+    : [];
+  const domains = domainsRegistryFromDocuments(domainRows.map(row => row.document));
+  if (Object.keys(domains).length) {
+    const domainsPath = join(repositoryRoot, "puzzles", "domains.js");
+    await remember(domainsPath);
+    queueWrite(files, domainsPath, renderDomainsSource(domains));
   }
 
   queueWrite(files, puzzleRegistryPath, puzzleRegistry);

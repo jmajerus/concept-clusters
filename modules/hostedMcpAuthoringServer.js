@@ -13,6 +13,7 @@ import * as z from "zod/v4";
 import { settleAgentPresentationColors } from "./colorPalette.js";
 import { checkDocumentLinks } from "./wikiLinkCheck.js";
 import { DOMAINS } from "../puzzles/domains.js";
+import { refreshDomainsRegistry } from "./domainRegistry.js";
 import { categoryIdFor, subcategoryIdForPuzzle } from "../puzzles/categories.js";
 import {
   authoringGuidanceResult,
@@ -330,7 +331,9 @@ const metaCatalogueDocumentSchema = z.object({
 const categoryDocumentSchema = z.object({
   id: draftIdSchema,
   title: z.string().min(1).max(100),
-  domain: z.enum(Object.keys(DOMAINS)).optional(),
+  // A string, not an enum: domains are published data, so the list is
+  // checked against the live registry when the document is validated.
+  domain: z.string().min(1).optional().describe("A domain id from list_categories' domains."),
   info: infoSchema.optional(),
   subcategories: z.record(draftIdSchema, z.object({
     title: z.string().min(1).max(100),
@@ -766,7 +769,11 @@ export function createAuthoringMcpServer({
 
   async function taxonomyContext() {
     requireD1ContentDocuments("content reads");
-    const rows = await loadTaxonomyRows(contentDocuments, actor);
+    const [rows] = await Promise.all([
+      loadTaxonomyRows(contentDocuments, actor),
+      // Category validation and the domain field read DOMAINS.
+      refreshDomainsRegistry(contentDocuments)
+    ]);
     return {
       ...rows,
       puzzleIds: knownPuzzleIds({
@@ -1264,7 +1271,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("list_categories", {
     title: "List categories",
-    description: "List the subject taxonomy from D1 category-editor working copies and published rows, with registration state, metadata, subcategories, and puzzle counts. A published D1 category document is registered even when no puzzle references it yet. Git, including puzzles/categories.js, is not a runtime fallback.",
+    description: "List the subject taxonomy from D1 category-editor working copies and published rows, with registration state, metadata, subcategories, and puzzle counts, plus the domains a category may name. A published D1 category document is registered even when no puzzle references it yet. Git, including puzzles/categories.js, is not a runtime fallback.",
     inputSchema: z.object({}),
     annotations: READ_ONLY
   }, tracked("list_categories", safe(async () => {
@@ -1280,7 +1287,10 @@ export function createAuthoringMcpServer({
         .filter(Boolean),
       registrationMode: CATEGORY_REGISTRATION_MODES.PUBLISHED_DOCUMENT
     });
-    return success(`Found ${categories.length} categories.`, { categories });
+    const domains = Object.entries(DOMAINS)
+      .map(([id, domain]) => ({ id, title: domain.title }))
+      .sort((left, right) => left.title.localeCompare(right.title));
+    return success(`Found ${categories.length} categories in ${domains.length} domains.`, { categories, domains });
   })));
 
   server.registerTool("get_category", {

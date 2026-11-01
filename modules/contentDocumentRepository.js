@@ -23,7 +23,8 @@ export const CONTENT_DRAFT_KINDS = Object.freeze(["catalogue", "category"]);
 export const PUBLISHED_DOCUMENT_KINDS = Object.freeze([
   "puzzle",
   "catalogue",
-  "category"
+  "category",
+  "domain"
 ]);
 
 function assertKind(kind, allowed) {
