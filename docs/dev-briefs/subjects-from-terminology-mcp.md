@@ -204,8 +204,10 @@ It writes the result into Concept Clusters' published category documents
 - The bootstrap reconciles the snapshot with the published categories. It
   adds and renames; a category or subcategory missing from `cc-subjects`,
   or retired there but still published, is logged, never deleted.
-- A rename publishes the new title (the old one joins `previousTitles`) and
-  keeps the `info` text. A retire re-tags published puzzles, then removes
+- A category rename publishes the new title (the old one joins
+  `previousTitles`) and keeps the `info` text. A subcategory rename changes
+  only its title: puzzles join subcategories on the slug, so no old title
+  is kept. A retire re-tags published puzzles, then removes
   the subcategory or withdraws the category. Working copies are not
   re-tagged; one that still names the old key fails validation on publish.
 - New, renamed, or retired domains are held (`new-domain`, `domain-rename`,

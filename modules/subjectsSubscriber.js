@@ -223,6 +223,8 @@ export function planChange(change, terms, { domains = DOMAINS } = {}) {
       if (from.depth !== to.depth) return hold("depth-change", `${nameOf(terms, id)} retired into a term at another level`);
       if (from.depth === 0) return hold("domain-retire", `Domain ${nameOf(terms, id)} retired: domains are still puzzles/domains.js`);
       if (from.depth === 1) {
+        const child = Object.keys(after).find(other => after[other].broader[0] === id && after[other].status !== "retired");
+        if (child) return hold("depth-change", `${nameOf(terms, id)} retired while ${nameOf(after, child)} is still under it`);
         return plan("apply", {
           edits: [
             { op: "retag", from: { category: from.category }, to: { category: to.category } },
@@ -490,6 +492,13 @@ export async function applyEdits(edits, { repository, actor = SUBSCRIBER_ACTOR }
   return { done };
 }
 
+export class CursorMovedError extends Error {
+  constructor() {
+    super("The subjects cursor moved during this pass (another run or an --accept); the next pass starts from the new cursor.");
+    this.name = "CursorMovedError";
+  }
+}
+
 // The cursor row (postgres/migrations/0008_subjects_subscription.sql).
 export function createSubscriptionStore(pool) {
   return {
@@ -513,14 +522,25 @@ export function createSubscriptionStore(pool) {
         blocked: rows[0].blocked ? JSON.parse(rows[0].blocked) : null
       };
     },
-    async write({ scheme = SUBJECTS_SCHEME_ID, log, through, terms, blocked = null }) {
-      await pool.query(`
-        INSERT INTO subjects_subscription (scheme, log, through, terms, blocked, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT (scheme) DO UPDATE SET
-          log = EXCLUDED.log, through = EXCLUDED.through, terms = EXCLUDED.terms,
-          blocked = EXCLUDED.blocked, updated_at = EXCLUDED.updated_at
-      `, [scheme, log, through, JSON.stringify(terms), blocked ? JSON.stringify(blocked) : null, new Date().toISOString()]);
+    // A compare-and-set: `expected` is the `through` this writer read, or
+    // null for a bootstrap that found no row. The drain loop and an
+    // --accept run in separate processes, so a cursor that moved since the
+    // read throws CursorMovedError instead of being overwritten.
+    async write({ scheme = SUBJECTS_SCHEME_ID, log, through, terms, blocked = null, expected }) {
+      const values = [scheme, log, through, JSON.stringify(terms), blocked ? JSON.stringify(blocked) : null, new Date().toISOString()];
+      const result = expected == null
+        ? await pool.query(`
+            INSERT INTO subjects_subscription (scheme, log, through, terms, blocked, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (scheme) DO NOTHING
+          `, values)
+        : await pool.query(`
+            UPDATE subjects_subscription
+            SET log = $2, through = $3, terms = $4, blocked = $5, updated_at = $6
+            WHERE scheme = $1 AND log = $2 AND through = $7
+          `, [...values, expected]);
+      const count = result.rowCount ?? result.affectedRows ?? 0;
+      if (count !== 1) throw new CursorMovedError();
     },
     async clear(scheme = SUBJECTS_SCHEME_ID) {
       await pool.query("DELETE FROM subjects_subscription WHERE scheme = $1", [scheme]);
@@ -537,7 +557,7 @@ async function bootstrap({ client, store, repository, apply, domains }) {
   if (!apply) return { outcome: "bootstrap", ...base, planned: edits.map(describeEdit) };
   const result = await applyEdits(edits, { repository });
   if (result.hold) return { outcome: "bootstrap-held", ...base, applied: result.done, hold: result.hold };
-  await store.write({ log: state.log, through: state.version, terms, blocked: null });
+  await store.write({ log: state.log, through: state.version, terms, blocked: null, expected: null });
   return { outcome: "bootstrapped", ...base, applied: result.done, reset: true };
 }
 
@@ -578,12 +598,15 @@ export async function runSubjectsSync({ client, store, repository, apply = true,
         break;
       }
     }
+    if (apply) {
+      await store.write({ log: cursor.log, through: change.n, terms: plan.terms, blocked: null, expected: through });
+    }
     terms = plan.terms;
     through = change.n;
-    if (apply) await store.write({ log: cursor.log, through, terms, blocked: null });
   }
+  const written = through;
   if (!blocked) through = response.version;
-  if (apply) await store.write({ log: cursor.log, through, terms, blocked });
+  if (apply) await store.write({ log: cursor.log, through, terms, blocked, expected: written });
   return {
     outcome: blocked ? "held" : through > cursor.through ? "applied" : "current",
     log: cursor.log,
@@ -605,7 +628,7 @@ export async function acceptHeldChange({ client, store, n }) {
   const change = (response.changes || []).find(candidate => candidate.n === n);
   if (!change) throw new Error(`Change ${n} is not after the cursor (${cursor.through}).`);
   const terms = termsAfter(cursor.terms, change);
-  await store.write({ log: cursor.log, through: n, terms, blocked: null });
+  await store.write({ log: cursor.log, through: n, terms, blocked: null, expected: cursor.through });
   return { log: cursor.log, through: n, change };
 }
 
@@ -651,6 +674,7 @@ export function createSubjectsSyncer({
   const repository = pool ? new PostgresPublishedRepository(pool) : null;
   let status = { state: enabled ? "pending" : "off" };
   let lastMessage = null;
+  const loggedProblems = new Set();
   let lastReport = null;
   let lastReportAt = 0;
   const note = (level, message) => {
@@ -670,7 +694,12 @@ export function createSubjectsSyncer({
         blocked: result.blocked || result.hold || null
       };
       for (const line of result.applied || []) log.log(`Subjects sync: ${line}`);
-      for (const problem of result.problems || []) log.error(`Subjects sync: ${problem.code}: ${problem.reason}`);
+      for (const problem of result.problems || []) {
+        const message = `Subjects sync: ${problem.code}: ${problem.reason}`;
+        if (loggedProblems.has(message)) continue;
+        loggedProblems.add(message);
+        log.error(message);
+      }
       if (result.outcome === "bootstrap-held") {
         note("error", `Subjects sync bootstrap held (retrying): ${result.hold.code}: ${result.hold.reason}`);
         return result;

@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { PGlite } from "@electric-sql/pglite";
 import { PostgresPublishedRepository } from "../modules/postgresPublishedRepository.js";
 import {
+  CursorMovedError,
   acceptHeldChange,
+  applyEdits,
   createSubjectsSyncer,
   createSubscriptionStore,
   planChange,
@@ -136,6 +138,13 @@ function planUnits() {
   }, terms);
   assert.equal(merge.code, "subcategory-move");
 
+  // A category retired while subcategories are still under it.
+  const orphaning = planChange({
+    n: 15, kind: "retired", terms: ["c1"],
+    afterTerms: [term("c1", "biology", "Biology", "d1", { status: "retired", replacedBy: ["c2"] })]
+  }, terms);
+  assert.equal(orphaning.code, "depth-change");
+
   assert.equal(planChange({ n: 16, kind: "slugged", terms: ["s1"], after: term("s1", "genome", "Genomics", "c1") }, terms).code, "slug-change");
   assert.equal(planChange({ n: 16, kind: "split", terms: ["s1"] }, terms).code, "split");
   assert.equal(planChange({ n: 16, kind: "noted", terms: ["s1"], afterTerms: [term("s1", "genomics", "Genomics", "c1")] }, terms).action, "skip");
@@ -267,9 +276,63 @@ async function endToEnd() {
   assert.equal((await createSubjectsSyncer({ pool, client, env: {} })()).outcome, "skipped");
 }
 
+async function categoryRetireAndRebuild() {
+  const db = new PGlite();
+  const pool = poolFrom(db);
+  await applyPostgresMigrations(pool);
+  const repository = new PostgresPublishedRepository(pool);
+  await repository.publish({ kind: "category", id: "biology", actor, document: { id: "biology", title: "Biology", domain: "life-sciences" } });
+  await repository.publish({ kind: "category", id: "history", actor, document: { id: "history", title: "History", domain: "humanities" } });
+  await repository.publish({ kind: "category", id: "ecology", actor, document: { id: "ecology", title: "Ecology", domain: "life-sciences" } });
+  await repository.publish({ kind: "puzzle", id: "food-webs", actor, document: { id: "food-webs", title: "Food Webs", category: "ecology", categories: ["ecology", "history"] } });
+  const store = createSubscriptionStore(pool);
+  const client = fakeClient({
+    terms: [term("d1", "life-sciences", "Life Sciences"), term("d2", "humanities", "Humanities"),
+      term("c1", "biology", "Biology", "d1"), term("c2", "history", "History", "d2"), term("c3", "ecology", "Ecology", "d1")]
+  });
+  assert.equal((await runSubjectsSync({ client, store, repository })).outcome, "bootstrapped");
+
+  // Withdrawing a category a live puzzle still uses holds.
+  const refused = await applyEdits([{ op: "withdraw-category", id: "ecology" }], { repository });
+  assert.equal(refused.hold.code, "still-referenced");
+  assert.match(refused.hold.reason, /food-webs/);
+
+  client.log.push({
+    n: 11, kind: "retired", terms: ["c3"],
+    after: term("c3", "ecology", "Ecology", "d1", { status: "retired", replacedBy: ["c1"] }),
+    afterTerms: [term("c3", "ecology", "Ecology", "d1", { status: "retired", replacedBy: ["c1"] })]
+  });
+  const retired = await runSubjectsSync({ client, store, repository });
+  assert.equal(retired.outcome, "applied");
+  const puzzle = (await repository.getPublished({ kind: "puzzle", id: "food-webs" })).document;
+  assert.equal(puzzle.category, "biology");
+  assert.deepEqual(puzzle.categories, ["biology", "history"]);
+  assert.ok((await repository.getPublished({ kind: "category", id: "ecology" })).withdrawnAt);
+
+  // A cursor that moved since it was read is not overwritten.
+  const cursor = await store.read();
+  await store.write({ ...cursor, expected: cursor.through });
+  await assert.rejects(store.write({ ...cursor, through: cursor.through, expected: cursor.through - 1 }), CursorMovedError);
+  await assert.rejects(store.write({ ...cursor, expected: null }), CursorMovedError);
+
+  // A new log id clears the cursor, and the next pass bootstraps.
+  const relogged = { ...client, changes: async () => ({ log: "log-2", version: 3, changes: [] }) };
+  const moved = await runSubjectsSync({ client: relogged, store, repository });
+  assert.equal(moved.outcome, "rebuilt");
+  assert.equal(await store.read(), null);
+  assert.equal((await runSubjectsSync({ client, store, repository })).outcome, "bootstrapped");
+
+  // So does a cursor past the head (400) under the same log id.
+  const behind = { ...client, changes: async () => { throw new TerminologyError(400, "since beyond head"); } };
+  assert.equal((await runSubjectsSync({ client: behind, store, repository })).outcome, "rebuilt");
+  assert.equal(await store.read(), null);
+  assert.equal((await runSubjectsSync({ client, store, repository })).outcome, "bootstrapped");
+}
+
 export async function run() {
   planUnits();
   reconcileUnits();
   retagUnits();
   await endToEnd();
+  await categoryRetireAndRebuild();
 }
