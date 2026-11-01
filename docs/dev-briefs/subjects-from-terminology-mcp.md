@@ -181,9 +181,12 @@ category the subscriber's mirror holds (`modules/subjectCopy.js`):
 Categories outside the mirror (Trivia, Vocabulary) keep the full editor,
 and without a mirror every category does.
 
-Over MCP, `update_category` still writes whole documents, and
-`create_category` creates them. Both become copy-only writes and proposals
-to terminology-mcp in a later change.
+Over MCP there is no category structure write. `update_subject_copy`
+writes the blurb and links of a category and its subcategories (saved to the
+working copy and, with `publish_to_authoring`, published onto the current
+row the same way), or of a domain. A missing subject is proposed with
+terminology-mcp's own `propose_term` tool and arrives through the
+subscriber.
 
 ## What the subscriber applies
 
@@ -265,8 +268,9 @@ the public site and CI read.
    (`cc-subjects`: 2). Usage reports are still planned.
 4. **Concept Clusters:** the changelog subscriber writing category data
    (live); domains as published documents (live); the editor narrowed to
-   player copy, including domain copy (built); `update_category` copy-only
-   and `create_category` and new subcategories as proposals.
+   player copy, including domain copy (built); `create_category` and
+   `update_category` retired for `update_subject_copy`, with new subjects
+   proposed through terminology-mcp's `propose_term` (built).
 5. **Retire** the corpus-mcp taxonomy push (`modules/taxonomyPush.js`)
    once corpus-mcp subscribes to terminology-mcp directly.
 

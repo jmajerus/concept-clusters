@@ -87,7 +87,7 @@ function backlogCategoryCandidates(backlog) {
         publication: {
           requiresNewCategory: true,
           assignSubcategory: !!nested,
-          note: "Call create_category with categoryDocument, then set puzzle.category to that title."
+          note: "Propose this category in terminology-mcp (propose_term, scheme cc-subjects, under its domain) with categoryDocument's title and id as the slug hint; once it is published here, set puzzle.category to its id and write its blurb with update_subject_copy."
         },
         categoryDocument: {
           id: slugify(entry.name),
@@ -142,7 +142,7 @@ function backlogSubcategoryCandidates(backlog) {
             title: entry.title,
             ...(entry.info ? { info: entry.info } : {})
           },
-          note: "Add this subcategory with update_category on the parent category working copy; the human Publishes on /admin/categories."
+          note: "Propose this subcategory in terminology-mcp (propose_term, scheme cc-subjects, broader = the parent category) with its id as the slug hint; once it is published here, write its blurb with update_subject_copy."
         }
       };
     });

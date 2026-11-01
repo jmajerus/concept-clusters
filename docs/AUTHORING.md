@@ -45,7 +45,7 @@ actually relevant.
 | Machine-readable fields for the active pass | `get_authoring_schema` or the complete schema resource |
 | Operational PR-review or catalogue/category procedure | `get_workflow_guidance` |
 | Accumulating work | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `validate_puzzle_draft` |
-| Category and catalogue working copies | `create_category`, `update_category`, `create_catalogue`, `update_catalogue` |
+| Subject copy and catalogue working copies | `update_subject_copy`, `create_catalogue`, `update_catalogue` |
 
 Publication, review-loop, catalogue-write, and local checkout tools are listed
 once in [MCP.md](MCP.md#tools) rather than duplicated here. Local stdio and

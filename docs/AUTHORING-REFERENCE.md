@@ -1420,7 +1420,8 @@ Puzzles join a category by the stable **category id** (`category`,
 `categories`, and the keys of `subcategories`). Copy on the category document
 (title, blurb, links, domain, and subcategory titles) can change freely:
 
-1. On `/admin/categories/<id>` (or `update_category`), change the title
+1. For a category outside `cc-subjects`, on `/admin/categories/<id>`, change the title
+   (a subject category is renamed in terminology-mcp, and the subscriber does this step)
    and publish. The document id (URL slug) stays the same. The old title
    is appended to the category's `previousTitles` automatically -- that
    list is the category's own rename history and survives Freeze into

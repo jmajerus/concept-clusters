@@ -6,7 +6,7 @@
 // onto the current published row is how it is saved and published, so a
 // working copy opened before a synced change can never undo it.
 
-import { keyOf } from "./subjectsSubscriber.js";
+import { keyOf } from "./subjectTree.js";
 
 function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));

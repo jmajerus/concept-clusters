@@ -13,7 +13,9 @@ import * as z from "zod/v4";
 import { settleAgentPresentationColors } from "./colorPalette.js";
 import { checkDocumentLinks } from "./wikiLinkCheck.js";
 import { DOMAINS } from "../puzzles/domains.js";
-import { refreshDomainsRegistry } from "./domainRegistry.js";
+import { refreshDomainsRegistry, validateDomainDocument } from "./domainRegistry.js";
+import { DraftNotFoundError } from "./draftRepository.js";
+import { applyCopy, copyOf, missingCopy } from "./subjectCopy.js";
 import { categoryIdFor, subcategoryIdForPuzzle } from "../puzzles/categories.js";
 import {
   authoringGuidanceResult,
@@ -47,7 +49,7 @@ import {
   assertNoWriteOnceDrift,
   projectAuthoredDocument
 } from "./authoringDomains.js";
-import { repairEscapedQuotes } from "./contentValidation.js";
+import { repairEscapedQuotes, validateInfo } from "./contentValidation.js";
 import {
   canonicalClassificationProjection,
   classificationAssignmentErrors
@@ -130,7 +132,7 @@ import {
   loadCatalogueDocument,
   loadTaxonomyRows,
   previewCatalogueWrite,
-  previewCategoryWrite,
+  resolveCategoryName,
   catalogueSummaryOf
 } from "./authoringMcpTaxonomy.js";
 
@@ -328,22 +330,6 @@ const metaCatalogueDocumentSchema = z.object({
   }).strict().nullable().optional()
 }).strict();
 
-const categoryDocumentSchema = z.object({
-  id: draftIdSchema,
-  title: z.string().min(1).max(100),
-  // A string, not an enum: domains are published data, so the list is
-  // checked against the live registry when the document is validated.
-  domain: z.string().min(1).optional().describe("A domain id from list_categories' domains."),
-  info: infoSchema.optional(),
-  subcategories: z.record(draftIdSchema, z.object({
-    title: z.string().min(1).max(100),
-    info: infoSchema.optional()
-  }).strict()).optional(),
-  previousTitles: z.array(z.string().min(1).max(100)).optional().describe(
-    "Titles this category was previously published under. Maintained automatically when the title changes; retained only as read-compatibility history for legacy puzzle documents. Omit it to keep the recorded history."
-  )
-}).strict();
-
 const publishToAuthoringInput = Object.freeze({
   publish_to_authoring: z.boolean().default(false).describe(
     "Also publish this valid D1 working copy onto the player in this call. " +
@@ -367,7 +353,27 @@ function puzzleDraftSaveSchema(shape) {
 
 const catalogueWriteDocumentSchema = catalogueDocumentSchema.extend(publishToAuthoringInput);
 const metaCatalogueWriteDocumentSchema = metaCatalogueDocumentSchema.extend(publishToAuthoringInput);
-const categoryWriteDocumentSchema = categoryDocumentSchema.extend(publishToAuthoringInput);
+// One info field patch: a string sets it, null or "" removes it.
+const infoPatchSchema = z.object({
+  text: z.string().nullable().optional(),
+  link: z.string().nullable().optional(),
+  extraLink: z.string().nullable().optional()
+}).strict();
+
+// RFC 7396 for one info object; undefined keeps the current value and null
+// removes it. Returns the merged object, or undefined when nothing is left.
+function mergeInfoPatch(current, patch) {
+  if (patch === undefined) return current;
+  if (patch === null) return undefined;
+  const next = typeof current === "string" ? { text: current } : { ...(current || {}) };
+  for (const key of ["text", "link", "extraLink"]) {
+    if (!(key in patch)) continue;
+    const value = typeof patch[key] === "string" ? patch[key].trim() : "";
+    if (value) next[key] = value;
+    else delete next[key];
+  }
+  return Object.keys(next).length ? next : undefined;
+}
 
 const READ_ONLY = Object.freeze({
   readOnlyHint: true,
@@ -573,8 +579,8 @@ function analyticsTarget(toolName, args) {
     return { type: "catalogue", id: args.id };
   }
   if (args?.catalogue_id) return { type: "catalogue", id: args.catalogue_id };
-  if ((toolName === "create_category" || toolName === "update_category") && args?.id) {
-    return { type: "category", id: args.id };
+  if (toolName === "update_subject_copy" && (args?.category || args?.domain)) {
+    return args.category ? { type: "category", id: args.category } : { type: "domain", id: args.domain };
   }
 
   if (toolName === "get_category" && args?.name) {
@@ -685,7 +691,7 @@ function serverInstructions() {
     "create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for that draft_id. " +
     "A draft that has never been created uses create_puzzle_draft. " +
     mcpPublicationBoundaryGuidance() + " " +
-    "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. create_puzzle_draft takes category, categories, and subcategories on the complete document. Leave tags and level unset there. A later shelf edit saves them with domain=classification. Associate catalogues via get_catalogue then update_catalogue. A category is registered when its category-editor document is published to D1; a published category document may and should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Use create_category or update_category to create or revise the category document; set publish_to_authoring=true to publish it in the same call. Those writes are D1 working copies unless published, and that publish is live on the player. Cue and Freeze only snapshot git. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
+    "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. create_puzzle_draft takes category, categories, and subcategories on the complete document. Leave tags and level unset there. A later shelf edit saves them with domain=classification. Associate catalogues via get_catalogue then update_catalogue. A category is registered when its document is published to D1, and it should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Domains, categories, and subcategories come from terminology-mcp's cc-subjects scheme: propose a missing one with its propose_term tool, and it is published here within a minute. update_subject_copy writes their blurbs and links; with publish_to_authoring=true that publish is live on the player. Cue and Freeze only snapshot git. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
 }
 
 export function createAuthoringMcpServer({
@@ -761,10 +767,6 @@ export function createAuthoringMcpServer({
 
   async function persistCatalogueDocument(document, publishToAuthoring = false) {
     return persistContentDocument("catalogue", document, publishToAuthoring);
-  }
-
-  async function persistCategoryDocument(document, publishToAuthoring = false) {
-    return persistContentDocument("category", document, publishToAuthoring);
   }
 
   async function taxonomyContext() {
@@ -1295,7 +1297,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_category", {
     title: "Get category",
-    description: "Return one D1 category's navigation metadata, subcategories, and puzzle counts, plus the published or working-copy document in update_category's input shape. A category-editor publication is authoritative even when Git has no matching entry. Name may be the display title or stable category id.",
+    description: "Return one D1 category's navigation metadata, subcategories, and puzzle counts, plus the published or working-copy document. Its title, domain, and subcategories come from terminology-mcp; update_subject_copy writes its player copy. A category-editor publication is authoritative even when Git has no matching entry. Name may be the display title or stable category id.",
     inputSchema: z.object({ name: z.string().min(1) }),
     annotations: READ_ONLY
   }, tracked("get_category", safe(async ({ name }) => {
@@ -2599,61 +2601,102 @@ export function createAuthoringMcpServer({
     );
   })));
 
-  server.registerTool("create_category", {
-    title: "Create category",
-    description: "Create a category document in a D1 working copy. Publishing that category document registers the category; set publish_to_authoring=true to publish the valid document to authoring play in the same call, before authoring puzzles that reference it. The published row is authoritative even when Git, including puzzles/categories.js, has no matching entry. The category id is the stable join used by puzzle category/category[] references; title is display copy. That publish is live on the player. It does not Cue or Freeze. Does not open a GitHub pull request.",
-    inputSchema: categoryWriteDocumentSchema,
-    annotations: CREATE
-  }, tracked("create_category", safe(async ({ publish_to_authoring, ...document }) => {
-    const taxonomy = await taxonomyContext();
-    const result = previewCategoryWrite(document, {
-      mode: "create",
-      existing: taxonomy.existingCategories
-    });
-    if (!result.valid) {
-      return success(
-        `Cannot create category because it has ${result.errors.length} errors.`,
-        { valid: false, errors: result.errors, category: null }
-      );
-    }
-    const { record, published } = await persistCategoryDocument(
-      result.preview.document,
-      publish_to_authoring
-    );
-    return success(
-      published
-        ? `Saved and published category ${record.id} onto the player. Cue and Freeze only snapshot git.`
-        : `Saved category working copy ${record.id}. Publish this category document before relying on it as registered live taxonomy; the category id is the stable join used by puzzle references.`,
-      { valid: true, errors: [], category: record, published }
-    );
-  })));
-
-  server.registerTool("update_category", {
-    title: "Update category",
-    description: "Save the complete category document to the D1 working copy. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; that publish is live on the player. It does not Cue or Freeze. Does not open a GitHub pull request. The category id is the stable join used by puzzles; title is display copy. Renaming a title does not require puzzle rewrites, while previousTitles remains a read-compatibility ledger.",
-    inputSchema: categoryWriteDocumentSchema,
+  // Player copy for a category (and its subcategories) or a domain.
+  // Structure belongs to terminology-mcp's cc-subjects scheme
+  // (docs/dev-briefs/subjects-from-terminology-mcp.md), so this tool never
+  // writes titles, domains, or which subcategories exist. A category's copy
+  // goes to the working copy and is published onto the current row, so an
+  // old get_category document can never revert a synced change.
+  server.registerTool("update_subject_copy", {
+    title: "Update subject copy",
+    description:
+      "Write player copy -- the blurb (text), link, and extra link -- for one category and its subcategories, or for one domain. " +
+      "Which domains, categories, and subcategories exist, and their titles and nesting, belong to terminology-mcp's cc-subjects scheme: " +
+      "propose a new subject there with its propose_term tool, and it arrives here within a minute. " +
+      "The patch merges: omit a field to keep it, send null to remove it. Subcategory keys must be existing subcategory ids. " +
+      "A category's copy is saved to the D1 working copy; set publish_to_authoring=true to also publish it onto the current published row, live on the player. " +
+      "A domain has no working copy, so domain copy needs publish_to_authoring=true. " +
+      "Categories, subcategories, and domains in list_categories and get_category without info text are the ones that need copy.",
+    inputSchema: z.object({
+      category: z.string().min(1).optional().describe("Category id or title."),
+      domain: z.string().min(1).optional().describe("Domain id, instead of category."),
+      info: infoPatchSchema.nullable().optional(),
+      subcategories: z.record(z.string().min(1), infoPatchSchema.nullable()).optional(),
+      ...publishToAuthoringInput
+    }).strict(),
     annotations: WRITE
-  }, tracked("update_category", safe(async ({ publish_to_authoring, ...document }) => {
-    const taxonomy = await taxonomyContext();
-    const result = previewCategoryWrite(document, {
-      mode: "update",
-      existing: taxonomy.existingCategories
-    });
-    if (!result.valid) {
-      return success(
-        `Cannot update category because it has ${result.errors.length} errors.`,
-        { valid: false, errors: result.errors, category: null }
-      );
+  }, tracked("update_subject_copy", safe(async ({ category, domain, info, subcategories, publish_to_authoring }) => {
+    if (Boolean(category) === Boolean(domain)) throw new Error("Name exactly one of category or domain.");
+    requireD1ContentDocuments("subject copy");
+
+    if (domain) {
+      if (subcategories) throw new Error("A domain has no subcategories.");
+      if (!publish_to_authoring) {
+        throw new Error("A domain has no working copy: set publish_to_authoring=true to publish its copy.");
+      }
+      const row = await publishedRowOrNull(contentDocuments, "domain", domain);
+      if (!row || row.withdrawnAt) throw new Error(`Unknown domain: ${domain}. list_categories returns the domains.`);
+      const next = { ...row.document };
+      const merged = mergeInfoPatch(row.document.info, info);
+      if (merged) next.info = merged;
+      else delete next.info;
+      const validation = validateDomainDocument(next);
+      if (!validation.valid) throw new Error(validation.errors.join("; "));
+      const published = await contentDocuments.publish({
+        kind: "domain", id: domain, document: validation.document, actor, expectedRevision: row.revision
+      });
+      await refreshDomainsRegistry(contentDocuments);
+      return success(`Published copy for domain ${domain} onto the player.`, { domain: validation.document, published });
     }
-    const { record, published } = await persistCategoryDocument(
-      result.preview.document,
-      publish_to_authoring
-    );
+
+    const taxonomy = await taxonomyContext();
+    const title = resolveCategoryName(taxonomy.categoryRegistry, category);
+    const id = title ? (taxonomy.categoryRegistry[title]?.slug || category) : category;
+    const published = await publishedRowOrNull(contentDocuments, "category", id);
+    let draft = null;
+    try {
+      draft = await contentDocuments.getDraft({ kind: "category", id, actor });
+    } catch (error) {
+      if (!(error instanceof DraftNotFoundError) && !String(error?.message || "").startsWith("Unknown draft:")) throw error;
+    }
+    const live = published && !published.withdrawnAt ? published : null;
+    const structure = live?.document || draft?.document;
+    if (!structure) throw new Error(`Unknown category: ${category}. list_categories returns the categories.`);
+    // Keep copy this owner saved but has not published.
+    const next = applyCopy(structure, copyOf(draft?.document || structure));
+    if (info !== undefined) {
+      const merged = mergeInfoPatch(next.info, info);
+      if (merged) next.info = merged;
+      else delete next.info;
+    }
+    for (const [sub, patch] of Object.entries(subcategories || {})) {
+      const definition = next.subcategories?.[sub];
+      if (!definition) {
+        throw new Error(`Category ${id} has no subcategory ${sub}. Subcategories are added in terminology-mcp.`);
+      }
+      const merged = mergeInfoPatch(definition.info, patch);
+      if (merged) definition.info = merged;
+      else delete definition.info;
+    }
+    const errors = [
+      ...validateInfo(next.info, "info", { requireObject: true }),
+      ...Object.entries(next.subcategories || {})
+        .flatMap(([sub, definition]) => validateInfo(definition.info, `subcategories.${sub}.info`, { requireObject: true }))
+    ];
+    if (errors.length) return success(`Cannot save copy for ${id}: ${errors.join("; ")}`, { valid: false, errors });
+    const record = await upsertCategoryDraft(contentDocuments, { document: next, actor });
+    let publication = null;
+    if (publish_to_authoring) {
+      if (!live) throw new Error(`Category ${id} is not published; its copy was saved to the working copy only.`);
+      publication = await contentDocuments.publish({
+        kind: "category", id, document: applyCopy(live.document, copyOf(next)), actor, expectedRevision: live.revision
+      });
+    }
     return success(
-      published
-        ? `Saved and published category ${record.id} onto the player. Cue and Freeze only snapshot git.`
-        : `Saved category working copy ${record.id}.`,
-      { valid: true, errors: [], category: record, published }
+      publication
+        ? `Saved and published copy for ${id} onto the player. Cue and Freeze only snapshot git.`
+        : `Saved copy for ${id} to the working copy. A person publishes it on /admin/categories, or call again with publish_to_authoring=true.`,
+      { valid: true, errors: [], category: record, published: publication, missingCopy: missingCopy(next) }
     );
   })));
 
