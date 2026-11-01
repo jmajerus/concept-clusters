@@ -150,8 +150,8 @@ the taxonomy; see
 The graph is the Concept Clusters side of the taxonomy, kept current by the
 sync. It is not a channel into terminology-mcp: once `cc-subjects` exists,
 importing again is refused (409, the source scheme is already imported),
-so a category or subcategory added in Concept Clusters is added in
-terminology-mcp by hand until the subscriber exists (see the dev-brief).
+and changes flow the other way: Concept Clusters' subscriber applies
+`cc-subjects` changes to its categories (see the dev-brief).
 It also has no LCC links; those live only in terminology-mcp.
 
 To seed an empty terminology-mcp store, use its **Import SKOS…** with the

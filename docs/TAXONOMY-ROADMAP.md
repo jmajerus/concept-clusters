@@ -331,15 +331,13 @@ collection was previously visible only after opening All Puzzles.
 
 ## Where the taxonomy lives
 
-terminology-mcp holds this taxonomy as its `cc-subjects` scheme (13
-domains, 56 categories, 117 subcategories) and is becoming its authority:
-new domains, categories, and subcategories are added there, slugs are
-minted and stored there, and each term can link to the Library of
-Congress Classification class that fits it. Concept Clusters keeps the
-player copy and keys puzzles on the same slugs. `puzzles/categories.js`
-and `puzzles/domains.js` remain the registry until Concept Clusters
-subscribes to terminology-mcp's changes, after which both become
-generated snapshots. The admission test for future domains (above) stays
+terminology-mcp holds this taxonomy as its `cc-subjects` scheme and is its
+authority: new domains, categories, and subcategories are added there,
+slugs are minted and stored there, and each term can link to the Library
+of Congress Classification class that fits it. Concept Clusters'
+subscriber applies those changes to its published category documents and
+keeps the player copy; puzzles key on the same slugs. Domains are still
+`puzzles/domains.js`, so domain changes wait for a code change. The admission test for future domains (above) stays
 the rule for new top terms. See
 [dev-briefs/subjects-from-terminology-mcp.md](dev-briefs/subjects-from-terminology-mcp.md).
 
