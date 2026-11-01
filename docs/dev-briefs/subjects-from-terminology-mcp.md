@@ -1,7 +1,7 @@
 # Subjects from terminology-mcp
 
-**Status: steps 1 and 2 done; LCC linking under way; the subscriber is
-next.** terminology-mcp
+**Status: steps 1–3 done; the subscriber (step 4, first part) is built and
+off until `SUBJECTS_SYNC=on`; LCC linking under way.** terminology-mcp
 (`http://terminology-mcp.localdomain:8000`) holds Concept Clusters' subject
 taxonomy as the `cc-subjects` scheme and is becoming its authority: which
 domains, categories, and subcategories exist, what they are called, and how
@@ -195,8 +195,33 @@ beside the taxonomy push and the ontology sync:
 - It reaches terminology-mcp directly on the LAN, which skips the Access
   check that applies to public hostnames.
 
-It writes the result into Concept Clusters' published category and domain
-data. Everything downstream is unchanged: D1 and the player, Freeze, and
+It writes the result into Concept Clusters' published category documents
+(`modules/subjectsSubscriber.js`), as the `terminology-mcp` actor:
+
+- The cursor (`log`, `through`, the term map, and any hold) is the
+  `subjects_subscription` row in Postgres (migration 0008). Deleting it, or
+  `npm run subjects:sync -- --rebootstrap`, makes the next pass bootstrap.
+- The bootstrap reconciles the snapshot with the published categories. It
+  adds and renames; a category or subcategory missing from `cc-subjects`,
+  or retired there but still published, is logged, never deleted.
+- A category rename publishes the new title (the old one joins
+  `previousTitles`) and keeps the `info` text. A subcategory rename changes
+  only its title: puzzles join subcategories on the slug, so no old title
+  is kept. A retire re-tags published puzzles, then removes
+  the subcategory or withdraws the category. Working copies are not
+  re-tagged; one that still names the old key fails validation on publish.
+- New, renamed, or retired domains are held (`new-domain`, `domain-rename`,
+  `domain-retire`) while domains are code.
+- A hold is reported as `blocked` with one of the codes above, and stays
+  until a person handles the change and runs
+  `npm run subjects:sync -- --accept <n>`.
+- It reports progress when the cursor or the hold moves, and every five
+  minutes otherwise.
+
+`npm run subjects:sync` is a dry run: what the next pass would apply and
+where it would stop. `--apply` runs one pass and reports.
+`TERMINOLOGY_BASE` overrides the server (`off` disables it); the drain loop
+runs the pass only with `SUBJECTS_SYNC=on`. Everything downstream is unchanged: D1 and the player, Freeze, and
 the git snapshots (`puzzles/categories.js`, and `puzzles/domains.js` once
 generated) that the public site and CI read.
 
@@ -211,12 +236,14 @@ generated) that the public site and CI read.
    from the subjects graph: 186 terms (13 domains, 56 categories, 117
    subcategories), a tree, every slug kept. LCC links are added one term
    at a time, as they help.
-3. **terminology-mcp:** subscriber cursors and usage reports, and
-   `propose_term` creating provisional terms with a slug hint.
-4. **Concept Clusters:** the changelog subscriber writing category and
-   domain data; the five domain readers moved off `domains.js`, which
-   becomes a generated snapshot; the editor narrowed to player copy;
-   `create_category` and new subcategories as proposals.
+3. **terminology-mcp (done):** progress reports
+   (`POST /api/subscribers/:id/progress`), `POST /api/proposals` creating
+   provisional terms with a slug hint, and a scheme depth limit
+   (`cc-subjects`: 2). Usage reports are still planned.
+4. **Concept Clusters:** the changelog subscriber writing category data
+   (built); domains as published data, with the five readers moved off
+   `domains.js`, which becomes a generated snapshot; the editor narrowed to
+   player copy; `create_category` and new subcategories as proposals.
 5. **Retire** the corpus-mcp taxonomy push (`modules/taxonomyPush.js`)
    once corpus-mcp subscribes to terminology-mcp directly.
 

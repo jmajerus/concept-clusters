@@ -1,14 +1,16 @@
 // Drains the published replica queue while the authoring server is up.
 // A missing D1 client leaves the queue pending; the next tick tries again.
-// Each tick also pushes the taxonomy to corpus-mcp when it has changed and
-// syncs the ontology graphs on the LAN Oxigraph server, whether or not D1
-// is reachable.
+// Each tick also applies terminology-mcp's cc-subjects changes when
+// SUBJECTS_SYNC=on, pushes the taxonomy to corpus-mcp when it has changed,
+// and syncs the ontology graphs on the LAN Oxigraph server, whether or not
+// D1 is reachable.
 
 import { createHttpD1Database } from "./httpD1Database.js";
 import { LocalD1ConfigError, resolveLocalD1Config } from "./localD1Config.js";
 import { authoringDatabaseUrl, getAuthoringPool } from "./postgresPool.js";
 import { createOntologySyncer } from "./ontologySync.js";
 import { drainPublishedReplica } from "./publishedReplica.js";
+import { createSubjectsSyncer } from "./subjectsSubscriber.js";
 import { createTaxonomyPusher } from "./taxonomyPush.js";
 
 const DRAIN_INTERVAL_MS = 15_000;
@@ -35,6 +37,12 @@ let ontologySyncer = null;
 
 export function ontologySyncStatus() {
   return ontologySyncer ? ontologySyncer.status() : null;
+}
+
+let subjectsSyncer = null;
+
+export function subjectsSyncStatus() {
+  return subjectsSyncer ? subjectsSyncer.status() : null;
 }
 
 function noteDrainStatus({ phase, waiting = null, error = null }) {
@@ -67,6 +75,8 @@ export function startPublishedReplicaDrain({
   taxonomyPusher = pushTaxonomy;
   const syncOntology = createOntologySyncer({ pool, env });
   ontologySyncer = syncOntology;
+  const syncSubjects = createSubjectsSyncer({ pool, env });
+  subjectsSyncer = syncSubjects;
 
   async function drain() {
     try {
@@ -100,6 +110,8 @@ export function startPublishedReplicaDrain({
     running = true;
     try {
       await drain();
+      // Before the push and the ontology sync, so both see its changes.
+      await syncSubjects();
       await pushTaxonomy();
       await syncOntology();
     } finally {

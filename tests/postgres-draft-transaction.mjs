@@ -129,7 +129,8 @@ export async function run() {
     "0004_citation_sources.sql",
     "0005_citation_usage_pilot.sql",
     "0006_citation_citekey_lookup.sql",
-    "0007_citation_work_items.sql"
+    "0007_citation_work_items.sql",
+    "0008_subjects_subscription.sql"
   ]);
   assert.deepEqual(await applyPostgresMigrations(pool), []);
   await citationSchemaAndMatching(pool);
