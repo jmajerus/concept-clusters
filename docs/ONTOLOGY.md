@@ -34,7 +34,7 @@ per-graph permissions, so ownership is enforced in code:
 | --- | --- |
 | `urn:concept-clusters:graph:puzzle:<id>` | One published puzzle: clusters, terms, bridges, lenses, relatedPuzzles, classification links |
 | `urn:concept-clusters:graph:taxonomy` | Categories, subcategories, domains, catalogues, meta catalogues |
-| `urn:concept-clusters:graph:subjects` | The subject taxonomy as a plain SKOS tree, for terminology-mcp's import (below) |
+| `urn:concept-clusters:graph:subjects` | The subject taxonomy as a plain SKOS tree, terminology-mcp's seed for `cc-subjects` (below) |
 | `urn:concept-clusters:graph:sync` | When the last sync ran, the converter version, and the versioned content hash loaded for each puzzle and for the taxonomy |
 
 No triple in one puzzle's graph points into another puzzle's graph.
@@ -122,8 +122,9 @@ changed by hand. It needs `AUTHORING_DATABASE_URL`.
 
 `urn:concept-clusters:graph:subjects` restates the domains, categories,
 and subcategories as one `skos:ConceptScheme`,
-`urn:concept-clusters:scheme:subjects`, so terminology-mcp can seed its
-`subjects` scheme from it. See
+`urn:concept-clusters:scheme:subjects`. terminology-mcp's `cc-subjects`
+scheme is seeded from it, and terminology-mcp is becoming the authority for
+the taxonomy; see
 [dev-briefs/subjects-from-terminology-mcp.md](dev-briefs/subjects-from-terminology-mcp.md).
 
 - Domains are top concepts. Categories are `skos:broader` their domain,
@@ -146,10 +147,19 @@ and subcategories as one `skos:ConceptScheme`,
 - The graph holds nothing but these statements, so the import omits
   nothing and reports no warnings.
 
-To import, use terminology-mcp's **Import SKOS…** with the query endpoint
-`http://oxigraph.localdomain:7878/query` and the named graph
-`urn:concept-clusters:graph:subjects`, then choose
-`urn:concept-clusters:scheme:subjects`.
+The graph is the Concept Clusters side of the taxonomy, kept current by the
+sync. It is not a channel into terminology-mcp: once `cc-subjects` exists,
+importing again is refused (409, the source scheme is already imported),
+so a category or subcategory added in Concept Clusters is added in
+terminology-mcp by hand until the subscriber exists (see the dev-brief).
+It also has no LCC links; those live only in terminology-mcp.
+
+To seed an empty terminology-mcp store, use its **Import SKOS…** with the
+query endpoint `http://oxigraph.localdomain:7878/query` and the named graph
+`urn:concept-clusters:graph:subjects`, choose
+`urn:concept-clusters:scheme:subjects`, and give the local scheme id
+`cc-subjects`. The preview should report 0 warnings, a tree, and every slug
+taken from the graph.
 
 ## Ad hoc queries
 

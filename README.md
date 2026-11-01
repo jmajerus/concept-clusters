@@ -73,6 +73,10 @@ The technical details live in [docs/](docs/):
 - **[docs/MCP-REMOTE.md](docs/MCP-REMOTE.md)** — Access-protected Cloudflare
   MCP authoring with D1 drafts, approval-gated GitHub pull requests, and
   deployment setup.
+- **[docs/ONTOLOGY.md](docs/ONTOLOGY.md)** — published content as RDF on
+  the LAN Oxigraph server: the ontology MCP tools, ad hoc SPARQL, and the
+  subject taxonomy that terminology-mcp's `cc-subjects` scheme is seeded
+  from.
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** — what each file
   does, known limitations, and the roadmap. Start here if you're
   working on the game's code.

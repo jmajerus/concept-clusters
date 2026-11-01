@@ -1,65 +1,101 @@
 # Subjects from terminology-mcp
 
-**Status: step 1 done; step 2 is terminology-mcp's import.** terminology-mcp becomes the
-authority for Concept Clusters' subject taxonomy: which domains,
-categories, and subcategories exist, what they are called, and how they
-nest. Concept Clusters keeps the player copy and keeps keying puzzles on
-slugs. terminology-mcp's [PLAN.md](https://github.com/jmajerus/terminology-mcp/blob/main/PLAN.md)
+**Status: steps 1 and 2 done; LCC linking under way; the subscriber is
+next.** terminology-mcp
+(`http://terminology-mcp.localdomain:8000`) holds Concept Clusters' subject
+taxonomy as the `cc-subjects` scheme and is becoming its authority: which
+domains, categories, and subcategories exist, what they are called, and how
+they nest. Concept Clusters keeps the player copy and keeps keying puzzles
+on slugs. terminology-mcp's
+[PLAN.md](https://github.com/jmajerus/terminology-mcp/blob/main/PLAN.md)
 points here for the Concept Clusters side.
 
 ## Decision
 
 | Owned by terminology-mcp | Owned by Concept Clusters |
 |---|---|
-| Terms of the `subjects` scheme, their labels, and the hierarchy: domains (top terms), categories, subcategories | `info` texts and wiki links: the player copy, which terminology-mcp keeps out of scope notes |
+| Terms of the `cc-subjects` scheme, their labels, slugs, and the hierarchy: domains (top terms), categories, subcategories | `info` texts and wiki links: the player copy, which terminology-mcp keeps out of scope notes |
 | Scope notes, alternative labels, links to Wikidata, LCSH, and LCC | The Trivia and Vocabulary puzzle kinds and the generated `other` domain, as local categories with no mapping |
-| Renames, moves, merges, splits, retires, with impact previews | Which terms players see: only those with puzzles |
+| Renames, moves, merges, splits, retires, slug changes, with impact previews | Which terms players see: only those with puzzles |
 
 Concept Clusters shows three levels: domain, category, subcategory. The
-`subjects` scheme stays at those three levels; finer detail goes in links
-to other schemes, not in deeper `subjects` terms.
+`cc-subjects` scheme stays at those three levels; finer detail goes in
+links to other schemes, not in deeper terms.
 
 ## Slugs come from terminology-mcp
 
 Puzzles keep `category: "history-society"` and
 `subcategories: { "history-society": "…" }`. Puzzle documents, catalogue
 ids, and player URLs do not change. Concept Clusters records each
-`subjects` term id next to the slug, and terminology-mcp keeps the Concept
-Clusters IRI as the term's source IRI and `cc-*` alias.
+`cc-subjects` term id next to the slug, and terminology-mcp keeps the
+Concept Clusters IRI as the term's source IRI and `cc-*` alias.
 
 The slug is a field terminology-mcp owns, so other consumers can share it:
 
 - Minted once, at creation, with Concept Clusters' `slugify`
   (`puzzles/categories.js`) plus accent folding, an empty-result fallback,
   and an 80-character cap. None of these change an existing slug.
-- Stored, never re-derived: the seed carries today's slugs as they are,
-  including the 20 that differ from their label.
+- Stored, never re-derived: `cc-subjects` holds the slugs Concept Clusters
+  uses, including the 20 that differ from their label (the `geography`
+  category is "Physical Geography").
 - Unique among siblings, and scheme-wide per depth where the scheme says
-  so: for `subjects`, among domains and among categories, separately.
-  Subcategory slugs repeat across categories (`bioinformatics`,
-  `hydrology`); Concept Clusters composes them as `<category>--<sub>`.
+  so: for `cc-subjects`, among domains and among categories, separately
+  (the `humanities` category sits in the `humanities` domain). Subcategory
+  slugs repeat across categories (`bioinformatics`, `hydrology`); Concept
+  Clusters composes them as `<category>--<sub>`.
 - A rename changes the label only. A slug changes only through
-  terminology-mcp's explicit slug operation: breaking, previewed with its
-  impact, and gateable by slug-keyed consumers. The old slug moves to the
-  term's `formerSlugs` and stays reserved and resolvable, so old puzzle
+  terminology-mcp's **Change slug…** operation: breaking, previewed with
+  its impact, and gateable by slug-keyed consumers. The old slug moves to
+  the term's `formerSlugs` and stays reserved and resolvable, so old puzzle
   references and URLs resolve while Concept Clusters migrates.
+- Lookup is scoped: `GET /api/schemes/cc-subjects/slugs/<slug>` with
+  `?depth=0` for domains, `?depth=1` for categories, or
+  `?parent=<category slug, alias, or term id>` for subcategories. A bare
+  `humanities` is ambiguous and answers 409.
 
 ## LCC is a linked reference, not a source tree
 
-The Library of Congress Classification excerpt on the LAN Oxigraph server
-(480 concepts under 21 classes, up to six levels deep) is a shelving
-scheme. Its depth does not mean the same thing across branches, and many
-nodes are shelving headings ("General works", "Theory. Method. Scope.")
-rather than subjects. Cutting it at a fixed level would mix subjects with
-shelf labels.
+The Library of Congress Classification excerpt (480 concepts under 21
+classes, up to six levels deep) is in terminology-mcp as the
+`loc-classification` scheme, and in the LAN Oxigraph server's default
+graph. It is a shelving scheme. Its depth does not mean the same thing
+across branches, and many nodes are shelving headings ("General works",
+"Theory. Method. Scope.") rather than subjects. Cutting it at a fixed
+level would mix subjects with shelf labels.
 
-Instead, a `subjects` term links to the LCC class that fits, at whatever
-depth fits, with `skos:closeMatch` or `skos:broadMatch`. New subcategories
-come from LCC by promotion: browse the LCC branch under the relevant
-category, pick one class, and create a `subjects` term with a
-`closeMatch` back. Terms arrive when content needs them, one pick at a
-time. The links also let corpus-mcp roll LCC-shelved books up to Concept
+Instead, a `cc-subjects` term links to the LCC class that fits, at
+whatever depth fits. New subcategories come from LCC by promotion: one
+class picked when content needs it, never a pass through LCC level by
+level. The links also let corpus-mcp roll LCC-shelved books up to Concept
 Clusters categories for reference planning.
+
+### Linking a term to LCC
+
+In the terminology-mcp editor:
+
+1. Open the `loc-classification` scheme and find the class, by label or
+   by its LCC notation (for example `K3236-K3268.5`). Its `id.loc.gov` IRI
+   is listed under **Aliases**; copy it.
+2. Open the `cc-subjects` term and choose **External references → +
+   Reference**.
+3. Choose the match: **Close match** when the class covers what the term
+   covers, **Broad match** when the class is wider (a whole discipline for
+   a subcategory). Use **Exact match** only for a true equivalent, which is
+   rare across a shelving scheme.
+4. Paste the IRI and save.
+
+A link is a free edit, not a breaking change: it applies at once and
+needs no impact preview. It lives only in terminology-mcp. Concept
+Clusters' subjects graph does not carry links, and the subscriber does not
+copy them into category rows.
+
+### Promoting an LCC class to a subcategory
+
+1. Under the Concept Clusters category, choose **+ Narrower term** and
+   give it the label players should see.
+2. The editor mints the slug from the label. If Concept Clusters needs a
+   different one, use **Change slug…** before anything refers to it.
+3. Link it to the LCC class as above, usually with **Close match**.
 
 ## Domains are data
 
@@ -69,8 +105,8 @@ category browse (`modules/overviewRenderer.js`), by category validation
 `create_category`'s domain enum, by the citation collection sync, and by
 the ontology sync. Adding a domain takes a commit and a deploy.
 
-Domains become top terms of `subjects` like any other term, so a new one
-is an addition in terminology-mcp, held to the taxonomy roadmap's
+Domains become top terms of `cc-subjects` like any other term, so a new
+one is an addition in terminology-mcp, held to the taxonomy roadmap's
 admission test. Concept Clusters stores the domains it receives as
 published data beside its category rows. Those five readers use that
 registry instead of the module, and the player picks up a new domain from
@@ -78,18 +114,33 @@ D1 without a deploy. `domains.js` becomes a generated snapshot for the
 public site and CI, like `puzzles/categories.js`. A domain's `info` text
 is player copy, edited in the category editor with the rest.
 
-Concept Clusters gets no domain editor of its own in the meantime. Until
-the subscriber exists, a domain change is still an edit to `domains.js`,
-and the ontology sync's taxonomy hash covers the registry, so the subjects
-graph follows it after a deploy.
+Concept Clusters gets no domain editor of its own in the meantime.
+
+## Until the subscriber exists
+
+Nothing carries changes between the two systems yet, in either direction:
+
+- A category, subcategory, or domain added in Concept Clusters (the
+  category editor, `create_category`, `update_category`, or `domains.js`)
+  does not reach `cc-subjects`. Re-importing the subjects graph is refused
+  (409, the source scheme is already imported). Add the same term in
+  terminology-mcp by hand: **+ Narrower term** under its parent, then
+  **Change slug…** if the minted slug differs from Concept Clusters' id.
+- A term added or renamed in terminology-mcp does not reach Concept
+  Clusters until the subscriber applies it.
+
+Keep structural changes rare until then, and make each in both places.
+The ontology sync keeps the subjects graph current with Concept Clusters'
+side, so the graph and `cc-subjects` can be compared with a SPARQL query
+on one side and `/api/state?scheme=cc-subjects` on the other.
 
 ## New subcategories
 
 An author or agent proposes a term while authoring, optionally with a
 slug hint. terminology-mcp mints or validates the slug and creates the term
-`provisional`; additions are not breaking, so it reaches
-Concept Clusters on the next sync and is usable at once, on drafts and on
-published puzzles.
+`provisional`; additions are not breaking, so it reaches Concept Clusters
+on the next sync and is usable at once, on drafts and on published
+puzzles.
 
 The owner confirms, merges, or retires it later in terminology-mcp's
 changes tray, which lists the puzzles that use it. A rename is a label
@@ -119,6 +170,7 @@ and new subcategories become proposals to terminology-mcp.
 | A depth change (retiring a category promotes its subcategories) | Held, alert |
 | Split, or retired with no or several replacements | Held: a person decides where puzzles go |
 | Slug change | Held until a person coordinates the migration |
+| Links, scope notes, alternative labels | Ignored: they stay in terminology-mcp |
 
 Holding stops the cursor at that change; later changes wait behind it.
 
@@ -126,27 +178,36 @@ Holding stops the cursor at that change; later changes wait behind it.
 
 Concept Clusters subscribes to terminology-mcp's changelog from the
 authoring server's drain loop (`modules/publishedReplicaSchedule.js`),
-beside the taxonomy push and the ontology sync. It keeps an "applied
-through N" cursor, reads `/api/changes?since=N`, and writes the result
-into its published category and domain data. Everything downstream is
-unchanged: D1 and the player, Freeze, and the git snapshots
-(`puzzles/categories.js`, and `puzzles/domains.js` once generated) that the
-public site and CI read.
+beside the taxonomy push and the ontology sync:
+
+- It bootstraps from `GET /api/state?scheme=cc-subjects`, which includes
+  retired terms, so old references keep resolving.
+- It keeps an "applied through N" cursor and the changelog's `log` id,
+  and reads `GET /api/changes?since=N&scheme=cc-subjects`. It applies each
+  change's `afterTerms` (every term the change touched), not only `after`.
+- A different `log` id means the store was rebuilt: it bootstraps again.
+  `since` past the head answers 400 and means the same.
+- It reaches terminology-mcp directly on the LAN, which skips the Access
+  check that applies to public hostnames.
+
+It writes the result into Concept Clusters' published category and domain
+data. Everything downstream is unchanged: D1 and the player, Freeze, and
+the git snapshots (`puzzles/categories.js`, and `puzzles/domains.js` once
+generated) that the public site and CI read.
 
 ## Order of work
 
 1. **Concept Clusters (done):** the ontology sync writes the taxonomy as a
-   plain SKOS tree to `urn:concept-clusters:graph:subjects`
-   ([ONTOLOGY.md](../ONTOLOGY.md#the-subjects-graph)), so terminology-mcp's
-   SPARQL import can seed `subjects` from it with the Concept Clusters
-   IRIs as source IRIs. terminology-mcp's own import code, run against a
-   scratch database, took the 186 concepts (13 domains, 56 categories, 117
-   subcategories) as a tree with no warnings.
-2. **terminology-mcp:** import `subjects` from that graph. Add LCC links
-   one at a time, when they help.
-3. **terminology-mcp:** subscribers with cursors, and `propose_term`
-   creating provisional terms. Behind Access before MCP proposals come
-   from outside the LAN.
+   plain SKOS tree to `urn:concept-clusters:graph:subjects`, with slugs and
+   the per-depth uniqueness rule
+   ([ONTOLOGY.md](../ONTOLOGY.md#the-subjects-graph)).
+2. **terminology-mcp (done):** stored slugs, scoped slug lookup, the slug
+   operation, `?scheme=` filters, and the `log` id. `cc-subjects` seeded
+   from the subjects graph: 186 terms (13 domains, 56 categories, 117
+   subcategories), a tree, every slug kept. LCC links are added one term
+   at a time, as they help.
+3. **terminology-mcp:** subscriber cursors and usage reports, and
+   `propose_term` creating provisional terms with a slug hint.
 4. **Concept Clusters:** the changelog subscriber writing category and
    domain data; the five domain readers moved off `domains.js`, which
    becomes a generated snapshot; the editor narrowed to player copy;
@@ -158,4 +219,4 @@ public site and CI read.
 
 - Whether a profile's depth rule lives in the concept set or in the
   subscription (terminology-mcp's open question) does not matter while
-  `subjects` stays three levels deep.
+  `cc-subjects` stays three levels deep.

@@ -329,6 +329,20 @@ fifth route kind, and the Library's "Subject areas" section shows every
 domain with its count before a single click -- the breadth of the
 collection was previously visible only after opening All Puzzles.
 
+## Where the taxonomy lives
+
+terminology-mcp holds this taxonomy as its `cc-subjects` scheme (13
+domains, 56 categories, 117 subcategories) and is becoming its authority:
+new domains, categories, and subcategories are added there, slugs are
+minted and stored there, and each term can link to the Library of
+Congress Classification class that fits it. Concept Clusters keeps the
+player copy and keys puzzles on the same slugs. `puzzles/categories.js`
+and `puzzles/domains.js` remain the registry until Concept Clusters
+subscribes to terminology-mcp's changes, after which both become
+generated snapshots. The admission test for future domains (above) stays
+the rule for new top terms. See
+[dev-briefs/subjects-from-terminology-mcp.md](dev-briefs/subjects-from-terminology-mcp.md).
+
 ## The failure mode this staging is designed to avoid
 
 Defining the taxonomy first and growing content into it produces authoring
