@@ -38,6 +38,7 @@
     "mcp:restart": "node tools/mcp-housekeep.mjs --restart",
     "mcp:portal:sync": "node tools/dispatch-mcp-portal-sync.mjs",
     "ontology:load": "node tools/ontology-load.mjs",
+    "subjects:sync": "node tools/subjects-sync.mjs",
     "mcp:probe-report": "node tools/mcp-probe-report.mjs",
     "mcp:hosted:dev": "wrangler dev -c wrangler.authoring.jsonc",
     "mcp:hosted:deploy": "wrangler deploy -c wrangler.authoring.jsonc",

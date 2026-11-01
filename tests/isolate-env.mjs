@@ -22,3 +22,6 @@ const fromFile = existsSync(path)
 for (const name of new Set([...ALWAYS, ...fromFile])) process.env[name] = "";
 // Unset or empty means the LAN Oxigraph server, so this one is turned off.
 process.env.ONTOLOGY_SPARQL_BASE = "off";
+// Likewise the LAN terminology-mcp server; the subjects sync stays off.
+process.env.TERMINOLOGY_BASE = "off";
+delete process.env.SUBJECTS_SYNC;
