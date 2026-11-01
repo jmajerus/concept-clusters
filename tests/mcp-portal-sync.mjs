@@ -141,6 +141,22 @@ export async function run() {
     /Portal catalog sync failed: error: upstream/
   );
 
+  // HTTP 200 with success: false and no errors[]: the reason is in result.
+  await assert.rejects(
+    () => syncMcpPortalCatalog({
+      accountId: "account",
+      token: "portal-token",
+      fetchImpl: async (url) => {
+        if (new URL(url).searchParams.get("page")) {
+          return jsonResponse({ success: true, result: [lan], result_info: { total_pages: 1 } });
+        }
+        return jsonResponse({ success: false, errors: [], result: { status: "error", error: "origin returned 401", error_details: { cause: "Access denied" } } });
+      },
+      sleep: async () => {}
+    }),
+    /sync failed: HTTP 200: error: origin returned 401: Access denied/
+  );
+
   await assert.rejects(
     () => listMcpServers("account", "portal-token", {
       fetchImpl: async () => jsonResponse({

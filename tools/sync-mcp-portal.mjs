@@ -16,9 +16,18 @@ const PAGE_LIMIT = 20;
 const POLL_INTERVAL_MS = 2000;
 const POLL_LIMIT = 15;
 
+// A sync can answer HTTP 200 with success: false and no errors[]; the reason
+// is then in result (status, error, error_details), so report that rather
+// than a bare status code.
 function cloudflareError(body, status) {
-  const messages = (body?.errors || []).map(error => error.message).filter(Boolean);
-  return messages.join("; ") || `HTTP ${status}`;
+  const messages = [...(body?.errors || []), ...(body?.messages || [])]
+    .map(item => item?.message).filter(Boolean);
+  if (messages.length) return messages.join("; ");
+  if (body?.result && typeof body.result === "object") {
+    const detail = portalSyncFailure(body);
+    if (detail !== "portal sync did not report ready") return `HTTP ${status}: ${detail}`;
+  }
+  return `HTTP ${status}`;
 }
 
 async function cloudflare(path, token, { method = "GET", fetchImpl = fetch } = {}) {
