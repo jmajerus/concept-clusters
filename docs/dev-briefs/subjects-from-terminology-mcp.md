@@ -78,9 +78,10 @@ In the terminology-mcp editor:
    is listed under **Aliases**; copy it.
 2. Open the `cc-subjects` term and choose **External references → +
    Reference**.
-3. Choose the match: **Close match** when the class covers what the term
-   covers, **Broad match** when the class is wider (a whole discipline for
-   a subcategory). Use **Exact match** only for a true equivalent, which is
+3. Choose the match. A new reference starts on **Exact match**, so change
+   it each time: **Close match** when the class covers what the term
+   covers, **broad match** when the class is wider (a whole discipline for
+   a subcategory). Keep Exact match only for a true equivalent, which is
    rare across a shelving scheme.
 4. Paste the IRI and save.
 
@@ -118,21 +119,25 @@ Concept Clusters gets no domain editor of its own in the meantime.
 
 ## Until the subscriber exists
 
-Nothing carries changes between the two systems yet, in either direction:
+terminology-mcp is the master for `cc-subjects` already; nothing carries
+its changes to Concept Clusters yet. A new domain, category, or
+subcategory is created in terminology-mcp first, then mirrored into
+Concept Clusters by hand (the category editor, or `domains.js` for a
+domain) with the same slug, or left until the subscriber picks it up.
 
-- A category, subcategory, or domain added in Concept Clusters (the
-  category editor, `create_category`, `update_category`, or `domains.js`)
-  does not reach `cc-subjects`. Re-importing the subjects graph is refused
-  (409, the source scheme is already imported). Add the same term in
-  terminology-mcp by hand: **+ Narrower term** under its parent, then
-  **Change slug…** if the minted slug differs from Concept Clusters' id.
-- A term added or renamed in terminology-mcp does not reach Concept
-  Clusters until the subscriber applies it.
+- Changes made only in Concept Clusters (the category editor,
+  `create_category`, `update_category`, `domains.js`) do not reach
+  `cc-subjects`, and re-importing the subjects graph is refused (409, the
+  source scheme is already imported). Mirror them into terminology-mcp:
+  **+ Narrower term** under the parent, then **Change slug…** if the
+  minted slug differs from Concept Clusters' id.
+- A rename in terminology-mcp reaches players only once Concept Clusters'
+  title is changed to match, by hand or by the subscriber.
 
-Keep structural changes rare until then, and make each in both places.
-The ontology sync keeps the subjects graph current with Concept Clusters'
-side, so the graph and `cc-subjects` can be compared with a SPARQL query
-on one side and `/api/state?scheme=cc-subjects` on the other.
+Keep structural changes rare until then. The ontology sync keeps the
+subjects graph current with Concept Clusters' side, so the graph and
+`cc-subjects` can be compared with a SPARQL query on one side and
+`/api/state?scheme=cc-subjects` on the other.
 
 ## New subcategories
 
