@@ -16,6 +16,7 @@
 
 import { RESERVED_DOMAIN_IDS } from "../puzzles/domains.js";
 import { DOMAINS_SNAPSHOT, refreshDomainsRegistry, validateDomainDocument } from "./domainRegistry.js";
+import { keyOf } from "./subjectTree.js";
 import { existingCategoryRecords } from "./authoringMcpTaxonomy.js";
 import { validateCategoryDocument } from "./categoryValidation.js";
 import { PostgresPublishedRepository } from "./postgresPublishedRepository.js";
@@ -25,6 +26,8 @@ import {
   createTerminologyClient,
   terminologyConfig
 } from "./terminologyClient.js";
+
+export { keyOf };
 
 export const SUBSCRIBER_ACTOR = Object.freeze({ subject: "terminology-mcp", name: "cc-subjects subscriber" });
 const SUBSCRIBER_LABEL = "Concept Clusters";
@@ -64,25 +67,6 @@ export function termsFromState(state) {
     if (term?.id && (!term.scheme || term.scheme === SUBJECTS_SCHEME_ID)) terms[term.id] = termRecord(term);
   }
   return terms;
-}
-
-// The Concept Clusters keys a term stands for, from its slug and its
-// ancestors' slugs. Null when an ancestor is unknown or the chain loops.
-export function keyOf(terms, id) {
-  const chain = [];
-  let current = id;
-  while (current) {
-    const term = terms[current];
-    if (!term || chain.length > 8) return null;
-    chain.unshift(term);
-    current = term.broader[0];
-  }
-  const depth = chain.length - 1;
-  const [domain, category, sub] = chain.map(term => term.slug);
-  if (depth === 0) return { depth, domain };
-  if (depth === 1) return { depth, domain, category };
-  if (depth === 2) return { depth, domain, category, sub };
-  return { depth };
 }
 
 function sameKey(a, b) {

@@ -303,26 +303,31 @@ export async function run() {
     assert.match(gitOnlySeed.error, /published D1 puzzle document/i);
     assert.match(gitOnlySeed.error, /does not fall back to Git/i);
 
-    const createdCategory = await call("create_category", {
+    // Categories arrive from terminology-mcp through the subscriber, or are
+    // made in the category editor; MCP no longer creates them.
+    await contentDocuments.publish({
+      kind: "category",
       id: "lab-subject",
-      title: "Lab Subject",
-      domain: "sciences-mathematics",
-      info: { text: "A lab-only subject for MCP tests." },
-      publish_to_authoring: true
+      document: {
+        id: "lab-subject",
+        title: "Lab Subject",
+        domain: "sciences-mathematics",
+        info: { text: "A lab-only subject for MCP tests." },
+        subcategories: { benchwork: { title: "Benchwork" } }
+      },
+      actor: { subject: "terminology-mcp" }
     });
-    assert.equal(createdCategory.valid, true);
-    assert.equal(createdCategory.category.document.title, "Lab Subject");
-    assert.equal(createdCategory.published.id, "lab-subject");
-    assert.equal(createdCategory.published.cuedForFreezeAt, null);
-
-    const unpublishedCategory = await call("create_category", {
+    await contentDocuments.createDraft({
+      kind: "category",
       id: "draft-only-subject",
-      title: "Draft Only Subject",
-      domain: "sciences-mathematics",
-      info: { text: "Not registered until its category document is published." }
+      document: {
+        id: "draft-only-subject",
+        title: "Draft Only Subject",
+        domain: "sciences-mathematics",
+        info: { text: "Not registered until its category document is published." }
+      },
+      actor
     });
-    assert.equal(unpublishedCategory.valid, true);
-    assert.equal(unpublishedCategory.published, null);
 
     const categories = await call("list_categories");
     const botany = categories.categories.find(item => item.name === "Lab Botany");
@@ -363,14 +368,47 @@ export async function run() {
     assert.equal(publishedCategory.document.id, "lab-botany");
     assert.equal(publishedCategory.document.title, "Lab Botany");
 
-    const updatedCategory = await call("update_category", {
-      ...loadedCategory.document,
-      info: { text: "Published from one MCP write." },
+    // update_subject_copy writes copy only, merged, onto the current row.
+    const updatedCategory = await call("update_subject_copy", {
+      category: "Lab Subject",
+      info: { text: "Published from one MCP write.", link: "wiki:Laboratory" },
+      subcategories: { benchwork: { text: "Hands on the bench." } },
       publish_to_authoring: true
     });
     assert.equal(updatedCategory.valid, true);
     assert.equal(updatedCategory.published.revision, 2);
     assert.equal(updatedCategory.published.cuedForFreezeAt, null);
+    const labSubject = (await contentDocuments.getPublished({ kind: "category", id: "lab-subject" })).document;
+    assert.equal(labSubject.title, "Lab Subject");
+    assert.deepEqual(labSubject.info, { text: "Published from one MCP write.", link: "wiki:Laboratory" });
+    assert.deepEqual(labSubject.subcategories.benchwork, { title: "Benchwork", info: { text: "Hands on the bench." } });
+    // A synced rename is not reverted by a later copy write.
+    await contentDocuments.publish({
+      kind: "category", id: "lab-subject", document: { ...labSubject, title: "Laboratory Subject" }, actor: { subject: "terminology-mcp" }
+    });
+    const linkRemoved = await call("update_subject_copy", {
+      category: "lab-subject", info: { link: null }, publish_to_authoring: true
+    });
+    assert.equal(linkRemoved.valid, true);
+    const relabelled = (await contentDocuments.getPublished({ kind: "category", id: "lab-subject" })).document;
+    assert.equal(relabelled.title, "Laboratory Subject");
+    assert.deepEqual(relabelled.info, { text: "Published from one MCP write." });
+    const unknownSub = await call("update_subject_copy", {
+      category: "lab-subject", subcategories: { nowhere: { text: "No." } }
+    });
+    assert.match(unknownSub.error, /added in terminology-mcp/);
+    // Publishing an unpublished category is refused before anything is written.
+    const draftBefore = await contentDocuments.getDraft({ kind: "category", id: "draft-only-subject", actor });
+    const unpublishedPublish = await call("update_subject_copy", {
+      category: "draft-only-subject", info: { text: "Changed." }, publish_to_authoring: true
+    });
+    assert.match(unpublishedPublish.error, /Nothing was written/);
+    const draftAfter = await contentDocuments.getDraft({ kind: "category", id: "draft-only-subject", actor });
+    assert.equal(draftAfter.revision, draftBefore.revision);
+    const domainNeedsPublish = await call("update_subject_copy", { domain: "humanities", info: { text: "Texts." } });
+    assert.match(domainNeedsPublish.error, /publish_to_authoring=true/);
+    const both = await call("update_subject_copy", { category: "lab-subject", domain: "humanities" });
+    assert.match(both.error, /exactly one/);
 
     const createdCatalogue = await call("create_catalogue", {
       id: "mcp-taxonomy-lab",

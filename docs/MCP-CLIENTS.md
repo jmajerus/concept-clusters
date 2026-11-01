@@ -422,9 +422,8 @@ directly at the start of an authoring conversation:
 
 When the work later enters MCP catalogue/category tools, call
 `get_workflow_guidance` with `topic: "catalogue"`.
-Catalogue and category membership is D1: `create_category` /
-`update_category` / `create_catalogue` / `update_catalogue` /
-`update_meta_catalogue`. Those tools write D1 working copies; an explicit
+Catalogue membership and subject copy are D1: `update_subject_copy` /
+`create_catalogue` / `update_catalogue` / `update_meta_catalogue`. Those tools write D1 working copies; an explicit
 `publish_to_authoring: true` publishes a valid category or catalogue onto the
 player. Cue and Freeze remain outside MCP and snapshot git. Call
 `get_workflow_guidance` with `topic: "catalogue"` only when using those

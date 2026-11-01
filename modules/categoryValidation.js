@@ -90,7 +90,7 @@ export function validateSubcategoryAssignments(
         fail(
           scope,
           `"${id}" is not registered under "${category}" (${registered}). ` +
-          "If this is genuinely new, register it on the category first (update_category), then reference it from the puzzle."
+          "If this is genuinely new, copy it into terminology-mcp from a reference vocabulary (search_terms, then propose_term with source); once it is added to the category, reference it from the puzzle."
         );
       }
     }
@@ -146,7 +146,7 @@ export function validateCategoryDocument(
   if (mode === "create") {
     // An unresolved published-puzzle reference may be surfaced so an agent
     // can repair it, but only a category document is registration. Allow
-    // create_category to publish the missing document for that reference;
+    // the category editor to publish the missing document for that reference;
     // only a category that already has metadata is a duplicate create.
     if (matchById && matchById.metadataRegistered !== false) {
       errors.push(`Category "${id}" already exists`);
@@ -155,7 +155,7 @@ export function validateCategoryDocument(
       errors.push(`Category title "${title}" is already used by "${matchByTitle.id}"`);
     }
   } else if (id && !matchById) {
-    errors.push(`Category "${id}" does not exist -- use create_category for a new category`);
+    errors.push(`Category "${id}" does not exist -- copy a new category into terminology-mcp from a reference vocabulary (search_terms, then propose_term with source)`);
   } else if (matchByTitle) {
     errors.push(`Category title "${title}" is already used by "${matchByTitle.id}"`);
   }

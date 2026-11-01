@@ -225,7 +225,7 @@ The tools are:
 | Published content | `list_puzzles`, `search_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance`, `get_authoring_schema`, `get_workflow_guidance` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `reassign_puzzle_classifications`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_catalogue_creation`, `preview_update_catalogue` |
-| Categories and catalogues | `create_category`, `update_category`, `create_catalogue`, `update_catalogue`, `update_meta_catalogue` |
+| Subject copy and catalogues | `update_subject_copy`, `create_catalogue`, `update_catalogue`, `update_meta_catalogue` |
 | LAN reference pilot | `plan_puzzle_references` (read-only), `file_zotero_reference` (explicit Zotero collection and Postgres mirror write) |
 
 Published puzzles, the authoring guidance, and the simplified-puzzle v1 schema
@@ -265,12 +265,12 @@ category exists. An unresolved category string found in a published D1 puzzle
 may still be shown for repair, but it is explicitly `registered: false` until
 the category document is published.
 
-When a category is new or needs display metadata (title, introductory `info`,
-optional domain, or subcategory definitions), use `create_category` or
-`update_category` as a D1 working copy and publish that category document
-before authoring puzzles that reference it. Set the puzzle document's
-`category` to that category's stable id. `create_category`, `update_category`,
-`create_catalogue`, `update_catalogue`, and `update_meta_catalogue` accept
+A new category or subcategory is copied into terminology-mcp's `cc-subjects`
+from a reference vocabulary: `search_terms` with `excludeScheme: cc-subjects`,
+then `propose_term` with that hit as `source`. The subjects subscriber
+publishes it here, normally within a minute, before puzzles reference it. Set the puzzle document's `category` to
+that category's stable id. `update_subject_copy` writes a subject's blurb and
+links. It, `create_catalogue`, `update_catalogue`, and `update_meta_catalogue` accept
 `publish_to_authoring: true` to publish that valid working copy onto the
 player in the same call. `save_puzzle_draft` does not.
 `reassign_puzzle_classifications` accepts the flag and publishes the shelf

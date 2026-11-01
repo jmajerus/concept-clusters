@@ -370,11 +370,12 @@ Collected here so the eventual change is not archaeology.
 - **Registration is optional, as with categories.** An unregistered
   category simply has no domain and lands in an ungrouped section, the
   same graceful degradation subcategories already use.
-- **MCP surface.** `create_category` / `update_category` write D1 category
-  documents with optional `domain` alongside `title`, `id` (slug), `info`,
-  and `subcategories`. `list_categories` and `get_category` return it. No
-  authoring tool needs a domain-creation call: domains are added in
-  terminology-mcp and arrive through the subjects subscriber.
+- **MCP surface.** `list_categories` and `get_category` return each
+  category's `domain` and the domains. Domains, categories, and
+  subcategories are added in terminology-mcp (agents use its
+  `propose_term`, which requires a `source` entry from a reference
+  vocabulary) and arrive through the subjects subscriber;
+  `update_subject_copy` writes their blurbs and links.
 - **JSON-LD.** The interchange format needs no change, since domain is not
   a puzzle property. Only the category registry serializes it.
 - **Emoji.** The icons in the table above are editorial shorthand for this

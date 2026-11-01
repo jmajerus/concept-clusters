@@ -234,7 +234,7 @@ export async function run(page, baseURL) {
   }).map(error => error.message).join("\n");
   assert.match(unregisteredMessages, /"solar-system" is not registered under "Astronomy"/);
   assert.match(unregisteredMessages, /registered: inner-planets, outer-planets/);
-  assert.match(unregisteredMessages, /update_category/);
+  assert.match(unregisteredMessages, /propose_term/);
 
   const noSubcategoriesYetMessages = validateSubcategoryAssignments([
     { id: "p", category: "Empty", subcategories: { Empty: "x" } }

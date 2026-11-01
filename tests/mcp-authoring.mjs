@@ -170,12 +170,14 @@ export async function run() {
       "preview_update_catalogue",
       "update_catalogue",
       "update_meta_catalogue",
-      "create_category",
-      "update_category",
+      "update_subject_copy",
       "get_tool_catalog"
     ]) {
       assert.ok(toolNames.includes(name), `${name} should be registered`);
     }
+    // Structure belongs to terminology-mcp; these tools are retired.
+    assert.equal(toolNames.includes("create_category"), false);
+    assert.equal(toolNames.includes("update_category"), false);
     // JSON-LD interchange stays available through npm run content:export/
     // import/check, not through the MCP tool surface (see docs/JSON-LD.md).
     for (const name of [
@@ -859,7 +861,7 @@ export async function run() {
     assert.equal(catalogueWorkflow.result.structuredContent.topic, "catalogue");
     assert.match(
       catalogueWorkflow.result.structuredContent.markdown,
-      /create_category/
+      /update_subject_copy/
     );
     assert.match(
       catalogueWorkflow.result.structuredContent.markdown,

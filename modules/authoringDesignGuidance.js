@@ -699,10 +699,13 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   working copy only. A person publishes that copy, and that publish is what
   players see. Cue and Freeze are outside MCP. Set
   \`category\` / \`categories\` / \`subcategories\` / \`tags\` / \`level\` with domain=classification.
-  A category is
-  registered when its category-editor document is published to D1; create_category
-  or update_category creates or revises that document, and a new category should
-  be published before a puzzle references it. Add or remove catalogue
+  Domains, categories, and subcategories come from terminology-mcp's
+  cc-subjects scheme. To add a missing one, find it in a reference vocabulary
+  with terminology-mcp's search_terms (excludeScheme: cc-subjects), then call
+  its propose_term with that hit as source (closeMatch, or broadMatch when the
+  reference class is wider). The subjects subscriber publishes it here,
+  normally within a minute, before a puzzle references it.
+  update_subject_copy writes their blurbs and links. Add or remove catalogue
   membership with get_catalogue then update_catalogue (or update_meta_catalogue
   when editing a meta catalogue). Publication review
   evaluates the whole puzzle, not merely this metadata pass.`;
@@ -1053,12 +1056,15 @@ A puzzle's category association is on the puzzle document: stable category id in
 optional \`categories\`, and optional \`subcategories\`. Save that projection with
 domain=classification. To move many puzzles at once, call
 reassign_puzzle_classifications; it sets category membership, keeps tags
-and level, and does not edit lenses. Save after the category-editor document is published to D1. A
-published category document is the registration event. Create category
-metadata (title, domain, blurb, subcategory definitions) with create_category /
-update_category — the same D1
-working-copy store used by the authoring service. Call list_categories / get_category
-first; those read the live D1 taxonomy. Git is not an MCP fallback.
+and level, and does not edit lenses. Save after the category is published to D1. A
+published category document is the registration event. Which domains,
+categories, and subcategories exist, and their titles, come from
+terminology-mcp's cc-subjects scheme. A missing one is copied from a
+reference vocabulary: search_terms (excludeScheme: cc-subjects), then
+propose_term with that hit as source; it is published here, normally within
+a minute. If no reference entry fits even broadly, leave it to a person. Write a
+subject's blurb and links with update_subject_copy. Call list_categories /
+get_category first; those read the live D1 taxonomy. Git is not an MCP fallback.
 
 A catalogue is a curated selection with a real audience, theme, or learning
 purpose, not another name for a category. Call list_catalogues before creating
@@ -1159,9 +1165,12 @@ export function localAuthoringGuidance(env = envProcess()) {
       "See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the prose reference. JSON-LD " +
       "is interchange-only (content:export/import) and is not accepted as a " +
       "stored draft. Author in the simplified format get_authoring_schema documents.",
-    workflowMechanics: `Use list_categories or get_category for the live D1 taxonomy. A category-editor
-document becomes the registered category when it is published to D1; create and
-publish a genuinely new subject before authoring puzzles that reference it. Do
+    workflowMechanics: `Use list_categories or get_category for the live D1 taxonomy. A category is
+registered when its document is published to D1. A genuinely new subject is
+copied into terminology-mcp's cc-subjects scheme from a reference vocabulary:
+find it with search_terms (excludeScheme: cc-subjects), then propose_term with
+that hit as source. It arrives here, normally within a minute; wait for it
+before saving puzzles that reference it. Do
 not infer its absence from puzzles/categories.js or another Git checkout, and
 do not move a puzzle to a parent category because a static Git view omits a
 category that is published in D1.
@@ -1171,9 +1180,10 @@ save_puzzle_draft (draft_id plus document, optionally domain for a content-,
 pedagogy-, or classification-only pass), then validate_puzzle_draft (draft_id) and address
 every error. MCP maintains protected attribution and
 editorial metadata outside the agent document; existing values are preserved.
-Set stable category ids in category / categories / subcategories on the puzzle document. Use
-create_category or update_category with publish_to_authoring=true to publish the
-category document before the puzzle references it. Add or remove catalogue membership
+Set stable category ids in category / categories / subcategories on the puzzle document. A
+missing category or subcategory is copied into terminology-mcp from a reference
+vocabulary (search_terms, then propose_term with source) and arrives here,
+normally within a minute; update_subject_copy writes its blurb and links. Add or remove catalogue membership
 with get_catalogue then update_catalogue; those write D1 working copies.
 ${mcpPublicationBoundaryGuidance()} Stdio MCP stores
 drafts in the same D1 database hosted MCP uses, scoped to
@@ -1192,9 +1202,12 @@ export const LOCAL_AUTHORING_GUIDANCE = localAuthoringGuidance();
 
 export const HOSTED_AUTHORING_GUIDANCE = completeAuthoringGuidance({
   formatNotes: "This is the only supported authoring shape.",
-  workflowMechanics: `Use list_categories or get_category for the live D1 taxonomy. A category-editor
-document becomes the registered category when it is published to D1; create and
-publish a genuinely new subject before authoring puzzles that reference it. Do
+  workflowMechanics: `Use list_categories or get_category for the live D1 taxonomy. A category is
+registered when its document is published to D1. A genuinely new subject is
+copied into terminology-mcp's cc-subjects scheme from a reference vocabulary:
+find it with search_terms (excludeScheme: cc-subjects), then propose_term with
+that hit as source. It arrives here, normally within a minute; wait for it
+before saving puzzles that reference it. Do
 not infer its absence from puzzles/categories.js or another Git checkout, and
 do not move a puzzle to a parent category because a static Git view omits a
 category that is published in D1.
@@ -1202,10 +1215,11 @@ Drafts may be temporarily invalid. Retrieve the latest draft, save with
 expected_revision, then validate and address every error. MCP maintains
 protected attribution and editorial metadata outside the agent document;
 existing values are preserved.
-Set stable category ids in category / categories / subcategories on the puzzle document. Use
-create_category or update_category with publish_to_authoring=true to publish the
-category document before the puzzle references it; its optional domain must be one
-of the ids list_categories/get_category report (a small fixed vocabulary).
+Set stable category ids in category / categories / subcategories on the puzzle document.
+Copy a missing category or subcategory into terminology-mcp from a reference
+vocabulary (search_terms with excludeScheme cc-subjects, then propose_term with
+source); it is published here, normally within a minute. update_subject_copy
+writes a subject's blurb and links.
 Add or remove ordinary catalogue membership with get_catalogue then
 update_catalogue. For a meta catalogue, use get_catalogue then
 update_meta_catalogue.

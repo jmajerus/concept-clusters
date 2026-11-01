@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `9db2f8df` · 2026-10-20
+Skill rev `42156a24` · 2026-11-01
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. `save_puzzle_draft` writes the working copy only. The human
@@ -14,7 +14,10 @@ Publishes on `/admin/drafts`, and that publish is what players see. A GitHub
 pull request for this draft is opened from that same page by a human, not
 by MCP.
 Set `category` / `categories` / `subcategories` on the puzzle document.
-Register new category metadata with `create_category`. Add or remove
+Copy a missing category or subcategory into terminology-mcp from a reference
+vocabulary: `search_terms` (`excludeScheme: cc-subjects`), then `propose_term`
+with that hit as `source`. It is published here, normally within a minute. `update_subject_copy` writes its blurb
+and links. Add or remove
 catalogue membership with `get_catalogue` then `update_catalogue`.
 
 ## Authoring workspace
