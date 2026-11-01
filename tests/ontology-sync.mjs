@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { ONTOLOGY_GRAPH_PREFIX, ONTOLOGY_SYNC_GRAPH, ONTOLOGY_TAXONOMY_GRAPH, assertOwnedGraph, puzzleGraphIri } from "../modules/ontologyGraph.js";
+import { ONTOLOGY_GRAPH_PREFIX, ONTOLOGY_SUBJECTS_GRAPH, ONTOLOGY_SYNC_GRAPH, ONTOLOGY_TAXONOMY_GRAPH, assertOwnedGraph, puzzleGraphIri } from "../modules/ontologyGraph.js";
 import { createOntologySyncer, syncOntology } from "../modules/ontologySync.js";
 
 export const name = "Ontology sync: only changed puzzles are replaced, withdrawn ones dropped";
@@ -77,6 +77,7 @@ export async function run() {
   assert.equal(first.taxonomy, true);
   assert.ok(store.graphs.has(puzzleGraphIri("alpha")));
   assert.ok(store.graphs.has(ONTOLOGY_TAXONOMY_GRAPH));
+  assert.ok(store.graphs.has(ONTOLOGY_SUBJECTS_GRAPH));
 
   // Nothing changed: no writes at all.
   store.writes.length = 0;
@@ -99,9 +100,17 @@ export async function run() {
   assert.equal(third.taxonomy, false);
   assert.match(store.graphs.get(puzzleGraphIri("alpha")), /"carbon dioxide"/);
 
+  // A domain edit (code today) rebuilds the taxonomy and subjects graphs
+  // even when no published row changed.
+  store.writes.length = 0;
+  const renamed = await syncOntology({ repository, store, now, domains: { "life-sciences": { title: "Life Sciences" } } });
+  assert.equal(renamed.taxonomy, true);
+  assert.equal(renamed.replaced, 0);
+  assert.deepEqual(store.writes.map(([, graph]) => graph), [ONTOLOGY_TAXONOMY_GRAPH, ONTOLOGY_SUBJECTS_GRAPH, ONTOLOGY_SYNC_GRAPH]);
+
   // A full rebuild drops owned graphs only.
   const full = await syncOntology({ repository, store, now, domains: {}, full: true });
-  assert.equal(full.dropped, 3);
+  assert.equal(full.dropped, 4);
   assert.equal(full.replaced, 1);
   assert.equal(store.graphs.get("urn:terminology-mcp:vocab:lcc"), "<a> <b> <c> .");
 

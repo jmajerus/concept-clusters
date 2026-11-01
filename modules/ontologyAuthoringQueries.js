@@ -7,6 +7,7 @@ import {
   CC,
   ONTOLOGY_GRAPH_PREFIX,
   ONTOLOGY_PUZZLE_GRAPH_PREFIX,
+  ONTOLOGY_SUBJECTS_GRAPH,
   ONTOLOGY_SYNC_GRAPH,
   ONTOLOGY_SYNC_SUBJECT,
   ONTOLOGY_TAXONOMY_GRAPH,
@@ -175,6 +176,7 @@ export function ownedDataset(state) {
   const graphs = [
     ...[...(state?.puzzleHashes?.keys() || [])].sort().map(puzzleGraphIri),
     ONTOLOGY_TAXONOMY_GRAPH,
+    ONTOLOGY_SUBJECTS_GRAPH,
     ONTOLOGY_SYNC_GRAPH
   ];
   return { defaultGraphs: graphs, namedGraphs: graphs };
