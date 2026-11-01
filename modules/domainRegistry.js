@@ -27,20 +27,24 @@ export function domainsRegistryFromDocuments(documents = []) {
   return domains;
 }
 
-// An empty registry (no domain rows yet) keeps the snapshot.
+// Missing (a corpus or index from before any domain was published) keeps
+// the current registry; an object, even an empty one, replaces it.
 export function replaceDomainsRegistry(next) {
-  if (!next || typeof next !== "object" || !Object.keys(next).length) return DOMAINS;
+  if (!next || typeof next !== "object") return DOMAINS;
   for (const key of Object.keys(DOMAINS)) delete DOMAINS[key];
   Object.assign(DOMAINS, next);
   return DOMAINS;
 }
 
-// Server side: load the published domain rows and install them. Returns the
-// registry in use.
+// Server side: load the published domain rows and install the live ones.
+// With no rows at all (before the first seed) the snapshot is restored; once
+// rows exist, a withdrawn domain stays out even if the snapshot has it.
 export async function refreshDomainsRegistry(repository) {
   if (typeof repository?.listPublished !== "function") return DOMAINS;
-  const rows = await repository.listPublished({ kind: "domain" });
-  return replaceDomainsRegistry(domainsRegistryFromDocuments(rows.map(row => row.document)));
+  const rows = await repository.listPublished({ kind: "domain", includeWithdrawn: true });
+  if (!rows.length) return replaceDomainsRegistry(clone(DOMAINS_SNAPSHOT));
+  const live = rows.filter(row => !row.withdrawnAt).map(row => row.document);
+  return replaceDomainsRegistry(domainsRegistryFromDocuments(live));
 }
 
 // A domain document as it is published: { id, title, info? }.

@@ -3,6 +3,7 @@ import { DOMAINS } from "../puzzles/domains.js";
 import {
   DOMAINS_SNAPSHOT,
   domainsRegistryFromDocuments,
+  refreshDomainsRegistry,
   replaceDomainsRegistry,
   validateDomainDocument
 } from "../modules/domainRegistry.js";
@@ -21,13 +22,26 @@ export async function run() {
     ]);
     assert.deepEqual(live, { astronomy: { title: "Astronomy", info: { text: "Stars." } } });
 
-    // No rows keeps the snapshot; rows replace it in place, so readers that
-    // imported DOMAINS see them.
-    assert.equal(replaceDomainsRegistry({}), DOMAINS);
+    // A missing registry keeps the current one; rows replace it in place,
+    // so readers that imported DOMAINS see them.
+    assert.equal(replaceDomainsRegistry(undefined), DOMAINS);
     assert.equal(Object.keys(DOMAINS).length, Object.keys(DOMAINS_SNAPSHOT).length);
     replaceDomainsRegistry(live);
     assert.deepEqual(Object.keys(DOMAINS), ["astronomy"]);
     assert.ok(DOMAINS_SNAPSHOT.humanities, "the snapshot copy survives");
+
+    // The server refresh: no rows restores the snapshot; rows that are all
+    // withdrawn leave no domain registered.
+    const repository = rows => ({ async listPublished() { return rows; } });
+    await refreshDomainsRegistry(repository([]));
+    assert.equal(Object.keys(DOMAINS).length, Object.keys(DOMAINS_SNAPSHOT).length);
+    await refreshDomainsRegistry(repository([{ document: { id: "humanities", title: "Humanities" }, withdrawnAt: "2026-11-01" }]));
+    assert.deepEqual(Object.keys(DOMAINS), []);
+    await refreshDomainsRegistry(repository([
+      { document: { id: "humanities", title: "Humanities" }, withdrawnAt: "2026-11-01" },
+      { document: { id: "astronomy", title: "Astronomy" }, withdrawnAt: null }
+    ]));
+    assert.deepEqual(Object.keys(DOMAINS), ["astronomy"]);
 
     assert.equal(validateDomainDocument({ id: "astronomy", title: " Astronomy " }).document.title, "Astronomy");
     assert.equal(validateDomainDocument({ id: "other", title: "Other" }).valid, false);

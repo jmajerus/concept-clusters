@@ -456,10 +456,19 @@ export async function drainPublishedReplica({ pool, d1 } = {}) {
       const row = await oneRow(pool, "puzzle", queued.id);
       if (row && !row.withdrawn_at) livePuzzleIds.add(row.id);
     }
-    // A domain ships alone and first: categories name it.
-    const domain = pending.find(row => row.kind === "domain");
-    if (domain) {
-      shipped += await shipQueuedDocument(pool, d1, domain);
+    // A live domain ships alone and first: categories name it. A withdrawn
+    // one waits until the categories moved off it have shipped (below).
+    const domains = pending.filter(row => row.kind === "domain");
+    let liveDomain = null;
+    for (const queued of domains) {
+      const row = await oneRow(pool, "domain", queued.id);
+      if (!row || !row.withdrawn_at) {
+        liveDomain = queued;
+        break;
+      }
+    }
+    if (liveDomain) {
+      shipped += await shipQueuedDocument(pool, d1, liveDomain);
       continue;
     }
     const category = pending.find(row => row.kind === "category");
@@ -520,6 +529,11 @@ export async function drainPublishedReplica({ pool, d1 } = {}) {
       }
       shipped += await shipDocuments(pool, d1, members);
       heldPuzzles.clear();
+      continue;
+    }
+    const withdrawnDomain = domains[0];
+    if (withdrawnDomain) {
+      shipped += await shipQueuedDocument(pool, d1, withdrawnDomain);
       continue;
     }
     const settings = pending.find(row => row.kind === "site_settings");
