@@ -509,7 +509,7 @@ function groupCategoriesByDomain(categories) {
   }
   const groups = [...byDomain.keys()]
     .sort((a, b) => categoryDomainTitle(a).localeCompare(categoryDomainTitle(b)))
-    .map(id => ({ title: categoryDomainTitle(id), items: byDomain.get(id) }));
+    .map(id => ({ id, title: categoryDomainTitle(id), items: byDomain.get(id) }));
   if (ungrouped.length) groups.push({ title: "Other subjects", items: ungrouped });
   return groups;
 }
@@ -552,7 +552,32 @@ function categoryStatusCell(item) {
   return `${publishedPlaceBadge(item)} ${renderPublishedFreezeBadges(item)}${unpublished}`;
 }
 
-export function renderCategoryListPage(categories, { notice = null } = {}) {
+// Subjects players would see without a blurb, newest additions from
+// terminology-mcp included. Each links to the field that fills it.
+function renderNeedsCopy(needsCopy) {
+  if (!needsCopy?.length) return "";
+  const items = needsCopy.map(item => {
+    const href = item.kind === "domain"
+      ? `/admin/domains/${encodeURIComponent(item.id)}`
+      : `/admin/categories/${encodeURIComponent(item.id)}${item.sub ? `#sub-${encodeURIComponent(item.sub)}` : ""}`;
+    const where = item.kind === "domain" ? "domain" : item.sub ? `subcategory of ${escapeHtml(item.categoryTitle || item.id)}` : "category";
+    return `<li><a href="${escapeHtml(href)}">${escapeHtml(item.title)}</a> <span class="meta">${where}</span></li>`;
+  }).join("\n");
+  return `<section class="needs-copy">
+      <h2>Needs player copy (${needsCopy.length})</h2>
+      <p class="meta">No blurb yet. Players see these without the short
+      explanation and link the rest have.</p>
+      <ul>${items}</ul>
+    </section>`;
+}
+
+export function renderCategoryListPage(categories, {
+  notice = null,
+  needsCopy = [],
+  domainCopyIds = [],
+  terminologyUrl = null
+} = {}) {
+  const editableDomains = new Set(domainCopyIds);
   function categoryRow(item) {
     return `<tr>
     <td><a href="/admin/categories/${encodeURIComponent(item.id)}">${escapeHtml(item.title || item.id)}</a></td>
@@ -564,8 +589,13 @@ export function renderCategoryListPage(categories, { notice = null } = {}) {
   </tr>`;
   }
   const rows = groupCategoriesByDomain(categories)
-    .map(group => `<tr class="domain-divider"><td colspan="6">${escapeHtml(group.title)}</td></tr>
-      ${group.items.map(categoryRow).join("\n")}`)
+    .map(group => {
+      const blurb = group.id && editableDomains.has(group.id)
+        ? ` <a class="meta" href="/admin/domains/${encodeURIComponent(group.id)}">domain blurb</a>`
+        : "";
+      return `<tr class="domain-divider"><td colspan="6">${escapeHtml(group.title)}${blurb}</td></tr>
+      ${group.items.map(categoryRow).join("\n")}`;
+    })
     .join("\n");
   const table = categories.length
     ? `<table>
@@ -573,8 +603,16 @@ export function renderCategoryListPage(categories, { notice = null } = {}) {
          <tbody>${rows}</tbody>
        </table>`
     : "<p>No categories yet.</p>";
+  const source = terminologyUrl
+    ? `<p class="meta">Domains, categories, and subcategories come from
+    terminology-mcp's <a href="${escapeHtml(`${terminologyUrl}/?scheme=cc-subjects`)}"><code>cc-subjects</code></a>:
+    add, rename, or move them there and they arrive here within a minute.
+    This page writes their player copy -- blurbs and links.</p>`
+    : "";
   const body = `<h1>Categories</h1>
     ${renderContentPublicationNotice(notice)}
+    ${source}
+    ${renderNeedsCopy(needsCopy)}
     <p class="meta">Shared taxonomy documents in D1. Title, domain, blurb, and
     registered subcategories. Puzzle membership stays derived.
     <span class="badge badge-new">add on next freeze</span> marks a published
@@ -590,7 +628,9 @@ export function renderCategoryListPage(categories, { notice = null } = {}) {
     ${navLinks()}</p>
     <form class="new-catalogue" method="post" action="/admin/categories">
       <h2>New category</h2>
-      <p class="meta">Creates a working copy. Publish makes it available to public
+      <p class="meta">For categories outside the subject taxonomy, like Trivia
+      and Vocabulary; subject categories are added in terminology-mcp.
+      Creates a working copy. Publish makes it available to public
       play after the cache refreshes. Membership stays derived from puzzles.</p>
       <input type="hidden" name="confirm" value="create-category">
       <p><label>id <input name="id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="molecular-biology"></label></p>
@@ -610,6 +650,42 @@ function renderCorpusBooksLink(termId) {
     <code>${escapeHtml(termId)}</code></a> or a subcategory of it.</p>`;
 }
 
+function infoFields(prefix, info) {
+  return `<p><label>blurb <textarea name="${prefix}info">${escapeHtml(infoTextOf(info))}</textarea></label></p>
+        <p><label>link <input name="${prefix}link" value="${escapeHtml(infoLinkOf(info))}" placeholder="wiki:Topic or https://…"></label></p>
+        <p><label>extra link <input name="${prefix}extraLink" value="${escapeHtml(infoExtraLinkOf(info))}"></label></p>`;
+}
+
+function termLink(href, label = "edit in terminology-mcp") {
+  return href ? `<a class="meta" href="${escapeHtml(href)}">${label}</a>` : "";
+}
+
+// A subject terminology-mcp owns: its title and subcategories are shown,
+// not edited; the form writes player copy only.
+function managedCategoryForm(id, document, revision, managed) {
+  const subcategories = subcategoryEntries(document);
+  const subcategoryFields = subcategories.length
+    ? subcategories.map(([subId, definition]) => `<fieldset id="sub-${escapeHtml(subId)}">
+        <legend>${escapeHtml(definition?.title || subId)} <code>${escapeHtml(subId)}</code>
+        ${termLink(managed.subcategoryHrefs?.[subId])}</legend>
+        ${infoFields(`subcategory.${escapeHtml(subId)}.`, definition?.info)}
+      </fieldset>`).join("\n")
+    : "<p class=\"meta\">No subcategories in terminology-mcp under this category.</p>";
+  return `<p class="meta">Title, domain, and subcategories come from
+    terminology-mcp's <code>cc-subjects</code> ${termLink(managed.termHref, "(open this term)")}.
+    Rename, add, or move them there; this page writes the player copy.
+    Domain: ${escapeHtml(DOMAINS[document.domain]?.title || document.domain || "—")}
+    ${termLink(managed.domainHref)}.</p>
+    <form class="category-edit" method="post" action="/admin/categories/${encodeURIComponent(id)}">
+      <input type="hidden" name="confirm" value="save-category">
+      <input type="hidden" name="expected_revision" value="${escapeHtml(String(revision))}">
+      ${infoFields("", document.info)}
+      <h2>Subcategories</h2>
+      ${subcategoryFields}
+      <p><button type="submit">Save working copy</button></p>
+    </form>`;
+}
+
 export function renderCategoryEditPage({
   id,
   document,
@@ -621,7 +697,8 @@ export function renderCategoryEditPage({
   gitSeedCue = false,
   cuedForFreeze = false,
   readyForFreeze = false,
-  notice = null
+  notice = null,
+  managed = null
 }) {
   const subcategories = subcategoryEntries(document);
   const subcategoryFields = subcategories.length
@@ -652,7 +729,7 @@ export function renderCategoryEditPage({
     · ${navLinks()}</p>
     <p class="meta">${lifecycleHint}</p>
     ${activePublished ? renderCorpusBooksLink(categoryTermId(id, document.domain)) : ""}
-    <form class="category-edit" method="post" action="/admin/categories/${encodeURIComponent(id)}">
+    ${managed ? managedCategoryForm(id, document, revision, managed) : `<form class="category-edit" method="post" action="/admin/categories/${encodeURIComponent(id)}">
       <input type="hidden" name="confirm" value="save-category">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(revision))}">
       <p><label>title <input name="title" required value="${escapeHtml(document.title || "")}"></label></p>
@@ -680,7 +757,7 @@ export function renderCategoryEditPage({
         <p><label>link <input name="new_subcategory_link" placeholder="wiki:Topic or https://…"></label></p>
       </fieldset>
       <p><button type="submit">Save working copy</button></p>
-    </form>
+    </form>`}
     <form class="submit-pr" method="post" action="/admin/categories/${encodeURIComponent(id)}">
       <p><button type="submit" name="confirm" value="publish"${publishDisabled}>${publishLabel}</button>
       <button type="submit" name="confirm" value="${PUBLISH_AND_CUE_CONFIRM}" class="secondary"${publishDisabled}
@@ -695,6 +772,29 @@ export function renderCategoryEditPage({
     ${renderFreezeCueForm(`/admin/categories/${encodeURIComponent(id)}`, {
       published, withdrawn, cuedForFreeze: cuedForFreeze || readyForFreeze
     })}
-    ${renderDocumentLifecycleForms(`/admin/categories/${encodeURIComponent(id)}`, { published, withdrawn })}`;
+    ${renderDocumentLifecycleForms(`/admin/categories/${encodeURIComponent(id)}`, {
+      // terminology-mcp decides whether a subject exists.
+      published: managed ? false : published,
+      withdrawn
+    })}`;
+  return pageShell(document.title || id, body);
+}
+
+// A domain's player copy. Domains have no working copy: the copy is
+// published straight onto the current row, which carries nothing else a
+// person edits here.
+export function renderDomainCopyPage({ id, document, termHref = null, saved = false }) {
+  const body = `<h1>${escapeHtml(document.title || id)}</h1>
+    <p class="meta"><code>${escapeHtml(id)}</code> · domain · ${navLinks()}</p>
+    ${saved ? '<p role="status">Published. Public play picks it up after the cache refreshes.</p>' : ""}
+    <p class="meta">The title comes from terminology-mcp's <code>cc-subjects</code>
+    ${termLink(termHref, "(open this term)")}. The blurb and links below are
+    player copy, shown on the category browse screen and the domain's
+    Library card. Publish writes them to public play.</p>
+    <form class="category-edit" method="post" action="/admin/domains/${encodeURIComponent(id)}">
+      <input type="hidden" name="confirm" value="publish-domain-copy">
+      ${infoFields("", document.info)}
+      <p><button type="submit">Publish</button> <a href="/admin/categories">Back to categories</a></p>
+    </form>`;
   return pageShell(document.title || id, body);
 }

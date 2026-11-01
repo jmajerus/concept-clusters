@@ -10,6 +10,7 @@ import {
   renderCategoryEditPage,
   renderCategoryListPage,
   renderContentLifecycleResultPage,
+  renderDomainCopyPage,
   renderContentPublishResultPage,
   renderMetaCatalogueEditPage
 } from "./catalogueReviewPage.js";
@@ -43,6 +44,17 @@ import { LocalD1ConfigError } from "./localD1Config.js";
 import { sameStoredDocument } from "./authoringDomains.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
+import { refreshDomainsRegistry, validateDomainDocument } from "./domainRegistry.js";
+import {
+  applyCopy,
+  copyDiffers,
+  copyOf,
+  hasBlurb,
+  missingCopy,
+  subjectIndex,
+  terminologyTermHref
+} from "./subjectCopy.js";
+import { terminologyConfig } from "./terminologyClient.js";
 import {
   CATEGORY_REGISTRATION_MODES,
   categorySummaries
@@ -477,7 +489,9 @@ function newSubcategoryFromInput(body, params) {
   };
 }
 
-function listCategoryRows(published, working) {
+// A category terminology-mcp owns (in `index`) differs from its published
+// row only in copy: its working copy's structure is never published.
+function listCategoryRows(published, working, index = null) {
   const seen = new Set();
   const rows = [];
   for (const item of published) {
@@ -491,7 +505,9 @@ function listCategoryRows(published, working) {
       domain: item.document?.domain ?? null,
       published: true,
       withdrawn: Boolean(item.withdrawnAt),
-      differsFromPublished: Boolean(draft) && cataloguePublicationState(draft, item).differsFromPublished,
+      differsFromPublished: Boolean(draft) && (index?.categories.has(item.id) && !item.withdrawnAt
+        ? copyDiffers(draft.document, item.document)
+        : cataloguePublicationState(draft, item).differsFromPublished),
       subcategories: publishedSubcategories,
       unpublishedSubcategories: subcategoryList(draft).filter(sub => !publishedIds.has(sub.id)),
       updatedAt: item.updatedAt || "",
@@ -553,7 +569,8 @@ export function createLocalCatalogueReviewHandler({
   actor,
   contentService = null,
   repositoryRoot,
-  env = process.env
+  env = process.env,
+  subjectTerms = null
 }) {
   if (!contentDocuments) throw new Error("contentDocuments is required");
   if (!actor?.subject) throw new Error("authenticated actor is required");
@@ -672,10 +689,88 @@ export function createLocalCatalogueReviewHandler({
     }
   }
 
+  const terminologyUrl = (env.TERMINOLOGY_EDITOR_URL || terminologyConfig(env)?.baseUrl || "")
+    .replace(/\/+$/, "") || null;
+
+  // Which subjects terminology-mcp owns, from the subscriber's mirror. Null
+  // only without one (no cursor yet): every category is then edited in full.
+  // A failed read throws, so a managed category never falls back to the
+  // full editor.
+  async function loadSubjectIndex() {
+    if (typeof subjectTerms !== "function") return null;
+    return subjectIndex(await subjectTerms());
+  }
+
+  function termHref(termId) {
+    return terminologyUrl && termId ? terminologyTermHref(terminologyUrl, termId) : null;
+  }
+
+  // A category terminology-mcp owns: { live: true, ... } when its row is
+  // published, so the editor writes player copy only; { live: false } when
+  // it is retired there or not yet synced, so nothing here may publish it.
+  // Null for Concept Clusters' own categories.
+  function managedCategory(index, categoryId, published) {
+    const termId = index?.categories.get(categoryId);
+    if (!termId) return index?.retiredCategories.has(categoryId) ? { live: false } : null;
+    if (!published || published.withdrawnAt) return { live: false };
+    const subcategoryHrefs = {};
+    for (const sub of Object.keys(published.document?.subcategories || {})) {
+      const href = termHref(index.subcategories.get(`${categoryId}--${sub}`));
+      if (href) subcategoryHrefs[sub] = href;
+    }
+    return {
+      live: true,
+      termHref: termHref(termId),
+      domainHref: termHref(index.domains.get(published.document?.domain)),
+      subcategoryHrefs
+    };
+  }
+
+  const NOT_LIVE_MESSAGE = "This category belongs to terminology-mcp, which has retired it or not synced it yet. "
+    + "It is restored or changed there, not here.";
+
+  // The copy a managed-category form submits, applied onto the current
+  // published structure.
+  function submittedCopyDocument(structure, body, params) {
+    const document = structuredClone(structure);
+    const field = (key, fallback) => readFormField(body, params, key, fallback);
+    document.info = patchInfo(document.info, {
+      text: field("info", infoTextOf(document.info)),
+      link: field("link", document.info?.link || ""),
+      extraLink: field("extraLink", document.info?.extraLink || "")
+    });
+    if (!Object.keys(document.info).length) delete document.info;
+    for (const [sub, definition] of Object.entries(document.subcategories || {})) {
+      const edit = body?.subcategories?.[sub]?.info;
+      const prefix = `subcategory.${sub}.`;
+      const subField = (key, value) => (edit && typeof edit === "object" && key in edit)
+        ? String(edit[key] ?? "").trim()
+        : field(`${prefix}${key === "text" ? "info" : key}`, value);
+      definition.info = patchInfo(definition.info, {
+        text: subField("text", infoTextOf(definition.info)),
+        link: subField("link", definition.info?.link || ""),
+        extraLink: subField("extraLink", definition.info?.extraLink || "")
+      });
+      if (!Object.keys(definition.info).length) delete definition.info;
+    }
+    return document;
+  }
+
+  async function liveDomain(id) {
+    try {
+      const row = await contentDocuments.getPublished({ kind: "domain", id });
+      return row.withdrawnAt ? null : row;
+    } catch (error) {
+      if (error instanceof ContentDocumentNotFoundError) return null;
+      throw error;
+    }
+  }
+
   return async function handleLocalCatalogueReview(req, res) {
     const requestUrl = new URL(req.url || "/", "http://local.invalid");
     const urlPath = requestUrl.pathname;
-    if (!urlPath.startsWith("/admin/catalogues") && !urlPath.startsWith("/admin/categories")) {
+    if (!urlPath.startsWith("/admin/catalogues") && !urlPath.startsWith("/admin/categories")
+      && !urlPath.startsWith("/admin/domains")) {
       return false;
     }
     const sameOrigin = () => isSameOriginRequest({
@@ -694,7 +789,82 @@ export function createLocalCatalogueReviewHandler({
     }
 
     if (urlPath.startsWith("/admin/catalogues")) await ensureSeeded("catalogue");
-    else await ensureSeeded("category");
+    else if (urlPath.startsWith("/admin/categories")) await ensureSeeded("category");
+
+    const domainPage = urlPath.match(/^\/admin\/domains\/([^/]+)$/);
+    if (domainPage) {
+      const domainId = decodeURIComponent(domainPage[1]);
+      const row = await liveDomain(domainId);
+      if (!row) {
+        html(res, `<p>Unknown domain: ${escapeHtml(domainId)}</p>`, 404);
+        return true;
+      }
+      const index = await loadSubjectIndex();
+      const page = (document, saved = false) => renderDomainCopyPage({
+        id: domainId,
+        document,
+        termHref: termHref(index?.domains.get(domainId)),
+        saved
+      });
+      if (req.method === "GET") {
+        html(res, page(row.document, requestUrl.searchParams.get("saved") === "1"));
+        return true;
+      }
+      if (req.method === "POST") {
+        if (!sameOrigin()) {
+          html(res, renderContentLifecycleResultPage({
+            title: "Domain was not saved",
+            error: "Cross-origin submit is not allowed.",
+            backHref: `/admin/domains/${encodeURIComponent(domainId)}`
+          }), 403);
+          return true;
+        }
+        try {
+          const { json: body, params } = await readRequestPayload(req);
+          if ((body?.confirm || params.get("confirm")) !== "publish-domain-copy") {
+            html(res, "<p>Unknown domain action.</p>", 400);
+            return true;
+          }
+          const info = patchInfo(row.document.info, {
+            text: readFormField(body, params, "info", infoTextOf(row.document.info)),
+            link: readFormField(body, params, "link", row.document.info?.link || ""),
+            extraLink: readFormField(body, params, "extraLink", row.document.info?.extraLink || "")
+          });
+          const next = { ...row.document };
+          if (Object.keys(info).length) next.info = info;
+          else delete next.info;
+          const validation = validateDomainDocument(next);
+          if (!validation.valid) throw Object.assign(new Error(validation.errors.join("; ")), { status: 400 });
+          // Applied onto the row just read, so the title the subscriber
+          // keeps is never overwritten from a stale form.
+          await contentDocuments.publish({
+            kind: "domain",
+            id: domainId,
+            document: validation.document,
+            actor,
+            expectedRevision: row.revision
+          });
+          await refreshDomainsRegistry(contentDocuments);
+          if (wantsJson(req, body)) {
+            json(res, { id: domainId, document: validation.document }, 200);
+            return true;
+          }
+          res.writeHead(303, {
+            Location: `/admin/domains/${encodeURIComponent(domainId)}?saved=1`,
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          html(res, renderContentLifecycleResultPage({
+            title: "Domain was not saved",
+            error: error instanceof Error ? error.message : String(error),
+            backHref: `/admin/domains/${encodeURIComponent(domainId)}`
+          }), error.status || 400);
+        }
+        return true;
+      }
+      return false;
+    }
 
     if (req.method === "GET" && urlPath === "/admin/catalogues") {
       const [published, working] = await Promise.all([
@@ -729,11 +899,24 @@ export function createLocalCatalogueReviewHandler({
       const summaries = categorySummaries(puzzles, registry, {
         registrationMode: CATEGORY_REGISTRATION_MODES.PUBLISHED_DOCUMENT
       });
+      const [domains, index] = await Promise.all([
+        contentDocuments.listPublished({ kind: "domain" }),
+        loadSubjectIndex()
+      ]);
+      const needsCopy = [
+        ...domains.filter(row => !hasBlurb(row.document?.info))
+          .map(row => ({ kind: "domain", id: row.id, title: row.document?.title || row.id })),
+        ...published.filter(row => !row.withdrawnAt).flatMap(row => missingCopy(row.document)
+          .map(item => ({ kind: "category", ...item, categoryTitle: row.document?.title })))
+      ];
       html(res, renderCategoryListPage(decorateFreezeAdd(
-        decorateCoverageCounts(listCategoryRows(published, working), summaries),
+        decorateCoverageCounts(listCategoryRows(published, working, index), summaries),
         gitIdsFromContentService(contentService).categories
       ), {
-        notice: publicationNoticeFromSearch(requestUrl.searchParams, "category", published)
+        notice: publicationNoticeFromSearch(requestUrl.searchParams, "category", published),
+        needsCopy,
+        domainCopyIds: domains.map(row => row.id),
+        terminologyUrl: index ? terminologyUrl : null
       }));
       return true;
     }
@@ -1221,13 +1404,25 @@ export function createLocalCatalogueReviewHandler({
           gitIdsFromContentService(contentService).categories
         );
         const publication = cataloguePublicationState(record, published);
+        const managed = managedCategory(await loadSubjectIndex(), categoryId, published);
+        if (managed && !managed.live) {
+          html(res, renderContentLifecycleResultPage({
+            title: record.document.title || categoryId,
+            message: NOT_LIVE_MESSAGE,
+            backHref: "/admin/categories"
+          }));
+          return true;
+        }
         html(res, renderCategoryEditPage({
           id: categoryId,
-          document: record.document,
+          document: managed ? applyCopy(published.document, copyOf(record.document)) : record.document,
+          managed,
           revision: record.revision,
           published: publication.published,
           withdrawn: publication.withdrawn,
-          differsFromPublished: publication.differsFromPublished,
+          differsFromPublished: managed
+            ? copyDiffers(record.document, published.document)
+            : publication.differsFromPublished,
           freezeAdd: flags.freezeAdd,
           gitSeedCue: flags.gitSeedCue,
           cuedForFreeze: flags.cuedForFreeze,
@@ -1277,6 +1472,29 @@ export function createLocalCatalogueReviewHandler({
             : `/admin/categories/${encodeURIComponent(categoryId)}`;
           res.writeHead(303, {
             Location: destination,
+            "Cache-Control": "no-store"
+          });
+          res.end();
+          return true;
+        }
+        const publishedRow = await publishedCategory(categoryId);
+        const managed = managedCategory(await loadSubjectIndex(), categoryId, publishedRow);
+        if (managed && !managed.live && confirm !== DELETE_DRAFT_CONFIRM) {
+          throw Object.assign(new Error(NOT_LIVE_MESSAGE), { status: 400 });
+        }
+        if (confirm === SAVE_CATEGORY_CONFIRM && managed) {
+          const current = await loadOrSeedCategory(categoryId);
+          const expectedRevision = Number(body?.expected_revision ?? params.get("expected_revision"));
+          const structure = applyCopy(publishedRow.document, copyOf(current.document));
+          await contentDocuments.saveDraft({
+            kind: "category",
+            id: categoryId,
+            document: submittedCopyDocument(structure, body, params),
+            actor,
+            expectedRevision
+          });
+          res.writeHead(303, {
+            Location: `/admin/categories/${encodeURIComponent(categoryId)}`,
             "Cache-Control": "no-store"
           });
           res.end();
@@ -1358,11 +1576,14 @@ export function createLocalCatalogueReviewHandler({
           const publishAndCue = confirm === PUBLISH_AND_CUE_CONFIRM;
           const record = await loadOrSeedCategory(categoryId);
           assertPublishableTitle(record.document, "Category");
+          // A managed category publishes its copy onto the structure the
+          // subscriber last published, never the working copy's structure.
           let published = await contentDocuments.publish({
             kind: "category",
             id: categoryId,
-            document: record.document,
-            actor
+            document: managed ? applyCopy(publishedRow.document, copyOf(record.document)) : record.document,
+            actor,
+            ...(managed ? { expectedRevision: publishedRow.revision } : {})
           });
           if (publishAndCue) {
             published = await contentDocuments.setFreezeCue({
@@ -1399,6 +1620,11 @@ export function createLocalCatalogueReviewHandler({
           });
           res.end();
           return true;
+        }
+        if (confirm === UNPUBLISH_CONFIRM && managed) {
+          throw Object.assign(new Error(
+            "This category comes from terminology-mcp. Retire or merge it there; the subscriber withdraws it here."
+          ), { status: 400 });
         }
         if (confirm === UNPUBLISH_CONFIRM) {
           const puzzles = await livePuzzleDocuments();
@@ -1470,7 +1696,8 @@ export function createDefaultLocalCatalogueReviewHandler({
   let handleRequestPromise;
   return async function handleDefaultLocalCatalogueReview(req, res) {
     const urlPath = (req.url || "").split("?")[0];
-    if (!urlPath.startsWith("/admin/catalogues") && !urlPath.startsWith("/admin/categories")) {
+    if (!urlPath.startsWith("/admin/catalogues") && !urlPath.startsWith("/admin/categories")
+      && !urlPath.startsWith("/admin/domains")) {
       return false;
     }
     try {
@@ -1485,7 +1712,8 @@ export function createDefaultLocalCatalogueReviewHandler({
         actor: resolved.actor,
         contentService,
         repositoryRoot,
-        env
+        env,
+        subjectTerms: resolved.subjectTerms || null
       }));
       const handleRequest = await handleRequestPromise;
       return handleRequest(req, res);
