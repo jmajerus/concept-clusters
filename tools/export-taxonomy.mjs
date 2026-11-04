@@ -1,11 +1,15 @@
-// Print the published taxonomy as a corpus-vocabulary/1 file (corpus-mcp's
-// tag vocabulary), or write it to --out <file>. The authoring server pushes
-// it to corpus-mcp on its own (modules/taxonomyPush.js).
+// Print the published taxonomy as a corpus-vocabulary/1 file, or write it to
+// --out <file>. corpus-mcp follows terminology-mcp for its tag vocabulary; this
+// file is its fallback (CORPUS_TERMINOLOGY_URL=off, then
+// `npm run deploy -- --vocabulary=<file>` in corpus-mcp).
 import { writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
+import { listMergedCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
+import { refreshDomainsRegistry } from "../modules/domainRegistry.js";
 import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 import { authoringDatabaseUrl, getAuthoringPool } from "../modules/postgresPool.js";
-import { loadPublishedTaxonomy } from "../modules/taxonomyPush.js";
+import { PostgresPublishedRepository } from "../modules/postgresPublishedRepository.js";
+import { taxonomyVocabulary } from "../modules/taxonomySnapshot.js";
 
 const isMain = process.argv[1]
   && import.meta.url === pathToFileURL(process.argv[1]).href;
@@ -21,7 +25,15 @@ if (isMain) {
   } else {
     const pool = getAuthoringPool(url);
     try {
-      const json = `${JSON.stringify(await loadPublishedTaxonomy(pool), null, 2)}\n`;
+      const repository = new PostgresPublishedRepository(pool);
+      // taxonomyVocabulary reads DOMAINS, and this process has only the git snapshot.
+      await refreshDomainsRegistry(repository);
+      const vocabulary = taxonomyVocabulary(listMergedCategoryRegistry({
+        contentService: null,
+        publishedCategories: await repository.listPublished({ kind: "category" }),
+        includeGit: false
+      }));
+      const json = `${JSON.stringify(vocabulary, null, 2)}\n`;
       if (out) await writeFile(out, json);
       else process.stdout.write(json);
     } catch (error) {
