@@ -88,7 +88,7 @@ The graph deliberately has no `owl:sameAs`.
 
 The LAN authoring server's published-replica drain loop
 (`modules/publishedReplicaSchedule.js`) calls the ontology syncer
-(`modules/ontologySync.js`) on every tick, after the taxonomy push. The
+(`modules/ontologySync.js`) on every tick, after the subjects sync. The
 syncer works like this:
 
 1. It reads `kind, id, content_hash` for live published puzzles, categories,

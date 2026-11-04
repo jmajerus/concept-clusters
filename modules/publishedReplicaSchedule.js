@@ -1,9 +1,8 @@
 // Drains the published replica queue while the authoring server is up.
 // A missing D1 client leaves the queue pending; the next tick tries again.
 // Each tick also applies terminology-mcp's cc-subjects changes when
-// SUBJECTS_SYNC=on, pushes the taxonomy to corpus-mcp when it has changed,
-// and syncs the ontology graphs on the LAN Oxigraph server, whether or not
-// D1 is reachable.
+// SUBJECTS_SYNC=on and syncs the ontology graphs on the LAN Oxigraph server,
+// whether or not D1 is reachable.
 
 import { refreshDomainsRegistry } from "./domainRegistry.js";
 import { createHttpD1Database } from "./httpD1Database.js";
@@ -13,7 +12,6 @@ import { createOntologySyncer } from "./ontologySync.js";
 import { PostgresPublishedRepository } from "./postgresPublishedRepository.js";
 import { drainPublishedReplica } from "./publishedReplica.js";
 import { createSubjectsSyncer } from "./subjectsSubscriber.js";
-import { createTaxonomyPusher } from "./taxonomyPush.js";
 
 const DRAIN_INTERVAL_MS = 15_000;
 
@@ -26,13 +24,6 @@ const drainStatus = {
 
 export function publishedReplicaDrainStatus() {
   return { ...drainStatus };
-}
-
-// Null until the drain starts; the drain does not run without a database URL.
-let taxonomyPusher = null;
-
-export function taxonomyPushStatus() {
-  return taxonomyPusher ? taxonomyPusher.status() : null;
 }
 
 let ontologySyncer = null;
@@ -73,8 +64,6 @@ export function startPublishedReplicaDrain({
   let timer = null;
   let running = false;
   let reportedWaiting = false;
-  const pushTaxonomy = createTaxonomyPusher({ pool, env });
-  taxonomyPusher = pushTaxonomy;
   const syncOntology = createOntologySyncer({ pool, env });
   ontologySyncer = syncOntology;
   const syncSubjects = createSubjectsSyncer({ pool, env });
@@ -127,9 +116,8 @@ export function startPublishedReplicaDrain({
     try {
       await drain();
       await refreshDomains();
-      // Before the push and the ontology sync, so both see its changes.
+      // Before the ontology sync, so it sees its changes.
       await syncSubjects();
-      await pushTaxonomy();
       await syncOntology();
     } finally {
       running = false;

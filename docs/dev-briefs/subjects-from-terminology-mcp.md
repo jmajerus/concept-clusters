@@ -276,8 +276,11 @@ the public site and CI read.
    player copy, including domain copy (built); `create_category` and
    `update_category` retired for `update_subject_copy`, with new subjects
    proposed through terminology-mcp's `propose_term` (built).
-5. **Retire** the corpus-mcp taxonomy push (`modules/taxonomyPush.js`)
-   once corpus-mcp subscribes to terminology-mcp directly.
+5. **corpus-mcp (done):** it follows `cc-subjects` directly, as subscriber
+   `corpus-mcp`, and Concept Clusters no longer pushes it a vocabulary.
+   `npm run authoring:taxonomy:export` still writes the
+   `corpus-vocabulary/1` file its `CORPUS_TERMINOLOGY_URL=off` fallback can
+   install by hand.
 
 ## Open
 
