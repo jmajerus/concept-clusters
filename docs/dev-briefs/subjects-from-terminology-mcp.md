@@ -114,7 +114,7 @@ rows replace that object in place (`modules/domainRegistry.js`):
   without a deploy;
 - the authoring server, from Postgres on every drain tick and whenever MCP
   loads the taxonomy, so category validation, `create_category`, the
-  ontology sync, the taxonomy push, and the citation collections follow
+  ontology sync and the citation collections follow
   the rows. `list_categories` returns the domains a category may name.
 
 `puzzles/domains.js` is a snapshot that every Freeze rewrites from the
@@ -213,7 +213,7 @@ Holding stops the cursor at that change; later changes wait behind it.
 
 Concept Clusters subscribes to terminology-mcp's changelog from the
 authoring server's drain loop (`modules/publishedReplicaSchedule.js`),
-beside the taxonomy push and the ontology sync:
+alongside the ontology sync:
 
 - It bootstraps from `GET /api/state?scheme=cc-subjects`, which includes
   retired terms, so old references keep resolving.
