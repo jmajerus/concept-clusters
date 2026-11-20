@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `42156a24` · 2026-11-01
+Skill rev `66273ed5` · 2026-11-20
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. `save_puzzle_draft` writes the working copy only. The human
@@ -116,8 +116,10 @@ human-approved.
    the full draft.
 7. **Complete pass must clear every `blocking` gap** from `--level complete` before record/stop.
 8. **Never run a shell command as a placeholder, no-op, or "to think."** If
-   the MCP tool you need is not in your tool list, stop and name the missing
-   tool; do not substitute another call.
+   the concept-clusters MCP tool you need is not in your tool list, stop and
+   name the missing tool; do not substitute another call. The
+   [library tools](#library-sources-optional) are optional and never a reason
+   to stop.
 
 ## Stop-gate report
 
@@ -198,6 +200,28 @@ What's next?
 2. Approve — open the drafts page to review the complete puzzle
 3. Publish and cue for freeze when ready
 ```
+
+## Library sources (optional)
+
+When the Authoring Portal tools are listed (names ending in `find_work`,
+`search_corpus`, `add_quote`, `cite_quote`), the owner's own books are a
+source alongside the web. They are read-only research aids on every pass,
+including inventory; they never replace a concept-clusters MCP call. Without
+them, research the usual way.
+
+- **Check a reference.** `find_work` (holdings) says whether a work is owned
+  and in what form. When it has a text holding, `search_corpus` and
+  `read_book` confirm the claim against the book; `cite_passage` returns the
+  citation and the printed page (`page_label`, never `file_page`). A work
+  with no text holding has nothing to search.
+- **Quote in a lesson.** Only in `learningIntroduction` content, at most one
+  or two short passages that carry the lesson better than paraphrase. Save
+  each with quote-mcp `add_quote` (it checks the words against the book)
+  before the quote appears in the draft, never from memory, and cite it with
+  `cite_quote`. Put the work in `learningIntroduction.citations`. Present
+  the quote as a `>` blockquote with its attribution.
+- **File a book.** A cited book not yet in Zotero goes through
+  `file_zotero_reference`; record the citekey it gets with `pin_citekey`.
 
 ## Do not load
 
