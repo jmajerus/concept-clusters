@@ -7,6 +7,10 @@
 export const AUTHORING_CHECKOUT = "/opt/concept-clusters";
 export const AUTHORING_RESTART_COMMAND =
   "sudo -S -p '' systemctl restart concept-clusters-authoring.service";
+// Applies the deployed branch's postgres/migrations/ (all additive and
+// idempotent) to the checkout's AUTHORING_DATABASE_URL, so new code never
+// starts against a schema it does not match.
+export const AUTHORING_MIGRATE_COMMAND = "node tools/postgres-migrate.mjs";
 
 const USAGE = "Usage: npm run authoring:deploy [-- --main | --pr <number>]\n"
   + "  (no option)    redeploy the branch the server is on\n"
@@ -73,7 +77,8 @@ export function buildAuthoringDeployScript({
   branch = null,
   baseBranch = "main",
   checkout = AUTHORING_CHECKOUT,
-  restartCommand = AUTHORING_RESTART_COMMAND
+  restartCommand = AUTHORING_RESTART_COMMAND,
+  migrateCommand = AUTHORING_MIGRATE_COMMAND
 } = {}) {
   if (branch !== null) assertBranchName(branch);
   assertBranchName(baseBranch);
@@ -121,6 +126,8 @@ export function buildAuthoringDeployScript({
       + fail("HEAD does not match origin/$branch after the fast-forward."),
     "git merge-base --is-ancestor \"origin/$base\" HEAD || "
       + fail("HEAD does not include origin/$base."),
+    `${migrateCommand} || `
+      + fail("Postgres migrations failed, so the old server is still running. Fix the error above (the checkout's .env needs AUTHORING_DATABASE_URL), then redeploy."),
     "echo \"Restarting on $branch @ $(git rev-parse --short HEAD): $(git log -1 --format=%s)\"",
     restartCommand
   ].join("\n");

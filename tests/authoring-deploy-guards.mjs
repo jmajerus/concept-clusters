@@ -59,15 +59,18 @@ function commit(cwd, file, message) {
   return git(cwd, ["rev-parse", "HEAD"]);
 }
 
-function deploy(checkout, branch) {
+function deploy(checkout, branch, { migrateFails = false } = {}) {
   const marker = join(checkout, "..", "restarted");
+  const migrated = join(checkout, "..", "migrated");
   rmSync(marker, { force: true });
+  rmSync(migrated, { force: true });
   const result = spawnSync("sh", ["-c", buildAuthoringDeployScript({
     branch,
     checkout,
-    restartCommand: `touch '${marker}'`
+    restartCommand: `touch '${marker}'`,
+    migrateCommand: migrateFails ? "false" : `touch '${migrated}'`
   })], { encoding: "utf8", env: gitEnv });
-  return { ...result, restarted: existsSync(marker) };
+  return { ...result, restarted: existsSync(marker), migrated: existsSync(migrated) };
 }
 
 async function requestJson(handlerOptions, method = "GET") {
@@ -346,12 +349,14 @@ export async function run() {
     const refused = deploy(server, "feature/stale");
     assert.notEqual(refused.status, 0);
     assert.equal(refused.restarted, false);
+    assert.equal(refused.migrated, false, "a refused deploy never migrates");
     assert.match(refused.stderr, /missing 1 commit\(s\) from origin\/main/);
     assert.equal(git(server, ["rev-parse", "HEAD"]), started.commit, "refusal leaves the checkout alone");
 
     const toMain = deploy(server, "main");
     assert.equal(toMain.status, 0, toMain.stderr);
     assert.equal(toMain.restarted, true);
+    assert.equal(toMain.migrated, true, "the deployed branch's migrations run before restart");
     assert.equal(git(server, ["rev-parse", "HEAD"]), mainHead);
 
     const moved = await loadServerRevisionStatus({ repositoryRoot: server, running: started, fetchRemote: false });
@@ -402,6 +407,12 @@ export async function run() {
     const backToMain = deploy(server, "main");
     assert.equal(backToMain.status, 0, backToMain.stderr);
     assert.equal(git(server, ["rev-parse", "--abbrev-ref", "HEAD"]), "main");
+
+    // A failed migration keeps the old server running.
+    const unmigrated = deploy(server, null, { migrateFails: true });
+    assert.notEqual(unmigrated.status, 0);
+    assert.equal(unmigrated.restarted, false);
+    assert.match(unmigrated.stderr, /Postgres migrations failed/);
 
     // A detached checkout has no branch to redeploy.
     git(server, ["checkout", "-q", "--detach"]);
