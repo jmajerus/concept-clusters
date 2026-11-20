@@ -1,3 +1,5 @@
+import { fenceClasses, fenceCloseIndex, fenceOpenSpec, lessonBlockFor } from "./lessonBlocks.js";
+
 function element(name, text) {
   const node = document.createElement(name);
   if (text !== undefined) node.textContent = text;
@@ -54,18 +56,77 @@ function appendInline(container, text, { baseUrl, resolveAssetUrl }) {
 }
 
 function startsBlock(line) {
-  return /^(#{1,3})\s+|^>\s?|^```|^[-*]\s+|^\d+\.\s+|^---+$/.test(line);
+  return /^(#{1,3})\s+|^>\s?|^```|^[-*]\s+|^\d+\.\s+|^---+$|^:::|^<!--/.test(line);
+}
+
+const ATTRIBUTION = /^(?:\u2014|\u2015|--)\s*/;
+
+// An IASP epigraph: the quotation in a blockquote, a closing "— Author,
+// *Work*" paragraph as its caption.
+function renderEpigraph(body, options) {
+  const figure = element("figure");
+  let end = body.length;
+  while (end > 0 && !body[end - 1].trim()) end--;
+  let start = end;
+  while (start > 0 && body[start - 1].trim()) start--;
+  const attribution = start < end && ATTRIBUTION.test(body[start].trim())
+    ? body.slice(start, end).map(line => line.trim()).join(" ").replace(ATTRIBUTION, "")
+    : null;
+  const quote = element("blockquote");
+  quote.appendChild(renderLines(attribution ? body.slice(0, start) : body, options));
+  figure.appendChild(quote);
+  if (attribution) {
+    const caption = element("figcaption");
+    appendInline(caption, `\u2014 ${attribution}`, options);
+    figure.appendChild(caption);
+  }
+  return figure;
+}
+
+function renderLessonBlock(spec, body, options) {
+  const block = lessonBlockFor(fenceClasses(spec));
+  if (!block) return renderLines(body, options);
+  const node = block.kind === "epigraph" ? renderEpigraph(body, options) : element("aside");
+  node.className = `lesson-block lesson-block-${block.kind}`;
+  if (block.label) {
+    node.setAttribute("aria-label", block.label);
+    const label = element("p", block.label);
+    label.className = "lesson-block-label";
+    node.appendChild(label);
+    node.appendChild(renderLines(body, options));
+  }
+  return node;
 }
 
 export function renderSafeMarkdown(markdown, options) {
+  return renderLines(String(markdown || "").replace(/\r\n?/g, "\n").split("\n"), options);
+}
+
+function renderLines(lines, options) {
   const fragment = document.createDocumentFragment();
-  const lines = String(markdown || "").replace(/\r\n?/g, "\n").split("\n");
   let index = 0;
 
   while (index < lines.length) {
     const line = lines[index];
     if (!line.trim()) {
       index++;
+      continue;
+    }
+
+    // HTML comments (IASP `<!-- quote <id> -->` provenance markers) are
+    // source annotations, never shown.
+    if (/^<!--/.test(line.trim())) {
+      while (index < lines.length && !lines[index].includes("-->")) index++;
+      index++;
+      continue;
+    }
+
+    const spec = fenceOpenSpec(line);
+    if (spec !== null) {
+      const close = fenceCloseIndex(lines, index);
+      const bodyEnd = close === -1 ? lines.length : close;
+      fragment.appendChild(renderLessonBlock(spec, lines.slice(index + 1, bodyEnd), options));
+      index = bodyEnd + 1;
       continue;
     }
 

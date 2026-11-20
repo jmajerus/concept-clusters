@@ -232,7 +232,8 @@ anything ever imports from it directly):
 | `learningIntroductionStore.js` | Content-fingerprint-aware read/skipped acknowledgement records | nothing — caller supplies storage |
 | `learningIntroductionElement.js` | Controlled `<cc-learning-introduction>` offer/review dialog | `learningIntroduction.js`, `puzzleManifest.js`, `safeMarkdown.js`, `generativeAssistance.js` |
 | `generativeAssistance.js` | Lesson-credit parsing/rendering helpers; current authoring attribution comes from `provenance` | nothing — pure |
-| `safeMarkdown.js` | DOM-built safe Markdown subset; no raw-HTML insertion | browser DOM APIs only |
+| `safeMarkdown.js` | DOM-built safe Markdown subset plus allowlisted IASP lesson blocks; no raw-HTML insertion | `lessonBlocks.js`, browser DOM APIs |
+| `lessonBlocks.js` | IASP fenced-block allowlist for lessons (`epigraph`, `note.insight`, `note.definition`, `sidebar.example`), fence parsing, validation issues | none |
 | `learningIntroductionValidation.js` | Node-side manifest, Markdown, and packaged-image validation | Node file APIs plus the learning/resource modules |
 | `contentValidation.js` | Shared browser-safe puzzle and catalogue semantic validation | `colorPalette.js`, `lensValidation.js` |
 | `categoryValidation.js` | Repository-aware subcategory registry and assignment validation | `contentValidation.js`, `puzzles/categories.js` |

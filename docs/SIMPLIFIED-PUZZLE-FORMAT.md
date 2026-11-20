@@ -107,7 +107,10 @@ optional, as are:
   and neither `order` nor `boardOrder` belongs inside this field.
 - `learningIntroduction`: `{requirement: "optional"|"recommended"|"required",
   title?, summary?, estimatedMinutes?, content: {text}, links?:
-  (same shape as info.links), citations?}`. Nested cluster/term/bridge `info` is
+  (same shape as info.links), citations?}`. `content.text` is Markdown that
+  may use four IASP fenced blocks (`{.epigraph}`, `{.note .definition}`,
+  `{.note .insight}`, `{.sidebar .example}`, closed by `:::`); any other
+  `:::` block fails validation (`modules/lessonBlocks.js`). Nested cluster/term/bridge `info` is
   `{text?, links?}` — bibliography stays on the puzzle.
 - `language` (optional publication metadata).
 

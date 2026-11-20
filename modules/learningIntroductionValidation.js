@@ -4,6 +4,7 @@ import {
   MAX_LEARNING_MARKDOWN_BYTES,
   validateLearningIntroductionStructure
 } from "./learningIntroductionValidationCore.js";
+import { lessonBlockIssues } from "./lessonBlocks.js";
 import { resolvePuzzleResourceUrl } from "./puzzleManifest.js";
 
 const IMAGE_PATTERN = /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
@@ -58,6 +59,7 @@ export async function validateLearningIntroduction(puzzle) {
       markdown = bytes.toString("utf8");
       markdownUrl = resourceUrl;
       if (!markdown.trim()) fail("learningIntroduction Markdown file is empty");
+      lessonBlockIssues(markdown, "learningIntroduction.content.src").forEach(fail);
     } catch (error) {
       fail(`learningIntroduction.content.src is invalid or missing: ${error.message}`);
       return errors;

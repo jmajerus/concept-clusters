@@ -323,6 +323,14 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   dialog already shows title; do not repeat it as the first line. Do not write
   the two-character sequence backslash-n; the tool serializer encodes newlines.
   A body stored as one line with \`\\n\` tokens renders as a single paragraph.
+  content.text may use four IASP blocks, each opened by a ::: line and
+  closed by a line of ::: alone: {.epigraph} (one short quotation, its last
+  paragraph "— Author, *Work*"), {.note .definition}, {.note .insight}
+  (the one idea worth carrying into play), and {.sidebar .example}. The
+  shorthand note.insight works too. Use a block where that passage has that
+  job; most of a lesson stays plain paragraphs. Any other ::: block fails
+  validation. A quotation is the source's exact words, and its source is on
+  info.citations.
   learningIntroduction.credit is a legacy human-managed byline; do not include
   it in MCP documents. The MCP server keeps protected attribution outside the
   agent-authored document and stamps an identifiable client when possible.
@@ -655,6 +663,14 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   shows title; do not repeat it as the first line. Do not write the
   two-character sequence backslash-n; the tool serializer encodes newlines. A
   body stored as one line with \`\\n\` tokens renders as a single paragraph.
+  content.text may use four IASP blocks, each opened by a ::: line and
+  closed by a line of ::: alone: {.epigraph} (one short quotation, its last
+  paragraph "— Author, *Work*"), {.note .definition}, {.note .insight}
+  (the one idea worth carrying into play), and {.sidebar .example}. The
+  shorthand note.insight works too. Use a block where that passage has that
+  job; most of a lesson stays plain paragraphs. Any other ::: block fails
+  validation. A quotation is the source's exact words, and its source is on
+  info.citations.
   Do not include the human-managed legacy field learningIntroduction.credit.
   Do not put byline text in content.text.
   Never add dateCreated, dateModified, version, or

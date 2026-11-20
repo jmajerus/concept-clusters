@@ -138,6 +138,42 @@ class LearningIntroductionElement extends HTMLElement {
         .lesson figure { margin: 16px 0; text-align: center; }
         .lesson img { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 8px; }
         .lesson figcaption { margin-top: 5px; color: var(--ink-soft); font-size: 13px; }
+        .lesson .lesson-block-epigraph { margin: 4px 0 22px 18%; text-align: right; }
+        .lesson .lesson-block-epigraph blockquote {
+          margin: 0;
+          padding: 0;
+          border: 0;
+          background: none;
+          font-style: italic;
+        }
+        .lesson .lesson-block-epigraph blockquote p { margin: 0 0 6px; }
+        .lesson .lesson-block-epigraph figcaption { font-size: 14px; }
+        .lesson aside.lesson-block {
+          --block: var(--amber);
+          --block-bg: var(--amber-bg);
+          margin: 16px 0;
+          padding: 9px 14px 4px;
+          border-left: 4px solid var(--block);
+          border-radius: 0 8px 8px 0;
+          background: var(--block-bg);
+        }
+        .lesson aside.lesson-block-definition {
+          --block: var(--success);
+          --block-bg: var(--success-bg);
+        }
+        .lesson aside.lesson-block-example {
+          --block: var(--blue);
+          --block-bg: var(--blue-bg);
+        }
+        .lesson .lesson-block-label {
+          margin: 0 0 2px;
+          color: var(--block);
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+        .lesson aside.lesson-block > :last-child { margin-bottom: 8px; }
         .sources { margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--rule); }
         .sources h3 { margin: 0 0 5px; font-size: 14px; }
         .sources ul { margin: 0; padding-left: 20px; }

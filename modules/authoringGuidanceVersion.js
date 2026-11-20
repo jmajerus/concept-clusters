@@ -206,7 +206,10 @@
 // adopts a newer edition when next revised for other reasons, unless the
 // cited one is wrong for the claim, two or more editions behind, or a
 // superseded open-textbook edition.
+// 6.22: same review bar. Lessons may use four IASP blocks (epigraph,
+// note.definition, note.insight, sidebar.example); other ::: blocks fail
+// validation.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 21
+  minor: 22
 });
