@@ -244,7 +244,7 @@ async function recordPass(id, { outcome, comments = null, version, dryRun, conte
     const path = reviewLogPath();
     const repositoryNote = durable
       ? "The draft repository accepted the review."
-      : "The draft repository did not accept the review.";
+      : "Not recorded durably: this puzzle has no published row yet, so the review is kept only in the local log. Re-record it after the puzzle is published.";
     return {
       id, recorded, path, wrote: true, durable,
       where: `Wrote the local review log at ${path}. ${repositoryNote}`,

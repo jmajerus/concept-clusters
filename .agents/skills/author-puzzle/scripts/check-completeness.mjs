@@ -94,13 +94,16 @@ function clusterTerms(cluster) {
   return [...(cluster.seeds || []), ...(cluster.floatingTerms || [])];
 }
 
+// An info value may be a plain string: the schema accepts it and play reads
+// it as { text } (normalizeInfo in modules/termInfo.js).
 function hasInfoText(info) {
-  return typeof info?.text === "string" && info.text.trim().length > 0;
+  const text = typeof info === "string" ? info : info?.text;
+  return typeof text === "string" && text.trim().length > 0;
 }
 
 function hasAnyInfoSurface(info) {
-  if (!info || typeof info !== "object") return false;
   if (hasInfoText(info)) return true;
+  if (!info || typeof info !== "object") return false;
   if (info.link || info.extraLink) return true;
   if (Array.isArray(info.links) && info.links.length) return true;
   if (Array.isArray(info.citations) && info.citations.length) return true;

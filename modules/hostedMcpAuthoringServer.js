@@ -1002,7 +1002,7 @@ export function createAuthoringMcpServer({
   server.registerTool("probe_mcp_client", {
     title: "Probe MCP client identity",
     description:
-      "Return and log the calling MCP host identity from the request call frame (clientInfo / _meta). Call once per client when calibrating authorship attribution; pass label=cursor, codex, claude-code, gemini-cli, or claude-web.",
+      "Return and log the calling MCP host identity from the request call frame (clientInfo / _meta). Call once per client when calibrating authorship attribution; label is any short client name you choose (for example cursor, codex, claude-code, gemini-cli, claude-web, kilo-code, or zcode); attribution reads the call frame, not the label.",
     inputSchema: z.object({
       label: z.string().min(1).max(100).optional()
     }),
