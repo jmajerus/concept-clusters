@@ -4,6 +4,7 @@ import {
   LEARNING_MEDIA_TYPE,
   LEARNING_REQUIREMENTS
 } from "./learningIntroduction.js";
+import { lessonBlockIssues } from "./lessonBlocks.js";
 
 export const MAX_LEARNING_MARKDOWN_BYTES = 128 * 1024;
 
@@ -61,6 +62,8 @@ export function validateLearningIntroductionStructure(
       } else if (new TextEncoder().encode(content.text).byteLength >
           MAX_LEARNING_MARKDOWN_BYTES) {
         fail(`learningIntroduction Markdown exceeds ${MAX_LEARNING_MARKDOWN_BYTES} bytes`);
+      } else {
+        lessonBlockIssues(content.text).forEach(fail);
       }
     } else {
       if (!nonEmptyString(content.src)) {

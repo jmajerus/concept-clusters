@@ -73,6 +73,57 @@ export async function run(page, baseURL) {
   assert.equal(unsafeMarkdown.links, 0);
   assert.equal(unsafeMarkdown.executed, false);
   assert.match(unsafeMarkdown.text, /<img src=x/);
+  const lessonBlocks = await page.evaluate(async () => {
+    const { renderSafeMarkdown } = await import("./modules/safeMarkdown.js");
+    const host = document.createElement("div");
+    host.appendChild(renderSafeMarkdown([
+      "<!-- quote 12 -->",
+      "::: {.epigraph}",
+      "Words *matter*.",
+      "",
+      "— Someone, *Book*",
+      ":::",
+      "",
+      "::: note.insight",
+      "A **point**.",
+      ":::",
+      "",
+      "::: {.note .definition}",
+      "Term means this.",
+      ":::",
+      "",
+      "::: sidebar.example",
+      "- one",
+      ":::",
+      "",
+      "::: note.warning",
+      "Plain fallback.",
+      ":::"
+    ].join("\n"), { baseUrl: location.href, resolveAssetUrl: value => value }));
+    const epigraph = host.querySelector("figure.lesson-block-epigraph");
+    return {
+      text: host.textContent,
+      epigraphQuote: epigraph?.querySelector("blockquote")?.textContent.trim(),
+      epigraphCaption: epigraph?.querySelector("figcaption")?.textContent,
+      asides: [...host.querySelectorAll("aside.lesson-block")].map(aside => [
+        aside.className, aside.getAttribute("aria-label"),
+        aside.querySelector(".lesson-block-label")?.textContent
+      ]),
+      exampleItems: host.querySelectorAll("aside.lesson-block-example li").length,
+      fallbackParagraph: [...host.children].some(node =>
+        node.tagName === "P" && node.textContent === "Plain fallback.")
+    };
+  });
+  assert.equal(lessonBlocks.epigraphQuote, "Words matter.");
+  assert.equal(lessonBlocks.epigraphCaption, "— Someone, Book");
+  assert.deepEqual(lessonBlocks.asides, [
+    ["lesson-block lesson-block-insight", "Insight", "Insight"],
+    ["lesson-block lesson-block-definition", "Definition", "Definition"],
+    ["lesson-block lesson-block-example", "Example", "Example"]
+  ]);
+  assert.equal(lessonBlocks.exampleItems, 1);
+  assert.equal(lessonBlocks.fallbackParagraph, true);
+  assert.doesNotMatch(lessonBlocks.text, /quote 12|:::/);
   await page.click("#learning-introduction #finish");
   assert.equal(await page.evaluate(() => CC.state.learningGated), false);
   assert.equal(await page.isVisible("#board"), true);

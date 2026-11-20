@@ -19,6 +19,8 @@ import {
   resolvePuzzleResourceUrl
 } from "../modules/puzzleManifest.js";
 import { validateLearningIntroduction } from "../modules/learningIntroductionValidation.js";
+import { validateLearningIntroductionStructure } from "../modules/learningIntroductionValidationCore.js";
+import { fenceClasses, fenceCloseIndex, lessonBlockFor, lessonBlockIssues } from "../modules/lessonBlocks.js";
 
 export const name = "learning introductions: resources, requirements, and acknowledgement";
 
@@ -152,4 +154,55 @@ export async function run() {
   const assetErrors = await validateLearningIntroduction(unsafeAsset);
   assert.ok(assetErrors.some(error => error.includes("non-empty alt text")));
   assert.ok(assetErrors.some(error => error.includes("invalid or missing")));
+
+  // IASP lesson blocks: brace and shorthand forms name the same block;
+  // layout-only classes and attributes do not change it.
+  assert.equal(lessonBlockFor(fenceClasses("{.note .insight}"))?.kind, "insight");
+  assert.equal(lessonBlockFor(fenceClasses("note.insight"))?.kind, "insight");
+  assert.equal(lessonBlockFor(fenceClasses('{.epigraph concepts="a:b"}'))?.kind, "epigraph");
+  assert.equal(
+    lessonBlockFor(fenceClasses("{.sidebar .sidebar-block .example}"))?.kind, "example");
+  assert.equal(lessonBlockFor(fenceClasses("note.definition"))?.kind, "definition");
+  assert.equal(lessonBlockFor(fenceClasses("note.warning")), null);
+  assert.equal(lessonBlockFor(fenceClasses("{.note .insight .warning}")), null);
+
+  const blocks = [
+    "<!-- quote 12 -->",
+    "::: {.epigraph}",
+    "Words.",
+    "",
+    "— Someone, *Book*",
+    ":::",
+    "",
+    "::: note.insight",
+    "::: {.note .definition}",
+    "Nested.",
+    ":::",
+    ":::",
+    "",
+    "```",
+    "::: note.warning",
+    "```"
+  ].join("\n");
+  assert.deepEqual(lessonBlockIssues(blocks), []);
+  const bad = lessonBlockIssues("::: note.warning\nCareful.\n:::\n\n::: epigraph\nOpen.");
+  assert.equal(bad.length, 2);
+  assert.match(bad[0], /"::: note.warning" is not a lesson block/);
+  assert.match(bad[1], /1 ":::" block\(s\) left unclosed/);
+  assert.match(lessonBlockIssues(":::")[0], /closes no open block/);
+  // A ::: line inside code within a block does not nest, so the block's own
+  // close is found and later lesson text stays outside it.
+  const codeInBlock = ["::: note.insight", "```", "::: note.warning", "```", ":::", "After."];
+  assert.equal(fenceCloseIndex(codeInBlock, 0), 4);
+  assert.deepEqual(lessonBlockIssues(codeInBlock.join("\n")), []);
+
+  const withBlock = text => ({
+    learningIntroduction: {
+      requirement: "optional",
+      content: { mediaType: "text/markdown", text }
+    }
+  });
+  assert.deepEqual(validateLearningIntroductionStructure(withBlock(blocks)), []);
+  assert.ok(validateLearningIntroductionStructure(withBlock("::: callout\nHi.\n:::"))
+    .some(error => error.includes("is not a lesson block")));
 }

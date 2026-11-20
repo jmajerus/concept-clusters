@@ -640,6 +640,10 @@ describe("hosted authoring Worker", () => {
       .toMatch(/real\s+line breaks/);
     expect(lessonGuidance.result.structuredContent.markdown)
       .toMatch(/learningIntroduction\.credit/);
+    expect(lessonGuidance.result.structuredContent.markdown)
+      .toMatch(/\{\.epigraph\}/);
+    expect(pedagogyGuidance.result.structuredContent.markdown)
+      .not.toMatch(/\{\.epigraph\}/);
     expect(pedagogyGuidance.result.structuredContent.markdown)
       .not.toMatch(/Vocabulary-in-context|lexical-disambiguation|near-synonym/);
     expect(pedagogyGuidance.result.structuredContent.markdown)

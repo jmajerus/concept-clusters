@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `fa530f85` · 2026-11-20
+Skill rev `40af9afc` · 2026-11-20
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. `save_puzzle_draft` writes the working copy only. The human
@@ -220,9 +220,14 @@ them, research the usual way.
   before the quote appears in the draft, never from memory, and cite it with
   `cite_quote`. The work goes in the puzzle-level `info.citations` on that
   same lesson-domain save (one bibliography; never a second list on the lesson). Present
-  the quote as a `>` blockquote with its attribution.
+  the quote as an `{.epigraph}` block or a `>` blockquote with its
+  attribution.
 - **File a book.** A cited book not yet in Zotero goes through
   `file_zotero_reference`; record the citekey it gets with `pin_citekey`.
+- **Lesson blocks.** Lessons may use the four IASP blocks the `lesson`
+  guidance lists. With the portal, check the lesson text with iasp
+  `validate_markdown` (it also checks `<!-- quote <id> -->` passages against
+  quote-mcp); `validate_puzzle_draft` enforces the allowlist either way.
 
 ## Do not load
 

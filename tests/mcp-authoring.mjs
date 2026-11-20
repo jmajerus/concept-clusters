@@ -624,6 +624,8 @@ export async function run() {
     assert.match(lessonGuidance.result.structuredContent.markdown, /real\s+line breaks/);
     assert.match(lessonGuidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
     assert.match(lessonGuidance.result.structuredContent.markdown, /author, title, and year/);
+    assert.match(lessonGuidance.result.structuredContent.markdown, /\{\.epigraph\}/);
+    assert.doesNotMatch(pedagogyGuidance.result.structuredContent.markdown, /\{\.epigraph\}/);
     assert.doesNotMatch(
       pedagogyGuidance.result.structuredContent.markdown,
       /Vocabulary-in-context|lexical-disambiguation|near-synonym/
