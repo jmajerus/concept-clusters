@@ -8,6 +8,8 @@ import { createHostedAuthoringContentService } from "../modules/hostedAuthoringC
 import { applyPostgresMigrations } from "../tools/postgres-migrate.mjs";
 import { PostgresCitationSourceRepository } from "../modules/postgresCitationSourceRepository.js";
 import { refreshPublishedCitationUsage, PostgresCitationUsagePilot } from "../modules/postgresCitationUsagePilot.js";
+import { createReferencePilot } from "../modules/localAuthoringWorkspace.js";
+import { queryWords } from "../modules/referenceQueryWords.js";
 
 export const name = "Postgres draft writes: one transaction, conflict rolls back";
 
@@ -98,6 +100,45 @@ async function citationSchemaAndMatching(pool) {
   assert.deepEqual(matches.map(row => row.matchStatus),
     ["inferred", "inferred", "inferred", "unmatched", "unmatched", "inferred"]);
   assert.equal((await usage.status()).observations, 6);
+  // Topic queries match word by word and rank by distinct words matched.
+  assert.deepEqual(queryWords("Cell signaling and signal transduction"),
+    ["cell", "signal", "transduction"]);
+  assert.deepEqual(queryWords("10.1234/Example"), ["10.1234/example"]);
+  const ranked = await usage.search({ query: "path normalization host" });
+  assert.deepEqual(ranked.map(row => row.citation.title), ["Host normalization", "Path case"]);
+  assert.deepEqual(ranked[0].matchedWords, ["normalization", "host"]);
+  const filed = await sources.search({ query: "different path variant" });
+  assert.deepEqual(filed.map(source => source.id), [pathVariant.id, queryVariant.id]);
+  assert.deepEqual(filed[0].matchedWords, ["different", "path"]);
+  // A newly filed source outdates the index; the planning pilot rebuilds it
+  // before reading.
+  await sources.upsertFromZotero({
+    ...identity, zoteroItemKey: "SOURCE06", citekey: "author2026late",
+    metadata: { title: "Filed after indexing" }
+  });
+  assert.equal((await usage.status()).freshness, "stale");
+  const pilot = createReferencePilot(async () => ({ citationUsage: usage, citationSources: sources }));
+  const fresh = await pilot.freshUsageStatus();
+  assert.equal(fresh.freshness, "current");
+  assert.equal(fresh.refreshed, true);
+  assert.equal((await pilot.freshUsageStatus()).refreshed, undefined);
+  // An exact identifier match reports the identifier as its matched word.
+  assert.deepEqual((await sources.search({ query: "AUTHOR2026PAPER" }))[0].matchedWords,
+    ["author2026paper"]);
+  // A source filed while the rebuild runs is newer than the watermark, so
+  // the index still reads stale afterwards instead of claiming it.
+  const racing = {
+    async listAll() {
+      const all = await sources.listAll();
+      await sources.upsertFromZotero({
+        ...identity, zoteroItemKey: "SOURCE07", citekey: "author2026racing",
+        metadata: { title: "Filed during rebuild" }
+      });
+      return all;
+    }
+  };
+  await refreshPublishedCitationUsage(pool, racing);
+  assert.equal((await usage.status()).freshness, "stale");
   assert.equal((await pool.query(`
     SELECT indexname FROM pg_indexes WHERE indexname = 'citation_sources_citekey_lookup'
   `)).rows.length, 1);

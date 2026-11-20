@@ -4,6 +4,7 @@
 // refreshing this mirror never changes an older revision.
 
 import { randomUUID } from "node:crypto";
+import { matchedWords, queryWords } from "./referenceQueryWords.js";
 import { nonCryptographicHash } from "./nonCryptographicHash.js";
 import { withTransaction } from "./postgresPool.js";
 
@@ -120,23 +121,32 @@ export class PostgresCitationSourceRepository {
     return sources;
   }
 
+  // Exact citekey, DOI, or URL first; then title or author containing any
+  // query word, ranked by how many distinct words match.
   async search({ query, limit = 10 }) {
     const term = nonEmpty(query, "Citation search query");
+    const words = queryWords(term);
     const result = await this.pool.query(`
-      SELECT * FROM citation_sources
-      WHERE LOWER(citekey) = LOWER($1)
-         OR LOWER(doi) = LOWER($1)
-         OR LOWER(url) = LOWER($1)
-         OR title ILIKE '%' || $1 || '%'
-         OR author ILIKE '%' || $1 || '%'
-      ORDER BY
-        CASE WHEN LOWER(citekey) = LOWER($1) OR LOWER(doi) = LOWER($1)
-          THEN 0 ELSE 1 END,
-        title
-      LIMIT $2
-    `, [term, Math.max(1, Math.min(Number(limit) || 10, 25))]);
+      SELECT * FROM (
+        SELECT *,
+          CASE WHEN LOWER(citekey) = LOWER($1) OR LOWER(doi) = LOWER($1)
+            OR LOWER(url) = LOWER($1) THEN 1 ELSE 0 END AS exact_match,
+          (SELECT COUNT(*) FROM unnest($2::text[]) AS w(word)
+            WHERE title ILIKE '%' || w.word || '%'
+              OR author ILIKE '%' || w.word || '%') AS matched_count
+        FROM citation_sources
+      ) ranked
+      WHERE exact_match = 1 OR matched_count > 0
+      ORDER BY exact_match DESC, matched_count DESC, title
+      LIMIT $3
+    `, [term, words, Math.max(1, Math.min(Number(limit) || 10, 25))]);
     const sources = [];
-    for (const row of result.rows) sources.push(await readRevision(this.pool, row));
+    for (const row of result.rows) {
+      const source = await readRevision(this.pool, row);
+      const fields = Number(row.exact_match)
+        ? [row.title, row.author, row.citekey, row.doi, row.url] : [row.title, row.author];
+      sources.push({ ...source, matchedWords: matchedWords(fields, words) });
+    }
     return sources;
   }
 

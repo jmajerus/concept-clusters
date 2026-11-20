@@ -249,13 +249,22 @@ export function createReferencePilot(resolveWorkspace) {
       const store = (await resolveWorkspace()).citationUsage;
       return store ? store.search(args) : [];
     },
-    async usageStatus() {
-      const store = (await resolveWorkspace()).citationUsage;
-      return store ? store.status() : { freshness: "unavailable" };
-    },
-    async searchZotero(query, options) {
-      const service = (await resolveWorkspace()).zoteroReferences;
-      return service ? service.search(query, options) : [];
+    // The usage index is derived from published puzzles. Rebuild it when
+    // a publish or a newly filed source has outdated it, before searching,
+    // so a lookup never reads a stale index. A failed rebuild leaves the
+    // old index and reports why.
+    async freshUsageStatus() {
+      const workspace = await resolveWorkspace();
+      const store = workspace.citationUsage;
+      if (!store) return { freshness: "unavailable" };
+      const status = await store.status();
+      if (status.freshness === "current" || !workspace.citationSources) return status;
+      try {
+        await store.refresh(workspace.citationSources);
+        return { ...(await store.status()), refreshed: true };
+      } catch (error) {
+        return { ...status, refreshError: error.message };
+      }
     },
     async fileItem(itemKey) {
       return (await zotero()).fileItem(itemKey);
