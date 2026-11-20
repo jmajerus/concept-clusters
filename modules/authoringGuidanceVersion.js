@@ -206,7 +206,10 @@
 // adopts a newer edition when next revised for other reasons, unless the
 // cited one is wrong for the claim, two or more editions behind, or a
 // superseded open-textbook edition.
+// 6.22: the lesson is its own write domain. A lesson save writes the
+// learning introduction and merges info.citations by url, or by author,
+// title, and year. A content save still replaces the whole citation list.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 21
+  minor: 22
 });

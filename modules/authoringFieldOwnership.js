@@ -10,6 +10,7 @@ export const AUTHORING_DOMAINS = Object.freeze([
   "content",
   "classification",
   "pedagogy",
+  "lesson",
   "administration",
   "provenance",
   "system"
@@ -19,13 +20,15 @@ export const AUTHORING_READ_DOMAINS = Object.freeze([
   "complete",
   "content",
   "classification",
-  "pedagogy"
+  "pedagogy",
+  "lesson"
 ]);
 
 export const AUTHORING_WRITE_DOMAINS = Object.freeze([
   "content",
   "classification",
-  "pedagogy"
+  "pedagogy",
+  "lesson"
 ]);
 
 export const AUTHORING_PHASES = Object.freeze([
@@ -33,6 +36,7 @@ export const AUTHORING_PHASES = Object.freeze([
   "core",
   "review",
   "pedagogy",
+  "lesson",
   "classification",
   "publication"
 ]);
@@ -41,7 +45,7 @@ export const AUTHORING_PHASES = Object.freeze([
 
 /**
  * @typedef {object} FieldOwnership
- * @property {"content" | "classification" | "pedagogy" | "administration" | "provenance" | "system"} domain
+ * @property {"content" | "classification" | "pedagogy" | "lesson" | "administration" | "provenance" | "system"} domain
  * @property {FieldKind} kind
  * @property {boolean} [identity] stable cross-domain identity for this field
  * @property {boolean} [writeOnce] authored when the draft is created and
@@ -52,7 +56,7 @@ export const AUTHORING_PHASES = Object.freeze([
  *   field is the document's own identity in storage: an agent picks it when
  *   the puzzle is born and nothing may move it afterwards except a
  *   deliberate human rename, which does not go through an authored write.
- * @property {ReadonlyArray<"content" | "classification" | "pedagogy">} [contextFor]
+ * @property {ReadonlyArray<"content" | "classification" | "pedagogy" | "lesson">} [contextFor]
  *   domains that may receive this field as read-only sibling context
  */
 
@@ -82,7 +86,7 @@ export const ROOT_FIELD_OWNERSHIP = Object.freeze({
   lensMode: { domain: "pedagogy", kind: "authored" },
   preSolve: { domain: "pedagogy", kind: "authored" },
   relatedPuzzles: { domain: "pedagogy", kind: "authored" },
-  learningIntroduction: { domain: "pedagogy", kind: "authored" },
+  learningIntroduction: { domain: "lesson", kind: "authored" },
   creator: { domain: "pedagogy", kind: "protected" },
   license: { domain: "pedagogy", kind: "protected" },
   derivedFrom: { domain: "pedagogy", kind: "protected" },
@@ -171,7 +175,7 @@ export const BRIDGE_FIELD_OWNERSHIP = Object.freeze({
  * writeDomain and must not be saved as a domain replacement.
  *
  * @type {Readonly<Record<string, {
- *   writeDomain: "content" | "classification" | "pedagogy" | null,
+ *   writeDomain: "content" | "classification" | "pedagogy" | "lesson" | null,
  *   root: ReadonlyArray<string>,
  *   clusters?: ReadonlyArray<string>,
  *   bridges?: ReadonlyArray<string>
@@ -205,12 +209,16 @@ export const AUTHORING_PHASE_PASSES = Object.freeze({
   pedagogy: Object.freeze({
     writeDomain: "pedagogy",
     root: Object.freeze([
-      "bridges", "lenses", "lensMode", "preSolve", "learningIntroduction"
+      "bridges", "lenses", "lensMode", "preSolve"
     ]),
     // Annotations are pedagogy-owned; id and term name the bridge to patch.
     bridges: Object.freeze([
       "id", "term", "conceptId", "relationKind", "direction", "idealTerms"
     ])
+  }),
+  lesson: Object.freeze({
+    writeDomain: "lesson",
+    root: Object.freeze(["learningIntroduction"])
   }),
   classification: Object.freeze({
     writeDomain: "classification",
@@ -240,6 +248,11 @@ function fieldsMatching(ownership, predicate) {
 export const SYSTEM_ROOT_FIELDS = fieldsMatching(
   ROOT_FIELD_OWNERSHIP,
   meta => meta.domain === "system" && meta.kind === "protected"
+);
+
+export const LESSON_ROOT_FIELDS = fieldsMatching(
+  ROOT_FIELD_OWNERSHIP,
+  meta => meta.domain === "lesson" && meta.kind === "authored"
 );
 
 export const PEDAGOGY_ROOT_FIELDS = fieldsMatching(
@@ -405,6 +418,7 @@ export default {
   SYSTEM_ROOT_FIELDS,
   PEDAGOGY_ROOT_FIELDS,
   PEDAGOGY_STORED_ROOT_FIELDS,
+  LESSON_ROOT_FIELDS,
   CLASSIFICATION_ROOT_FIELDS,
   CLASSIFICATION_STORED_ROOT_FIELDS,
   MCP_EXCLUDED_ROOT_FIELDS,

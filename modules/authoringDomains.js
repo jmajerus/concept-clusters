@@ -15,6 +15,7 @@ import {
   WRITE_ONCE_ROOT_FIELDS,
   CLASSIFICATION_ROOT_FIELDS,
   CLASSIFICATION_STORED_ROOT_FIELDS,
+  LESSON_ROOT_FIELDS,
   PEDAGOGY_BRIDGE_FIELDS,
   PEDAGOGY_ROOT_FIELDS,
   PEDAGOGY_STORED_ROOT_FIELDS,
@@ -262,6 +263,7 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
   const content = {};
   const pedagogy = {};
   const classification = {};
+  const lesson = {};
   let provenance;
   let administration;
 
@@ -278,6 +280,8 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
       }
     } else if (CLASSIFICATION_STORED_ROOT_FIELDS.has(key)) {
       classification[key] = clone(value);
+    } else if (LESSON_ROOT_FIELDS.has(key)) {
+      lesson[key] = clone(value);
     } else if (PEDAGOGY_STORED_ROOT_FIELDS.has(key)) {
       pedagogy[key] = clone(value);
     } else {
@@ -296,6 +300,7 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
     content,
     pedagogy,
     classification,
+    lesson,
     administration,
     provenance,
     system: clone(system) || {}
@@ -311,12 +316,14 @@ export function assembleAuthoredDocument({
   content = {},
   pedagogy = {},
   classification = {},
+  lesson = {},
   administration = undefined,
   provenance = undefined
 } = {}) {
   assertObject(content, "Content domain");
   assertObject(pedagogy, "Pedagogy domain");
   assertObject(classification, "Classification domain");
+  assertObject(lesson, "Lesson domain");
   const document = clone(content);
   if (hasOwn(content, "bridges")) {
     document.bridges = assembleBridges(content.bridges, pedagogy.bridges);
@@ -326,6 +333,9 @@ export function assembleAuthoredDocument({
     document[key] = clone(value);
   }
   for (const [key, value] of Object.entries(classification)) {
+    document[key] = clone(value);
+  }
+  for (const [key, value] of Object.entries(lesson)) {
     document[key] = clone(value);
   }
   if (administration !== undefined && administration !== null) {
@@ -379,11 +389,72 @@ function publicDomain(value) {
 
 function publicPedagogyDomain(value) {
   const result = publicDomain(value);
-  // `learningIntroduction.credit` is a legacy human-owned byline. It is
-  // parsed into provenance by the canonicalization path, so it is protected
-  // even though its containing learningIntroduction belongs to pedagogy.
+  // Legacy rows may still carry the lesson inside the pedagogy blob until
+  // the next save moves it. Hide the byline if that copy is still here.
   if (isObject(result.learningIntroduction)) {
     delete result.learningIntroduction.credit;
+  }
+  return result;
+}
+
+function publicLessonDomain(value) {
+  const result = publicDomain(value);
+  // `learningIntroduction.credit` is a legacy human-owned byline. It is
+  // parsed into provenance by the canonicalization path, so it is protected
+  // even though its containing learningIntroduction belongs to the lesson.
+  if (isObject(result.learningIntroduction)) {
+    delete result.learningIntroduction.credit;
+  }
+  return result;
+}
+
+const LESSON_CLUSTER_FIELDS = ["id", "name", "fact", "seeds", "floatingTerms", "terms", "termInfo"];
+const LESSON_BRIDGE_FIELDS = ["id", "term", "clusters", "fact"];
+
+function pickFields(source, keys) {
+  if (!isObject(source)) return clone(source);
+  const result = {};
+  for (const key of keys) {
+    if (hasOwn(source, key)) result[key] = clone(source[key]);
+  }
+  return result;
+}
+
+// The lesson read is the subject, not the play design. relationKind is the
+// one pedagogy annotation the prose needs in order to follow how ideas relate.
+function lessonReadContext(domains) {
+  const content = domains.content || {};
+  const result = {};
+  for (const key of ["id", "title", "puzzleKind"]) {
+    if (hasOwn(content, key)) result[key] = clone(content[key]);
+  }
+  if (hasOwn(domains.classification || {}, "category")) {
+    result.category = clone(domains.classification.category);
+  }
+  if (Array.isArray(content.clusters)) {
+    result.clusters = content.clusters.map(cluster => pickFields(cluster, LESSON_CLUSTER_FIELDS));
+  }
+  const annotations = Array.isArray(domains.pedagogy?.bridges) ? domains.pedagogy.bridges : [];
+  if (Array.isArray(content.bridges)) {
+    result.bridges = content.bridges.map((bridge, index) => {
+      const view = pickFields(bridge, LESSON_BRIDGE_FIELDS);
+      const annotation = annotations.find((candidate, candidateIndex) =>
+        isObject(candidate) && bridgeMatches(bridge, candidate, index, candidateIndex)
+      );
+      if (annotation && hasOwn(annotation, "relationKind")) {
+        view.relationKind = clone(annotation.relationKind);
+      }
+      return view;
+    });
+  }
+  return result;
+}
+
+function lessonWritableDocument(domains) {
+  const result = publicLessonDomain(domains.lesson);
+  const citations = domains.content?.info?.citations;
+  if (Array.isArray(citations) && citations.length) {
+    result.info = { citations: clone(citations) };
   }
   return result;
 }
@@ -403,6 +474,26 @@ function omitClassificationFields(domain) {
   const next = { ...domain };
   for (const key of CLASSIFICATION_STORED_ROOT_FIELDS) delete next[key];
   return next;
+}
+
+function omitLessonField(domain) {
+  if (!isObject(domain) || !hasOwn(domain, "learningIntroduction")) return domain;
+  const next = { ...domain };
+  delete next.learningIntroduction;
+  return next;
+}
+
+export function projectionHoldsLearningIntroduction(value) {
+  if (value == null || value === "") return false;
+  let parsed = value;
+  if (typeof value === "string") {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return false;
+    }
+  }
+  return isObject(parsed) && hasOwn(parsed, "learningIntroduction");
 }
 
 // tags and level joined classification after classification_json already
@@ -453,7 +544,12 @@ export function domainColumnsForSave(current, domain, next) {
     projectionHoldsLegacyShelfFields(current?.pedagogy) ||
     projectionHoldsLegacyShelfFields(current?.content)
   );
-  const rewriteAll = needsSplit || needsShelfMove;
+  // A lesson still stored on the pedagogy (or content) projection has to
+  // move in the same write that records lesson_json, or the next read
+  // would keep the stale copy.
+  const needsLessonMove = projectionHoldsLearningIntroduction(current?.pedagogy)
+    || projectionHoldsLearningIntroduction(current?.content);
+  const rewriteAll = needsSplit || needsShelfMove || needsLessonMove;
   return {
     content: domain === "content" || current?.content == null || rewriteAll
       ? next.content
@@ -464,6 +560,9 @@ export function domainColumnsForSave(current, domain, next) {
     classification: domain === "classification" || rewriteAll
       ? next.classification
       : current.classification,
+    lesson: domain === "lesson" || current?.lesson == null || rewriteAll
+      ? next.lesson
+      : current.lesson,
     provenance: next.provenance,
     administration: next.administration
   };
@@ -473,7 +572,9 @@ export function domainColumnsForSave(current, domain, next) {
  * Return an agent-facing projection. Pedagogy receives content as read-only
  * context because annotations reference clusters and bridges. Content and
  * pedagogy also receive classification as read-only context. Classification
- * receives id and title. Only the returned `document` is writable.
+ * receives id and title. The lesson receives the subject (clusters, bridge
+ * facts, relationKind) and writes the introduction plus the shared
+ * bibliography. Only the returned `document` is writable.
  */
 export function projectAuthoredDocument(document, domain = "complete") {
   if (domain === "complete") {
@@ -495,6 +596,13 @@ export function projectAuthoredDocument(document, domain = "complete") {
       domain,
       document: publicDomain(domains.classification),
       context: contextForDomain(domains.content, "classification")
+    };
+  }
+  if (domain === "lesson") {
+    return {
+      domain,
+      document: lessonWritableDocument(domains),
+      context: lessonReadContext(domains)
     };
   }
   return {
@@ -564,6 +672,27 @@ export function assertNoWriteOnceDrift(
   }
 }
 
+function ownerOfRootField(key) {
+  if (LESSON_ROOT_FIELDS.has(key)) return "lesson";
+  if (PEDAGOGY_ROOT_FIELDS.has(key)) return "pedagogy";
+  if (CLASSIFICATION_ROOT_FIELDS.has(key)) return "classification";
+  return "content";
+}
+
+function assertLessonInfo(info) {
+  if (!isObject(info)) {
+    throw new Error("lesson domain info must be an object of citations");
+  }
+  for (const key of Object.keys(info)) {
+    if (key !== "citations") {
+      throw new Error(`info.${key} belongs to the content domain`);
+    }
+  }
+  if (hasOwn(info, "citations") && info.citations !== null && !Array.isArray(info.citations)) {
+    throw new Error("info.citations must be a list");
+  }
+}
+
 function assertDomainPayload(domain, incoming) {
   assertObject(incoming, `${domain} domain document`);
   assertNoAgentProtectedFields(incoming, `${domain} domain document`);
@@ -575,22 +704,24 @@ function assertDomainPayload(domain, incoming) {
     if (DERIVED_ROOT_FIELDS.has(key)) {
       throw new Error(`${key} is derived and cannot be written through the ${domain} domain`);
     }
-    if (domain === "content" && CLASSIFICATION_ROOT_FIELDS.has(key)) {
-      throw new Error(`${key} belongs to the classification domain`);
-    }
-    if (domain === "content" && PEDAGOGY_ROOT_FIELDS.has(key)) {
-      throw new Error(`${key} belongs to the pedagogy domain`);
+    if (domain === "content" && ownerOfRootField(key) !== "content") {
+      throw new Error(`${key} belongs to the ${ownerOfRootField(key)} domain`);
     }
     if (domain === "classification" && !CLASSIFICATION_ROOT_FIELDS.has(key)) {
-      const owner = PEDAGOGY_ROOT_FIELDS.has(key) ? "pedagogy" : "content";
-      throw new Error(`${key} belongs to the ${owner} domain`);
+      throw new Error(`${key} belongs to the ${ownerOfRootField(key)} domain`);
     }
     if (domain === "pedagogy" && key !== "bridges" && CLASSIFICATION_ROOT_FIELDS.has(key)) {
       throw new Error(`${key} belongs to the classification domain`);
     }
     if (domain === "pedagogy" && key !== "bridges" && !PEDAGOGY_ROOT_FIELDS.has(key)) {
-      throw new Error(`${key} belongs to the content domain`);
+      throw new Error(`${key} belongs to the ${ownerOfRootField(key)} domain`);
     }
+    if (domain === "lesson" && key !== "learningIntroduction" && key !== "info") {
+      throw new Error(`${key} belongs to the ${ownerOfRootField(key)} domain`);
+    }
+  }
+  if (domain === "lesson" && hasOwn(incoming, "info") && incoming.info !== null) {
+    assertLessonInfo(incoming.info);
   }
 
   if (isObject(incoming.learningIntroduction) &&
@@ -674,6 +805,7 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
     content: current.content,
     pedagogy: current.pedagogy,
     classification: current.classification,
+    lesson: current.lesson,
     administration: current.administration,
     provenance: current.provenance
   };
@@ -684,6 +816,13 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
     next.content = clone(incoming);
   } else if (domain === "classification") {
     next.classification = clone(incoming);
+  } else if (domain === "lesson") {
+    next.lesson = lessonProjectionFromPayload(current.lesson, incoming);
+    next.content = {
+      ...clone(current.content),
+      ...contentWithLessonCitations(current.content, incoming)
+    };
+    if (next.content.info === undefined) delete next.content.info;
   } else {
     const preservedProtected = Object.fromEntries(
       [...PEDAGOGY_STORED_ROOT_FIELDS]
@@ -694,21 +833,40 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
     if (hasOwn(incoming, "bridges")) {
       next.pedagogy.bridges = splitDomainBridges(incoming.bridges);
     }
-    // The focused projection omits this legacy field. Preserve it when the
-    // lesson itself remains present; deleting the whole lesson remains a
-    // legitimate pedagogy-domain replacement and cannot feed credit back
-    // through canonicalization.
-    const currentIntroduction = current.pedagogy.learningIntroduction;
-    const incomingIntroduction = next.pedagogy.learningIntroduction;
-    if (isObject(currentIntroduction) && hasOwn(currentIntroduction, "credit") &&
-        isObject(incomingIntroduction)) {
-      next.pedagogy.learningIntroduction = {
-        ...incomingIntroduction,
-        credit: clone(currentIntroduction.credit)
-      };
-    }
   }
   return assembleAuthoredDocument(next);
+}
+
+function lessonProjectionFromPayload(currentLesson, incoming) {
+  const currentIntroduction = currentLesson?.learningIntroduction;
+  if (!hasOwn(incoming, "learningIntroduction")) return {};
+  let introduction = clone(incoming.learningIntroduction);
+  if (isObject(currentIntroduction) && hasOwn(currentIntroduction, "credit") &&
+      isObject(introduction)) {
+    introduction = { ...introduction, credit: clone(currentIntroduction.credit) };
+  }
+  return { learningIntroduction: introduction };
+}
+
+// The lesson payload carries only the bibliography. Other info fields stay
+// on the content projection. Omitting citations, or sending an empty list,
+// clears the bibliography.
+function contentWithLessonCitations(content, incoming) {
+  const info = content?.info;
+  const provided = hasOwn(incoming, "info") && isObject(incoming.info)
+    && hasOwn(incoming.info, "citations") && incoming.info.citations != null
+    ? incoming.info.citations
+    : null;
+  const citations = Array.isArray(provided) && provided.length ? clone(provided) : null;
+  if (!citations) {
+    if (!isObject(info)) return isObject(content) && hasOwn(content, "info") ? { info } : {};
+    const next = { ...info };
+    delete next.citations;
+    return Object.keys(next).length ? { info: next } : { info: undefined };
+  }
+  if (isObject(info)) return { info: { ...info, citations } };
+  if (typeof info === "string" && info) return { info: { text: info, citations } };
+  return { info: { citations } };
 }
 
 // Lists of items with a stable identity merge item by item, the way
@@ -743,6 +901,82 @@ function keyedLabel(keys, item) {
 function withoutDirective(item) {
   const { [PATCH_DIRECTIVE]: _directive, ...rest } = item;
   return rest;
+}
+
+function normalizedCitationText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function citationWorkKey(entry) {
+  const title = normalizedCitationText(entry?.title);
+  if (!title) return null;
+  return `${normalizedCitationText(entry?.author)}\0${title}\0${normalizedCitationText(entry?.year)}`;
+}
+
+function citationLabel(entry) {
+  return normalizedCitationText(entry?.url) || citationWorkKey(entry);
+}
+
+function citationsMatch(left, right) {
+  const leftUrl = normalizedCitationText(left?.url);
+  const rightUrl = normalizedCitationText(right?.url);
+  // A URL identifies the entry whenever both sides have one. Different
+  // non-empty URLs are different editions even when author, title, and year
+  // agree. The work key applies only when at least one side has no URL.
+  if (leftUrl && rightUrl) return leftUrl === rightUrl;
+  const leftWork = citationWorkKey(left);
+  const rightWork = citationWorkKey(right);
+  return !!(leftWork && leftWork === rightWork);
+}
+
+// Lesson saves share info.citations with content. A content save still
+// replaces the whole list. A lesson save merges: url identifies an entry
+// when both sides have one, otherwise author + title + year. Entries the
+// patch does not mention stay.
+function mergeCitationList(base, patch) {
+  if (patch.some(item => isObject(item) && item[PATCH_DIRECTIVE] === "replace")) {
+    return patch
+      .filter(item => !(isObject(item) && item[PATCH_DIRECTIVE] === "replace"))
+      .map(item => withoutDirective(item));
+  }
+  const result = Array.isArray(base) ? clone(base) : [];
+  patch.forEach((item, index) => {
+    if (!isObject(item) || !citationLabel(item)) {
+      throw new Error(`info.citations[${index}] must name a url or a title`);
+    }
+    const directive = item[PATCH_DIRECTIVE];
+    if (directive !== undefined && directive !== "delete") {
+      throw new Error(
+        `info.citations[${index}].$patch must be "delete" on an entry or "replace" as its own list entry`
+      );
+    }
+    const target = result.findIndex(candidate => citationsMatch(item, candidate));
+    if (directive === "delete") {
+      if (target >= 0) result.splice(target, 1);
+      return;
+    }
+    const clean = withoutDirective(item);
+    if (target < 0) {
+      if (!normalizedCitationText(clean.title)) {
+        throw new Error(`info.citations[${index}] must include a title`);
+      }
+      result.push(clean);
+      return;
+    }
+    result[target] = mergePatch(result[target], clean, "info.citations[]");
+  });
+  return result;
+}
+
+function patchWithMergedCitations(base, patch) {
+  if (!isObject(patch?.info) || !Array.isArray(patch.info.citations)) return patch;
+  return {
+    ...patch,
+    info: {
+      ...patch.info,
+      citations: mergeCitationList(base?.info?.citations, patch.info.citations)
+    }
+  };
 }
 
 function mergeKeyedList(base, patch, path, keys) {
@@ -954,7 +1188,10 @@ export function applyAuthoredDomainPatch(currentDocument, domain, patch) {
   assertObject(currentDocument, "Current authored document");
   assertDomainPayload(domain, patch);
   const base = projectAuthoredDocument(currentDocument, domain).document;
-  const merged = mergePatch(base, patch);
+  const merged = mergePatch(
+    base,
+    domain === "lesson" ? patchWithMergedCitations(base, patch) : patch
+  );
   if (domain === "content") pruneRemovedTermInfo(base, merged, patch);
   // `merged` is the complete projection, so an absent write-once field here
   // means the patch removed it with null rather than leaving it unsaid.
@@ -975,6 +1212,7 @@ export function storedDomainDocuments(document) {
     content: JSON.stringify(domains.content),
     pedagogy: JSON.stringify(domains.pedagogy),
     classification: JSON.stringify(domains.classification),
+    lesson: JSON.stringify(domains.lesson),
     provenance: domains.provenance === undefined
       ? null
       : JSON.stringify(domains.provenance),
@@ -989,6 +1227,7 @@ export function assembleStoredDomainDocuments({
   content = null,
   pedagogy = null,
   classification = null,
+  lesson = null,
   provenance = null,
   administration = null
 } = {}) {
@@ -998,19 +1237,29 @@ export function assembleStoredDomainDocuments({
   // inside the content and pedagogy blobs. tags and level that still sit on
   // a sibling projection are adopted when the classification column lacks
   // that key, then stripped, so a read does not drop them.
+  // A stored lesson column is likewise authoritative. While it is null, a
+  // learningIntroduction still sitting on the pedagogy blob is the lesson.
   const classificationProvided = classification !== null && classification !== undefined;
+  const lessonProvided = lesson !== null && lesson !== undefined;
   const contentSource = content ?? fallback?.content ?? {};
   const pedagogySource = pedagogy ?? fallback?.pedagogy ?? {};
+  let storedContent = contentSource;
+  let storedPedagogy = pedagogySource;
+  if (classificationProvided) {
+    storedContent = omitClassificationFields(storedContent);
+    storedPedagogy = omitClassificationFields(storedPedagogy);
+  }
+  if (lessonProvided) {
+    storedContent = omitLessonField(storedContent);
+    storedPedagogy = omitLessonField(storedPedagogy);
+  }
   return assembleAuthoredDocument({
-    content: classificationProvided
-      ? omitClassificationFields(contentSource)
-      : contentSource,
-    pedagogy: classificationProvided
-      ? omitClassificationFields(pedagogySource)
-      : pedagogySource,
+    content: storedContent,
+    pedagogy: storedPedagogy,
     classification: classificationProvided
       ? adoptLegacyShelfFields(classification, [pedagogySource, contentSource])
       : (fallback?.classification ?? {}),
+    lesson: lessonProvided ? lesson : (fallback?.lesson ?? {}),
     provenance: provenance ?? fallback?.provenance,
     administration: administration ?? fallback?.administration
   });
@@ -1044,6 +1293,9 @@ export function assembleAuthoredDocumentFromDraftRow(row, {
   const classification = row.classification_json == null
     ? null
     : parseJson(row.classification_json, "Stored classification domain");
+  const lesson = row.lesson_json == null
+    ? null
+    : parseJson(row.lesson_json, "Stored lesson domain");
   const provenance = row.provenance_json == null
     ? null
     : parseJson(row.provenance_json, "Stored provenance domain");
@@ -1062,11 +1314,12 @@ export function assembleAuthoredDocumentFromDraftRow(row, {
       content,
       pedagogy,
       classification,
+      lesson,
       provenance,
       administration
     });
   }
-  if (content != null || pedagogy != null || classification != null || provenance != null || administration != null) {
+  if (content != null || pedagogy != null || classification != null || lesson != null || provenance != null || administration != null) {
     return assembleStoredDomainDocuments({
       document: row.document == null
         ? undefined
@@ -1076,6 +1329,7 @@ export function assembleAuthoredDocumentFromDraftRow(row, {
       content,
       pedagogy,
       classification,
+      lesson,
       provenance,
       administration
     });

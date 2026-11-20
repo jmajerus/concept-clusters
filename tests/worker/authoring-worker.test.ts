@@ -627,9 +627,18 @@ describe("hosted authoring Worker", () => {
       .toMatch(/Dutch tilt/);
     expect(pedagogyGuidance.result.structuredContent.markdown)
       .toMatch(/dolly zoom/);
-    expect(pedagogyGuidance.result.structuredContent.markdown)
+    const lessonGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-lesson",
+      method: "tools/call",
+      params: { name: "get_authoring_guidance", arguments: { phase: "lesson" } }
+    });
+    const lessonGuidance = await rpcJson(lessonGuided) as {
+      result: { structuredContent: { markdown: string } };
+    };
+    expect(lessonGuidance.result.structuredContent.markdown)
       .toMatch(/real\s+line breaks/);
-    expect(pedagogyGuidance.result.structuredContent.markdown)
+    expect(lessonGuidance.result.structuredContent.markdown)
       .toMatch(/learningIntroduction\.credit/);
     expect(pedagogyGuidance.result.structuredContent.markdown)
       .not.toMatch(/Vocabulary-in-context|lexical-disambiguation|near-synonym/);

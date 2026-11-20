@@ -881,11 +881,11 @@ export async function run() {
   assert.doesNotMatch(stacked, /badge-warn">unpublished changes</);
   const pending = renderDraftListPage([{
     ...baseDraft, published: true, unpublishedChanges: true,
-    unpublishedChangeDomains: ["content", "classification", "pedagogy", "administration", "provenance", "layout"], gitSeedCue: true
+    unpublishedChangeDomains: ["content", "classification", "pedagogy", "lesson", "administration", "provenance", "layout"], gitSeedCue: true
   }]);
   assert.match(pending, /<th>Unpublished Changes<\/th>/);
   assert.doesNotMatch(pending, /badge-warn">unpublished changes</);
-  for (const domain of ["content", "classification", "pedagogy", "administration", "provenance", "layout"]) {
+  for (const domain of ["content", "classification", "pedagogy", "lesson", "administration", "provenance", "layout"]) {
     assert.match(pending, new RegExp(`data-change-domain="${domain}"`));
   }
   assert.match(pending, /data-unpublished-changes="1"/);

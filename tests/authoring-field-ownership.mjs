@@ -96,9 +96,16 @@ export async function run() {
   const pedagogy = simplifiedPuzzleSchemaResult("pedagogy");
   assert.equal(pedagogy.domain, "pedagogy");
   assert.ok(pedagogy.schema.properties.lenses);
-  assert.ok(pedagogy.schema.properties.learningIntroduction);
+  assert.equal(pedagogy.schema.properties.learningIntroduction, undefined);
   assert.equal(pedagogy.schema.properties.categories, undefined);
   assert.match(pedagogy.schema.description, /write domain "pedagogy"/);
+
+  const lesson = simplifiedPuzzleSchemaResult("lesson");
+  assert.equal(lesson.domain, "lesson");
+  assert.ok(lesson.schema.properties.learningIntroduction);
+  assert.ok(lesson.schema.properties.info.properties.citations);
+  assert.equal(lesson.schema.properties.lenses, undefined);
+  assert.match(lesson.schema.description, /write domain "lesson"/);
 
   const publication = simplifiedPuzzleSchemaResult("publication");
   assert.equal(publication.domain, "pedagogy");
@@ -268,7 +275,7 @@ export async function run() {
     assert.equal(pedagogyEdit[field], document[field]);
   }
 
-  assert.deepEqual([...AUTHORING_WRITE_DOMAINS], ["content", "classification", "pedagogy"]);
+  assert.deepEqual([...AUTHORING_WRITE_DOMAINS], ["content", "classification", "pedagogy", "lesson"]);
 
   // Write-once is its own axis, distinct from protected (never agent-written)
   // and from identity (the matching key, which ordinary authoring renames).

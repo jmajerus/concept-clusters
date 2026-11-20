@@ -36,13 +36,14 @@ the infrastructure preserves and recombines the other domains.
 |---|---|---|---|
 | `content` | Educational meaning: puzzle identity, copy, clusters, and bridge core | Agent | Read/write |
 | `classification` | Disciplinary home, membership, subcategory placement, search tags, and optional level | Agent | Read/write; id and title are read-only context |
-| `pedagogy` | Relationships, lenses, learning introductions, related puzzles, and language | Agent | Read/write; content and classification are read-only context |
+| `pedagogy` | Relationships, lenses, related puzzles, and language | Agent | Read/write; content and classification are read-only context |
+| `lesson` | The learning introduction. A lesson save may also merge entries into `info.citations` | Agent | Read/write; the subject (clusters, bridge facts, relationKind) is read-only context |
 | `administration` | Older puzzles' play flags on `board`, read only as a fallback for the matching layout settings | No current writer | Protected. Not an agent write domain |
 | `layout` | Everything the layout page sets: saved per-mode layouts and the board settings (size, Star free-term strip, bridge pre-connect, lens flow trace, lens reveal cue) | Author and the automatic layout pass | Outside the document. Never an agent write domain |
 | `provenance` | Who contributed and how human and generative work relate | Author and infrastructure | Protected |
 | `system` | Ownership, revisions, timestamps, hashes, validation, and lifecycle state | Infrastructure | Outside the document |
 
-The agent-write domains stay three: content, classification, and pedagogy. Administration is read-only compatibility: no human or agent writes it, and it holds only the values older puzzle documents carry. Provenance records who contributed, and it changes when contribution changes. The shared rule is only mechanical: a content, classification, or pedagogy save must not see or replace `board`. Layout is not part of the puzzle document at all; it is described in [The layout domain](#the-layout-domain).
+The agent-write domains are content, classification, pedagogy, and lesson. Administration is read-only compatibility: no human or agent writes it, and it holds only the values older puzzle documents carry. Provenance records who contributed, and it changes when contribution changes. The shared rule is only mechanical: a content, classification, pedagogy, or lesson save must not see or replace `board`. Layout is not part of the puzzle document at all; it is described in [The layout domain](#the-layout-domain).
 
 The document's `board` object holds values that older puzzles carry for settings that are now layout settings. Nothing writes it any more, and play reads each key only when the layout document does not set that key (see [The layout domain](#the-layout-domain)).
 
@@ -151,7 +152,7 @@ storage projection for compatibility; they are not moved into the separate
 
 For puzzle drafts, the working-copy store — Postgres when
 `AUTHORING_DATABASE_URL` is set, D1 otherwise — stores projections for the
-three authored domains as the durable write surface. The complete `document`
+authored domains as the durable write surface. The complete `document`
 column is a materialized cache refreshed on complete saves and on
 validate/publish (`materialize`). Focused domain saves replace the selected
 authored projection, preserve the other domains, and mark the cache stale;
@@ -171,12 +172,14 @@ increments the counter. The caller must send the `expected_revision` it last
 read; a mismatch fails and leaves the row unchanged.
 
 Each projection is one JSON column: `content_json`, `classification_json`,
-and `pedagogy_json`, plus the protected `provenance_json` and
-`administration_json` columns. The saved layout sits beside them in
+`pedagogy_json`, and `lesson_json`, plus the protected `provenance_json` and
+`administration_json` columns. `lesson_json` holds the learning introduction.
+A row that still keeps that object inside `pedagogy_json` moves it on the
+next save. The saved layout sits beside them in
 `layout_json`, outside the document and with its own rules (see
 [The layout domain](#the-layout-domain)). A column holds the whole projection. Changing
 one field inside content replaces `content_json`. On a focused save of a
-draft whose domain columns are already split, the other two authored columns
+draft whose domain columns are already split, the other authored columns
 keep the stored text. `provenance_json` and `administration_json` are written
 again from the assembled document, so a content save cannot drop them. The
 first focused save on a row that still lacks `classification_json`, or that
