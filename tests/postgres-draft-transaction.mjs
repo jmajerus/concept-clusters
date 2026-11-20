@@ -122,6 +122,23 @@ async function citationSchemaAndMatching(pool) {
   assert.equal(fresh.freshness, "current");
   assert.equal(fresh.refreshed, true);
   assert.equal((await pilot.freshUsageStatus()).refreshed, undefined);
+  // An exact identifier match reports the identifier as its matched word.
+  assert.deepEqual((await sources.search({ query: "AUTHOR2026PAPER" }))[0].matchedWords,
+    ["author2026paper"]);
+  // A source filed while the rebuild runs is newer than the watermark, so
+  // the index still reads stale afterwards instead of claiming it.
+  const racing = {
+    async listAll() {
+      const all = await sources.listAll();
+      await sources.upsertFromZotero({
+        ...identity, zoteroItemKey: "SOURCE07", citekey: "author2026racing",
+        metadata: { title: "Filed during rebuild" }
+      });
+      return all;
+    }
+  };
+  await refreshPublishedCitationUsage(pool, racing);
+  assert.equal((await usage.status()).freshness, "stale");
   assert.equal((await pool.query(`
     SELECT indexname FROM pg_indexes WHERE indexname = 'citation_sources_citekey_lookup'
   `)).rows.length, 1);

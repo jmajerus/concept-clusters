@@ -143,7 +143,9 @@ export class PostgresCitationSourceRepository {
     const sources = [];
     for (const row of result.rows) {
       const source = await readRevision(this.pool, row);
-      sources.push({ ...source, matchedWords: matchedWords([row.title, row.author], words) });
+      const fields = Number(row.exact_match)
+        ? [row.title, row.author, row.citekey, row.doi, row.url] : [row.title, row.author];
+      sources.push({ ...source, matchedWords: matchedWords(fields, words) });
     }
     return sources;
   }

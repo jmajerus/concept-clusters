@@ -1177,12 +1177,13 @@ export function createAuthoringMcpServer({
         categoryRegistry: taxonomy.categoryRegistry
       });
       const words = queryWords(query);
-      // Nearby puzzles: the shared puzzle search runs once per word, and a
-      // puzzle ranks by how many distinct words it matched.
+      // Nearby puzzles: the shared puzzle search runs once per word over the
+      // full match set, and a puzzle ranks by how many distinct words it
+      // matched; the limit applies only after that ranking.
       const nearbyById = new Map();
       for (const word of words) {
         const result = searchAuthoringPuzzles(puzzles, taxonomy.categoryRegistry, {
-          query: word, category: categoryId, subcategory, limit: 25
+          query: word, category: categoryId, subcategory, limit: Infinity
         });
         for (const { source, ...match } of result.matches) {
           const entry = nearbyById.get(match.id);

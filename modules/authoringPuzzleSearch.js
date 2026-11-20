@@ -363,7 +363,9 @@ export function searchAuthoringPuzzles(
     })
     .filter(Boolean)
     .sort((a, b) => a.rank - b.rank || a.index - b.index)
-    .slice(0, Math.max(1, Math.min(limit, 25)));
+    // Infinity (internal callers that rank the full match set themselves,
+    // such as plan_puzzle_references) returns every match.
+    .slice(0, Number.isFinite(limit) ? Math.max(1, Math.min(limit, 25)) : undefined);
 
   return {
     query: trimmed,

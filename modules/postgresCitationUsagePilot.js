@@ -77,9 +77,12 @@ function matchSource(citation, sources, workItems = new Map()) {
 }
 
 export async function refreshPublishedCitationUsage(pool, sourceRepository) {
+  // The watermark is taken before anything is read, so a source or puzzle
+  // that changes during the rebuild is newer than indexed_at and the index
+  // reads as stale until the next rebuild includes it.
+  const indexedAt = new Date().toISOString();
   const sources = await sourceRepository.listAll();
   const workItems = await recordedWorkItems(pool);
-  const indexedAt = new Date().toISOString();
   const published = await pool.query(`
     SELECT id, title, document FROM published_documents
     WHERE kind = 'puzzle' AND withdrawn_at IS NULL
