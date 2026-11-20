@@ -338,6 +338,25 @@ export async function run() {
     assert.equal(botany.slug, "lab-botany");
     assert.equal(botany.registered, true);
     assert.equal(botany.puzzleCount, 0);
+    // The default list is a compact index: no blurbs, subcategory ids only,
+    // and a needsCopy flag where a blurb is missing.
+    assert.equal(botany.domain, "life-sciences");
+    assert.equal(botany.info, undefined);
+    assert.equal(botany.needsCopy, undefined);
+    assert.ok(categories.categories.every(item =>
+      (item.subcategories || []).every(sub => typeof sub === "string")));
+    assert.ok(categories.domains.some(entry => entry.id === "life-sciences"));
+    // A domain returns its categories in full; title works as well as id.
+    const lifeSciences = await call("list_categories", { domain: "life-sciences" });
+    assert.equal(lifeSciences.domain.id, "life-sciences");
+    assert.ok(lifeSciences.categories.every(item => item.domain === "life-sciences"));
+    assert.equal(
+      lifeSciences.categories.find(item => item.slug === "lab-botany").info.text,
+      "The study of plants, lab fixture."
+    );
+    const byTitle = await call("list_categories", { domain: lifeSciences.domain.title });
+    assert.equal(byTitle.categories.length, lifeSciences.categories.length);
+    assert.match((await call("list_categories", { domain: "astrology" })).error, /Unknown domain: astrology/);
     const draftOnly = categories.categories.find(item => item.name === "Draft Only Subject");
     assert.ok(draftOnly, "list_categories should expose the owner's D1 working copy");
     assert.equal(draftOnly.registered, false);
