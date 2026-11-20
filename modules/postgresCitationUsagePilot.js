@@ -7,6 +7,7 @@ import {
 } from "../puzzles/categories.js";
 import { recordedWorkItems } from "./citationBackfill.js";
 import { classifyCitation, doiOf } from "./citationWorkKey.js";
+import { matchedWords, queryWords } from "./referenceQueryWords.js";
 import { nonCryptographicHash } from "./nonCryptographicHash.js";
 import { withTransaction } from "./postgresPool.js";
 
@@ -158,34 +159,44 @@ export class PostgresCitationUsagePilot {
     };
   }
 
+  async refresh(sourceRepository) {
+    return refreshPublishedCitationUsage(this.pool, sourceRepository);
+  }
+
   async search({ query, category = null, subcategory = null, sourceId = null, limit = 25 }) {
-    const term = String(query || "").trim();
-    if (!term && !sourceId && !category && !subcategory) return [];
+    const words = queryWords(query);
+    if (!words.length && !sourceId && !category && !subcategory) return [];
+    // Any query word may match; rows rank by how many distinct words hit.
     const result = await this.pool.query(`
-      SELECT DISTINCT o.* FROM citation_usage_observations o
-      LEFT JOIN citation_sources s ON s.id = o.source_id
-      WHERE ($1::text IS NULL OR o.source_id = $1)
-        AND ($2::text = '' OR o.citation_title ILIKE '%' || $2 || '%'
-          OR o.citation_author ILIKE '%' || $2 || '%'
-          OR o.citation_url ILIKE '%' || $2 || '%'
-          OR s.citekey ILIKE '%' || $2 || '%'
-          OR s.doi ILIKE '%' || $2 || '%')
-        AND ($3::text IS NULL OR EXISTS (
-          SELECT 1 FROM citation_usage_topics t
-          WHERE t.puzzle_id = o.puzzle_id
-            AND t.citation_index = o.citation_index
-            AND t.category_id = $3
-            AND ($4::text IS NULL OR t.subcategory_id = $4)
-        ))
-        AND ($3::text IS NOT NULL OR $4::text IS NULL OR EXISTS (
-          SELECT 1 FROM citation_usage_topics t
-          WHERE t.puzzle_id = o.puzzle_id
-            AND t.citation_index = o.citation_index
-            AND t.subcategory_id = $4
-        ))
-      ORDER BY o.puzzle_id, o.citation_index
+      SELECT * FROM (
+        SELECT o.*, s.citekey AS source_citekey, s.doi AS source_doi,
+          (SELECT COUNT(*) FROM unnest($2::text[]) AS w(word)
+            WHERE o.citation_title ILIKE '%' || w.word || '%'
+              OR o.citation_author ILIKE '%' || w.word || '%'
+              OR o.citation_url ILIKE '%' || w.word || '%'
+              OR s.citekey ILIKE '%' || w.word || '%'
+              OR s.doi ILIKE '%' || w.word || '%') AS matched_count
+        FROM citation_usage_observations o
+        LEFT JOIN citation_sources s ON s.id = o.source_id
+        WHERE ($1::text IS NULL OR o.source_id = $1)
+          AND ($3::text IS NULL OR EXISTS (
+            SELECT 1 FROM citation_usage_topics t
+            WHERE t.puzzle_id = o.puzzle_id
+              AND t.citation_index = o.citation_index
+              AND t.category_id = $3
+              AND ($4::text IS NULL OR t.subcategory_id = $4)
+          ))
+          AND ($3::text IS NOT NULL OR $4::text IS NULL OR EXISTS (
+            SELECT 1 FROM citation_usage_topics t
+            WHERE t.puzzle_id = o.puzzle_id
+              AND t.citation_index = o.citation_index
+              AND t.subcategory_id = $4
+          ))
+      ) ranked
+      WHERE cardinality($2::text[]) = 0 OR matched_count > 0
+      ORDER BY matched_count DESC, puzzle_id, citation_index
       LIMIT $5
-    `, [sourceId, term, category, subcategory,
+    `, [sourceId, words, category, subcategory,
       Math.max(1, Math.min(Number(limit) || 25, 100))]);
     const rows = [];
     for (const row of result.rows) {
@@ -204,6 +215,10 @@ export class PostgresCitationUsagePilot {
         matchBasis: row.match_basis,
         sourceId: row.source_id,
         indexedAt: row.indexed_at,
+        ...(words.length ? {
+          matchedWords: matchedWords([row.citation_title, row.citation_author,
+            row.citation_url, row.source_citekey, row.source_doi], words)
+        } : {}),
         topics: topics.rows.map(topic => ({
           categoryId: topic.category_id,
           subcategoryId: topic.subcategory_id,

@@ -5,7 +5,7 @@ description: Find and verify Zotero records while authoring or checking Concept 
 
 # Zotero references
 
-Skill rev `ee8a3c43` · 2026-10-25
+Skill rev `85c38678` · 2026-11-20
 
 Use the project `zotero` MCP connection, backed by the `jmajerus/zotero-mcp`
 fork, for read-only source lookup. Do not change the Zotero library during
@@ -31,12 +31,17 @@ citation lookup.
 The local Postgres-backed `concept-clusters` MCP server offers:
 
 - `plan_puzzle_references` for read-only coverage planning. Supply a query
-  (topic, title, author, DOI, URL, or known citekey), category, or subcategory.
-  It returns source candidates, published citation usage, accessible draft
-  citations, and nearby puzzles. Published matches are inferred, ambiguous,
-  or unmatched; draft citations are unlinked. Check `usageIndex.freshness`
-  before treating missing usage as evidence of a gap. Review nearby puzzle
-  content before judging missing or excessive coverage.
+  (topic words, title, author, DOI, URL, or known citekey), category, or
+  subcategory. It returns sources already filed in the collection, published
+  citation usage, accessible draft citations, and nearby puzzles. Each query
+  word matches separately; results rank by `matchedWords`, so a one-word hit
+  is weak evidence. Published matches are inferred, ambiguous, or unmatched;
+  draft citations are unlinked. The tool rebuilds an outdated usage index
+  before reading it; `usageIndex.refreshError` means it could not, and
+  missing usage is then not evidence of a gap. Review nearby puzzle content
+  before judging missing or excessive coverage. It does not discover new
+  sources: the collection holds only works already cited, so find candidates
+  with the portal's holdings `find_work` and corpus `search_corpus`.
 - `file_zotero_reference` to explicitly file a selected work in the Concept
   Clusters Zotero collection and mirror its assigned citekey and metadata in
   Postgres. Provide exactly one of `zotero_item_key`, `doi`, `url`, `isbn`,

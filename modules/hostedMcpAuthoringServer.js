@@ -117,6 +117,7 @@ import {
   searchAuthoringPuzzles,
   sortByRecent
 } from "./authoringPuzzleSearch.js";
+import { matchedWords, queryWords } from "./referenceQueryWords.js";
 import { PUZZLE_KINDS } from "./authoringProfiles.js";
 import { AGENT_CORPUS_STATUSES, RECENCY_WINDOWS } from "./puzzleCorpusStatus.js";
 import {
@@ -1146,9 +1147,13 @@ export function createAuthoringMcpServer({
     server.registerTool("plan_puzzle_references", {
       title: "Plan puzzle references",
       description:
-        "Optional read-only lookup for candidate references, published citation usage, and nearby puzzles. " +
-        "Search by topic, title, author, DOI, URL, or citekey; category and subcategory narrow coverage and can be used alone. " +
-        "Existing citation links are inferred from text and need review. This tool never files a Zotero item or changes a puzzle.",
+        "Optional read-only lookup of what Concept Clusters already knows about a topic or source: where published " +
+        "puzzles and your drafts cite it, which filed sources match, and nearby puzzles. Search by topic words, title, " +
+        "author, DOI, URL, or citekey; each word matches separately and results rank by how many words they contain. " +
+        "Category and subcategory narrow coverage and can be used alone. This does not discover new sources: find " +
+        "books and papers with the portal's holdings find_work and corpus search_corpus, then file one with " +
+        "file_zotero_reference. Citation links are inferred from text and need review. This tool never files a " +
+        "Zotero item or changes a puzzle; it rebuilds its own citation index when publishing has outdated it.",
       inputSchema: z.object({
         query: z.string().optional(),
         category: z.string().min(1).optional(),
@@ -1171,21 +1176,30 @@ export function createAuthoringMcpServer({
         drafts,
         categoryRegistry: taxonomy.categoryRegistry
       });
-      const nearby = query.trim()
-        ? searchAuthoringPuzzles(puzzles, taxonomy.categoryRegistry, {
-          query, category: categoryId, subcategory, limit
-        })
-        : { matches: [] };
-      const [sources, usage, usageIndex, zoteroResult] = await Promise.all([
-        query.trim() ? referencePilot.searchSources({ query, limit }) : [],
-        referencePilot.searchUsage({ query, category: categoryId, subcategory, limit }),
-        referencePilot.usageStatus(),
-        referencePilot.searchZotero(query, { limit: Math.min(limit, 5) })
-          .then(items => ({ items, warning: null }))
-          .catch(error => ({ items: [], warning: `Zotero lookup unavailable: ${error.message}` }))
+      const words = queryWords(query);
+      // Nearby puzzles: the shared puzzle search runs once per word, and a
+      // puzzle ranks by how many distinct words it matched.
+      const nearbyById = new Map();
+      for (const word of words) {
+        const result = searchAuthoringPuzzles(puzzles, taxonomy.categoryRegistry, {
+          query: word, category: categoryId, subcategory, limit: 25
+        });
+        for (const { source, ...match } of result.matches) {
+          const entry = nearbyById.get(match.id);
+          if (entry) entry.matchedWords.push(word);
+          else nearbyById.set(match.id, { ...match, matchedWords: [word] });
+        }
+      }
+      const nearbyPuzzles = [...nearbyById.values()]
+        .sort((left, right) => right.matchedWords.length - left.matchedWords.length)
+        .slice(0, limit);
+      // Rebuild a stale usage index before reading it.
+      const usageIndex = await referencePilot.freshUsageStatus();
+      const [sources, usage] = await Promise.all([
+        words.length ? referencePilot.searchSources({ query, limit }) : [],
+        referencePilot.searchUsage({ query, category: categoryId, subcategory, limit })
       ]);
       const draftCitationUsage = [];
-      const term = query.trim().toLowerCase();
       for (const draft of drafts) {
         const document = draft.document;
         if (!document) continue;
@@ -1210,8 +1224,10 @@ export function createAuthoringMcpServer({
         ];
         for (const [citationIndex, citation] of citations.entries()) {
           if (!citation || typeof citation !== "object" || Array.isArray(citation)) continue;
-          if (term && ![citation.title, citation.author, citation.url, citation.doi]
-            .some(value => String(value || "").toLowerCase().includes(term))) continue;
+          const hits = words.length
+            ? matchedWords([citation.title, citation.author, citation.url, citation.doi], words)
+            : [];
+          if (words.length && !hits.length) continue;
           draftCitationUsage.push({
             draftId: draft.draftId,
             puzzleId: draft.puzzleId,
@@ -1219,25 +1235,30 @@ export function createAuthoringMcpServer({
             citationIndex,
             citation,
             topics,
-            matchStatus: "draft_unlinked"
+            matchStatus: "draft_unlinked",
+            ...(words.length ? { matchedWords: hits } : {})
           });
-          if (draftCitationUsage.length >= limit) break;
         }
-        if (draftCitationUsage.length >= limit) break;
       }
+      draftCitationUsage.sort((left, right) =>
+        (right.matchedWords?.length || 0) - (left.matchedWords?.length || 0));
       const output = {
         query,
+        ...(words.length ? { queryWords: words } : {}),
         filters: { category: categoryId, subcategory },
         mirroredSources: sources.map(({
           id, currentRevision, contentHash, createdAt, updatedAt, capturedAt, ...candidate
         }) => candidate),
-        zoteroCandidates: zoteroResult.items,
         citationUsage: usage.map(({ sourceId, ...observation }) => observation),
-        draftCitationUsage,
+        draftCitationUsage: draftCitationUsage.slice(0, limit),
         usageIndex,
-        nearbyPuzzles: nearby.matches.map(({ source, ...match }) => match),
-        ...(zoteroResult.warning ? { warning: zoteroResult.warning } : {}),
-        interpretation: "Published citation links are inferred from inline metadata; ambiguous and unmatched entries are not exact source reuse. Nearby puzzles require content review before judging coverage."
+        nearbyPuzzles,
+        interpretation: "Everything here is already in Concept Clusters: mirroredSources are sources filed in its " +
+          "Zotero collection, citationUsage and draftCitationUsage are where puzzles cite them, and nearbyPuzzles " +
+          "overlap the topic. Results match any query word and rank by matchedWords; a single-word hit is weak " +
+          "evidence. Published citation links are inferred from inline metadata; ambiguous and unmatched entries " +
+          "are not exact source reuse. Nearby puzzles require content review before judging coverage. To find new " +
+          "sources, including owned books not yet in Zotero, use holdings find_work and corpus search_corpus."
       };
       return success("Reference planning results.", output);
     })));

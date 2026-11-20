@@ -168,28 +168,6 @@ export class ZoteroReferenceService {
     return call ? read(call) : this.withClient(read);
   }
 
-  async search(query, { limit = 5, citekey = false } = {}) {
-    const term = String(query || "").trim();
-    if (!term) return [];
-    return this.withClient(async call => {
-      const useCitekey = citekey || (/^[a-z][a-z0-9:_-]+$/i.test(term) && /\d{4}/.test(term));
-      const result = useCitekey
-        ? await call("zotero_search_by_citation_key", { citekey: term })
-        : await call("zotero_search_items", {
-          query: term,
-          qmode: "titleCreatorYear",
-          limit: Math.max(1, Math.min(limit, 10))
-        });
-      const keys = itemKeyFromText(result).slice(0, limit);
-      const items = [];
-      for (const key of keys) {
-        const record = await this.getItem(key, call);
-        items.push(sourceSummary(record));
-      }
-      return items;
-    });
-  }
-
   async fileItem(itemKey) {
     const key = String(itemKey || "").trim();
     if (!/^[A-Z0-9]{8}$/.test(key)) throw new Error("Zotero item key must have eight characters");
