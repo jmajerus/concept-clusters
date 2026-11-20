@@ -29,8 +29,10 @@ order, and verification commands.
 - `content` — puzzle identity, copy, clusters, and bridge core;
 - `classification` — primary category, membership, subcategory placement,
   search tags, and optional level;
-- `pedagogy` — bridge relationship annotations, lenses, learning
-  introductions, related puzzles, and language;
+- `pedagogy` — bridge relationship annotations, lenses, related puzzles,
+  and language;
+- `lesson` — the learning introduction. A lesson save may also merge
+  entries into `info.citations`;
 - `provenance` — contributor attribution; and
 - `system` — repository-owned state.
 

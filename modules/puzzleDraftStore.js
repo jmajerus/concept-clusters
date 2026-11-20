@@ -104,6 +104,7 @@ export function createPuzzleDraftStore({ directory }) {
     const content = storedDomainValue(record, "content", "Stored content domain");
     const pedagogy = storedDomainValue(record, "pedagogy", "Stored pedagogy domain");
     const classification = storedDomainValue(record, "classification", "Stored classification domain");
+    const lesson = storedDomainValue(record, "lesson", "Stored lesson domain");
     if (documentStale && (content == null || pedagogy == null)) {
       throw new Error(
         `Draft ${record.draftId || "unknown"} is stale but missing durable content/pedagogy projections`
@@ -118,6 +119,7 @@ export function createPuzzleDraftStore({ directory }) {
         content,
         pedagogy,
         classification,
+        lesson,
         provenance: storedDomainValue(record, "provenance", "Stored provenance domain"),
         administration: storedDomainValue(record, "administration", "Stored administration domain")
       })
@@ -329,7 +331,8 @@ export function createPuzzleDraftStore({ directory }) {
       const columns = domainColumnsForSave({
         content: storedDomains?.content ?? null,
         pedagogy: storedDomains?.pedagogy ?? null,
-        classification: storedDomains?.classification ?? null
+        classification: storedDomains?.classification ?? null,
+        lesson: storedDomains?.lesson ?? null
       }, domain, nextDomains);
       const domains = storedDomains
         ? { ...storedDomains, ...columns }

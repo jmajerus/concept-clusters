@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `3aa8900b` · 2026-11-20
+Skill rev `40af9afc` · 2026-11-20
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. `save_puzzle_draft` writes the working copy only. The human
@@ -46,7 +46,7 @@ Never write those into `docs/`, `.agents/`, or `/tmp`.
 - Content owns a bridge's `term`, `clusters`, `fact`, and `info`. Pedagogy owns `relationKind`, `direction`, `idealTerms`, and `conceptId` (`PEDAGOGY_BRIDGE_FIELDS` in `modules/authoringFieldOwnership.js`). `idealTerms` is a map. A merge patch keeps keys the patch does not mention. After retargeting a bridge, a pedagogy save must set each stale cluster id to `null`.
 - A validation or ownership rejection did not commit, so retry the same `expected_revision`. When the error names a current revision, use that integer and the document you already have. Call `get_puzzle_draft` before another save when merging a draft this session has not seen.
 - A native `save_puzzle_draft` or `create_puzzle_draft` does not write `working/<id>.json`. Do not read that file as the current draft, and do not run `save-working-draft.mjs` on it, unless this session just wrote the file from the latest `get_puzzle_draft` and recorded that revision in `working/<id>.revision`.
-- `info.citations` replaces the whole list, so a partial list deletes the citations left out.
+- `info.citations` replaces the whole list on a content save, so a partial list deletes the citations left out. A lesson save merges entries by url, or by author, title, and year, and leaves the rest.
 - HTTP 403 from a link check is inconclusive, not missing. For a Supreme Court opinion, a Cornell LII volume/page URL can 404 while `/supremecourt/text/{docket}` returns 200. Prefer the URL the link checker marks ok.
 - Prefer the native tool (`concept-clusters_save_puzzle_draft` in Kilo) when you pass the revision yourself. Use `node tools/mcp-call.mjs` only when that native tool is not listed.
 
@@ -218,13 +218,13 @@ them, research the usual way.
   or two short passages that carry the lesson better than paraphrase. Save
   each with quote-mcp `add_quote` (it checks the words against the book)
   before the quote appears in the draft, never from memory, and cite it with
-  `cite_quote`. The work goes in the puzzle-level `info.citations` (a
-  content-domain save; never a second list on the lesson). Present
+  `cite_quote`. The work goes in the puzzle-level `info.citations` on that
+  same lesson-domain save (one bibliography; never a second list on the lesson). Present
   the quote as an `{.epigraph}` block or a `>` blockquote with its
   attribution.
 - **File a book.** A cited book not yet in Zotero goes through
   `file_zotero_reference`; record the citekey it gets with `pin_citekey`.
-- **Lesson blocks.** Lessons may use the four IASP blocks the `pedagogy`
+- **Lesson blocks.** Lessons may use the four IASP blocks the `lesson`
   guidance lists. With the portal, check the lesson text with iasp
   `validate_markdown` (it also checks `<!-- quote <id> -->` passages against
   quote-mcp); `validate_puzzle_draft` enforces the allowlist either way.

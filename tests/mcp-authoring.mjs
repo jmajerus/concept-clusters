@@ -128,8 +128,8 @@ export async function run() {
     const toolNames = listed.result.tools.map(tool => tool.name);
     const guidanceTool = listed.result.tools.find(tool => tool.name === "get_authoring_guidance");
     const schemaTool = listed.result.tools.find(tool => tool.name === "get_authoring_schema");
-    assert.match(guidanceTool.description, /core, review, pedagogy, classification, or publication/);
-    assert.match(schemaTool.description, /core, review, pedagogy, classification, or publication/);
+    assert.match(guidanceTool.description, /core, review, pedagogy, lesson, classification, or publication/);
+    assert.match(schemaTool.description, /core, review, pedagogy, lesson, classification, or publication/);
     const saveTool = listed.result.tools.find(tool => tool.name === "save_puzzle_draft");
     assert.match(saveTool.description, /^Every save requires expected_revision/);
     assert.match(saveTool.description, /A validation or ownership rejection did not commit/);
@@ -361,7 +361,7 @@ export async function run() {
     assert.equal(authoringSchema.result.structuredContent.phase, undefined);
 
     const phasedSchemas = {};
-    for (const phase of ["core", "review", "pedagogy", "classification", "publication"]) {
+    for (const phase of ["core", "review", "pedagogy", "lesson", "classification", "publication"]) {
       const response = await request("tools/call", {
         name: "get_authoring_schema",
         arguments: { phase }
@@ -391,31 +391,34 @@ export async function run() {
     assert.ok(clusterInfoObject.properties.links);
     assert.ok(phasedSchemas.core.schema.properties.info.anyOf[1].properties.links);
     assert.equal(phasedSchemas.core.schema.properties.info.anyOf[1].properties.link, undefined);
+    assert.equal(phasedSchemas.pedagogy.schema.properties.learningIntroduction, undefined);
     assert.equal(
-      phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties.sources,
+      phasedSchemas.lesson.schema.properties.learningIntroduction.properties.sources,
       undefined
     );
-    assert.ok(phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties.links);
+    assert.ok(phasedSchemas.lesson.schema.properties.learningIntroduction.properties.links);
     assert.match(
-      phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties.content
+      phasedSchemas.lesson.schema.properties.learningIntroduction.properties.content
         .properties.text.description,
       /real line breaks/
     );
     assert.equal(
-      phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties.credit,
+      phasedSchemas.lesson.schema.properties.learningIntroduction.properties.credit,
       undefined
     );
+    assert.ok(phasedSchemas.lesson.schema.properties.info.properties.citations);
     assert.equal(phasedSchemas.core.schema.properties.large, undefined);
     assert.equal(phasedSchemas.review.schema.properties.large, undefined);
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.relationKind);
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.direction);
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.idealTerms);
     assert.ok(phasedSchemas.pedagogy.schema.properties.lenses);
-    assert.ok(phasedSchemas.pedagogy.schema.properties.learningIntroduction);
+    assert.ok(phasedSchemas.lesson.schema.properties.learningIntroduction);
     assert.ok(phasedSchemas.pedagogy.schema.properties.bridges.items.properties.direction);
     assert.deepEqual(phasedSchemas.pedagogy.schema.properties.bridges.items.required, []);
     assert.equal(phasedSchemas.core.domain, "content");
     assert.equal(phasedSchemas.pedagogy.domain, "pedagogy");
+    assert.equal(phasedSchemas.lesson.domain, "lesson");
     assert.equal(phasedSchemas.publication.domain, "pedagogy");
     assert.equal(phasedSchemas.review.domain, undefined);
     assert.equal(phasedSchemas.publication.schema.properties.provenance, undefined);
@@ -604,19 +607,25 @@ export async function run() {
       name: "get_authoring_guidance",
       arguments: { phase: "pedagogy" }
     });
-    assert.match(pedagogyGuidance.result.structuredContent.markdown, /do not have to be authored together/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /domain=lesson/);
     // The pass that saves bridge annotations is the pass that teaches them.
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /conceptId only when/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /Start with the bridges, before drafting lenses/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /not\s+a higher grade of lens/);
-    assert.match(pedagogyGuidance.result.structuredContent.markdown, /preserve those lenses/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /one,\s+two, or three honest answers/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /not a size to fill/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /Dutch tilt/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /dolly zoom/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /geometrically\s+wrong/);
-    assert.match(pedagogyGuidance.result.structuredContent.markdown, /real\s+line breaks/);
-    assert.match(pedagogyGuidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
+    const lessonGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "lesson" }
+    });
+    assert.match(lessonGuidance.result.structuredContent.markdown, /real\s+line breaks/);
+    assert.match(lessonGuidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
+    assert.match(lessonGuidance.result.structuredContent.markdown, /author, title, and year/);
+    assert.match(lessonGuidance.result.structuredContent.markdown, /\{\.epigraph\}/);
+    assert.doesNotMatch(pedagogyGuidance.result.structuredContent.markdown, /\{\.epigraph\}/);
     assert.doesNotMatch(
       pedagogyGuidance.result.structuredContent.markdown,
       /Vocabulary-in-context|lexical-disambiguation|near-synonym/

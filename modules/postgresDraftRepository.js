@@ -161,6 +161,7 @@ function historySnapshotDocument(row) {
   const hasDomains = row.content_json != null
     || row.pedagogy_json != null
     || row.classification_json != null
+    || row.lesson_json != null
     || row.provenance_json != null
     || row.administration_json != null;
   if (!hasDomains) {
@@ -173,6 +174,9 @@ function historySnapshotDocument(row) {
     classification: row.classification_json == null
       ? null
       : parsedJson(row.classification_json, "Stored working copy"),
+    lesson: row.lesson_json == null
+      ? null
+      : parsedJson(row.lesson_json, "Stored working copy"),
     provenance: row.provenance_json == null
       ? null
       : parsedJson(row.provenance_json, "Stored working copy"),
@@ -259,7 +263,7 @@ async function insertHistorySnapshot(client, { draftId, ownerSubject, expectedRe
   await client.query(`
     INSERT INTO puzzle_draft_history (
       draft_id, seq, document,
-      content_json, pedagogy_json, classification_json, provenance_json, administration_json,
+      content_json, pedagogy_json, classification_json, lesson_json, provenance_json, administration_json,
       content_hash, saved_at
     )
     SELECT
@@ -269,7 +273,7 @@ async function insertHistorySnapshot(client, { draftId, ownerSubject, expectedRe
         WHEN content_json IS NULL AND pedagogy_json IS NULL THEN document
         ELSE NULL
       END,
-      content_json, pedagogy_json, classification_json, provenance_json, administration_json,
+      content_json, pedagogy_json, classification_json, lesson_json, provenance_json, administration_json,
       content_hash,
       $1
     FROM puzzle_drafts
@@ -359,8 +363,8 @@ export class PostgresDraftRepository extends DraftRepository {
           revision = revision + 1, validation_json = NULL, updated_at = $4,
           document_stale = 1,
           content_json = $5, pedagogy_json = $6, classification_json = $7,
-          provenance_json = $8, administration_json = $9
-      WHERE id = $10 AND owner_subject = $11 AND revision = $12
+          lesson_json = $8, provenance_json = $9, administration_json = $10
+      WHERE id = $11 AND owner_subject = $12 AND revision = $13
     `, [
       identity.puzzleId,
       identity.title,
@@ -369,6 +373,7 @@ export class PostgresDraftRepository extends DraftRepository {
       domains.content,
       domains.pedagogy,
       domains.classification,
+      domains.lesson,
       domains.provenance,
       domains.administration,
       draftId,
@@ -433,14 +438,14 @@ export class PostgresDraftRepository extends DraftRepository {
             id, puzzle_id, owner_subject, title, status,
             document, content_hash, base_commit_sha,
             created_at, updated_at, revision, document_stale,
-            content_json, pedagogy_json, classification_json, provenance_json, administration_json,
+            content_json, pedagogy_json, classification_json, lesson_json, provenance_json, administration_json,
             opened_from_published, review_base_published_revision
           ) VALUES (
             $1, $2, $3, $4, 'draft',
             $5, $6, $7,
             $8, $9, 1, 1,
-            $10, $11, $12, $13, $14,
-            $15, $16
+            $10, $11, $12, $13, $14, $15,
+            $16, $17
           )
         `, [
           draftId,
@@ -455,6 +460,7 @@ export class PostgresDraftRepository extends DraftRepository {
           domains.content,
           domains.pedagogy,
           domains.classification,
+          domains.lesson,
           domains.provenance,
           domains.administration,
           seededFromPublished ? 1 : 0,
@@ -602,7 +608,8 @@ export class PostgresDraftRepository extends DraftRepository {
     const columns = domainColumnsForSave({
       content: peeked.content_json,
       pedagogy: peeked.pedagogy_json,
-      classification: peeked.classification_json
+      classification: peeked.classification_json,
+      lesson: peeked.lesson_json
     }, domain, domains);
     const contentHash = draftContentHash(nextAssembled);
     const now = new Date().toISOString();
@@ -670,7 +677,7 @@ export class PostgresDraftRepository extends DraftRepository {
         const current = await this.#requireCurrent(client, draftId, owner.subject, expectedRevision);
         const history = await client.query(`
           SELECT seq, document,
-            content_json, pedagogy_json, classification_json, provenance_json, administration_json
+            content_json, pedagogy_json, classification_json, lesson_json, provenance_json, administration_json
           FROM puzzle_draft_history
           WHERE draft_id = $1
           ORDER BY seq DESC

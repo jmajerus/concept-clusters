@@ -959,7 +959,7 @@ function listIntro(variant) {
        working copies of unpublished puzzles and published snapshots changed
        since the last Freeze. <strong>Unpublished changes</strong> selects saved
        working copies that differ from their published D1 snapshot, including
-       content, classification, pedagogy, admin settings, provenance, or layout.
+       content, classification, pedagogy, the lesson, admin settings, provenance, or layout.
        Badges in the Unpublished Changes column identify the changed domains. <strong>Cued</strong>
        selects explicit freeze cues. <strong>Review pending</strong> selects
        puzzles with agent review proposals waiting for a decision.
@@ -1037,6 +1037,7 @@ const UNPUBLISHED_DOMAIN_LABELS = {
   content: "Content",
   classification: "Classification",
   pedagogy: "Pedagogy",
+  lesson: "Lesson",
   administration: "Admin",
   provenance: "Provenance",
   layout: "Layout"

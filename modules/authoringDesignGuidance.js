@@ -340,10 +340,12 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   (same { author?, title, publisher?, year?, pages?, url? } shape) -- never
   a second list on the lesson. When a learningIntroduction exists, play
   shows that list under References in the Lesson dialog; otherwise it
-  shows on the board. info.citations is content. A pedagogy save cannot
-  write it, and the server does not copy links into it. After the lesson
-  is saved, a content-domain save copies the cluster links that lesson
-  text relies on into this list. That is the default set. Add a term link
+  shows on the board. The lesson domain writes that list: a lesson save
+  merges entries by url, or by author, title, and year, and leaves the
+  rest. A content save still replaces the whole list when it sends one.
+  The server does not copy links into it. The lesson save copies the
+  cluster links that lesson text relies on into this list. That is the
+  default set. Add a term link
   only when the lesson depends on a source that exists only on a term.
   Add a source for a claim that lives only in the lesson and has no node.
   Do not start a new source hunt. The same URL may stay on its node. Do
@@ -442,10 +444,11 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   Hover help is for the local idea. When a learningIntroduction exists,
   play shows info.citations under References in the Lesson dialog (not on
   the board); with no introduction, it shows on the board. That list is
-  the sources the lesson text relies on. The agent writes them with a
-  content-domain save after the lesson exists, starting from the cluster
+  the sources the lesson text relies on. The lesson save writes them,
+  merging by url or by author, title, and year, starting from the cluster
   links. The server does not insert them. A book, edition, or page range
-  a link cannot carry belongs there too.
+  a link cannot carry belongs there too. A quote the lesson includes is
+  filed in that same save.
   Cite a book's current edition. An existing puzzle moves to a newer
   edition when it is next revised for other reasons, not when one is
   published, unless the cited edition is wrong for what the puzzle claims,
@@ -469,7 +472,7 @@ contract or guidance is needed, and always validate the complete draft before
 publication. Phases are reusable concern areas, not irreversible lifecycle
 gates: revisit any phase whenever that part of the puzzle needs more work.
 
-Every focused domain save (content, pedagogy, classification) is a JSON
+Every focused domain save (content, pedagogy, lesson, classification) is a JSON
 Merge Patch (RFC 7396) over that domain: send only the fields this pass
 changes. Omitted fields are kept, \`null\` removes a field, and objects merge.
 Lists of identified items merge item by item, as in a Kubernetes strategic
@@ -523,10 +526,10 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
 - Research while shaping the concepts. When a source supports a fact or term,
   record it immediately as a link on that cluster, term, or bridge. Preserve
   the URL discovered now. A book, edition, or page range that a link cannot
-  carry goes on puzzle info.citations when you find it. A later
-  content-domain save, after the lesson exists, copies the cluster links
-  that lesson text relies on into that same list. The server does not
-  write that list. Do not plan to rediscover either later. Once the draft
+  carry goes on puzzle info.citations when you find it. The lesson save
+  later merges the cluster links that lesson text relies on into that same
+  list. The server does not write that list. Do not plan to rediscover
+  either later. Once the draft
   is saved, run check_puzzle_links with draft_id rather than trusting a
   wiki: title from recall.
 - Provide help at the appropriate level of granularity; prefer a verified
@@ -560,7 +563,7 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   Keep exact citation data gathered during research; this pass confirms and
   corrects it rather than performing a second generic source hunt. When a
   learningIntroduction exists and info.citations is missing the cluster
-  links that lesson text relies on, repair that with a content-domain save.
+  links that lesson text relies on, repair that with a lesson-domain save.
   Do not open a new source hunt, and do not copy every term link. Add a
   term-only or lesson-only source when the text depends on it. Check that
   each link matches the grain of the
@@ -634,6 +637,12 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   is X?", one definition at a time. Check once whether two of them are
   really one bounded question with two honest answers, or whether quiz mode
   fits them better. If each stands on its own, keep them.
+- The learning introduction is the lesson domain. Retrieve and save it with
+  domain=lesson. This pass does not write it. A pedagogy save leaves the
+  lesson and its bibliography as they are.`;
+
+const LESSON_PHASE_GUIDANCE = `## Lesson pass
+
 - Prefer a learningIntroduction. A lesson helps in almost every case,
   because the author cannot know what the player already knows. Write one lesson
   about the subject: the learning objective, the domain, and how the ideas
@@ -649,20 +658,31 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   required for material the puzzle truly depends on; otherwise prefer
   optional or recommended. required holds the board until the learner
   chooses Start puzzle in the lesson. Closing the dialog returns to the
-  invitation. info.citations is content, so this pedagogy save does not
-  write it and the server will not fill it in. Cluster links are already
-  in the read-only content context. After this save, a content-domain save
-  copies those cluster links the lesson text relies on into info.citations.
-  Add a term link only when the lesson depends on a source that exists only
-  on a term. Add a source for a claim that lives only in the lesson and has
-  no node. Do not start a new source hunt, and do not copy every term link.
-  The same URL may remain on its node. Do not also put it on
-  learningIntroduction.links. content.text is
-  Markdown with real line breaks in the string value (blank lines between
-  paragraphs, \`##\` headings on their own lines). The lesson dialog already
-  shows title; do not repeat it as the first line. Do not write the
-  two-character sequence backslash-n; the tool serializer encodes newlines. A
-  body stored as one line with \`\\n\` tokens renders as a single paragraph.
+  invitation.
+- Retrieve get_puzzle_draft with domain=lesson. The writable document is the
+  learning introduction and \`info.citations\`. Context is the subject: id,
+  title, puzzleKind, category, each cluster's name, fact, and terms, and
+  each bridge's term, fact, and relationKind. Lenses are not in this read.
+  Save domain=lesson as a merge patch: send only what changed.
+- \`info.citations\` is the one bibliography for the puzzle. This save may
+  add or update entries. An entry matches an existing one by url when both
+  have a url, otherwise by author, title, and year. A match is updated, a
+  new entry is appended, and entries left out stay. Remove one with
+  \`{ "url": "...", "$patch": "delete" }\` or the same author, title, and
+  year. An entry \`{ "$patch": "replace" }\` replaces the list. A content
+  save still replaces the whole list when it sends one. Do not put a second
+  list on the lesson.
+- File the work behind a quote in this same save. Copy a cluster link the
+  lesson text relies on into the same list. Add a term link only when the
+  lesson depends on a source that exists only on a term. Add a source for a
+  claim that lives only in the lesson and has no node. Do not start a new
+  source hunt, and do not copy every term link. The same URL may remain on
+  its node. Do not also put it on learningIntroduction.links.
+- content.text is Markdown with real line breaks in the string value (blank
+  lines between paragraphs, \`##\` headings on their own lines). The lesson
+  dialog already shows title; do not repeat it as the first line. Do not write
+  the two-character sequence backslash-n; the tool serializer encodes newlines.
+  A body stored as one line with \`\\n\` tokens renders as a single paragraph.
   content.text may use four IASP blocks, each opened by a ::: line and
   closed by a line of ::: alone: {.epigraph} (one short quotation, its last
   paragraph "— Author, *Work*"), {.note .definition}, {.note .insight}
@@ -676,11 +696,7 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   Never add dateCreated, dateModified, version, or
   learningIntroduction.revision. Publication times stay on the published
   row; version and the lesson revision stay off the document.
-  Do not send large. Lists and play compute it from the node count.
-- Lenses and learningIntroduction belong in this same pedagogy concern, but
-  they do not have to be authored together. It is normal to add or revise a
-  learning introduction long after the lenses exist; preserve those lenses
-  unless the later lesson work reveals a substantive reason to change them.`;
+  Do not send large. Lists and play compute it from the node count.`;
 
 const CLASSIFICATION_PHASE_GUIDANCE = `## Classification pass
 
@@ -861,8 +877,8 @@ through domain=pedagogy and the content core remains owned by domain=content.`,
   several unordered answers in one target list.
 
 This pass remains a pedagogy-domain pass: retrieve the pedagogy projection and
-save lenses, lensMode, any multi-cluster preSolve choice, and
-learningIntroduction with domain=pedagogy.`,
+save lenses, lensMode, and any multi-cluster preSolve choice with
+domain=pedagogy. The learning introduction is domain=lesson.`,
   publication: `## Vocabulary-in-context publication pass
 
 - Preserve the authored puzzleKind: "vocabulary-context"; the profile argument
@@ -982,7 +998,8 @@ and quiz-lens changes with domain=pedagogy.`,
   isolated question.
 
 This is a pedagogy-domain pass: retrieve the pedagogy projection and save
-lenses, lensMode, preSolve, and learningIntroduction with domain=pedagogy.`,
+lenses, lensMode, and preSolve with domain=pedagogy. The learning
+introduction is domain=lesson.`,
   publication: `## Trivia-quiz publication pass
 
 - Preserve puzzleKind: "trivia-quiz" as the authored puzzle type; the MCP
@@ -1061,6 +1078,7 @@ export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
   core: `${PHASE_PREAMBLE}\n\n${CORE_PHASE_GUIDANCE}`,
   review: `${PHASE_PREAMBLE}\n\n${REVIEW_PHASE_GUIDANCE}`,
   pedagogy: `${PHASE_PREAMBLE}\n\n${PEDAGOGY_PHASE_GUIDANCE}`,
+  lesson: `${PHASE_PREAMBLE}\n\n${LESSON_PHASE_GUIDANCE}`,
   classification: `${PHASE_PREAMBLE}\n\n${CLASSIFICATION_PHASE_GUIDANCE}`,
   publication: `${PHASE_PREAMBLE}\n\n${PUBLICATION_PHASE_GUIDANCE}`
 });
