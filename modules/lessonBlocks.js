@@ -45,10 +45,14 @@ export function lessonBlockFor(classes) {
 }
 
 // Index of the `:::` line that closes the fence opened at `start` (nested
-// fences balanced), or -1 when it is never closed.
+// fences balanced, ::: lines inside ``` code ignored), or -1 when it is
+// never closed.
 export function fenceCloseIndex(lines, start) {
   let depth = 1;
+  let inCode = false;
   for (let index = start + 1; index < lines.length; index++) {
+    if (/^```/.test(lines[index])) inCode = !inCode;
+    if (inCode) continue;
     if (fenceOpenSpec(lines[index]) !== null) depth++;
     else if (isFenceClose(lines[index]) && --depth === 0) return index;
   }

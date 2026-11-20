@@ -20,7 +20,7 @@ import {
 } from "../modules/puzzleManifest.js";
 import { validateLearningIntroduction } from "../modules/learningIntroductionValidation.js";
 import { validateLearningIntroductionStructure } from "../modules/learningIntroductionValidationCore.js";
-import { fenceClasses, lessonBlockFor, lessonBlockIssues } from "../modules/lessonBlocks.js";
+import { fenceClasses, fenceCloseIndex, lessonBlockFor, lessonBlockIssues } from "../modules/lessonBlocks.js";
 
 export const name = "learning introductions: resources, requirements, and acknowledgement";
 
@@ -190,6 +190,11 @@ export async function run() {
   assert.match(bad[0], /"::: note.warning" is not a lesson block/);
   assert.match(bad[1], /1 ":::" block\(s\) left unclosed/);
   assert.match(lessonBlockIssues(":::")[0], /closes no open block/);
+  // A ::: line inside code within a block does not nest, so the block's own
+  // close is found and later lesson text stays outside it.
+  const codeInBlock = ["::: note.insight", "```", "::: note.warning", "```", ":::", "After."];
+  assert.equal(fenceCloseIndex(codeInBlock, 0), 4);
+  assert.deepEqual(lessonBlockIssues(codeInBlock.join("\n")), []);
 
   const withBlock = text => ({
     learningIntroduction: {
