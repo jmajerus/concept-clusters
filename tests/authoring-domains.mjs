@@ -673,4 +673,27 @@ export async function run() {
   });
   assert.deepEqual(replacedCitations.document.info.citations.map(entry => entry.title), ["Only this"]);
   assert.equal(replacedCitations.document.info.text, "Core information");
+
+  const distinctEdition = applyAuthoredDomainPatch(quoted.document, "lesson", {
+    info: {
+      citations: [{
+        title: "Quoted book",
+        author: "B",
+        year: "2021",
+        url: "https://example.test/quote-edition"
+      }]
+    }
+  });
+  assert.deepEqual(distinctEdition.document.info.citations.map(entry => entry.url), [
+    "https://example.test/board",
+    "https://example.test/quote",
+    "https://example.test/quote-edition"
+  ]);
+
+  const citedWithoutInfo = applyAuthoredDomainPatch(noInfo.document, "lesson", {
+    info: { citations: [{ title: "Only source", author: "D", year: "2019" }] }
+  });
+  assert.deepEqual(citedWithoutInfo.document.info, {
+    citations: [{ title: "Only source", author: "D", year: "2019" }]
+  });
 }

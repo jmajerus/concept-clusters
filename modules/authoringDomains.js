@@ -866,7 +866,7 @@ function contentWithLessonCitations(content, incoming) {
   }
   if (isObject(info)) return { info: { ...info, citations } };
   if (typeof info === "string" && info) return { info: { text: info, citations } };
-  return { info: citations };
+  return { info: { citations } };
 }
 
 // Lists of items with a stable identity merge item by item, the way
@@ -920,7 +920,10 @@ function citationLabel(entry) {
 function citationsMatch(left, right) {
   const leftUrl = normalizedCitationText(left?.url);
   const rightUrl = normalizedCitationText(right?.url);
-  if (leftUrl && rightUrl && leftUrl === rightUrl) return true;
+  // A URL identifies the entry whenever both sides have one. Different
+  // non-empty URLs are different editions even when author, title, and year
+  // agree. The work key applies only when at least one side has no URL.
+  if (leftUrl && rightUrl) return leftUrl === rightUrl;
   const leftWork = citationWorkKey(left);
   const rightWork = citationWorkKey(right);
   return !!(leftWork && leftWork === rightWork);
