@@ -91,6 +91,11 @@ function rethrowMissingDomainColumn(error) {
   if (sqliteMissingColumn(message, "classification_json")) {
     throw new Error(CLASSIFICATION_COLUMN_MIGRATION);
   }
+  if (sqliteMissingColumn(message, "lesson_json")) {
+    throw new Error(
+      "puzzle_drafts.lesson_json is missing. Apply d1/migrations/0038_lesson_domain.sql before writing drafts."
+    );
+  }
   throw error;
 }
 
@@ -106,7 +111,8 @@ function domainColumnValues(current, domain, domains) {
   return domainColumnsForSave({
     content: current.content_json,
     pedagogy: current.pedagogy_json,
-    classification: current.classification_json
+    classification: current.classification_json,
+    lesson: current.lesson_json
   }, domain, domains);
 }
 
@@ -351,7 +357,7 @@ function workingCopySnapshotStatements(database, {
     database.prepare(`
       INSERT INTO puzzle_draft_history (
         draft_id, seq, document,
-        content_json, pedagogy_json, classification_json, provenance_json, administration_json,
+        content_json, pedagogy_json, classification_json, lesson_json, provenance_json, administration_json,
         content_hash, saved_at
       )
       SELECT
@@ -361,7 +367,7 @@ function workingCopySnapshotStatements(database, {
           WHEN content_json IS NULL AND pedagogy_json IS NULL THEN document
           ELSE NULL
         END,
-        content_json, pedagogy_json, classification_json, provenance_json, administration_json,
+        content_json, pedagogy_json, classification_json, lesson_json, provenance_json, administration_json,
         content_hash,
         ?
       FROM puzzle_drafts
@@ -395,6 +401,7 @@ function historySnapshotDocument(row) {
   const hasDomains = row.content_json != null
     || row.pedagogy_json != null
     || row.classification_json != null
+    || row.lesson_json != null
     || row.provenance_json != null
     || row.administration_json != null;
   if (!hasDomains) {
@@ -413,6 +420,9 @@ function historySnapshotDocument(row) {
     classification: row.classification_json == null
       ? null
       : parsedJson(row.classification_json, "Stored working copy"),
+    lesson: row.lesson_json == null
+      ? null
+      : parsedJson(row.lesson_json, "Stored working copy"),
     provenance: row.provenance_json == null
       ? null
       : parsedJson(row.provenance_json, "Stored working copy"),
@@ -475,6 +485,7 @@ export class D1DraftRepository extends DraftRepository {
       domains.content,
       domains.pedagogy,
       domains.classification,
+      domains.lesson,
       domains.provenance,
       domains.administration,
       draftId,
@@ -518,7 +529,7 @@ export class D1DraftRepository extends DraftRepository {
           SET puzzle_id = ?, title = ?, content_hash = ?,
               revision = revision + 1, validation_json = NULL, updated_at = ?,
               document_stale = 1,
-              content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
+              content_json = ?, pedagogy_json = ?, classification_json = ?, lesson_json = ?, provenance_json = ?, administration_json = ?
           WHERE id = ? AND owner_subject = ? AND revision = ?${requestGuard}
         `).bind(...bindings),
         // Audit rows are written only if this exact document landed: a
@@ -754,6 +765,7 @@ export class D1DraftRepository extends DraftRepository {
       domains.content,
       domains.pedagogy,
       domains.classification,
+      domains.lesson,
       domains.provenance,
       domains.administration
     ];
@@ -797,9 +809,9 @@ export class D1DraftRepository extends DraftRepository {
         names: `id, puzzle_id, owner_subject, title, status,
           document, content_hash, base_commit_sha,
           created_at, updated_at, revision, document_stale,
-          content_json, pedagogy_json, classification_json, provenance_json, administration_json, opened_from_published,
+          content_json, pedagogy_json, classification_json, lesson_json, provenance_json, administration_json, opened_from_published,
           review_base_published_revision`,
-        values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?, ?, ?, ?"
+        values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?, ?, ?, ?, ?"
       })).bind(
         ...bindModern,
         seededFromPublished ? 1 : 0,
@@ -830,8 +842,8 @@ export class D1DraftRepository extends DraftRepository {
             names: `id, puzzle_id, owner_subject, title, status,
               document, content_hash, base_commit_sha,
               created_at, updated_at, revision,
-              content_json, pedagogy_json, classification_json, provenance_json, administration_json`,
-            values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?"
+              content_json, pedagogy_json, classification_json, lesson_json, provenance_json, administration_json`,
+            values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?"
           })).bind(...bindModern, ...gateBindings));
         } catch (retryError) {
           return returnCommittedDraft(this.database, retryError, committed);
@@ -1039,7 +1051,7 @@ export class D1DraftRepository extends DraftRepository {
           SET puzzle_id = ?, title = ?, content_hash = ?,
               revision = revision + 1, validation_json = NULL, updated_at = ?,
               document_stale = 1,
-              content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
+              content_json = ?, pedagogy_json = ?, classification_json = ?, lesson_json = ?, provenance_json = ?, administration_json = ?
           WHERE id = ? AND owner_subject = ? AND revision = ?
         `).bind(
           typeof materialized.id === "string" ? materialized.id : null,
@@ -1049,6 +1061,7 @@ export class D1DraftRepository extends DraftRepository {
           domains.content,
           domains.pedagogy,
           domains.classification,
+          domains.lesson,
           domains.provenance,
           domains.administration,
           draftId,
@@ -1152,7 +1165,7 @@ export class D1DraftRepository extends DraftRepository {
           SET puzzle_id = ?, title = ?, content_hash = ?,
               revision = revision + 1, validation_json = NULL, updated_at = ?,
               document_stale = 1,
-              content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
+              content_json = ?, pedagogy_json = ?, classification_json = ?, lesson_json = ?, provenance_json = ?, administration_json = ?
           WHERE id = ? AND owner_subject = ? AND revision = ?
         `).bind(
           typeof materialized.id === "string" ? materialized.id : null,
@@ -1162,6 +1175,7 @@ export class D1DraftRepository extends DraftRepository {
           columns.content,
           columns.pedagogy,
           columns.classification,
+          columns.lesson,
           columns.provenance,
           columns.administration,
           draftId,
@@ -1204,7 +1218,7 @@ export class D1DraftRepository extends DraftRepository {
     }
     const previous = await this.database.prepare(`
       SELECT seq, document,
-        content_json, pedagogy_json, classification_json, provenance_json, administration_json
+        content_json, pedagogy_json, classification_json, lesson_json, provenance_json, administration_json
       FROM puzzle_draft_history
       WHERE draft_id = ?
       ORDER BY seq DESC
@@ -1253,7 +1267,7 @@ export class D1DraftRepository extends DraftRepository {
           SET puzzle_id = ?, title = ?, content_hash = ?,
               revision = revision + 1, validation_json = NULL, updated_at = ?,
               document_stale = 1,
-              content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
+              content_json = ?, pedagogy_json = ?, classification_json = ?, lesson_json = ?, provenance_json = ?, administration_json = ?
           WHERE id = ? AND owner_subject = ? AND revision = ?
         `).bind(
           typeof materialized.id === "string" ? materialized.id : null,
@@ -1263,6 +1277,7 @@ export class D1DraftRepository extends DraftRepository {
           domains.content,
           domains.pedagogy,
           domains.classification,
+          domains.lesson,
           domains.provenance,
           domains.administration,
           draftId,

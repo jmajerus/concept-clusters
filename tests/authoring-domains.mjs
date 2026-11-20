@@ -195,7 +195,7 @@ export async function run() {
   assert.equal(pedagogy.document.provenance, undefined);
   assert.equal(pedagogy.document.bridges[0].fact, undefined);
   assert.equal(pedagogy.document.bridges[0].relationKind, "contrast");
-  assert.equal(pedagogy.document.learningIntroduction.credit, undefined);
+  assert.equal(pedagogy.document.learningIntroduction, undefined);
   for (const field of ["creator", "license", "derivedFrom"]) {
     assert.equal(pedagogy.document[field], undefined);
   }
@@ -371,7 +371,8 @@ export async function run() {
   const legacyDomains = partitionAuthoredDocument(legacyMetadata);
   assert.equal(legacyDomains.content.dateCreated, undefined);
   assert.equal(legacyDomains.pedagogy.dateModified, undefined);
-  assert.equal(legacyDomains.pedagogy.learningIntroduction.revision, undefined);
+  assert.equal(legacyDomains.lesson.learningIntroduction.revision, undefined);
+  assert.equal(legacyDomains.pedagogy.learningIntroduction, undefined);
   assert.equal(assembleAuthoredDocument(legacyDomains).version, undefined);
 
   // Agent domain saves: pedagogy and classification are RFC 7396 merge
@@ -416,15 +417,22 @@ export async function run() {
     "bridges[plain].relationKind"
   ]);
 
-  const lessonEdit = applyAuthoredDomainPatch(document, "pedagogy", {
-    learningIntroduction: { content: { text: "Rewritten" } },
+  const clearedLanguage = applyAuthoredDomainPatch(document, "pedagogy", {
     language: null
+  });
+  assert.equal(clearedLanguage.document.language, undefined);
+  assert.equal(clearedLanguage.document.learningIntroduction.credit, "By Jane Doe");
+  assert.deepEqual(clearedLanguage.cleared, ["language"]);
+
+  const lessonEdit = applyAuthoredDomainPatch(document, "lesson", {
+    learningIntroduction: { content: { text: "Rewritten" } }
   });
   assert.equal(lessonEdit.document.learningIntroduction.content.text, "Rewritten");
   assert.equal(lessonEdit.document.learningIntroduction.requirement, "optional");
   assert.equal(lessonEdit.document.learningIntroduction.credit, "By Jane Doe");
-  assert.equal(lessonEdit.document.language, undefined);
-  assert.deepEqual(lessonEdit.cleared, ["language"]);
+  assert.equal(lessonEdit.document.language, "en");
+  assert.deepEqual(lessonEdit.document.lenses, document.lenses);
+  assert.deepEqual(lessonEdit.cleared, []);
 
   assert.throws(
     () => applyAuthoredDomainPatch(document, "pedagogy", {
@@ -586,4 +594,83 @@ export async function run() {
     () => applyAuthoredDomainPatch(document, "content", { lenses: [] }),
     /lenses belongs to the pedagogy domain/
   );
+  assert.throws(
+    () => applyAuthoredDomainPatch(document, "pedagogy", {
+      learningIntroduction: { content: { text: "Nope" } }
+    }),
+    /learningIntroduction belongs to the lesson domain/
+  );
+
+  const lessonView = projectAuthoredDocument(document, "lesson");
+  assert.equal(lessonView.document.learningIntroduction.credit, undefined);
+  assert.equal(lessonView.document.learningIntroduction.content.text, "Introduction");
+  assert.equal(lessonView.document.lenses, undefined);
+  assert.equal(lessonView.context.lenses, undefined);
+  assert.equal(lessonView.context.category, "science");
+  assert.equal(lessonView.context.clusters[0].fact, "Alpha fact");
+  assert.equal(lessonView.context.clusters[0].color, undefined);
+  assert.equal(lessonView.context.bridges[0].relationKind, "contrast");
+  assert.equal(lessonView.context.bridges[0].direction, undefined);
+  assert.equal(lessonView.context.bridges[0].fact, "Shared fact");
+
+  const storedParts = storedDomainDocuments(document);
+  const legacyLesson = assembleStoredDomainDocuments({
+    content: JSON.parse(storedParts.content),
+    pedagogy: {
+      ...JSON.parse(storedParts.pedagogy),
+      learningIntroduction: document.learningIntroduction
+    },
+    classification: JSON.parse(storedParts.classification),
+    lesson: null
+  });
+  assert.equal(legacyLesson.learningIntroduction.content.text, "Introduction");
+  const lessonColumnWins = assembleStoredDomainDocuments({
+    content: JSON.parse(storedParts.content),
+    pedagogy: {
+      ...JSON.parse(storedParts.pedagogy),
+      learningIntroduction: { requirement: "optional", content: { text: "stale" } }
+    },
+    classification: JSON.parse(storedParts.classification),
+    lesson: JSON.parse(storedParts.lesson)
+  });
+  assert.equal(lessonColumnWins.learningIntroduction.content.text, "Introduction");
+
+  const cited = {
+    ...document,
+    info: {
+      text: "Core information",
+      citations: [{ title: "Board book", author: "A", year: "2020", url: "https://example.test/board" }]
+    }
+  };
+  const quoted = applyAuthoredDomainPatch(cited, "lesson", {
+    info: {
+      citations: [{
+        title: "Quoted book",
+        author: "B",
+        year: "2021",
+        pages: "14",
+        url: "https://example.test/quote"
+      }]
+    }
+  });
+  assert.equal(quoted.document.info.text, "Core information");
+  assert.deepEqual(quoted.document.info.citations.map(entry => entry.title), [
+    "Board book",
+    "Quoted book"
+  ]);
+  const updatedQuote = applyAuthoredDomainPatch(quoted.document, "lesson", {
+    info: { citations: [{ title: "Quoted book", author: "B", year: "2021", pages: "15" }] }
+  });
+  assert.equal(updatedQuote.document.info.citations.length, 2);
+  assert.equal(updatedQuote.document.info.citations[1].pages, "15");
+  assert.equal(updatedQuote.document.info.citations[1].url, "https://example.test/quote");
+  const removedQuote = applyAuthoredDomainPatch(updatedQuote.document, "lesson", {
+    info: { citations: [{ url: "https://example.test/quote", $patch: "delete" }] }
+  });
+  assert.deepEqual(removedQuote.document.info.citations.map(entry => entry.title), ["Board book"]);
+  const replacedCitations = applyAuthoredDomainPatch(quoted.document, "content", {
+    info: { citations: [{ title: "Only this", author: "C", year: "2024" }] }
+  });
+  assert.deepEqual(replacedCitations.document.info.citations.map(entry => entry.title), ["Only this"]);
+  assert.equal(replacedCitations.document.info.text, "Core information");
 }

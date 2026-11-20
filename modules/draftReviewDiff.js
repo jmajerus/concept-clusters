@@ -135,7 +135,7 @@ export function unpublishedChangeDomains(published, draft, {
     if (annotations.length) parts.pedagogy.bridges = annotations;
     else delete parts.pedagogy.bridges;
   }
-  const changed = ["content", "classification", "pedagogy", "administration"]
+  const changed = ["content", "classification", "pedagogy", "lesson", "administration"]
     .filter(domain => {
       const left = before[domain] || {};
       const right = after[domain] || {};

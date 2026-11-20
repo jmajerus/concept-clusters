@@ -52,7 +52,7 @@ export async function run() {
     [{ title: "New title" }, ["content"]],
     [{ category: "Science" }, ["classification"]],
     [{ tags: ["new tag"] }, ["classification"]],
-    [{ learningIntroduction: { markdown: "New lesson" } }, ["pedagogy"]],
+    [{ learningIntroduction: { markdown: "New lesson" } }, ["lesson"]],
     [{ language: "fr" }, ["pedagogy"]],
     // Board settings belong to the layout, wherever an older document keeps them.
     [{ board: { bridgePreconnect: true } }, ["layout"]],

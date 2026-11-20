@@ -14,10 +14,10 @@ import { partitionAuthoredDocument } from "./authoringDomains.js";
 // stamp decision would influence the next one).
 const DEFAULT_EXCLUDE_KEYS = Object.freeze(["provenance"]);
 
-// Only the content and pedagogy write domains are authorship. Classification
-// (the shelf) and administration (settings) can change many fields without
+// Content, pedagogy, and the lesson are authorship. Classification (the
+// shelf) and administration (settings) can change many fields without
 // anyone writing the puzzle, so they never count toward credit.
-export const CREDITED_WRITE_DOMAINS = Object.freeze(["content", "pedagogy"]);
+export const CREDITED_WRITE_DOMAINS = Object.freeze(["content", "pedagogy", "lesson"]);
 
 function creditedParts(document) {
   if (!document || typeof document !== "object") return document;
@@ -25,7 +25,7 @@ function creditedParts(document) {
   return Object.fromEntries(CREDITED_WRITE_DOMAINS.map(domain => [domain, parts[domain]]));
 }
 
-/** The change score over the content and pedagogy domains alone. */
+/** The change score over the content, pedagogy, and lesson domains. */
 export function creditableChangeScore(beforeDocument, afterDocument, options = {}) {
   return computeChangeScore(creditedParts(beforeDocument), creditedParts(afterDocument), options);
 }

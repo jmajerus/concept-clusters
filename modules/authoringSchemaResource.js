@@ -16,7 +16,7 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.32.0";
+export const AUTHORING_MCP_SERVER_VERSION = "1.33.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export { AUTHORING_PHASES };
 export { AUTHORING_PROFILES };
@@ -150,6 +150,17 @@ function phaseDescription(phase, pass) {
     "A field projection for one authoring phase, not a standalone puzzle schema. " +
     "Apply these fields to the current accumulated draft and preserve all other fields. " +
     `Use ${SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI} or phase=complete for final validation.`;
+  if (pass.writeDomain === "lesson") {
+    return (
+      `${base} This pass binds to write domain "lesson": retrieve ` +
+      "get_puzzle_draft with domain=lesson, edit, and save that same domain. " +
+      "That save is a JSON Merge Patch (RFC 7396): send only the fields this " +
+      "pass changes; omitted fields are kept and null removes a field. " +
+      "info.citations merges by url when both entries have one, otherwise by " +
+      "author, title, and year; entries left out stay. A content save still " +
+      "replaces the whole citation list."
+    );
+  }
   if (pass.writeDomain) {
     return (
       `${base} This pass binds to write domain "${pass.writeDomain}": retrieve ` +
@@ -188,6 +199,18 @@ function phaseSchema(phase, profile = null) {
   // Fields owned by other phases remain valid in the accumulated document and
   // must never be removed merely because this focused view omits them.
   schema.additionalProperties = true;
+  if (phase === "lesson") {
+    const citationItems = SIMPLIFIED_PUZZLE_SCHEMA.properties.info?.anyOf
+      ?.find(branch => branch.properties?.citations)?.properties?.citations;
+    schema.properties.info = {
+      type: "object",
+      additionalProperties: false,
+      description:
+        "Bibliography grant. Only citations may be sent. Entries merge by url, " +
+        "or by author, title, and year. Entries left out stay.",
+      properties: citationItems ? { citations: structuredClone(citationItems) } : {}
+    };
+  }
 
   for (const collection of ["clusters", "bridges"]) {
     if (!pass[collection] || !schema.properties[collection]?.items?.properties) continue;
