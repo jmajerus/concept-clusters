@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `66273ed5` · 2026-11-20
+Skill rev `be5f81f4` · 2026-11-20
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. `save_puzzle_draft` writes the working copy only. The human
@@ -218,7 +218,8 @@ them, research the usual way.
   or two short passages that carry the lesson better than paraphrase. Save
   each with quote-mcp `add_quote` (it checks the words against the book)
   before the quote appears in the draft, never from memory, and cite it with
-  `cite_quote`. Put the work in `learningIntroduction.citations`. Present
+  `cite_quote`. The work goes in the puzzle-level `info.citations` (a
+  content-domain save; never a second list on the lesson). Present
   the quote as a `>` blockquote with its attribution.
 - **File a book.** A cited book not yet in Zotero goes through
   `file_zotero_reference`; record the citekey it gets with `pin_citekey`.
