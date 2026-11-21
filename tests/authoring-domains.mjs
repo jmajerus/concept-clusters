@@ -356,6 +356,7 @@ export async function run() {
   assert.deepEqual(assistanceStampScopes(document, { domain: "content" }), ["content"]);
   assert.deepEqual(assistanceStampScopes(document, { domain: "classification" }), ["classification"]);
   assert.deepEqual(assistanceStampScopes(document, { domain: "pedagogy" }), ["pedagogy"]);
+  assert.deepEqual(assistanceStampScopes(document, { domain: "lesson" }), ["lesson"]);
   assert.deepEqual(assistanceStampScopes(document), ["puzzle", "learningIntroduction"]);
 
   const legacyMetadata = {
@@ -696,4 +697,27 @@ export async function run() {
   assert.deepEqual(citedWithoutInfo.document.info, {
     citations: [{ title: "Only source", author: "D", year: "2019" }]
   });
+  const updatedPrintOnly = applyAuthoredDomainPatch(citedWithoutInfo.document, "lesson", {
+    info: { citations: [{ title: "Only source", author: "D", year: "2019", pages: "22" }] }
+  });
+  assert.equal(updatedPrintOnly.document.info.citations[0].pages, "22");
+  assert.deepEqual(updatedPrintOnly.cleared, []);
+  const deletedPrintOnly = applyAuthoredDomainPatch(updatedPrintOnly.document, "lesson", {
+    info: { citations: [{ title: "Only source", author: "D", year: "2019", $patch: "delete" }] }
+  });
+  assert.deepEqual(deletedPrintOnly.cleared, ["info"]);
+
+  const beforeLessonCols = storedDomainDocuments(cited);
+  const afterLessonCols = storedDomainDocuments(quoted.document);
+  const savedLessonCols = domainColumnsForSave(beforeLessonCols, "lesson", afterLessonCols);
+  assert.deepEqual(
+    JSON.parse(savedLessonCols.content).info.citations.map(entry => entry.title),
+    ["Board book", "Quoted book"]
+  );
+  const proseOnlyNext = storedDomainDocuments({
+    ...cited,
+    learningIntroduction: { requirement: "optional", content: { text: "Updated prose" } }
+  });
+  const proseOnlyCols = domainColumnsForSave(beforeLessonCols, "lesson", proseOnlyNext);
+  assert.equal(proseOnlyCols.content, beforeLessonCols.content);
 }

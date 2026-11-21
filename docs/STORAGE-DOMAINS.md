@@ -1,9 +1,9 @@
 # Storage Domains: Write-Domain Scoping in Concept Clusters
 
-*Status: implemented. `content`, `classification`, and `pedagogy` are the
-focused agent-write domains; the complete authored-content form remains
-available for compatibility, while protected metadata is hidden and preserved.
-Pass-level writes that patch a domain instead of replacing it remain future work.*
+*Status: implemented. `content`, `classification`, `pedagogy`, and `lesson` are
+the focused agent-write domains; focused saves merge-patch the selected domain,
+while the complete authored-content form remains available for compatibility
+and protected metadata is hidden and preserved.*
 
 This document describes the design and the reader-visible behavior of the
 Concept Clusters authoring boundary. The repository-level migration and
@@ -56,8 +56,9 @@ Do not add a writer for `board`: a new play setting the layout page offers is a 
 The agent-write domains are broad enough to be useful authoring surfaces.
 Content includes the core of a bridge and its cluster membership. Classification
 is the shelf: primary category, membership, subcategory placement, search tags,
-and optional level. Pedagogy includes bridge relationship annotations, the
-lesson, related puzzles, and language. Provenance is a
+and optional level. Pedagogy includes bridge relationship annotations, lenses,
+related puzzles, and language. Lesson holds the learning introduction and merges
+bibliography entries into `info.citations`. Provenance is a
 compact document-level record, while system state belongs to the repository
 envelope rather than to authored JSON.
 
@@ -129,14 +130,19 @@ than by exception.
 
 ## What is implemented
 
-An MCP caller may request `content`, `classification`, or `pedagogy` when reading or saving a
-puzzle draft. A focused read contains only the selected writable projection.
-Content and pedagogy responses include the classification fields as read-only
-context. A classification response includes id and title as read-only context,
-and a pedagogy response also includes the content projection. A focused
-save replaces the selected projection, preserves the protected
-domains, and lets the infrastructure reassemble a complete document for
-validation, publication, rendering, and Freeze.
+An MCP caller may request `content`, `classification`, `pedagogy`, or `lesson`
+when reading or saving a puzzle draft. A focused read contains only the
+selected writable projection. Content and pedagogy responses include the
+classification fields as read-only context. A classification response includes
+id and title as read-only context, and a pedagogy response also includes the
+content projection. A lesson response returns `learningIntroduction` (and
+existing `info.citations`), with the subject as read-only context: id, title,
+`puzzleKind`, primary category, each cluster's name, fact, and terms, and each
+bridge's term, fact, and `relationKind`; lenses are withheld so the prose
+teaches the subject rather than walking through the mechanics. A focused save
+merge-patches the selected domain, preserves the sibling and protected domains,
+and lets the infrastructure reassemble a complete document for validation,
+publication, rendering, and Freeze.
 
 The `complete` path remains available for existing clients and workflows, but
 it does not expose or accept protected attribution, legacy lesson credit, or
@@ -182,8 +188,9 @@ one field inside content replaces `content_json`. On a focused save of a
 draft whose domain columns are already split, the other authored columns
 keep the stored text. `provenance_json` and `administration_json` are written
 again from the assembled document, so a content save cannot drop them. The
-first focused save on a row that still lacks `classification_json`, or that
-still keeps shelf fields inside content or pedagogy, rewrites all three
+first focused save on a row that still lacks `classification_json`, that still
+keeps shelf fields inside content or pedagogy, or that still keeps
+`learningIntroduction` inside pedagogy or content, rewrites all four
 authored columns so the split is complete. The materialized `document`
 column is left as it was and `document_stale` is set. A complete save
 rewrites `document` and every domain column and clears the stale flag.
@@ -286,7 +293,7 @@ Two counters and a few clocks are involved:
 
 | Domain | Writes land on | Working-copy `revision` | Undo snapshot | Reaches players | Why it differs |
 |---|---|---|---|---|---|
-| `content`, `classification`, `pedagogy` | Working copy, as a merge patch on one domain column | +1 | Yes | Publish | Baseline |
+| `content`, `classification`, `pedagogy`, `lesson` | Working copy, as a merge patch on one domain column (`lesson` also updates `content_json` when `info.citations` changes) | +1 | Yes | Publish | Baseline |
 | `provenance` | Working copy, written by the save it describes (MCP stamps, or the edit page's Save working copy) | +1, as part of that save | Yes | Publish | It records who made a save, so it never saves on its own |
 | `layout` (per-mode layouts and board settings) | Working copy, `layout_json` | Unchanged | No | Publish | Presentation, not content, and edited in a second tab. Bumping the revision would make the edit page's next save fail its `expected_revision` check, and drag-and-save cycles are not content history. `updated_at` guards concurrent layout saves instead |
 | `administration` (legacy `board`) | Nothing writes it | – | – | Lifted into the layout at publish | Read-only compatibility for older puzzles |
@@ -354,17 +361,17 @@ must never cause an incomplete agent response to be mistaken for a complete
 document.
 
 The current implementation provides focused
-`content`, `classification`, and `pedagogy` projections, phase-specific schema guidance, and a
+`content`, `classification`, `pedagogy`, and `lesson` projections, phase-specific schema guidance, and a
 shared [field-ownership map](dev-briefs/authoring-domain-scoping-implementation.md#projection-and-sub-schema-refinement)
 (`modules/authoringFieldOwnership.js`) that both domain partition and phase
 schemas consume. Phase schemas bind to a write domain when they are a pure
 subset (`core` → content; `classification` → classification;
-`pedagogy` / `publication` → pedagogy); `review`
+`pedagogy` / `publication` → pedagogy; `lesson` → lesson); `review`
 remains a cross-domain inspection view.
 
 Several passes share the pedagogy domain: the pedagogy pass writes lenses and
-the learning introduction, the review pass writes bridge annotations, and the
-publication pass writes `relatedPuzzles` and `language`. Every focused agent
+bridge annotations, the review pass checks and refines bridge annotations, and
+the publication pass writes `relatedPuzzles` and `language`. Every focused agent
 save is therefore a
 [JSON Merge Patch (RFC 7396)](https://www.rfc-editor.org/rfc/rfc7396), with
 pedagogy `bridges` merged by bridge `id` or `term` (the merge-key idea from
@@ -378,7 +385,12 @@ using Kubernetes strategic-merge-patch list semantics: an item left out is
 kept, `"$patch": "delete"` removes one, and a `"$patch": "replace"` entry
 replaces the list. Pedagogy `bridges` is an ordinary keyed list under this
 rule, not an exception. Lists of plain values and ordered reference lists
-(terms, tags, categories, citations, links) replace whole. Editing one item is
+(terms, tags, categories, citations, links) replace whole, with one
+cross-domain exception: `info.citations` remains a single puzzle-level
+bibliography on `content`, replaces whole on a content save, and merges by
+entry identity on a lesson save (`url` when both entries have one, otherwise
+`author`, `title`, and `year`) so citing a quote or cluster source during
+lesson writing preserves existing entries. Editing one item is
 far more common than deleting one, so this trades a wiped board for an item
 that survives by mistake, which the save response flags in `kept`. Removals
 are listed in `cleared`.
@@ -497,14 +509,25 @@ discarded; an automatic pass can give every board one without overriding an
 author's; and a board with a saved layout finishes immediately instead of
 after a live search.
 
+**Lesson (November 2026).** The learning introduction lived inside the
+pedagogy projection alongside lenses, bridge annotations, and related puzzles.
+Revising the prose meant carrying the lens apparatus in context, where lens
+prompts could pull the introduction toward a gameplay walkthrough, while citing
+a quoted work required a second content-domain save to update `info.citations`.
+Moving `learningIntroduction` into `lesson_json` gives the prose pass
+subject-only context with lenses withheld, and lets a lesson save merge
+bibliography entries into `info.citations` without owning the rest of content
+or introducing a second citation list.
+
 ## The next boundary
 
 Classification is the shelf: category, membership, subcategory, search tags,
-and optional level. Those marks can change without rewriting the board or the
-lesson. Related puzzles and language stay in pedagogy. A related-puzzle entry
-needs a reason written against the lesson, and language describes the prose
-of this document. Further separation may be worthwhile where a field has a
-distinct owner or where a different model needs a different context.
+and optional level. Lesson is the introductory prose. Both change without
+rewriting the board or the lenses. Related puzzles and language stay in
+pedagogy: a related-puzzle entry needs a reason written against what the puzzle
+teaches, and language describes the prose of the document. Further separation
+may be worthwhile where a field has a distinct owner or where a pass needs a
+genuinely different context and toolset.
 
 The two kinds of domain carry different costs. Every additional agent-write
 domain is another projection an agent may have to read, choose between, and

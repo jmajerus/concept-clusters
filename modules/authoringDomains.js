@@ -532,6 +532,27 @@ export function projectionHoldsLegacyShelfFields(value) {
   return LEGACY_PEDAGOGY_SHELF_FIELDS.some(key => hasOwn(parsed, key));
 }
 
+function parseStoredObject(value) {
+  if (value == null || value === "") return null;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return isObject(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+  return isObject(value) ? value : null;
+}
+
+function storedCitations(contentValue) {
+  const info = parseStoredObject(contentValue)?.info;
+  if (!isObject(info) || !Array.isArray(info.citations) || !info.citations.length) {
+    return null;
+  }
+  return info.citations;
+}
+
 /**
  * Choose which stored domain columns a focused save should write.
  * A missing classification column, or tags/level still stored on a sibling
@@ -550,8 +571,12 @@ export function domainColumnsForSave(current, domain, next) {
   const needsLessonMove = projectionHoldsLearningIntroduction(current?.pedagogy)
     || projectionHoldsLearningIntroduction(current?.content);
   const rewriteAll = needsSplit || needsShelfMove || needsLessonMove;
+  // info.citations stays stored on content_json; a lesson save that changes
+  // the bibliography must persist content_json alongside lesson_json.
+  const lessonChangedCitations = domain === "lesson" &&
+    !sameStoredDocument(storedCitations(current?.content), storedCitations(next?.content));
   return {
-    content: domain === "content" || current?.content == null || rewriteAll
+    content: domain === "content" || lessonChangedCitations || current?.content == null || rewriteAll
       ? next.content
       : current.content,
     pedagogy: domain === "pedagogy" || current?.pedagogy == null || rewriteAll
@@ -1110,16 +1135,23 @@ function itemMatches(left, right) {
   );
 }
 
+function citationPathKey(item) {
+  return normalizedCitationText(item?.url) || normalizedCitationText(item?.title) || null;
+}
+
 function removedPaths(before, after, prefix = "") {
   const removed = [];
   if (Array.isArray(before)) {
     const next = Array.isArray(after) ? after : [];
+    const isCitations = prefix === "info.citations";
     before.forEach((item, index) => {
-      const key = itemKey(item);
+      const key = isCitations ? citationPathKey(item) : itemKey(item);
       const path = `${prefix}[${key ?? index}]`;
-      const match = key === null
-        ? next.find(candidate => sameStoredDocument(candidate, item))
-        : next.find(candidate => itemMatches(item, candidate));
+      const match = isCitations && isObject(item)
+        ? next.find(candidate => isObject(candidate) && citationsMatch(item, candidate))
+        : key === null
+          ? next.find(candidate => sameStoredDocument(candidate, item))
+          : next.find(candidate => itemMatches(item, candidate));
       if (match === undefined) removed.push(path);
       else if (isObject(item)) removed.push(...removedPaths(item, match, path));
     });
