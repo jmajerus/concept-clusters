@@ -104,6 +104,18 @@ export async function run() {
   assert.equal(valid.coverage.lenses, 1);
   assert.match(valid.stopGate, /Integrated profile cycle OK/);
 
+  // A plain-string info value is valid shorthand for { text } (schema and
+  // play both accept it), so the checker counts it as a note.
+  const stringNotes = vocabularyPuzzle();
+  stringNotes.clusters[0].termInfo = {
+    innate: "Present from birth or arising naturally.",
+    intrinsic: "Belonging to a thing's essential nature.",
+    inherent: "Existing as a permanent or essential part."
+  };
+  const stringNoted = runIntegrated(stringNotes);
+  assert.equal(stringNoted.ok, true, JSON.stringify(stringNoted.blocking));
+  assert.equal(stringNoted.coverage.termsWithNotes, 3);
+
   const trivia = runIntegrated(triviaPuzzle());
   assert.equal(trivia.ok, true, JSON.stringify(trivia.blocking));
   assert.equal(trivia.coverage.clusters, 2);

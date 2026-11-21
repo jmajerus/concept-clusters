@@ -1002,7 +1002,7 @@ export function createAuthoringMcpServer({
   server.registerTool("probe_mcp_client", {
     title: "Probe MCP client identity",
     description:
-      "Return and log the calling MCP host identity from the request call frame (clientInfo / _meta). Call once per client when calibrating authorship attribution; pass label=cursor, codex, claude-code, gemini-cli, or claude-web.",
+      "Return and log the calling MCP host identity from the request call frame (clientInfo / _meta). Call once per client when calibrating authorship attribution; label is any short client name you choose (for example cursor, codex, claude-code, gemini-cli, claude-web, kilo-code, or zcode); attribution reads the call frame, not the label.",
     inputSchema: z.object({
       label: z.string().min(1).max(100).optional()
     }),
@@ -1295,10 +1295,18 @@ export function createAuthoringMcpServer({
 
   server.registerTool("list_categories", {
     title: "List categories",
-    description: "List the subject taxonomy from D1 category-editor working copies and published rows, with registration state, metadata, subcategories, and puzzle counts, plus the domains a category may name. A published D1 category document is registered even when no puzzle references it yet. Git, including puzzles/categories.js, is not a runtime fallback.",
-    inputSchema: z.object({}),
+    description: "List the subject taxonomy from D1 category-editor working copies and published rows. Without domain: " +
+      "a compact index of every category (name, slug, domain, registration, puzzle counts, subcategory ids) plus the " +
+      "domains, enough to choose a category. needsCopy and subcategoriesNeedingCopy mark subjects with no blurb yet. " +
+      "With domain: that domain's categories in full (blurbs, links, and per-subcategory titles and counts). " +
+      "get_category returns one category and its document. A published D1 category document is registered even when " +
+      "no puzzle references it yet. Git, including puzzles/categories.js, is not a runtime fallback.",
+    inputSchema: z.object({
+      domain: z.string().min(1).optional()
+        .describe("Domain id or title; returns that domain's categories in full.")
+    }),
     annotations: READ_ONLY
-  }, tracked("list_categories", safe(async () => {
+  }, tracked("list_categories", safe(async ({ domain = null } = {}) => {
     const taxonomy = await taxonomyContext();
     const categories = listCategorySummaries({
       contentService: null,
@@ -1312,9 +1320,36 @@ export function createAuthoringMcpServer({
       registrationMode: CATEGORY_REGISTRATION_MODES.PUBLISHED_DOCUMENT
     });
     const domains = Object.entries(DOMAINS)
-      .map(([id, domain]) => ({ id, title: domain.title }))
+      .map(([id, entry]) => ({ id, title: entry.title }))
       .sort((left, right) => left.title.localeCompare(right.title));
-    return success(`Found ${categories.length} categories in ${domains.length} domains.`, { categories, domains });
+    if (domain) {
+      const wanted = domain.trim().toLowerCase();
+      const match = domains.find(entry =>
+        entry.id === wanted || entry.title.toLowerCase() === wanted);
+      if (!match) {
+        throw new Error(`Unknown domain: ${domain}. Domains: ${domains.map(entry => entry.id).join(", ")}.`);
+      }
+      const inDomain = categories.filter(category => category.domain === match.id);
+      return success(
+        `Found ${inDomain.length} categories in ${match.title}.`,
+        { domain: match, categories: inDomain }
+      );
+    }
+    const hasText = info => typeof info === "string"
+      ? !!info.trim() : !!(typeof info?.text === "string" && info.text.trim());
+    const compact = categories.map(({ info, subcategories = [], ...category }) => {
+      const missing = subcategories.filter(sub => !hasText(sub.info)).map(sub => sub.id);
+      return {
+        ...category,
+        subcategories: subcategories.map(sub => sub.id),
+        ...(hasText(info) ? {} : { needsCopy: true }),
+        ...(missing.length ? { subcategoriesNeedingCopy: missing } : {})
+      };
+    });
+    return success(
+      `Found ${categories.length} categories in ${domains.length} domains. Pass domain for full detail.`,
+      { categories: compact, domains }
+    );
   })));
 
   server.registerTool("get_category", {
@@ -2639,7 +2674,7 @@ export function createAuthoringMcpServer({
       "The patch merges: omit a field to keep it, send null to remove it. Subcategory keys must be existing subcategory ids. " +
       "A category's copy is saved to the D1 working copy; set publish_to_authoring=true to also publish it onto the current published row, live on the player. " +
       "A domain has no working copy, so domain copy needs publish_to_authoring=true. " +
-      "Categories, subcategories, and domains in list_categories and get_category without info text are the ones that need copy.",
+      "list_categories marks categories and subcategories with no blurb (needsCopy, subcategoriesNeedingCopy); get_category and list_categories with domain show the current copy.",
     inputSchema: z.object({
       category: z.string().min(1).optional().describe("Category id or title."),
       domain: z.string().min(1).optional().describe("Domain id, instead of category."),

@@ -113,7 +113,7 @@ export async function run() {
       assert.equal(missed.wrote, true);
       assert.equal(missed.unpublished, true);
       assert.ok(missed.where.includes(`Wrote the local review log at ${missed.path}`));
-      assert.match(missed.where, /draft repository did not accept the review/);
+      assert.match(missed.where, /no published row yet, so the review is kept only in the local log/);
     } finally {
       if (previous === undefined) delete process.env.AUTHORING_DATA_DIR;
       else process.env.AUTHORING_DATA_DIR = previous;
