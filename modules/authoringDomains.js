@@ -831,12 +831,11 @@ export function projectAuthoredDocument(document, domain = "complete", {
       context: lessonReadContext(domains)
     };
   }
-  const assembledDomains = domainCitations ? partitionAuthoredDocument(document) : domains;
   return {
     domain,
     document: publicPedagogyDomain(domains.pedagogy),
     context: {
-      ...publicDomain(assembledDomains.content),
+      ...publicDomain(domains.content),
       ...publicDomain(domains.classification)
     }
   };
