@@ -133,4 +133,31 @@ export async function run() {
     text: "Photons are packets of light."
   });
   assert.equal(withLesson.learningIntroduction.content.text, "Photons are packets of light.");
+
+  const withArticleLesson = engine.setLearningIntroduction(withLens, {
+    requirement: "required",
+    title: "Light",
+    summary: "Short summary.",
+    text: "",
+    articleUrl: "https://essays.example.org/light/",
+    articleTitle: "Light as Quanta",
+    articleSummary: "Full essay.",
+    articleEstimatedMinutes: 14
+  });
+  assert.equal(withArticleLesson.learningIntroduction.requirement, "recommended");
+  assert.equal(withArticleLesson.learningIntroduction.content, undefined);
+  assert.deepEqual(withArticleLesson.learningIntroduction.article, {
+    url: "https://essays.example.org/light/",
+    title: "Light as Quanta",
+    summary: "Full essay.",
+    estimatedMinutes: 14
+  });
+  const clearedMinutes = engine.setLearningIntroduction(withArticleLesson, {
+    requirement: "recommended",
+    title: "Light",
+    summary: "Short summary.",
+    text: "",
+    articleEstimatedMinutes: null
+  });
+  assert.equal(clearedMinutes.learningIntroduction.article.estimatedMinutes, undefined);
 }

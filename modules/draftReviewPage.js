@@ -25,6 +25,7 @@ import {
   WORKING_COPY_FORM_ID
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
+import { isHttpArticleUrl } from "./learningIntroduction.js";
 import { diffPublishedDraft } from "./draftReviewDiff.js";
 import {
   formatReviewValue,
@@ -2796,10 +2797,7 @@ function renderCreditsSection({ edit, intro, document, diff, provenanceSettings 
         edit, section: "learning", field: "content.text",
         value: intro.content?.text || "", change: diff?.fields?.learningIntroduction, label: "introduction"
       })}
-      ${intro.article?.url
-        ? `<p class="fact"><span class="field-label">article:</span> <a href="${escapeHtml(intro.article.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(intro.article.title || intro.article.url)} ↗</a>${intro.article.estimatedMinutes ? ` ${badge(`${intro.article.estimatedMinutes} min`)}` : ""}</p>
-           ${intro.article.summary ? `<p class="fact"><span class="field-label">article summary:</span> ${escapeHtml(intro.article.summary)}</p>` : ""}`
-        : ""}
+      ${renderLearningArticlePreview(intro.article)}
       ${renderCopyField({
         edit, section: "learning", field: "article.url",
         value: intro.article?.url || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "article URL"
@@ -2845,6 +2843,32 @@ function renderCreditsSection({ edit, intro, document, diff, provenanceSettings 
 function renderLearningReferences(intro) {
   const links = renderLinkList(authoredLearningLinks(intro));
   return labeledLine("links", links || emptyValue());
+}
+
+function safeHttpHref(raw) {
+  if (!isHttpArticleUrl(raw)) return null;
+  try {
+    return new URL(raw.trim()).href;
+  } catch {
+    return null;
+  }
+}
+
+function renderLearningArticlePreview(article) {
+  if (!article || typeof article !== "object" || Array.isArray(article) || !article.url) {
+    return "";
+  }
+  const rawUrl = String(article.url);
+  const safeHref = safeHttpHref(rawUrl);
+  const label = escapeHtml(article.title || safeHref || rawUrl);
+  const targetHtml = safeHref
+    ? `<a href="${escapeHtml(safeHref)}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`
+    : `<span>${escapeHtml(rawUrl)}</span>`;
+  const minutesBadge = article.estimatedMinutes ? ` ${badge(`${article.estimatedMinutes} min`)}` : "";
+  const summaryHtml = article.summary
+    ? `\n      <p class="fact"><span class="field-label">article summary:</span> ${escapeHtml(article.summary)}</p>`
+    : "";
+  return `<p class="fact"><span class="field-label">article:</span> ${targetHtml}${minutesBadge}</p>${summaryHtml}`;
 }
 
 function renderDiffSummary(diff, {

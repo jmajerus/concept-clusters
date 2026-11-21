@@ -1786,4 +1786,39 @@ export async function run() {
   const bridgeSection = bridgePage.match(/<section class="bridge[\s\S]*?<\/section>/)?.[0] || "";
   assert.match(bridgeSection, /local link/);
   assert.match(bridgeSection, /field" value="info.links"/);
+
+  // Linked article URLs on /admin/drafts only emit an <a> anchor for http(s)
+  // schemes; invalid intermediate values (e.g. javascript:) render as plain text.
+  const safeArticlePage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      learningIntroduction: {
+        requirement: "recommended",
+        article: {
+          url: "https://essays.example.org/safe-post/",
+          title: "Safe Essay",
+          estimatedMinutes: 11
+        }
+      }
+    }
+  });
+  assert.match(safeArticlePage, /<a href="https:\/\/essays\.example\.org\/safe-post\/"/);
+  assert.match(safeArticlePage, /11 min/);
+
+  const unsafeArticlePage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      learningIntroduction: {
+        requirement: "recommended",
+        article: {
+          url: "javascript:alert(1)",
+          title: "Unsafe Scheme"
+        }
+      }
+    }
+  });
+  assert.doesNotMatch(unsafeArticlePage, /href="javascript:/i);
+  assert.match(unsafeArticlePage, /<span>javascript:alert\(1\)<\/span>/);
 }

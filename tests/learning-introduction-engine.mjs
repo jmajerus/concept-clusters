@@ -227,7 +227,15 @@ export async function run() {
   assert.equal(learningIntroductionGate(normalizedStandalone, null), true);
   assert.equal(learningIntroductionGate(normalizedStandalone, "skipped"), false);
   assert.equal(learningIntroductionGate(normalizedStandalone, "read"), false);
-  // Even if hand-edited to "required", an external-only article never hard-locks.
+  // Even if hand-edited to "required", an external-only article never gates on
+  // either the initial null status or "skipped".
+  assert.equal(
+    learningIntroductionGate({
+      requirement: "required",
+      article: { url: "https://essays.example.org/signals-and-causes/" }
+    }, null),
+    false
+  );
   assert.equal(
     learningIntroductionGate({
       requirement: "required",

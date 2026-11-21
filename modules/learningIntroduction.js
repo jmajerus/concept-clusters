@@ -117,10 +117,10 @@ export function learningIntroductionGate(introduction, status) {
   if (!introduction) return false;
   if (introduction.requirement === "required") {
     // External-only article lessons open in another tab and cannot verify
-    // completion; never let one hard-lock the board even if hand-edited.
+    // completion; never let a hand-edited "required" article lock the board.
     const articleOnly = !hasEmbeddedLearningContent(introduction) &&
       Boolean(normalizedLearningArticle(introduction));
-    if (articleOnly) return !status;
+    if (articleOnly) return false;
     return status !== "read";
   }
   if (introduction.requirement === "recommended") return !status;
