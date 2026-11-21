@@ -139,6 +139,10 @@ function visitDocumentHrefs(document, onHref) {
     addInfo(`bridge "${bridge?.term || bridge?.id || "bridge"}"`, bridge?.info);
   }
   if (document.learningIntroduction) {
+    const articleUrl = typeof document.learningIntroduction.article?.url === "string"
+      ? document.learningIntroduction.article.url.trim()
+      : "";
+    if (articleUrl) onHref("learningIntroduction.article", articleUrl);
     addLinks("learningIntroduction", authoredLearningLinks(document.learningIntroduction));
     addCitations("learningIntroduction", document.learningIntroduction);
   }

@@ -472,12 +472,17 @@ export function createAuthoringStudio({
     body += `<h3>Learning introduction</h3>
       <label>requirement
         <select data-field="lesson-requirement">
-          <option value="required"${intro.requirement !== "optional" ? " selected" : ""}>required</option>
+          <option value="required"${intro.requirement === "required" || (!intro.requirement && !intro.article) ? " selected" : ""}>required</option>
+          <option value="recommended"${intro.requirement === "recommended" || (!intro.requirement && intro.article) ? " selected" : ""}>recommended</option>
           <option value="optional"${intro.requirement === "optional" ? " selected" : ""}>optional</option>
         </select>
       </label>
       ${field("lesson-title", intro.title || "", { label: "title" })}
       ${field("lesson-summary", intro.summary || "", { label: "summary" })}
+      ${field("lesson-article-url", intro.article?.url || "", { label: "article URL (Ghost / companion essay)" })}
+      ${field("lesson-article-title", intro.article?.title || "", { label: "article title" })}
+      ${field("lesson-article-summary", intro.article?.summary || "", { label: "article summary" })}
+      ${field("lesson-article-minutes", intro.article?.estimatedMinutes !== undefined ? String(intro.article.estimatedMinutes) : "", { label: "article minutes" })}
       <label>markdown
         <textarea data-field="lesson-text" class="authoring-markdown" spellcheck="true">${escapeHtml(intro.content?.text || "")}</textarea>
       </label>
@@ -673,14 +678,24 @@ export function createAuthoringStudio({
       link.click();
       URL.revokeObjectURL(url);
     } else if (action === "save-lesson") {
+      const rawMinutes = valueOf("lesson-article-minutes").trim();
+      const parsedMinutes = /^\d+$/.test(rawMinutes) ? Number.parseInt(rawMinutes, 10) : null;
       mutate(current => setLearningIntroduction(current, {
-        requirement: valueOf("lesson-requirement") || "required",
+        requirement: valueOf("lesson-requirement") || "recommended",
         title: valueOf("lesson-title"),
         summary: valueOf("lesson-summary"),
-        text: valueOf("lesson-text")
+        text: valueOf("lesson-text"),
+        articleUrl: valueOf("lesson-article-url"),
+        articleTitle: valueOf("lesson-article-title"),
+        articleSummary: valueOf("lesson-article-summary"),
+        articleEstimatedMinutes: parsedMinutes
       }), { message: "Lesson saved." });
     } else if (action === "clear-lesson") {
-      mutate(current => setLearningIntroduction(current, { text: "" }), {
+      mutate(current => setLearningIntroduction(current, {
+        text: "",
+        articleUrl: "",
+        articleEstimatedMinutes: null
+      }), {
         message: "Lesson cleared."
       });
     } else if (action === "toggle-seed" && described.word) {

@@ -29,8 +29,10 @@ import {
 import { stripSystemAuthoredMetadata } from "./authoringDomains.js";
 import {
   decodeAuthoredEscapedNewlines,
+  isHttpArticleUrl,
   LEARNING_MEDIA_TYPE,
-  LEARNING_REQUIREMENTS
+  LEARNING_REQUIREMENTS,
+  MAX_LEARNING_ARTICLE_MINUTES
 } from "./learningIntroduction.js";
 import { puzzleToJsonLd } from "./puzzleJsonLd.js";
 import {
@@ -231,7 +233,27 @@ const RelatedPuzzlesSchema = z.object({
 // Matches modules/learningIntroductionValidationCore.js. Only `content.text`
 // is offered here (not `content.src`) -- hosted drafts must embed Markdown
 // directly regardless (requireEmbedded: true), and a chatbot has no
-// filesystem to point `src` at in the first place.
+// filesystem to point `src` at in the first place. A lesson may embed
+// `content`, link a full external essay via `article` (for example a Ghost
+// article rendered through the full IASP pipeline), or provide both (short
+// embedded orientation plus the expanded essay).
+const LearningArticleSchema = z.object({
+  url: z.string().trim().min(1).refine(isHttpArticleUrl, {
+    message: "must be a full http(s) URL"
+  }).describe(
+    "Full http(s) URL of the linked essay (for example a published Ghost article)."
+  ),
+  title: z.string().trim().min(1).optional().describe(
+    "Title of the linked essay when distinct from learningIntroduction.title."
+  ),
+  summary: z.string().trim().min(1).optional().describe(
+    "Short note on what the full essay covers."
+  ),
+  estimatedMinutes: z.number().int().min(1).max(MAX_LEARNING_ARTICLE_MINUTES).optional().describe(
+    "Estimated reading time in minutes for the full essay."
+  )
+}).strict();
+
 const LearningIntroductionSchema = z.object({
   requirement: z.enum([...LEARNING_REQUIREMENTS]),
   title: z.string().min(1).optional(),
@@ -242,11 +264,30 @@ const LearningIntroductionSchema = z.object({
     .describe(LESSON_CREDIT_DESCRIPTION),
   content: z.object({
     text: z.string().min(1).describe(LEARNING_MARKDOWN_DESCRIPTION)
-  }).strict(),
+  }).strict().optional(),
+  article: LearningArticleSchema.optional(),
   links: z.array(LinkEntrySchema).min(1).optional(),
   // Bibliographic references live on puzzle info.citations only. Leftover
   // learningIntroduction.citations still fold up via hoistDocumentCitations.
-}).strict();
+}).strict().superRefine((intro, context) => {
+  const hasContent = intro.content !== undefined;
+  const hasArticle = intro.article !== undefined;
+  if (!hasContent && !hasArticle) {
+    context.addIssue({
+      code: "custom",
+      message: "must provide content, article, or both"
+    });
+    return;
+  }
+  if (!hasContent && hasArticle && intro.requirement === "required") {
+    context.addIssue({
+      code: "custom",
+      path: ["requirement"],
+      message:
+        'cannot be "required" when content is omitted; external article lessons must be "optional" or "recommended"'
+    });
+  }
+});
 
 const ClusterSchema = z.object({
   id: SlugSchema.optional(), // Derived from name when omitted -- see puzzleFromSimplified.
@@ -682,10 +723,23 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
       ? { estimatedMinutes: input.learningIntroduction.estimatedMinutes } : {}),
     ...(input.learningIntroduction.credit
       ? { credit: input.learningIntroduction.credit.trim() } : {}),
-    content: {
-      mediaType: LEARNING_MEDIA_TYPE,
-      text: decodeAuthoredEscapedNewlines(input.learningIntroduction.content.text)
-    },
+    ...(input.learningIntroduction.content ? {
+      content: {
+        mediaType: LEARNING_MEDIA_TYPE,
+        text: decodeAuthoredEscapedNewlines(input.learningIntroduction.content.text)
+      }
+    } : {}),
+    ...(input.learningIntroduction.article ? {
+      article: {
+        url: input.learningIntroduction.article.url.trim(),
+        ...(input.learningIntroduction.article.title
+          ? { title: input.learningIntroduction.article.title.trim() } : {}),
+        ...(input.learningIntroduction.article.summary
+          ? { summary: input.learningIntroduction.article.summary.trim() } : {}),
+        ...(input.learningIntroduction.article.estimatedMinutes !== undefined
+          ? { estimatedMinutes: input.learningIntroduction.article.estimatedMinutes } : {})
+      }
+    } : {}),
     ...(input.learningIntroduction.links ? { links: clone(input.learningIntroduction.links) } : {})
   } : undefined;
 

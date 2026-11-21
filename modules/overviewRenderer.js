@@ -13,6 +13,7 @@ import {
 } from "../puzzles/categories.js";
 import { DOMAINS } from "../puzzles/domains.js";
 import { loadPlayerSession } from "./playerSessionStore.js";
+import { normalizedLearningArticle } from "./learningIntroduction.js";
 import { computePuzzleStats } from "./puzzleStats.js";
 import { formatCitation, linkLabel, normalizeInfo, searchLink } from "./termInfo.js";
 import {
@@ -1674,6 +1675,46 @@ export function createOverviewRenderer({
 
   function showRelatedPuzzles(puzzle) {
     relatedPuzzlesEl.innerHTML = "";
+    const article = normalizedLearningArticle(puzzle?.learningIntroduction);
+    if (article) {
+      const card = document.createElement("a");
+      card.className = "related-card companion-article-card";
+      card.href = article.url;
+      card.target = "_blank";
+      card.rel = "noopener noreferrer";
+
+      const main = document.createElement("span");
+      main.className = "card-main";
+      const titleLine = document.createElement("span");
+      titleLine.className = "card-title-line";
+      const strong = document.createElement("strong");
+      strong.textContent = article.title || puzzle.learningIntroduction?.title || "Companion essay";
+      titleLine.appendChild(strong);
+      const badge = document.createElement("span");
+      badge.className = "puzzle-badge badge-learning";
+      badge.textContent = article.estimatedMinutes
+        ? `Essay · ${article.estimatedMinutes} min`
+        : "Essay";
+      titleLine.appendChild(badge);
+      main.appendChild(titleLine);
+
+      const detailText = article.summary ||
+        puzzle.learningIntroduction?.summary ||
+        "Read the full companion essay for this puzzle.";
+      if (detailText) {
+        const detail = document.createElement("span");
+        detail.className = "card-detail";
+        detail.textContent = detailText;
+        main.appendChild(detail);
+      }
+
+      const action = document.createElement("span");
+      action.className = "card-play";
+      action.textContent = "Read essay ↗";
+      card.append(main, action);
+      relatedPuzzlesEl.appendChild(card);
+    }
+
     const related = puzzle.relatedPuzzles?.entries || [];
     if (!related.length) return;
     const heading = document.createElement("div");

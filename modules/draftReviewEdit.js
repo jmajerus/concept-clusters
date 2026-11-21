@@ -42,7 +42,11 @@ const FIELDS_BY_SECTION = {
   term: new Set(["info.text", "info.links"]),
   bridge: new Set(["term", "fact", "info.text", "info.links"]),
   lens: new Set(["prompt", "explanation", "reason"]),
-  learning: new Set(["title", "summary", "content.text", "credit", "links"]),
+  learning: new Set([
+    "title", "summary", "content.text",
+    "article.url", "article.title", "article.summary", "article.estimatedMinutes",
+    "credit", "links"
+  ]),
   provenance: new Set(["collaboration", "generativeModel", "reasoning", "switch", "editor"])
 };
 
@@ -529,6 +533,14 @@ function publishedAddressValue(published, address) {
     if (field === "title") return intro.title ?? "";
     if (field === "summary") return intro.summary ?? "";
     if (field === "content.text") return intro.content?.text ?? "";
+    if (field === "article.url") return intro.article?.url ?? "";
+    if (field === "article.title") return intro.article?.title ?? "";
+    if (field === "article.summary") return intro.article?.summary ?? "";
+    if (field === "article.estimatedMinutes") {
+      return intro.article?.estimatedMinutes !== undefined
+        ? String(intro.article.estimatedMinutes)
+        : "";
+    }
     if (field === "credit") return intro.credit ?? "";
     if (field === "links") return authoredLearningLinks(intro);
   }
@@ -664,8 +676,46 @@ export function applyDraftFieldValue(document, form, value, { settings = AUTHORI
     if (value) intro.credit = value;
     else delete intro.credit;
   } else if (field === "content.text") {
-    if (!intro.content || typeof intro.content !== "object") intro.content = {};
-    intro.content.text = decodeAuthoredEscapedNewlines(value);
+    const decoded = decodeAuthoredEscapedNewlines(value);
+    if (typeof decoded === "string" && decoded.trim()) {
+      if (!intro.content || typeof intro.content !== "object") intro.content = {};
+      intro.content.text = decoded;
+    } else if (intro.article && typeof intro.article === "object") {
+      delete intro.content;
+      if (intro.requirement === "required") intro.requirement = "recommended";
+    } else {
+      if (!intro.content || typeof intro.content !== "object") intro.content = {};
+      intro.content.text = decoded;
+    }
+  } else if (field.startsWith("article.")) {
+    const articleField = field.slice("article.".length);
+    if (!intro.article || typeof intro.article !== "object" || Array.isArray(intro.article)) {
+      intro.article = {};
+    }
+    const trimmed = typeof value === "string" ? value.trim() : "";
+    if (articleField === "url") {
+      if (trimmed) {
+        intro.article.url = trimmed;
+        if (!intro.requirement) intro.requirement = "recommended";
+      } else {
+        delete intro.article;
+      }
+    } else if (articleField === "title" || articleField === "summary") {
+      if (trimmed) intro.article[articleField] = trimmed;
+      else delete intro.article[articleField];
+      if (!Object.keys(intro.article).length) delete intro.article;
+    } else if (articleField === "estimatedMinutes") {
+      if (!trimmed) {
+        delete intro.article.estimatedMinutes;
+      } else {
+        const parsed = Number.parseInt(trimmed, 10);
+        if (!/^\d+$/.test(trimmed) || !Number.isInteger(parsed) || parsed < 1 || parsed > 120) {
+          throw new DraftFieldError("article.estimatedMinutes must be an integer from 1 to 120");
+        }
+        intro.article.estimatedMinutes = parsed;
+      }
+      if (!Object.keys(intro.article).length) delete intro.article;
+    }
   } else if (field === "links") {
     if (Array.isArray(value) && value.length) intro.links = value;
     else delete intro.links;

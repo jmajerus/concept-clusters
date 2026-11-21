@@ -1,4 +1,8 @@
-import { loadLearningIntroduction } from "./learningIntroduction.js";
+import {
+  hasEmbeddedLearningContent,
+  loadLearningIntroduction,
+  normalizedLearningArticle
+} from "./learningIntroduction.js";
 import { resolveLessonByline } from "./authoringProvenance.js";
 import { resolvePuzzleResourceUrl } from "./puzzleManifest.js";
 import { renderSafeMarkdown } from "./safeMarkdown.js";
@@ -41,6 +45,7 @@ class LearningIntroductionElement extends HTMLElement {
   #model = null;
   #loaded = null;
   #loading = null;
+  #articleOpened = false;
   #abortController = null;
   #returnFocus = null;
   #initialized = false;
@@ -75,15 +80,22 @@ class LearningIntroductionElement extends HTMLElement {
         }
         .offer p { margin: 0; color: var(--ink-soft); }
         .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-        button {
+        button, .button-link {
+          display: inline-flex;
+          align-items: center;
           border: 1px solid var(--rule);
           border-radius: 8px;
           padding: 7px 12px;
           color: var(--ink);
           background: var(--panel);
+          text-decoration: none;
           cursor: pointer;
         }
-        button.primary { border-color: var(--cyan); color: var(--cyan); font-weight: 700; }
+        button.primary, .button-link.primary {
+          border-color: var(--cyan);
+          color: var(--cyan);
+          font-weight: 700;
+        }
         dialog {
           width: min(720px, calc(100vw - 28px));
           max-height: min(820px, calc(100vh - 28px));
@@ -174,6 +186,32 @@ class LearningIntroductionElement extends HTMLElement {
           text-transform: uppercase;
         }
         .lesson aside.lesson-block > :last-child { margin-bottom: 8px; }
+        .article-callout {
+          margin-top: 18px;
+          padding: 13px 15px;
+          border: 1px solid var(--cyan-line);
+          border-left: 4px solid var(--cyan);
+          border-radius: var(--radius);
+          background: var(--cyan-bg);
+        }
+        .article-callout h3 {
+          margin: 3px 0 0;
+          font-family: var(--font-display);
+          font-size: 18px;
+          line-height: 1.3;
+        }
+        .article-callout a {
+          color: var(--ink);
+          text-decoration: underline;
+          text-decoration-color: var(--cyan);
+          text-underline-offset: 2px;
+        }
+        .article-callout p {
+          margin: 6px 0 0;
+          color: var(--ink-soft);
+          font-size: 14px;
+          line-height: 1.45;
+        }
         .sources { margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--rule); }
         .sources h3 { margin: 0 0 5px; font-size: 14px; }
         .sources ul { margin: 0; padding-left: 20px; }
@@ -214,6 +252,7 @@ class LearningIntroductionElement extends HTMLElement {
         <p id="offer-summary"></p>
         <div class="actions">
           <button id="read" class="primary" type="button">Read introduction</button>
+          <a id="read-article" class="button-link primary" hidden target="_blank" rel="noopener noreferrer">Read essay ↗</a>
           <button id="skip" type="button">Start puzzle</button>
         </div>
       </section>
@@ -228,6 +267,13 @@ class LearningIntroductionElement extends HTMLElement {
           </div>
           <div id="lesson-status" class="lesson-status" role="status"></div>
           <article id="lesson" class="lesson"></article>
+          <section id="article-callout" class="article-callout" aria-labelledby="article-callout-heading" hidden>
+            <div id="article-callout-meta" class="meta"></div>
+            <h3 id="article-callout-heading">
+              <a id="article-callout-link" target="_blank" rel="noopener noreferrer"></a>
+            </h3>
+            <p id="article-callout-summary" hidden></p>
+          </section>
           <section id="sources" class="sources" aria-labelledby="sources-title">
             <h3 id="sources-title">Further reading</h3>
             <ul id="source-list"></ul>
@@ -256,11 +302,22 @@ class LearningIntroductionElement extends HTMLElement {
     root.getElementById("read").addEventListener("click", event =>
       this.openLesson(event.currentTarget)
     );
+    root.getElementById("read-article").addEventListener("click", () => {
+      this.#articleOpened = true;
+      if (this.#model?.introduction) this.#emitStatus("read");
+    });
+    root.getElementById("article-callout-link").addEventListener("click", () => {
+      this.#articleOpened = true;
+      if (this.#model?.introduction && !hasEmbeddedLearningContent(this.#model.introduction)) {
+        this.#emitStatus("read");
+      }
+    });
     root.getElementById("skip").addEventListener("click", () =>
       this.#emitStatus("skipped")
     );
     root.getElementById("finish").addEventListener("click", () => {
-      const status = this.#loaded ? "read" : "skipped";
+      const hasEmbedded = hasEmbeddedLearningContent(this.#model?.introduction);
+      const status = (hasEmbedded ? this.#loaded : this.#articleOpened) ? "read" : "skipped";
       this.closeLesson();
       if (this.#model?.introduction) this.#emitStatus(status);
     });
@@ -291,8 +348,15 @@ class LearningIntroductionElement extends HTMLElement {
     this.#render();
     const dialog = this.shadowRoot.getElementById("dialog");
     if (!dialog.open) dialog.showModal();
-    if (this.#model.introduction && this.#loaded) this.#paintLoaded();
-    else if (this.#model.introduction && !this.#loading) await this.#load();
+    if (this.#model.introduction) {
+      if (!hasEmbeddedLearningContent(this.#model.introduction)) {
+        this.#paintStandaloneArticle();
+      } else if (this.#loaded) {
+        this.#paintLoaded();
+      } else if (!this.#loading) {
+        await this.#load();
+      }
+    }
     return true;
   }
 
@@ -306,6 +370,7 @@ class LearningIntroductionElement extends HTMLElement {
     this.#abortController = null;
     this.#loading = null;
     this.#loaded = null;
+    this.#articleOpened = false;
     this.closeLesson();
     this.shadowRoot?.getElementById("lesson")?.replaceChildren();
   }
@@ -318,15 +383,17 @@ class LearningIntroductionElement extends HTMLElement {
     }));
   }
 
-  #metaText(introduction) {
+  #metaText(introduction, { articleOnly = false, article = null } = {}) {
     const requirement = introduction.requirement === "required"
       ? "Required"
       : introduction.requirement === "recommended"
         ? "Recommended"
         : "Optional";
-    return introduction.estimatedMinutes
-      ? `${requirement} · About ${introduction.estimatedMinutes} min`
-      : requirement;
+    const minutes = introduction.estimatedMinutes ?? (articleOnly ? article?.estimatedMinutes : undefined);
+    const parts = [requirement];
+    if (articleOnly) parts.push("Essay");
+    if (minutes) parts.push(`About ${minutes} min`);
+    return parts.join(" · ");
   }
 
   #render() {
@@ -350,19 +417,89 @@ class LearningIntroductionElement extends HTMLElement {
   #renderLesson() {
     const { introduction, gate } = this.#model;
     const root = this.shadowRoot;
+    const hasEmbedded = hasEmbeddedLearningContent(introduction);
+    const article = normalizedLearningArticle(introduction);
+    const articleHref = article ? safeExternalUrl(article.url) : null;
+    const articleOnly = !hasEmbedded && !!articleHref;
+    const meta = this.#metaText(introduction, { articleOnly, article });
+
     this.toggleAttribute("gated", gate);
     root.getElementById("offer").hidden = !gate;
-    root.getElementById("offer-meta").textContent = this.#metaText(introduction);
-    root.getElementById("dialog-meta").textContent = this.#metaText(introduction);
+    root.getElementById("offer-meta").textContent = meta;
+    root.getElementById("dialog-meta").textContent = meta;
     root.getElementById("offer-title").textContent = introduction.title;
     root.getElementById("dialog-title").textContent = introduction.title;
     root.getElementById("offer-summary").textContent = introduction.summary ||
-      "A short orientation before you begin.";
-    root.getElementById("skip").hidden = introduction.requirement === "required";
+      article?.summary ||
+      (articleOnly
+        ? "Read the companion essay before you begin, or start the puzzle now."
+        : "A short orientation before you begin.");
+
+    const readBtn = root.getElementById("read");
+    const readArticleLink = root.getElementById("read-article");
+    if (articleOnly) {
+      readBtn.hidden = true;
+      readArticleLink.hidden = false;
+      readArticleLink.href = articleHref;
+    } else {
+      readBtn.hidden = false;
+      readArticleLink.hidden = true;
+      readArticleLink.removeAttribute("href");
+    }
+
+    root.getElementById("skip").hidden = hasEmbedded && introduction.requirement === "required";
     root.getElementById("finish").textContent = gate ? "Start puzzle" : "Return to puzzle";
     root.getElementById("close").setAttribute("aria-label", "Close introduction");
-    root.getElementById("lesson-status").hidden = !!this.#loaded;
-    this.#renderSources(authoredLearningLinks(introduction));
+    root.getElementById("lesson-status").hidden = !hasEmbedded || !!this.#loaded;
+
+    this.#renderArticleCallout(introduction, article, articleHref, hasEmbedded);
+    this.#renderSources(authoredLearningLinks(introduction), articleHref);
+  }
+
+  #renderArticleCallout(introduction, article, articleHref, hasEmbedded) {
+    const root = this.shadowRoot;
+    const callout = root.getElementById("article-callout");
+    if (!article || !articleHref) {
+      callout.hidden = true;
+      return;
+    }
+    const metaEl = root.getElementById("article-callout-meta");
+    const linkEl = root.getElementById("article-callout-link");
+    const summaryEl = root.getElementById("article-callout-summary");
+    const labelParts = [hasEmbedded ? "Expanded lesson" : "Full essay"];
+    if (article.estimatedMinutes) labelParts.push(`About ${article.estimatedMinutes} min`);
+    metaEl.textContent = labelParts.join(" · ");
+
+    const title = article.title ||
+      (hasEmbedded ? "Read the full essay" : (introduction.title || linkLabel(articleHref)));
+    linkEl.href = articleHref;
+    linkEl.textContent = `${title} ↗`;
+
+    const summary = article.summary &&
+      (hasEmbedded || article.summary !== introduction.summary)
+      ? article.summary
+      : "";
+    summaryEl.textContent = summary;
+    summaryEl.hidden = !summary;
+    callout.hidden = false;
+  }
+
+  #paintStandaloneArticle() {
+    if (!this.shadowRoot || !this.#model?.introduction) return;
+    const root = this.shadowRoot;
+    const lesson = root.getElementById("lesson");
+    const status = root.getElementById("lesson-status");
+    const finish = root.getElementById("finish");
+    const { introduction } = this.#model;
+    lesson.replaceChildren();
+    if (introduction.summary) {
+      const paragraph = document.createElement("p");
+      paragraph.textContent = introduction.summary;
+      lesson.appendChild(paragraph);
+    }
+    status.hidden = true;
+    finish.hidden = false;
+    finish.textContent = this.#model.gate ? "Start puzzle" : "Return to puzzle";
   }
 
   // No authored lesson: the same dialog as a catalogue card -- summary,
@@ -373,6 +510,7 @@ class LearningIntroductionElement extends HTMLElement {
     const root = this.shadowRoot;
     this.toggleAttribute("gated", false);
     root.getElementById("offer").hidden = true;
+    root.getElementById("article-callout").hidden = true;
     root.getElementById("dialog-meta").textContent = aboutEyebrow(about);
     root.getElementById("dialog-title").textContent = puzzle?.title || "";
     root.getElementById("close").setAttribute("aria-label", "Close");
@@ -386,14 +524,14 @@ class LearningIntroductionElement extends HTMLElement {
     this.#renderSources(authoredLearningLinks(puzzle?.info));
   }
 
-  #renderSources(sources) {
+  #renderSources(sources, excludeHref = null) {
     const root = this.shadowRoot;
     const section = root.getElementById("sources");
     const list = root.getElementById("source-list");
     list.replaceChildren();
     sources.forEach(source => {
       const href = safeExternalUrl(resolveLink(source.href) || source.href);
-      if (!href) return;
+      if (!href || href === excludeHref) return;
       const item = document.createElement("li");
       const anchor = document.createElement("a");
       anchor.href = href;

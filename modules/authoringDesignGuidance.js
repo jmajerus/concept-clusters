@@ -300,7 +300,11 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   two of them are really one bounded question with two honest answers, or
   whether quiz mode fits them better; if each stands on its own, keep
   them.
-- learningIntroduction ("Before You Begin") is one optional Markdown document.
+- learningIntroduction ("Before You Begin") is optional and may provide
+  embedded Markdown (\`content.text\`), a linked full essay (\`article\`:
+  \`{ url, title?, summary?, estimatedMinutes? }\`, such as a published Ghost
+  article rendered through the full IASP pipeline), or both (a compact
+  in-dialog orientation paired with the expanded essay).
   Write the lesson the subject needs, in the order the subject needs: the
   learning objective, the domain (vocabulary, stakes, why it matters), and
   how the ideas relate, including the groupings and why they hold. Teach
@@ -311,11 +315,14 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   Write about the **subject**. Do not mention clusters,
   bridges, lenses, boards, sorting, or how play works. Those words name
   the machinery. Do not author a preview, a teaser, or a split.
-  Play shows the whole lesson before the board. Write one in almost every
+  Play shows the whole embedded lesson before the board. Write one in almost every
   case: the author cannot know what the player already knows. requirement: optional and
   recommended both leave the board reachable without reading (recommended
   leads with the invitation first); required holds the board until the
-  learner chooses Start puzzle in the lesson. Closing the dialog returns
+  learner chooses Start puzzle in the lesson and requires embedded
+  \`content.text\` (an external-only \`article\` lesson must be \`optional\` or
+  \`recommended\`, and should still carry \`summary\` and \`info.citations\` on
+  the puzzle). Closing the dialog returns
   to the invitation. Reserve required for when the puzzle
   genuinely depends on that source.
   content.text is Markdown with real line breaks in the string value (blank
@@ -682,7 +689,14 @@ const LESSON_PHASE_GUIDANCE = `## Lesson pass
   claim that lives only in the lesson and has no node. Do not start a new
   source hunt, and do not copy every term link. The same URL may remain on
   its node. Do not also put it on learningIntroduction.links.
-- content.text is Markdown with real line breaks in the string value (blank
+- A lesson may embed Markdown in \`content.text\`, link a full external essay
+  via \`article\` (\`{ url, title?, summary?, estimatedMinutes? }\`, such as a
+  Ghost article authored with the full IASP pipeline), or provide both (a
+  concise embedded orientation plus the expanded essay). When \`content\` is
+  omitted and \`article\` stands alone, \`requirement\` must be \`optional\` or
+  \`recommended\`, and you should still include \`summary\` and merge the
+  essay's primary works into \`info.citations\`.
+- \`content.text\` is Markdown with real line breaks in the string value (blank
   lines between paragraphs, \`##\` headings on their own lines). The lesson
   dialog already shows title; do not repeat it as the first line. Do not write
   the two-character sequence backslash-n; the tool serializer encodes newlines.
@@ -692,9 +706,10 @@ const LESSON_PHASE_GUIDANCE = `## Lesson pass
   paragraph "— Author, *Work*"), {.note .definition}, {.note .insight}
   (the one idea worth carrying into play), and {.sidebar .example}. The
   shorthand note.insight works too. Use a block where that passage has that
-  job; most of a lesson stays plain paragraphs. Any other ::: block fails
-  validation. A quotation is the source's exact words, and its source is on
-  info.citations.
+  job; most of an embedded lesson stays plain paragraphs (publish full IASP
+  essays to Ghost and link them via \`learningIntroduction.article\`). Any
+  other ::: block in \`content.text\` fails validation. A quotation is the
+  source's exact words, and its source is on info.citations.
   Do not include the human-managed legacy field learningIntroduction.credit.
   Do not put byline text in content.text.
   Never add dateCreated, dateModified, version, or

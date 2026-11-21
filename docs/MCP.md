@@ -381,10 +381,11 @@ still backs `tools/content-jsonld.mjs`'s `content:import` CLI command (see
 repository-validation behavior; it is just no longer reachable from MCP.
 
 The server exposes no arbitrary filesystem path or shell-execution tool.
-Learning content in MCP drafts should be embedded as
-`learningIntroduction.content.text`; relative `src` imports remain available
-to the file-based CLI, where a package directory provides a safe resolution
-boundary.
+Learning content in MCP drafts should either be embedded as
+`learningIntroduction.content.text` or linked as an external essay via
+`learningIntroduction.article` (or both); relative `src` imports remain
+available to the file-based CLI, where a package directory provides a safe
+resolution boundary.
 
 ## Shared architecture
 

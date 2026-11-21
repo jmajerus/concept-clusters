@@ -33,6 +33,7 @@ export async function validateLearningIntroduction(puzzle) {
   if (errors.length) return errors;
 
   const content = introduction.content;
+  if (!content) return errors;
   const hasText = content.text !== undefined;
   let markdown = "";
   let markdownUrl = null;

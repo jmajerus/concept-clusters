@@ -122,6 +122,9 @@ export function puzzleToSimplified(
     return result;
   });
 
+  const resolvedLearningText = learningContent !== null
+    ? learningContent
+    : source.learningIntroduction?.content?.text;
   const learningIntroduction = source.learningIntroduction ? {
     requirement: source.learningIntroduction.requirement,
     ...(source.learningIntroduction.title ? { title: source.learningIntroduction.title } : {}),
@@ -130,7 +133,12 @@ export function puzzleToSimplified(
       ? { estimatedMinutes: source.learningIntroduction.estimatedMinutes } : {}),
     ...(source.learningIntroduction.credit
       ? { credit: source.learningIntroduction.credit } : {}),
-    content: { text: learningContent !== null ? learningContent : source.learningIntroduction.content.text },
+    ...(typeof resolvedLearningText === "string"
+      ? { content: { text: resolvedLearningText } }
+      : {}),
+    ...(source.learningIntroduction.article
+      ? { article: clone(source.learningIntroduction.article) }
+      : {}),
     ...(source.learningIntroduction.links ? { links: clone(source.learningIntroduction.links) } : {}),
     ...(source.learningIntroduction.sources ? { sources: clone(source.learningIntroduction.sources) } : {})
   } : undefined;

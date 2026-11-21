@@ -205,4 +205,120 @@ export async function run() {
   assert.deepEqual(validateLearningIntroductionStructure(withBlock(blocks)), []);
   assert.ok(validateLearningIntroductionStructure(withBlock("::: callout\nHi.\n:::"))
     .some(error => error.includes("is not a lesson block")));
+
+  // Companion / standalone Ghost article lessons:
+  const standaloneArticlePuzzle = {
+    id: "ghost-lesson",
+    learningIntroduction: {
+      requirement: "recommended",
+      summary: "Why signals and causes diverge.",
+      article: {
+        url: "https://essays.example.org/signals-and-causes/",
+        title: "Signals Are Not Yet Causes",
+        summary: "Full essay with primary-source citations.",
+        estimatedMinutes: 14
+      }
+    }
+  };
+  assert.deepEqual(validateLearningIntroductionStructure(standaloneArticlePuzzle), []);
+  assert.deepEqual(await validateLearningIntroduction(standaloneArticlePuzzle), []);
+  const normalizedStandalone = normalizedLearningIntroduction(standaloneArticlePuzzle);
+  assert.equal(normalizedStandalone.title, "Signals Are Not Yet Causes");
+  assert.equal(learningIntroductionGate(normalizedStandalone, null), true);
+  assert.equal(learningIntroductionGate(normalizedStandalone, "skipped"), false);
+  assert.equal(learningIntroductionGate(normalizedStandalone, "read"), false);
+  // Even if hand-edited to "required", an external-only article never gates on
+  // either the initial null status or "skipped".
+  assert.equal(
+    learningIntroductionGate({
+      requirement: "required",
+      article: { url: "https://essays.example.org/signals-and-causes/" }
+    }, null),
+    false
+  );
+  assert.equal(
+    learningIntroductionGate({
+      requirement: "required",
+      article: { url: "https://essays.example.org/signals-and-causes/" }
+    }, "skipped"),
+    false
+  );
+  // Validation rejects "required" without embedded content, non-http(s) article URLs,
+  // and lessons that omit both content and article.
+  assert.ok(
+    validateLearningIntroductionStructure({
+      learningIntroduction: {
+        requirement: "required",
+        article: { url: "https://essays.example.org/signals-and-causes/" }
+      }
+    }).some(error => error.includes('cannot be "required" when content is omitted'))
+  );
+  assert.ok(
+    validateLearningIntroductionStructure({
+      learningIntroduction: {
+        requirement: "optional",
+        article: { url: "wiki:Epidemiology" }
+      }
+    }).some(error => error.includes("full http(s) URL"))
+  );
+  assert.ok(
+    validateLearningIntroductionStructure({
+      learningIntroduction: { requirement: "optional", title: "Empty" }
+    }).some(error => error.includes("must provide content, article, or both"))
+  );
+
+  // Paired ("expanded lesson") with embedded orientation + Ghost article:
+  const pairedArticlePuzzle = definePuzzle(
+    new URL("../puzzles/public-health/from-evidence-to-action.js", import.meta.url),
+    {
+      ...fromEvidenceToAction,
+      learningIntroduction: {
+        requirement: "required",
+        title: "Before You Begin",
+        content: {
+          mediaType: "text/markdown",
+          text: "Short in-app orientation."
+        },
+        article: {
+          url: "https://essays.example.org/from-evidence-to-action/",
+          title: "From Evidence to Action (Full Essay)",
+          estimatedMinutes: 18
+        }
+      }
+    }
+  );
+  assert.deepEqual(await validateLearningIntroduction(pairedArticlePuzzle), []);
+
+  // Round-trip simplified <-> runtime <-> JSON-LD + link check:
+  const { puzzleFromAuthoredDocument, puzzleToSimplified } = await import("../modules/simplifiedPuzzleSchema.js");
+  const { puzzleToJsonLd, puzzleFromJsonLd } = await import("../modules/puzzleJsonLd.js");
+  const { collectDocumentWebLinks } = await import("../modules/wikiLinkCheck.js");
+  const simplifiedStandalone = puzzleToSimplified({
+    ...fromEvidenceToAction,
+    learningIntroduction: standaloneArticlePuzzle.learningIntroduction
+  });
+  assert.equal(simplifiedStandalone.learningIntroduction.content, undefined);
+  assert.equal(
+    simplifiedStandalone.learningIntroduction.article.url,
+    "https://essays.example.org/signals-and-causes/"
+  );
+  const compiledStandalone = puzzleFromAuthoredDocument(simplifiedStandalone);
+  assert.deepEqual(compiledStandalone.errors, []);
+  assert.equal(compiledStandalone.puzzle.learningIntroduction.content, undefined);
+  assert.equal(
+    compiledStandalone.puzzle.learningIntroduction.article.estimatedMinutes,
+    14
+  );
+  const jsonLdRoundTrip = puzzleFromJsonLd(puzzleToJsonLd(compiledStandalone.puzzle));
+  assert.deepEqual(
+    jsonLdRoundTrip.learningIntroduction.article,
+    compiledStandalone.puzzle.learningIntroduction.article
+  );
+  assert.ok(
+    collectDocumentWebLinks(simplifiedStandalone).some(
+      entry =>
+        entry.where === "learningIntroduction.article" &&
+        entry.link === "https://essays.example.org/signals-and-causes/"
+    )
+  );
 }
