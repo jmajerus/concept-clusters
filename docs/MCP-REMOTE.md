@@ -90,7 +90,7 @@ fingerprints are generated or stored by infrastructure rather than supplied
 by an agent.
 
 The guidance and schema tools accept an optional `phase`: `core`, `review`,
-`pedagogy`, `classification`, `publication`, or `complete`. They also accept the optional
+`pedagogy`, `lesson`, `classification`, `publication`, or `complete`. They also accept the optional
 authoring profile: `vocabulary-context` or `trivia-quiz`. An unprofiled
 guidance response is profile-neutral. Supplying a profile selects that
 profile's compact overview for `complete`, or only its focused brief for a
@@ -100,14 +100,16 @@ kind and set it explicitly for `trivia-quiz` or `vocabulary-context`. It is
 independent of taxonomy and lens mode, belongs to the existing `content`
 domain, and creates no new storage projection. Draft reads and writes also
 accept an optional
-`domain`: `content`, `classification`, `pedagogy`, or the
+`domain`: `content`, `classification`, `pedagogy`, `lesson`, or the
 backwards-compatible `complete` default. A focused domain is a real write
 boundary, not just prose guidance:
 
 - `domain: "content"` returns the core puzzle document and the shelf as read-only context.
-- `domain: "classification"` returns `category`, `categories`, and `subcategories`, plus id and title as read-only context.
-- `domain: "pedagogy"` returns the annotation/learning metadata and a
+- `domain: "classification"` returns `category`, `categories`, `subcategories`, `tags`, and `level`, plus id and title as read-only context.
+- `domain: "pedagogy"` returns bridge relationship annotations, lenses, related puzzles, and language, plus a
   read-only `context` containing content and classification.
+- `domain: "lesson"` returns `learningIntroduction` and any existing `info.citations`, plus a
+  subject-only read-only `context` (id, title, `puzzleKind`, category, cluster names/facts/terms, and bridge terms/facts/`relationKind`) with lenses omitted.
 - `domain: "complete"` preserves the whole authored-content compatibility
   contract while protected metadata remains hidden and server-preserved.
 
@@ -117,7 +119,7 @@ metadata stay outside every agent document. Saves preserve those values,
 materialize the complete document, and follow the same validation/publication
 path. Write semantics differ by domain:
 
-- Every focused save (`content`, `pedagogy`, or `classification`) is a
+- Every focused save (`content`, `pedagogy`, `lesson`, or `classification`) is a
   [JSON Merge Patch (RFC 7396)](https://www.rfc-editor.org/rfc/rfc7396) over
   that domain's current projection. Omitted fields are kept, `null` removes a
   field, and objects merge recursively.
@@ -137,8 +139,11 @@ path. Write semantics differ by domain:
   reorder. A pedagogy `bridges` entry carries only annotation fields; deleting
   it removes that bridge's annotations, not the bridge.
 - Every other list (`seeds`, `floatingTerms`, `terms`, `tags`, `categories`,
-  citations, links, lens `targets`) replaces whole, as in RFC 7396. `$patch`
-  is rejected anywhere except an item of a keyed list.
+  citations, links, lens `targets`) replaces whole, as in RFC 7396, except
+  `info.citations` on a `lesson` save: there entries merge by `url` when both
+  sides have one, otherwise by `author`, `title`, and `year`, with
+  `"$patch": "delete"` to remove an entry and `"$patch": "replace"` to replace
+  the list. `$patch` is rejected anywhere else outside a keyed list.
 - When a content patch moves a term off a cluster, that term's `termInfo`
   note is removed too, unless the same patch sets it.
 - A `complete` save replaces the whole agent-authored document.
@@ -156,7 +161,7 @@ Every focused save response carries two reports:
 An agent can confirm what a write changed instead of inferring it. The legacy
 human-owned `learningIntroduction.credit` is not exposed and is preserved when
 its introduction remains present.
-`repair: true` is accepted for complete or content saves, not classification or pedagogy saves,
+`repair: true` is accepted for complete or content saves, not classification, pedagogy, or lesson saves,
 because it repairs content-domain fields. The save still requires
 `expected_revision`.
 
@@ -170,15 +175,15 @@ accumulating draft:
 2. `review` checks ambiguity, redundancy, seed quality, bridge necessity,
    sources, and optional relationship
    fields such as `relationKind`, `direction`, and `idealTerms`.
-3. `pedagogy` owns lenses and learning introductions. They may be authored at
-   different times: revisiting this phase to add a later introduction must
-   preserve lenses already present unless they independently need revision.
-4. `classification` sets the shelf: primary category, full membership,
+3. `pedagogy` owns bridge annotations and lenses.
+4. `lesson` owns `learningIntroduction` and merges lesson or quotation sources
+   into `info.citations` (`domain=lesson`), leaving lenses untouched.
+5. `classification` sets the shelf: primary category, full membership,
    subcategory placement, tags, and level. Get and save that projection with
    `domain=classification`. Leave level unset unless it matches that
    category's existing ceiling. Add a tag only for a search word the title,
    category, citations, subcategories, and board terms do not already cover.
-5. `publication` adds related puzzles and language. Attribution and
+6. `publication` adds related puzzles and language. Attribution and
    rights metadata stay protected and are not part of the agent schema.
 
 For `profile: "vocabulary-context"`, the core pass treats clusters as tight
@@ -202,7 +207,7 @@ profile selector; the profile can be used with a disciplinary category.
 Before every later pass, call `get_puzzle_draft`, edit the latest document or
 selected domain, and send only the fields the pass changes. Focused `get_authoring_schema`
 responses bind pure phases to a write `domain` (`core` → `content`;
-`classification` → `classification`; `pedagogy` / `publication` → `pedagogy`);
+`classification` → `classification`; `pedagogy` / `publication` → `pedagogy`; `lesson` → `lesson`);
 `review` omits `domain` because it mixes content inspection with pedagogy
 bridge annotations. A phase schema is a
 focused field projection, not a standalone replacement schema or an independent
@@ -308,8 +313,9 @@ D1. The tracked D1 migrations still create:
 - `puzzle_drafts` for owner, status, current materialized document, revision
   (OCC token), content hash, last validation result, the optional confirmed
   layout document for unpublished play, and the persisted `content_json`,
-  `pedagogy_json`, and protected `provenance_json` projections added by
-  migration `0019_authoring_domains`. Focused domain saves update the selected
+  `classification_json`, `pedagogy_json`, `lesson_json`, and protected
+  `provenance_json` and `administration_json` projections (`0019_authoring_domains`,
+  `0028_classification_domain`, `0031_administration_domain`, `0038_lesson_domain`). Focused domain saves update the selected
   projection and set `document_stale` (migration `0024_document_stale`) without
   rewriting the materialized `document` cache; validate and publish rematerialize.
   Layout storage comes from `0022_puzzle_draft_star_layout.sql` plus the

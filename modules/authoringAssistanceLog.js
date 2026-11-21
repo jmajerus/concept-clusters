@@ -3,13 +3,15 @@
 // of record; append-only rows live in D1 (draft_assistance_stamps). Hosted MCP
 // may also write a summary row to Analytics Engine.
 
+import { AUTHORING_WRITE_DOMAINS } from "./authoringFieldOwnership.js";
+
 function compactActor(actor) {
   if (!actor?.subject) return null;
   return { subject: actor.subject };
 }
 
 export function assistanceStampScopes(document, { domain = "complete" } = {}) {
-  const scopes = domain === "content" || domain === "pedagogy" || domain === "classification"
+  const scopes = AUTHORING_WRITE_DOMAINS.includes(domain)
     ? [domain]
     : ["puzzle"];
   if (domain === "complete" &&

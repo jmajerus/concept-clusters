@@ -43,7 +43,7 @@ an agent touched the draft.
 
 The infrastructure also records the invocation's tool, server capture time,
 authoring role and date, and focused domain when a stamp is available. A
-focused `content`, `classification`, or `pedagogy` operation identifies that
+focused `content`, `classification`, `pedagogy`, or `lesson` operation identifies that
 domain; a complete operation is recorded at the broader puzzle level. Model or reasoning hints
 are retained when a client exposes them, but they are observations, not
 attestations.

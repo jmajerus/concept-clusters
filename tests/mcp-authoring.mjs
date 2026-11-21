@@ -1578,6 +1578,62 @@ export async function run() {
     assert.equal(keptDocument.level, "intermediate");
     assert.equal(keptDocument.category, "biology");
 
+    // A lesson-domain save on an already-split draft persists merged
+    // citations into content_json without rewriting lenses or shelf fields.
+    const lessonCited = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "energy-flow",
+        domain: "lesson",
+        expected_revision: afterKeep.result.structuredContent.draft.revision,
+        document: {
+          learningIntroduction: {
+            requirement: "optional",
+            content: { text: "Energy enters ecosystems as sunlight." }
+          },
+          info: {
+            citations: [{ title: "Fundamentals of Ecology", author: "Odum, Eugene P.", year: "1953" }]
+          }
+        }
+      }
+    });
+    assert.equal(lessonCited.result.isError, undefined);
+    const afterLessonCitation = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "energy-flow", domain: "lesson" }
+    });
+    assert.equal(
+      afterLessonCitation.result.structuredContent.draft.document.learningIntroduction.content.text,
+      "Energy enters ecosystems as sunlight."
+    );
+    assert.deepEqual(
+      afterLessonCitation.result.structuredContent.draft.document.info.citations.map(entry => entry.title),
+      ["Fundamentals of Ecology"]
+    );
+    const secondLessonCitation = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "energy-flow",
+        domain: "lesson",
+        expected_revision: afterLessonCitation.result.structuredContent.draft.revision,
+        document: {
+          info: {
+            citations: [{ title: "The Trophic-Dynamic Aspect of Ecology", author: "Lindeman, Raymond L.", year: "1942" }]
+          }
+        }
+      }
+    });
+    assert.equal(secondLessonCitation.result.isError, undefined);
+    const afterSecondCitation = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "energy-flow" }
+    });
+    assert.deepEqual(
+      afterSecondCitation.result.structuredContent.draft.document.info.citations.map(entry => entry.title),
+      ["Fundamentals of Ecology", "The Trophic-Dynamic Aspect of Ecology"]
+    );
+    assert.equal(afterSecondCitation.result.structuredContent.draft.document.category, "biology");
+
     // A held publish that fails validation does not undo the classification
     // save, and ok stays true so a caller does not retry a write that landed.
     const unpublishedShelf = await request("tools/call", {

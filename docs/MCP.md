@@ -30,7 +30,7 @@ versioned JSON Schema for simplified input. Clients that do not inspect MCP
 resources can call `get_authoring_schema` for the same schema as structured
 tool output. With no arguments, that tool and `get_authoring_guidance` retain
 their complete no-phase responses. Passing `phase: "core"`,
-`"review"`, `"pedagogy"`, `"classification"`, or `"publication"` returns a much smaller working
+`"review"`, `"pedagogy"`, `"lesson"`, `"classification"`, or `"publication"` returns a much smaller working
 projection for that pass. A projection is not a standalone format: apply it to
 one accumulating draft and preserve fields from every earlier pass.
 Draft-write tool schemas intentionally leave `document` permissive so
@@ -50,16 +50,18 @@ revisions, hashes, status, and lesson-progress fingerprints are supplied by
 infrastructure and are not fields an agent has to author.
 
 For smaller authoring payloads, `get_puzzle_draft` and
-`save_puzzle_draft` accept `domain: "content"`, `domain: "classification"`, or `domain: "pedagogy"`.
+`save_puzzle_draft` accept `domain: "content"`, `domain: "classification"`, `domain: "pedagogy"`, or `domain: "lesson"`.
 Shelf placement (`category`, `categories`, `subcategories`, `tags`, and
 `level`) is `domain: "classification"`. `reassign_puzzle_classifications`
 writes category membership for many puzzles in one call and keeps existing
 tags and level. With `publish_to_authoring: true` it publishes that shelf
 onto the live puzzle and leaves the rest of the published document in place.
 Content is the core puzzle write surface. Classification is the shelf.
-Pedagogy is the annotation and learning write surface, plus related puzzles
-and language. Pedagogy includes content and classification
-as read-only `context`. Focused responses omit protected attribution/editorial metadata
+Pedagogy owns bridge relationship annotations, lenses, related puzzles, and
+language, and includes content and classification as read-only `context`.
+Lesson owns `learningIntroduction` and merges bibliography entries into
+`info.citations`, with subject-only read-only `context` (clusters, bridge
+facts, and `relationKind`, with lenses withheld). Focused responses omit protected attribution/editorial metadata
 and system metadata, retaining only the draft id and revision needed for the
 next save. The complete-document compatibility path also omits protected
 fields and preserves them on save.
@@ -89,7 +91,7 @@ progressive route:
    approve network when prompted, then retry the same save — nothing is
    persisted until that call succeeds. With the URL set, the draft write
    goes to LAN Postgres. Published reads and Publish still use D1.
-4. The same pair is requested with `review`, `pedagogy`, `classification`, or `publication` only
+4. The same pair is requested with `review`, `pedagogy`, `lesson`, `classification`, or `publication` only
    when that concern is active. Omitting `phase`, or passing `complete`, returns
    the full fallback payload.
 5. `get_workflow_guidance` supplies operational instructions only when the
@@ -240,12 +242,13 @@ The following progressive workflow remains useful for agents that need it:
 4. Retrieve that latest accumulated draft, then use `phase: "review"` to check
    ambiguity, redundancy, seeds, bridge necessity, links/citations, and the
    optional bridge relationship fields. Preserve everything not being edited.
-5. Repeat that retrieve-preserve-save pattern for `phase: "pedagogy"` and
+5. Repeat that retrieve-preserve-save pattern for `phase: "pedagogy"`,
+   `phase: "lesson"`, `phase: "classification"`, and
    `phase: "publication"` when those passes apply. Use `phase: "complete"` (or
    omit `phase`) whenever the full contract or guidance is needed. Phases are
-   reusable concern areas, not one-way gates: for example, an author can return
-   to `pedagogy` later to add a learning introduction while preserving lenses
-   that were already authored.
+   reusable concern areas, not one-way gates: for example, an author can run
+   `lesson` later to add or revise a learning introduction while leaving lenses
+   that were already authored untouched.
 6. Call `validate_puzzle_draft` and correct every reported error against the
    complete accumulated document.
 7. Stop after `validate_puzzle_draft`. `save_puzzle_draft` writes the working

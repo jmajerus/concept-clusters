@@ -17,14 +17,14 @@ order, and verification commands.
 | Domain constants, projections, merge rules, protected fields | `modules/authoringDomains.js` (consumes the ownership map) |
 | Authored-document normalization and storage boundary | `modules/authoredPuzzleDocument.js` |
 | Hosted MCP read/write contract | `modules/hostedMcpAuthoringServer.js` |
-| Draft projections and D1 persistence | `modules/d1DraftRepository.js` and migrations `0019_authoring_domains`, `0028_classification_domain` |
+| Draft projections and D1 / Postgres persistence | `modules/d1DraftRepository.js`, `modules/postgresDraftRepository.js`, D1 migrations `0019_authoring_domains`, `0028_classification_domain`, `0038_lesson_domain`, and Postgres migration `0010_lesson_domain` |
 | Contributor normalization and automatic document attribution | `modules/authoringProvenance.js` and `modules/mcpClientIdentity.js` |
 | Invocation audit record and best-effort persistence | `modules/authoringAssistanceLog.js` and migration `0008_draft_assistance_stamps` |
 | One-time cleanup of document snapshots | migration `0020_purge_retired_document_snapshots` |
 
 ## Domain contract
 
-`modules/authoringDomains.js` defines five logical domains:
+`modules/authoringDomains.js` defines seven logical domains:
 
 - `content` — puzzle identity, copy, clusters, and bridge core;
 - `classification` — primary category, membership, subcategory placement,
@@ -33,26 +33,33 @@ order, and verification commands.
   and language;
 - `lesson` — the learning introduction. A lesson save may also merge
   entries into `info.citations`;
+- `administration` — legacy play flags on `board`, preserved as read-only
+  compatibility;
 - `provenance` — contributor attribution; and
 - `system` — repository-owned state.
 
-`content`, `classification`, and `pedagogy` are agent-writable. The read domains are
-`complete`, `content`, `classification`, and `pedagogy`; `complete` remains the compatibility
+`content`, `classification`, `pedagogy`, and `lesson` are agent-writable. The read domains are
+`complete`, `content`, `classification`, `pedagogy`, and `lesson`; `complete` remains the compatibility
 path for clients that still work with the whole authored document.
 
 For a focused read, `projectAuthoredDocument()` removes provenance, system
 fields, and the derived `large` flag. Classification receives id and title as
 read-only `context`. Content and pedagogy receive the classification fields as
-read-only `context`, and pedagogy also receives the content projection. The
-pedagogy projection omits the human-owned `learningIntroduction.credit`.
+read-only `context`, and pedagogy also receives the content projection. Lesson
+receives `learningIntroduction` (with the human-owned `learningIntroduction.credit`
+omitted) and any existing `info.citations`, plus subject-only `context` (id,
+title, `puzzleKind`, primary category, cluster names/facts/terms, and bridge
+terms/facts/`relationKind`) with lenses withheld.
 
-For a focused save, `applyAuthoredDomain()` replaces the selected projection
-as a whole, so omission removes an optional field in that projection. The
+For a focused save, `applyAuthoredDomainPatch()` resolves a JSON Merge Patch
+against the selected domain before `applyAuthoredDomain()` replaces that
+projection (`lesson` pre-merges `info.citations` by URL or by author, title,
+and year and writes the merged list onto `content.info`). The
 other projections are retained and the infrastructure reassembles the
 complete document. A pedagogy bridge entry must identify an existing content
 bridge and may change only its annotation fields. Protected fields and fields
 owned by another domain are rejected. Mechanical `repair` is accepted for
-complete and content saves, not classification or pedagogy saves, because it repairs content
+complete and content saves, not classification, pedagogy, or lesson saves, because it repairs content
 fields.
 
 ## Projection and sub-schema refinement
@@ -67,12 +74,12 @@ backed by one ownership map:
 - `projectAuthoredDocument()` defines the data and ownership boundary for a
   domain read or write from that map; and
 - `get_authoring_schema` supplies focused guidance and schemas for the
-  `core`, `review`, `pedagogy`, `classification`, and `publication` phases from
+  `core`, `review`, `pedagogy`, `lesson`, `classification`, and `publication` phases from
   `AUTHORING_PHASE_PASSES` in the same module. Those responses set
   `preserveExisting: true`; they are task views, not independently complete
   replacement documents. Pure passes also set `domain` to the matching write
   domain (`core` → `content`; `classification` → `classification`;
-  `pedagogy` / `publication` → `pedagogy`).
+  `pedagogy` / `publication` → `pedagogy`; `lesson` → `lesson`).
   `review` omits `domain` because it mixes content inspection with pedagogy
   bridge annotations. Protected fields such as `provenance` are not listed
   on any agent-facing phase pass.
@@ -120,16 +127,20 @@ tied to the canonical schema.
 
 ## D1 storage
 
-For puzzle drafts, D1 stores durable domain projections (`content_json`,
-`pedagogy_json`, `provenance_json`) as the authored source of truth. The
+For puzzle drafts, D1 and Postgres store durable domain projections (`content_json`,
+`classification_json`, `pedagogy_json`, `lesson_json`, `provenance_json`,
+`administration_json`) as the authored source of truth. The
 `document` column is a materialized complete simplified snapshot used by
 validation, publication, rendering, and Freeze. Focused MCP domain saves update
-the corresponding projection column and mark `document_stale` without rewriting
+the corresponding projection column (plus `content_json` when a `lesson` save
+updates `info.citations`) and mark `document_stale` without rewriting
 the cache; `get` assembles from domain columns, and validate/publish call
-`materialize()` to refresh the snapshot. The projections are not a new player
+`materialize()` to refresh the snapshot. Rows created before `lesson_json`
+keep `learningIntroduction` inside `pedagogy_json` until the next save moves
+it. The projections are not a new player
 or Freeze format.
 
-The projection columns remain nullable for rollout. If all three are absent,
+The projection columns remain nullable for rollout. If all domain columns are absent,
 `D1DraftRepository` can fall back to an older simplified complete document and
 the next successful write materializes the projections. This fallback is not
 valid for JSON-LD or retired fields. `content_drafts` and
@@ -143,7 +154,7 @@ not carry those values, and no `system_json` column is needed. JSON-LD may
 represent portable aliases at its explicit interchange boundary only.
 
 Any writer that updates a complete puzzle snapshot outside the draft
-repository must refresh all three projections in the same update. Category
+repository must refresh all six domain columns in the same update. Category
 rename propagation is the current example.
 
 ## Canonicalization, batch migration, and cleanup
@@ -240,7 +251,8 @@ For recognized MCP clients:
 The separate `draft_assistance_stamps` table stores an
 `authoring_assistance_stamp` record with server capture time, tool and
 draft/puzzle identifiers, role, date, scope, recognized client information,
-and available actor context. Focused writes record `content` or `pedagogy`;
+and available actor context. Focused writes record `content`, `classification`,
+`pedagogy`, or `lesson`;
 complete writes record `puzzle` and may also record `learningIntroduction`.
 The record is an audit event, not a before/after document snapshot, content
 hash, field-level diff, or tamper-evident history entry. D1 persistence and
