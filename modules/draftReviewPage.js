@@ -2789,10 +2789,33 @@ function renderCreditsSection({ edit, intro, document, diff, provenanceSettings 
         edit, section: "learning", field: "summary",
         value: intro.summary || "", change: diff?.fields?.learningIntroduction, label: "summary"
       })}
-      <pre class="learning-content">${escapeHtml(intro.content?.text || "")}</pre>
+      ${intro.content?.text
+        ? `<pre class="learning-content">${escapeHtml(intro.content.text)}</pre>`
+        : `<p class="meta">No embedded Markdown orientation (article-backed lesson).</p>`}
       ${renderCopyField({
         edit, section: "learning", field: "content.text",
         value: intro.content?.text || "", change: diff?.fields?.learningIntroduction, label: "introduction"
+      })}
+      ${intro.article?.url
+        ? `<p class="fact"><span class="field-label">article:</span> <a href="${escapeHtml(intro.article.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(intro.article.title || intro.article.url)} ↗</a>${intro.article.estimatedMinutes ? ` ${badge(`${intro.article.estimatedMinutes} min`)}` : ""}</p>
+           ${intro.article.summary ? `<p class="fact"><span class="field-label">article summary:</span> ${escapeHtml(intro.article.summary)}</p>` : ""}`
+        : ""}
+      ${renderCopyField({
+        edit, section: "learning", field: "article.url",
+        value: intro.article?.url || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "article URL"
+      })}
+      ${renderCopyField({
+        edit, section: "learning", field: "article.title",
+        value: intro.article?.title || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "article title"
+      })}
+      ${renderCopyField({
+        edit, section: "learning", field: "article.summary",
+        value: intro.article?.summary || "", change: diff?.fields?.learningIntroduction, label: "article summary"
+      })}
+      ${renderCopyField({
+        edit, section: "learning", field: "article.estimatedMinutes",
+        value: intro.article?.estimatedMinutes !== undefined ? String(intro.article.estimatedMinutes) : "",
+        change: diff?.fields?.learningIntroduction, multiline: false, label: "article minutes"
       })}
       ${derived
         ? `<p class="fact"><span class="field-label">${hasDerivedProvenance ? "byline (derived):" : "credit:"}</span> ${escapeHtml(derived)}</p>`

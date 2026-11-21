@@ -16,7 +16,7 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.33.0";
+export const AUTHORING_MCP_SERVER_VERSION = "1.34.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export { AUTHORING_PHASES };
 export { AUTHORING_PROFILES };
@@ -98,6 +98,13 @@ if (generatedAuthoringProperties.learningIntroduction?.properties) {
     generatedAuthoringProperties.learningIntroduction
   );
   delete generatedAuthoringProperties.learningIntroduction.properties.credit;
+  generatedAuthoringProperties.learningIntroduction.anyOf = [
+    { required: ["content"] },
+    {
+      required: ["article"],
+      properties: { requirement: { enum: ["optional", "recommended"] } }
+    }
+  ];
 }
 // Cluster and lens hues are presentational. The studio can set them; the
 // agent contract does not advertise them. Zod still accepts a hue on import.

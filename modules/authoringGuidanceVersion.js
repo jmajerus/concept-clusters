@@ -215,7 +215,11 @@
 // 6.24: same review bar. Both content and lesson saves merge info.citations
 // by url, or by author, title, and year; each domain stores its own draft
 // entries and read-time union flags conflicts or near-match ambiguities.
+// 6.25: same review bar. learningIntroduction may link a full external essay
+// via article ({ url, title?, summary?, estimatedMinutes? }) — for example a
+// Ghost article rendered through the full IASP pipeline — either alongside
+// embedded content.text (expanded lesson) or alone with optional/recommended.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 24
+  minor: 25
 });

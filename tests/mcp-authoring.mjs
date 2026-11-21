@@ -1742,6 +1742,94 @@ export async function run() {
     });
     assert.deepEqual(afterReconcile.result.structuredContent.flags, []);
 
+    // Lesson domain supports both paired ("expanded lesson") and standalone
+    // Ghost/external article lessons without requiring embedded Markdown.
+    const expandedLesson = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "energy-flow",
+        domain: "lesson",
+        expected_revision: afterReconcile.result.structuredContent.draft.revision,
+        document: {
+          learningIntroduction: {
+            article: {
+              url: "https://essays.example.org/energy-flow/",
+              title: "Energy Flow Through Ecosystems",
+              summary: "Full essay with primary ecological sources.",
+              estimatedMinutes: 12
+            }
+          }
+        }
+      }
+    });
+    assert.equal(expandedLesson.result.isError, undefined);
+    const expandedValidated = await request("tools/call", {
+      name: "validate_puzzle_draft",
+      arguments: { draft_id: "energy-flow" }
+    });
+    assert.equal(expandedValidated.result.structuredContent.valid, true);
+
+    // Switching to an article-only lesson with requirement="required" fails
+    // validation, while requirement="recommended" with content: null passes.
+    const standaloneRequiredRejected = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "energy-flow",
+        domain: "lesson",
+        expected_revision: expandedLesson.result.structuredContent.draft.revision,
+        document: {
+          learningIntroduction: {
+            requirement: "required",
+            content: null
+          }
+        }
+      }
+    });
+    assert.equal(standaloneRequiredRejected.result.isError, undefined);
+    const invalidStandalone = await request("tools/call", {
+      name: "validate_puzzle_draft",
+      arguments: { draft_id: "energy-flow" }
+    });
+    assert.equal(invalidStandalone.result.structuredContent.valid, false);
+    assert.ok(
+      invalidStandalone.result.structuredContent.errors.some(err =>
+        err.includes('cannot be "required" when content is omitted')
+      )
+    );
+
+    const standaloneRecommended = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "energy-flow",
+        domain: "lesson",
+        expected_revision: standaloneRequiredRejected.result.structuredContent.draft.revision,
+        document: {
+          learningIntroduction: {
+            requirement: "recommended",
+            summary: "How sunlight drives ecosystem energy budgets."
+          }
+        }
+      }
+    });
+    assert.equal(standaloneRecommended.result.isError, undefined);
+    const validStandalone = await request("tools/call", {
+      name: "validate_puzzle_draft",
+      arguments: { draft_id: "energy-flow" }
+    });
+    assert.equal(validStandalone.result.structuredContent.valid, true);
+    const standaloneRead = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "energy-flow", domain: "lesson" }
+    });
+    assert.equal(
+      standaloneRead.result.structuredContent.draft.document.learningIntroduction.content,
+      undefined
+    );
+    assert.equal(
+      standaloneRead.result.structuredContent.draft.document.learningIntroduction.article.url,
+      "https://essays.example.org/energy-flow/"
+    );
+
     // A held publish that fails validation does not undo the classification
     // save, and ok stays true so a caller does not retry a write that landed.
     const unpublishedShelf = await request("tools/call", {

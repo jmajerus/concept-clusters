@@ -803,4 +803,43 @@ export async function run() {
     () => applyDraftFieldValue(document, { section: "board", field: "bridgePreconnect", value: "true" }, "true"),
     /Unknown section: board/
   );
+
+  // Linked Ghost / companion article fields on learningIntroduction:
+  let withArticle = applyDraftFieldValue(
+    { ...document, learningIntroduction: { requirement: "required", content: { text: "Short intro." } } },
+    { section: "learning", field: "article.url" },
+    "https://essays.example.org/companion/"
+  );
+  withArticle = applyDraftFieldValue(
+    withArticle,
+    { section: "learning", field: "article.title" },
+    "Companion Essay"
+  );
+  withArticle = applyDraftFieldValue(
+    withArticle,
+    { section: "learning", field: "article.estimatedMinutes" },
+    "16"
+  );
+  assert.deepEqual(withArticle.learningIntroduction.article, {
+    url: "https://essays.example.org/companion/",
+    title: "Companion Essay",
+    estimatedMinutes: 16
+  });
+  // Clearing embedded content.text when an article is present drops content
+  // cleanly and steps "required" down to "recommended".
+  const clearedEmbedded = applyDraftFieldValue(
+    withArticle,
+    { section: "learning", field: "content.text" },
+    ""
+  );
+  assert.equal(clearedEmbedded.learningIntroduction.content, undefined);
+  assert.equal(clearedEmbedded.learningIntroduction.requirement, "recommended");
+  assert.equal(
+    clearedEmbedded.learningIntroduction.article.url,
+    "https://essays.example.org/companion/"
+  );
+  assert.throws(
+    () => applyDraftFieldValue(withArticle, { section: "learning", field: "article.estimatedMinutes" }, "abc"),
+    DraftFieldError
+  );
 }

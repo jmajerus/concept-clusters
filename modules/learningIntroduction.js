@@ -10,6 +10,46 @@ export const LEARNING_REQUIREMENTS = new Set([
 ]);
 
 export const LEARNING_MEDIA_TYPE = "text/markdown";
+export const MAX_LEARNING_ARTICLE_MINUTES = 120;
+
+export function isHttpArticleUrl(raw) {
+  if (typeof raw !== "string" || !raw.trim()) return false;
+  try {
+    const parsed = new URL(raw.trim());
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export function hasEmbeddedLearningContent(introduction) {
+  if (!introduction || typeof introduction !== "object" || Array.isArray(introduction)) {
+    return false;
+  }
+  const content = introduction.content;
+  if (!content || typeof content !== "object" || Array.isArray(content)) return false;
+  return (typeof content.text === "string" && !!content.text.trim()) ||
+    (typeof content.src === "string" && !!content.src.trim());
+}
+
+export function normalizedLearningArticle(introduction) {
+  const article = introduction?.article;
+  if (!article || typeof article !== "object" || Array.isArray(article)) return null;
+  if (!isHttpArticleUrl(article.url)) return null;
+  const normalized = { url: article.url.trim() };
+  if (typeof article.title === "string" && article.title.trim()) {
+    normalized.title = article.title.trim();
+  }
+  if (typeof article.summary === "string" && article.summary.trim()) {
+    normalized.summary = article.summary.trim();
+  }
+  if (Number.isInteger(article.estimatedMinutes) &&
+      article.estimatedMinutes >= 1 &&
+      article.estimatedMinutes <= MAX_LEARNING_ARTICLE_MINUTES) {
+    normalized.estimatedMinutes = article.estimatedMinutes;
+  }
+  return normalized;
+}
 
 // Chatbots often put the two-character sequence \n into tool-argument
 // strings, as if they were writing JSON source. After structured decode
@@ -62,18 +102,27 @@ export function normalizedLearningIntroduction(puzzle) {
   const introduction = puzzle?.learningIntroduction;
   if (!introduction) return null;
   const { revision: _legacyRevision, ...authoredIntroduction } = introduction;
+  const article = normalizedLearningArticle(introduction);
   return {
     ...authoredIntroduction,
+    ...(article ? { article } : {}),
     requirement: LEARNING_REQUIREMENTS.has(introduction.requirement)
       ? introduction.requirement
       : "optional",
-    title: introduction.title || "Before You Begin"
+    title: introduction.title || article?.title || "Before You Begin"
   };
 }
 
 export function learningIntroductionGate(introduction, status) {
   if (!introduction) return false;
-  if (introduction.requirement === "required") return status !== "read";
+  if (introduction.requirement === "required") {
+    // External-only article lessons open in another tab and cannot verify
+    // completion; never let one hard-lock the board even if hand-edited.
+    const articleOnly = !hasEmbeddedLearningContent(introduction) &&
+      Boolean(normalizedLearningArticle(introduction));
+    if (articleOnly) return !status;
+    return status !== "read";
+  }
   if (introduction.requirement === "recommended") return !status;
   return false;
 }

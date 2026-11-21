@@ -237,5 +237,83 @@ export async function run(page, baseURL) {
     false,
     "About mode must not record an introduction status"
   );
+
+  // Standalone Ghost article lesson: offer card links straight out without a
+  // lesson fetch, Lesson modal shows the summary + Full essay card, and
+  // paired lessons show both embedded Markdown and Expanded lesson + post-solve card.
+  const standaloneUi = await page.evaluate(async () => {
+    const { normalizedLearningIntroduction, learningIntroductionGate } = await import("./modules/learningIntroduction.js");
+    const host = document.getElementById("learning-introduction");
+    const puzzle = {
+      ...CC.state.puzzle,
+      id: "ghost-standalone-ui",
+      info: {
+        citations: [{ title: "Primary Source", author: "Author, A.", year: "2024" }]
+      },
+      learningIntroduction: {
+        requirement: "recommended",
+        summary: "Framing summary stored on the puzzle.",
+        article: {
+          url: "https://essays.example.org/full-ghost-article/",
+          title: "The Full Ghost Essay",
+          summary: "Extended primary-source argument.",
+          estimatedMinutes: 15
+        },
+        links: [
+          { href: "https://essays.example.org/full-ghost-article/", label: "Duplicate" },
+          { href: "https://example.org/extra", label: "Extra reading" }
+        ]
+      }
+    };
+    const introduction = normalizedLearningIntroduction(puzzle);
+    host.model = {
+      puzzle,
+      introduction,
+      about: { category: "Science", catalogues: [], termCount: 8 },
+      gate: learningIntroductionGate(introduction, null),
+      status: null
+    };
+    const root = host.shadowRoot;
+    const offerReadHidden = root.getElementById("read").hidden;
+    const offerArticleHidden = root.getElementById("read-article").hidden;
+    const offerArticleHref = root.getElementById("read-article").getAttribute("href");
+    const offerMeta = root.getElementById("offer-meta").textContent;
+    await host.openLesson();
+    const statusHidden = root.getElementById("lesson-status").hidden;
+    const calloutHidden = root.getElementById("article-callout").hidden;
+    const calloutMeta = root.getElementById("article-callout-meta").textContent;
+    const calloutText = root.getElementById("article-callout-link").textContent;
+    const calloutSummary = root.getElementById("article-callout-summary").textContent;
+    const sourceLinks = [...root.querySelectorAll("#source-list a")].map(a => a.href);
+    const citationsVisible = !root.getElementById("citations").hidden;
+    host.closeLesson();
+    return {
+      offerReadHidden,
+      offerArticleHidden,
+      offerArticleHref,
+      offerMeta,
+      statusHidden,
+      calloutHidden,
+      calloutMeta,
+      calloutText,
+      calloutSummary,
+      sourceLinks,
+      citationsVisible
+    };
+  });
+  assert.equal(standaloneUi.offerReadHidden, true);
+  assert.equal(standaloneUi.offerArticleHidden, false);
+  assert.equal(standaloneUi.offerArticleHref, "https://essays.example.org/full-ghost-article/");
+  assert.equal(standaloneUi.offerMeta, "Recommended · Essay · About 15 min");
+  assert.equal(standaloneUi.statusHidden, true);
+  assert.equal(standaloneUi.calloutHidden, false);
+  assert.equal(standaloneUi.calloutMeta, "Full essay · About 15 min");
+  assert.equal(standaloneUi.calloutText, "The Full Ghost Essay ↗");
+  assert.equal(standaloneUi.calloutSummary, "Extended primary-source argument.");
+  // Duplicate article URL is omitted from Further reading while distinct links remain:
+  assert.deepEqual(standaloneUi.sourceLinks, ["https://example.org/extra"]);
+  assert.equal(standaloneUi.citationsVisible, true);
+  assert.equal(lessonRequests.length, lessonFetches, "Standalone article mode must not fetch Markdown");
+
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

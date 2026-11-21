@@ -66,9 +66,12 @@ const JSON_LD_INFO_KEYS = new Set([
 ]);
 const JSON_LD_LEARNING_KEYS = new Set([
   "requirement", "title", "summary", "estimatedMinutes", "credit", "content",
-  "links", "sources", "citations", "revision"
+  "article", "links", "sources", "citations", "revision"
 ]);
 const JSON_LD_LEARNING_CONTENT_KEYS = new Set(["text", "mediaType", "src"]);
+const JSON_LD_LEARNING_ARTICLE_KEYS = new Set([
+  "url", "title", "summary", "estimatedMinutes"
+]);
 const JSON_LD_LINK_ENTRY_KEYS = new Set(["href", "label"]);
 const JSON_LD_CITATION_KEYS = new Set([
   "title", "author", "publisher", "year", "pages", "url"
@@ -379,6 +382,14 @@ function unsupportedJsonLdFields(document) {
         visit(child, childPath, {
           allowedKeys: JSON_LD_LEARNING_CONTENT_KEYS,
           nodeKind: "learning content"
+        });
+        continue;
+      }
+      if (nodeKind === "learning introduction" && key === "article"
+        && objectLike(child)) {
+        visit(child, childPath, {
+          allowedKeys: JSON_LD_LEARNING_ARTICLE_KEYS,
+          nodeKind: "learning article"
         });
         continue;
       }

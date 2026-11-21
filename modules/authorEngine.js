@@ -449,18 +449,62 @@ export function deleteLens(document, lensId) {
   return next;
 }
 
-export function setLearningIntroduction(document, { requirement, title, summary, text }) {
+export function setLearningIntroduction(document, {
+  requirement,
+  title,
+  summary,
+  text,
+  articleUrl,
+  articleTitle,
+  articleSummary,
+  articleEstimatedMinutes
+}) {
   const next = clone(document);
   const body = String(text || "");
-  if (!body.trim() && !title && !summary) {
+  const hasBody = !!body.trim();
+  const existingArticle = next.learningIntroduction?.article;
+  const resolvedArticleUrl = articleUrl !== undefined
+    ? String(articleUrl || "").trim()
+    : (existingArticle?.url || "");
+  const hasArticle = !!resolvedArticleUrl;
+
+  if (!hasBody && !hasArticle && !title && !summary) {
     delete next.learningIntroduction;
     return next;
   }
+
+  let normalizedRequirement = requirement === "optional" || requirement === "recommended"
+    ? requirement
+    : "required";
+  if (!hasBody && hasArticle && normalizedRequirement === "required") {
+    normalizedRequirement = "recommended";
+  }
+
+  let article;
+  if (hasArticle) {
+    const resolvedTitle = articleTitle !== undefined
+      ? String(articleTitle || "").trim()
+      : (existingArticle?.title || "");
+    const resolvedSummary = articleSummary !== undefined
+      ? String(articleSummary || "").trim()
+      : (existingArticle?.summary || "");
+    const resolvedMinutes = articleEstimatedMinutes !== undefined
+      ? (Number.isInteger(articleEstimatedMinutes) ? articleEstimatedMinutes : undefined)
+      : existingArticle?.estimatedMinutes;
+    article = {
+      url: resolvedArticleUrl,
+      ...(resolvedTitle ? { title: resolvedTitle } : {}),
+      ...(resolvedSummary ? { summary: resolvedSummary } : {}),
+      ...(resolvedMinutes ? { estimatedMinutes: resolvedMinutes } : {})
+    };
+  }
+
   next.learningIntroduction = {
-    requirement: requirement === "optional" ? "optional" : "required",
+    requirement: normalizedRequirement,
     ...(title ? { title: String(title) } : {}),
     ...(summary ? { summary: String(summary) } : {}),
-    content: { text: body }
+    ...(hasBody ? { content: { text: body } } : {}),
+    ...(article ? { article } : {})
   };
   return next;
 }
