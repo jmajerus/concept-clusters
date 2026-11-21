@@ -672,6 +672,13 @@ export async function run() {
   ]);
   assert.deepEqual(quoted.domainCitations.content.map(entry => entry.title), ["Board book"]);
   assert.deepEqual(quoted.domainCitations.lesson.map(entry => entry.title), ["Quoted book"]);
+  const pedagogyWithSplitCitations = projectAuthoredDocument(quoted.document, "pedagogy", {
+    domainCitations: quoted.domainCitations
+  });
+  assert.deepEqual(
+    pedagogyWithSplitCitations.context.info.citations.map(entry => entry.title),
+    ["Board book"]
+  );
 
   const updatedQuote = applyAuthoredDomainPatch(quoted.document, "lesson", {
     info: { citations: [{ title: "Quoted book", author: "B", year: "2021", pages: "15" }] }
