@@ -476,12 +476,14 @@ Every focused domain save (content, pedagogy, lesson, classification) is a JSON
 Merge Patch (RFC 7396) over that domain: send only the fields this pass
 changes. Omitted fields are kept, \`null\` removes a field, and objects merge.
 Lists of identified items merge item by item, as in a Kubernetes strategic
-merge patch: \`clusters\` by id (or name), \`bridges\` by id (or term), and
-\`lenses\`, lens \`options\`, and \`relatedPuzzles.entries\` by id. Send only
+merge patch: \`clusters\` by id (or name), \`bridges\` by id (or term),
+\`lenses\`, lens \`options\`, and \`relatedPuzzles.entries\` by id, and
+\`info.citations\` by url (or author, title, and year). Send only
 the items you change; items you leave out are kept, and an unknown id is
-added. Remove an item with \`{ "id": "...", "$patch": "delete" }\`. To
-replace or reorder a whole list, include \`{ "$patch": "replace" }\` as one of
-its entries. Every other list (terms, tags, categories, citations, links,
+added. Remove an item with \`{ "id": "...", "$patch": "delete" }\` (or url /
+author, title, and year on \`info.citations\`). To
+replace or reorder a domain's list, include \`{ "$patch": "replace" }\` as one of
+its entries. Every other list (terms, tags, categories, links,
 lens targets) replaces whole. A term moved off a cluster takes its termInfo
 note with it unless the patch sets that note. The save response lists
 everything it removed in \`cleared\`, and in \`kept\` any item it left in
@@ -664,14 +666,16 @@ const LESSON_PHASE_GUIDANCE = `## Lesson pass
   title, puzzleKind, category, each cluster's name, fact, and terms, and
   each bridge's term, fact, and relationKind. Lenses are not in this read.
   Save domain=lesson as a merge patch: send only what changed.
-- \`info.citations\` is the one bibliography for the puzzle. This save may
-  add or update entries. An entry matches an existing one by url when both
-  have a url, otherwise by author, title, and year. A match is updated, a
-  new entry is appended, and entries left out stay. Remove one with
+- \`info.citations\` is the one bibliography for the puzzle. Both \`content\` and
+  \`lesson\` saves store their own entries in the draft and merge them item by
+  item: an entry matches by url when both have a url, otherwise by author,
+  title, and year. A match is updated, a new entry is appended, and entries
+  left out stay. Remove one from this domain with
   \`{ "url": "...", "$patch": "delete" }\` or the same author, title, and
-  year. An entry \`{ "$patch": "replace" }\` replaces the list. A content
-  save still replaces the whole list when it sends one. Do not put a second
-  list on the lesson.
+  year; \`{ "$patch": "replace" }\` replaces this domain's list. Read-time
+  union combines both domains onto the puzzle (existing board citations appear
+  in \`context.info.citations\`) and flags field disagreements or near-match
+  duplicates for review. Do not put a second list on the lesson.
 - File the work behind a quote in this same save. Copy a cluster link the
   lesson text relies on into the same list. Add a term link only when the
   lesson depends on a source that exists only on a term. Add a source for a

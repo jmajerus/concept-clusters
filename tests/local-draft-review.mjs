@@ -1230,6 +1230,54 @@ export async function run() {
     assert.match(unpublishResult.body, /<h1>Unpublished<\/h1>/);
     assert.match(unpublishResult.body, /cached for up to 30 seconds/);
     assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
+
+    // Read-time citation union flags surface on /admin/drafts/:id when content
+    // and lesson columns hold conflicting values, and clear when reconciled.
+    const citationConflictId = "citation-union-review-fixture";
+    const citationBase = {
+      ...puzzleToSimplified(energyPuzzle),
+      id: citationConflictId,
+      info: {
+        text: "Board note.",
+        citations: [{ title: "Fundamentals of Ecology", author: "Eugene P. Odum", year: "1953", pages: "14" }]
+      }
+    };
+    const createdConflict = await draftStore.createDraft({
+      draftId: citationConflictId,
+      document: citationBase
+    });
+    const afterLessonConflict = await draftStore.replaceDomain({
+      draftId: citationConflictId,
+      domain: "lesson",
+      expectedRevision: createdConflict.revision,
+      projection: {
+        learningIntroduction: { requirement: "optional", content: { text: "Lesson prose." } },
+        info: {
+          citations: [{ title: "Fundamentals of Ecology", author: "Eugene P. Odum", year: "1953", pages: "88" }]
+        }
+      }
+    });
+    const flaggedReviewPage = createResponse();
+    await handlePublish({ method: "GET", url: `/admin/drafts/${citationConflictId}` }, flaggedReviewPage);
+    assert.equal(flaggedReviewPage.status, 200);
+    assert.match(flaggedReviewPage.body, /disagree on pages \(&quot;14&quot; vs &quot;88&quot;\)/);
+
+    const reconciledReview = await draftStore.replaceDraft({
+      draftId: citationConflictId,
+      expectedRevision: afterLessonConflict.revision,
+      document: {
+        ...afterLessonConflict.document,
+        info: {
+          text: "Board note.",
+          citations: [{ title: "Fundamentals of Ecology", author: "Eugene P. Odum", year: "1953", pages: "14, 88" }]
+        }
+      }
+    });
+    assert.equal(reconciledReview.domainCitations, undefined);
+    const clearedReviewPage = createResponse();
+    await handlePublish({ method: "GET", url: `/admin/drafts/${citationConflictId}` }, clearedReviewPage);
+    assert.equal(clearedReviewPage.status, 200);
+    assert.doesNotMatch(clearedReviewPage.body, /disagree on pages/);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

@@ -47,14 +47,16 @@ fields, and the derived `large` flag. Classification receives id and title as
 read-only `context`. Content and pedagogy receive the classification fields as
 read-only `context`, and pedagogy also receives the content projection. Lesson
 receives `learningIntroduction` (with the human-owned `learningIntroduction.credit`
-omitted) and any existing `info.citations`, plus subject-only `context` (id,
-title, `puzzleKind`, primary category, cluster names/facts/terms, and bridge
-terms/facts/`relationKind`) with lenses withheld.
+omitted) and any lesson-authored `info.citations`, plus subject-only `context` (id,
+title, `puzzleKind`, primary category, cluster names/facts/terms, bridge
+terms/facts/`relationKind`, and any board `info.citations`) with lenses withheld.
 
 For a focused save, `applyAuthoredDomainPatch()` resolves a JSON Merge Patch
-against the selected domain before `applyAuthoredDomain()` replaces that
-projection (`lesson` pre-merges `info.citations` by URL or by author, title,
-and year and writes the merged list onto `content.info`). The
+against the selected domain before `applyAuthoredDomain()` / `prepareDomainSave()`
+replaces that projection (`content` and `lesson` both pre-merge `info.citations`
+by URL or by author, title, and year inside their own column, and read-time
+assembly unions both lists onto `document.info.citations`, flagging conflicts or
+near-match ambiguities in `validation.flags`). The
 other projections are retained and the infrastructure reassembles the
 complete document. A pedagogy bridge entry must identify an existing content
 bridge and may change only its annotation fields. Protected fields and fields
@@ -132,9 +134,9 @@ For puzzle drafts, D1 and Postgres store durable domain projections (`content_js
 `administration_json`) as the authored source of truth. The
 `document` column is a materialized complete simplified snapshot used by
 validation, publication, rendering, and Freeze. Focused MCP domain saves update
-the corresponding projection column (plus `content_json` when a `lesson` save
-updates `info.citations`) and mark `document_stale` without rewriting
-the cache; `get` assembles from domain columns, and validate/publish call
+the corresponding projection column and mark `document_stale` without rewriting
+the cache; `get` assembles from domain columns (unioning `content_json` and
+`lesson_json` citation lists), and validate/publish call
 `materialize()` to refresh the snapshot. Rows created before `lesson_json`
 keep `learningIntroduction` inside `pedagogy_json` until the next save moves
 it. The projections are not a new player

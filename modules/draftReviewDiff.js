@@ -114,7 +114,7 @@ export function alignStorageForm(published, draft) {
 
 /** Changed publication domains, using the same ownership as focused writes. */
 export function unpublishedChangeDomains(published, draft, {
-  publishedLayout = null, draftLayout = null
+  publishedLayout = null, draftLayout = null, draftDomainCitations = null
 } = {}) {
   if (!published || !draft) return [];
   // Board settings an older document carries are compared where play reads
@@ -126,7 +126,9 @@ export function unpublishedChangeDomains(published, draft, {
   const draftLift = liftLegacyBoard(draft, draftLayout ?? publishedLayout);
   const [publishedDocument, draftDocument] = alignStorageForm(publishedLift.document, draftLift.document);
   const before = partitionAuthoredDocument(hoistDocumentCitations(publishedDocument));
-  const after = partitionAuthoredDocument(hoistDocumentCitations(draftDocument));
+  const after = partitionAuthoredDocument(hoistDocumentCitations(draftDocument), {
+    domainCitations: draftDomainCitations
+  });
   // Annotation-free bridge identities are context for pedagogy, not edits to it.
   for (const parts of [before, after]) {
     const annotations = (parts.pedagogy.bridges || []).filter(bridge =>

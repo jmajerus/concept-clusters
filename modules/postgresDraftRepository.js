@@ -11,13 +11,13 @@ import {
   serializeDraftDocument
 } from "./draftRepository.js";
 import {
-  applyAuthoredDomain,
   assertNoWriteOnceDrift,
   assembleStoredDomainDocuments,
   assembleAuthoredDocumentFromDraftRow,
   AUTHORING_WRITE_DOMAINS,
-  domainColumnsForSave,
+  extractDomainCitationsFromDraftRow,
   partitionAuthoredDocument,
+  prepareDomainSave,
   storedDomainDocuments
 } from "./authoringDomains.js";
 import {
@@ -86,6 +86,7 @@ function reviewStackLoadedFromRow(row) {
 }
 
 function fullDraft(row) {
+  const domainCitations = extractDomainCitationsFromDraftRow(row, { parseJson: parsedJson });
   return {
     ...metadata(row),
     reviewStackLoaded: reviewStackLoadedFromRow(row),
@@ -96,6 +97,7 @@ function fullDraft(row) {
     layout: row.layout_json == null
       ? null
       : parseLayoutDocument(row.layout_json, "Stored layout"),
+    ...(domainCitations ? { domainCitations } : {}),
     document: assembleRowDocument(row)
   };
 }
@@ -112,6 +114,7 @@ function committedDraftView({
   baseCommitSha = null,
   openedFromPublished = false,
   reviewBasePublishedRevision = null,
+  domainCitations = null,
   status = "draft"
 }) {
   const row = {
@@ -142,6 +145,7 @@ function committedDraftView({
     layout: current?.layout_json == null
       ? null
       : parseLayoutDocument(current.layout_json, "Stored layout"),
+    ...(domainCitations ? { domainCitations } : {}),
     document
   };
 }
@@ -594,23 +598,33 @@ export class PostgresDraftRepository extends DraftRepository {
         `Draft revision conflict: expected ${expectedRevision}, current revision is ${Number(peeked.revision)}`
       );
     }
-    const previousDocument = assembleRowDocument(peeked);
-    let nextDocument = applyAuthoredDomain(previousDocument, domain, projection);
-    if (provenance !== undefined) {
-      nextDocument = { ...nextDocument, provenance };
-    } else if (Object.prototype.hasOwnProperty.call(previousDocument, "provenance")) {
-      nextDocument = { ...nextDocument, provenance: previousDocument.provenance };
-    }
-    const materialized = assembleStoredDomainDocuments({ document: nextDocument });
+    const currentView = fullDraft(peeked);
+    const domainSave = prepareDomainSave(
+      {
+        rawColumns: {
+          content: peeked.content_json,
+          pedagogy: peeked.pedagogy_json,
+          classification: peeked.classification_json,
+          lesson: peeked.lesson_json,
+          provenance: peeked.provenance_json,
+          administration: peeked.administration_json
+        },
+        document: Number(peeked.document_stale || 0) === 1 || peeked.document == null
+          ? undefined
+          : (typeof peeked.document === "string"
+            ? parsedJson(peeked.document, "Stored draft")
+            : peeked.document)
+      },
+      domain,
+      projection,
+      { nextProvenance: provenance }
+    );
+    const { previousDocument, materialized, columns, domainCitations } = domainSave;
     const nextAssembled = serializeDraftDocument(materialized);
-    if (serializeDraftDocument(previousDocument) === nextAssembled) return fullDraft(peeked);
-    const domains = storedDomainDocuments(materialized);
-    const columns = domainColumnsForSave({
-      content: peeked.content_json,
-      pedagogy: peeked.pedagogy_json,
-      classification: peeked.classification_json,
-      lesson: peeked.lesson_json
-    }, domain, domains);
+    if (serializeDraftDocument(previousDocument) === nextAssembled
+        && JSON.stringify(currentView.domainCitations || null) === JSON.stringify(domainCitations || null)) {
+      return currentView;
+    }
     const contentHash = draftContentHash(nextAssembled);
     const now = new Date().toISOString();
     const draftAt = revision => committedDraftView({
@@ -620,7 +634,8 @@ export class PostgresDraftRepository extends DraftRepository {
       contentHash,
       updatedAt: now,
       current: withHistoryCount(peeked, true),
-      documentStale: true
+      documentStale: true,
+      domainCitations
     });
     const committed = {
       draftId,
@@ -686,12 +701,17 @@ export class PostgresDraftRepository extends DraftRepository {
         const previous = history.rows[0];
         if (!previous) throw new DraftEmptyHistoryError(draftId);
         const restored = historySnapshotDocument(previous);
+        const restoredDomainCitations = extractDomainCitationsFromDraftRow(previous, {
+          parseJson: parsedJson
+        });
         const materialized = assembleStoredDomainDocuments({
           document: restored,
           administration: partitionAuthoredDocument(assembleRowDocument(current)).administration ?? {}
         });
         const documentJson = serializeDraftDocument(materialized);
-        const domains = storedDomainDocuments(materialized);
+        const domains = storedDomainDocuments(materialized, {
+          domainCitations: restoredDomainCitations
+        });
         const contentHash = draftContentHash(documentJson);
         committed.expectedContentHash = contentHash;
         await this.#updateDomains(client, {

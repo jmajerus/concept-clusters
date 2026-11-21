@@ -61,11 +61,13 @@ Legacy `learningIntroduction.citations` fold the same way. They are not part
 of the current lesson schema. When a learning
 introduction exists, play shows the puzzle list under a **References**
 heading in the Lesson dialog (not on the persistent board); without a
-lesson, it shows on the board. A lesson-domain save merges entries into
-that list (`url` when both entries have one, otherwise `author`, `title`,
-and `year`), filing quoted works and the cluster links the lesson text
-relies on in the same save; a content-domain save replaces the whole list
-when it sends one. The server does not copy links automatically. The same URL may
+lesson, it shows on the board. Both `content`-domain and `lesson`-domain saves merge entries into
+`info.citations` by identity (`url` when both entries have one, otherwise
+`author`, `title`, and `year`), storing each domain's entries in its own draft
+column (`content_json` vs `lesson_json`) and unioning them onto puzzle
+`info.citations` at read and publication time. Disagreements on a matched source
+or near-matching cross-domain duplicates surface in `validation.flags` for human
+resolution on `/admin/drafts`. The server does not copy links automatically. The same URL may
 remain on its node. It is not also a lesson further-reading link. A link
 that only orients one term stays on that term. Lesson further-reading
 uses the same `links` entry shape. Leftover `sources` still play; they are

@@ -1634,6 +1634,114 @@ export async function run() {
     );
     assert.equal(afterSecondCitation.result.structuredContent.draft.document.category, "biology");
 
+    // Symmetric identity-merge + read-time union flags: content stores its own
+    // citation entries in content_json without overwriting lesson_json, and
+    // validate_puzzle_draft / get_puzzle_draft surface cross-domain conflicts
+    // and near-match ambiguities until reconciled.
+    const lessonPaged = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "energy-flow",
+        domain: "lesson",
+        expected_revision: secondLessonCitation.result.structuredContent.draft.revision,
+        document: {
+          info: {
+            citations: [{
+              title: "Fundamentals of Ecology",
+              author: "Odum, Eugene P.",
+              year: "1953",
+              pages: "88"
+            }]
+          }
+        }
+      }
+    });
+    assert.equal(lessonPaged.result.isError, undefined);
+    const contentConflicting = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "energy-flow",
+        domain: "content",
+        expected_revision: lessonPaged.result.structuredContent.draft.revision,
+        document: {
+          info: {
+            citations: [
+              {
+                title: "Fundamentals of Ecology",
+                author: "Odum, Eugene P.",
+                year: "1953",
+                pages: "14"
+              },
+              {
+                title: "The Trophic-Dynamic Aspect of Ecology",
+                author: "Raymond L. Lindeman",
+                year: "1942"
+              }
+            ]
+          }
+        }
+      }
+    });
+    assert.equal(contentConflicting.result.isError, undefined);
+    const readWithUnionFlags = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "energy-flow", domain: "lesson" }
+    });
+    assert.deepEqual(
+      readWithUnionFlags.result.structuredContent.draft.context.info.citations.map(entry => entry.title),
+      ["Fundamentals of Ecology", "The Trophic-Dynamic Aspect of Ecology"]
+    );
+    assert.deepEqual(
+      readWithUnionFlags.result.structuredContent.flags.map(flag => flag.id),
+      ["citation-union-conflict", "citation-union-ambiguity"]
+    );
+    const validatedWithUnionFlags = await request("tools/call", {
+      name: "validate_puzzle_draft",
+      arguments: { draft_id: "energy-flow" }
+    });
+    assert.deepEqual(
+      validatedWithUnionFlags.result.structuredContent.flags.map(flag => flag.id),
+      ["citation-union-conflict", "citation-union-ambiguity"]
+    );
+
+    // Reconciling the complete document (as human review on /admin/drafts does)
+    // folds the resolved bibliography into content_json and clears union flags.
+    const fullForReconcile = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "energy-flow" }
+    });
+    const reconciled = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "energy-flow",
+        expected_revision: fullForReconcile.result.structuredContent.draft.revision,
+        document: {
+          ...fullForReconcile.result.structuredContent.draft.document,
+          info: {
+            citations: [
+              {
+                title: "Fundamentals of Ecology",
+                author: "Odum, Eugene P.",
+                year: "1953",
+                pages: "14, 88"
+              },
+              {
+                title: "The Trophic-Dynamic Aspect of Ecology",
+                author: "Lindeman, Raymond L.",
+                year: "1942"
+              }
+            ]
+          }
+        }
+      }
+    });
+    assert.equal(reconciled.result.isError, undefined);
+    const afterReconcile = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "energy-flow" }
+    });
+    assert.deepEqual(afterReconcile.result.structuredContent.flags, []);
+
     // A held publish that fails validation does not undo the classification
     // save, and ok stays true so a caller does not retry a write that landed.
     const unpublishedShelf = await request("tools/call", {

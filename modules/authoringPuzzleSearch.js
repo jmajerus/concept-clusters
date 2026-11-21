@@ -134,7 +134,11 @@ function corpusStatusOf(puzzle) {
     domains = unpublishedChangeDomains(
       documentForEditor(publishedRow.document, { categoryRegistry }),
       documentForEditor(draft.document, { categoryRegistry }),
-      { publishedLayout: publishedRow.layout || null, draftLayout: draft.layout || null }
+      {
+        publishedLayout: publishedRow.layout || null,
+        draftLayout: draft.layout || null,
+        draftDomainCitations: draft.domainCitations ?? null
+      }
     );
   }
   status.unpublishedChangeDomains = domains;

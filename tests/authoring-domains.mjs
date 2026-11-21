@@ -5,11 +5,18 @@ import {
   assembleAuthoredDocument,
   assembleAuthoredDocumentFromDraftRow,
   assembleStoredDomainDocuments,
+  CITATION_UNION_AMBIGUITY_FLAG_ID,
+  CITATION_UNION_CONFLICT_FLAG_ID,
+  citationUnionFlags,
   domainColumnsForSave,
   partitionAuthoredDocument,
+  prepareDomainSave,
   projectAuthoredDocument,
-  storedDomainDocuments
+  storedDomainDocuments,
+  unionDomainCitations
 } from "../modules/authoringDomains.js";
+import { unpublishedChangeDomains } from "../modules/draftReviewDiff.js";
+import { withStorageCanonicalizeFlags } from "../modules/authoredPuzzleDocument.js";
 import { assistanceStampScopes } from "../modules/authoringAssistanceLog.js";
 
 export const name = "Authoring domains: focused projections, protected merges, and materialization";
@@ -643,6 +650,10 @@ export async function run() {
       citations: [{ title: "Board book", author: "A", year: "2020", url: "https://example.test/board" }]
     }
   };
+  const lessonInitialView = projectAuthoredDocument(cited, "lesson");
+  assert.equal(lessonInitialView.document.info, undefined);
+  assert.deepEqual(lessonInitialView.context.info.citations.map(entry => entry.title), ["Board book"]);
+
   const quoted = applyAuthoredDomainPatch(cited, "lesson", {
     info: {
       citations: [{
@@ -659,21 +670,60 @@ export async function run() {
     "Board book",
     "Quoted book"
   ]);
+  assert.deepEqual(quoted.domainCitations.content.map(entry => entry.title), ["Board book"]);
+  assert.deepEqual(quoted.domainCitations.lesson.map(entry => entry.title), ["Quoted book"]);
+  const pedagogyWithSplitCitations = projectAuthoredDocument(quoted.document, "pedagogy", {
+    domainCitations: quoted.domainCitations
+  });
+  assert.deepEqual(
+    pedagogyWithSplitCitations.context.info.citations.map(entry => entry.title),
+    ["Board book"]
+  );
+
   const updatedQuote = applyAuthoredDomainPatch(quoted.document, "lesson", {
     info: { citations: [{ title: "Quoted book", author: "B", year: "2021", pages: "15" }] }
-  });
+  }, { domainCitations: quoted.domainCitations });
   assert.equal(updatedQuote.document.info.citations.length, 2);
   assert.equal(updatedQuote.document.info.citations[1].pages, "15");
   assert.equal(updatedQuote.document.info.citations[1].url, "https://example.test/quote");
+
+  // Symmetric identity-merge on content: adding a board citation keeps both
+  // earlier board citations and lesson-owned citations intact.
+  const addedBoardCitation = applyAuthoredDomainPatch(updatedQuote.document, "content", {
+    info: { citations: [{ title: "Second board", author: "C", year: "2024" }] }
+  }, { domainCitations: updatedQuote.domainCitations });
+  assert.deepEqual(addedBoardCitation.document.info.citations.map(entry => entry.title), [
+    "Board book",
+    "Second board",
+    "Quoted book"
+  ]);
+  assert.equal(addedBoardCitation.document.info.text, "Core information");
+
+  // Replacing content's citation list via $patch: "replace" leaves lesson_json's
+  // citations untouched at read-time union.
+  const replacedContentOnly = applyAuthoredDomainPatch(addedBoardCitation.document, "content", {
+    info: { citations: [{ $patch: "replace" }, { title: "Only board", author: "C", year: "2024" }] }
+  }, { domainCitations: addedBoardCitation.domainCitations });
+  assert.deepEqual(replacedContentOnly.document.info.citations.map(entry => entry.title), [
+    "Only board",
+    "Quoted book"
+  ]);
+  assert.deepEqual(replacedContentOnly.cleared, ["info.citations[https://example.test/board]", "info.citations[Second board]"]);
+
+  // Cross-domain delete is rejected so neither domain silently ignores or
+  // mutates the sibling domain's citation column.
+  assert.throws(
+    () => applyAuthoredDomainPatch(quoted.document, "lesson", {
+      info: { citations: [{ url: "https://example.test/board", $patch: "delete" }] }
+    }, { domainCitations: quoted.domainCitations }),
+    /belongs to the content domain and cannot be deleted from the lesson domain/
+  );
+
   const removedQuote = applyAuthoredDomainPatch(updatedQuote.document, "lesson", {
     info: { citations: [{ url: "https://example.test/quote", $patch: "delete" }] }
-  });
+  }, { domainCitations: updatedQuote.domainCitations });
   assert.deepEqual(removedQuote.document.info.citations.map(entry => entry.title), ["Board book"]);
-  const replacedCitations = applyAuthoredDomainPatch(quoted.document, "content", {
-    info: { citations: [{ title: "Only this", author: "C", year: "2024" }] }
-  });
-  assert.deepEqual(replacedCitations.document.info.citations.map(entry => entry.title), ["Only this"]);
-  assert.equal(replacedCitations.document.info.text, "Core information");
+  assert.equal(removedQuote.domainCitations, null);
 
   const distinctEdition = applyAuthoredDomainPatch(quoted.document, "lesson", {
     info: {
@@ -684,7 +734,7 @@ export async function run() {
         url: "https://example.test/quote-edition"
       }]
     }
-  });
+  }, { domainCitations: quoted.domainCitations });
   assert.deepEqual(distinctEdition.document.info.citations.map(entry => entry.url), [
     "https://example.test/board",
     "https://example.test/quote",
@@ -699,25 +749,73 @@ export async function run() {
   });
   const updatedPrintOnly = applyAuthoredDomainPatch(citedWithoutInfo.document, "lesson", {
     info: { citations: [{ title: "Only source", author: "D", year: "2019", pages: "22" }] }
-  });
+  }, { domainCitations: citedWithoutInfo.domainCitations });
   assert.equal(updatedPrintOnly.document.info.citations[0].pages, "22");
   assert.deepEqual(updatedPrintOnly.cleared, []);
   const deletedPrintOnly = applyAuthoredDomainPatch(updatedPrintOnly.document, "lesson", {
     info: { citations: [{ title: "Only source", author: "D", year: "2019", $patch: "delete" }] }
-  });
+  }, { domainCitations: updatedPrintOnly.domainCitations });
   assert.deepEqual(deletedPrintOnly.cleared, ["info"]);
 
+  // Column isolation in prepareDomainSave: lesson citations persist in
+  // lesson_json while content_json stays byte-for-byte untouched.
   const beforeLessonCols = storedDomainDocuments(cited);
-  const afterLessonCols = storedDomainDocuments(quoted.document);
-  const savedLessonCols = domainColumnsForSave(beforeLessonCols, "lesson", afterLessonCols);
+  const preparedLesson = prepareDomainSave(
+    { rawColumns: beforeLessonCols },
+    "lesson",
+    projectAuthoredDocument(quoted.document, "lesson", {
+      domainCitations: quoted.domainCitations
+    }).document
+  );
+  assert.equal(preparedLesson.columns.content, beforeLessonCols.content);
   assert.deepEqual(
-    JSON.parse(savedLessonCols.content).info.citations.map(entry => entry.title),
+    JSON.parse(preparedLesson.columns.lesson).info.citations.map(entry => entry.title),
+    ["Quoted book"]
+  );
+  assert.deepEqual(
+    preparedLesson.materialized.info.citations.map(entry => entry.title),
     ["Board book", "Quoted book"]
   );
-  const proseOnlyNext = storedDomainDocuments({
-    ...cited,
-    learningIntroduction: { requirement: "optional", content: { text: "Updated prose" } }
-  });
-  const proseOnlyCols = domainColumnsForSave(beforeLessonCols, "lesson", proseOnlyNext);
-  assert.equal(proseOnlyCols.content, beforeLessonCols.content);
+  // Unpublished-change domain attribution charges a lesson citation edit to
+  // lesson, not content.
+  assert.deepEqual(
+    unpublishedChangeDomains(cited, preparedLesson.materialized, {
+      draftDomainCitations: preparedLesson.domainCitations
+    }),
+    ["lesson"]
+  );
+
+  // Read-time union: blank-fill without conflict vs conflict and ambiguity flags.
+  const cleanBlankFill = unionDomainCitations(
+    [{ title: "Fundamentals of Ecology", author: "Eugene P. Odum", year: "1953" }],
+    [{ title: "Fundamentals of Ecology", author: "Eugene P. Odum", year: "1953", pages: "88" }]
+  );
+  assert.equal(cleanBlankFill.citations.length, 1);
+  assert.equal(cleanBlankFill.citations[0].pages, "88");
+  assert.deepEqual(cleanBlankFill.flags, []);
+
+  const conflictingPages = {
+    content: [{ title: "Fundamentals of Ecology", author: "Eugene P. Odum", year: "1953", pages: "14" }],
+    lesson: [{ title: "Fundamentals of Ecology", author: "Eugene P. Odum", year: "1953", pages: "88" }]
+  };
+  const conflictResult = unionDomainCitations(conflictingPages.content, conflictingPages.lesson);
+  assert.equal(conflictResult.citations.length, 1);
+  assert.equal(conflictResult.citations[0].pages, "14");
+  assert.equal(conflictResult.flags.length, 1);
+  assert.equal(conflictResult.flags[0].id, CITATION_UNION_CONFLICT_FLAG_ID);
+  assert.match(conflictResult.flags[0].message, /pages \("14" vs "88"\)/);
+  assert.ok(
+    withStorageCanonicalizeFlags(cited, { valid: true, flags: [] }, {
+      domainCitations: conflictingPages
+    }).flags.some(flag => flag.id === CITATION_UNION_CONFLICT_FLAG_ID)
+  );
+
+  const ambiguousAuthors = {
+    content: [{ title: "Fundamentals of Ecology", author: "Eugene P. Odum", year: "1953" }],
+    lesson: [{ title: "Fundamentals of Ecology", author: "Odum, E. P.", year: "1953" }]
+  };
+  const ambiguityResult = citationUnionFlags(ambiguousAuthors);
+  assert.equal(ambiguityResult.length, 1);
+  assert.equal(ambiguityResult[0].id, CITATION_UNION_AMBIGUITY_FLAG_ID);
+  assert.match(ambiguityResult[0].message, /author \("Eugene P\. Odum" vs "Odum, E\. P\."\)/);
 }
