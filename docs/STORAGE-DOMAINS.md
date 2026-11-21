@@ -57,10 +57,39 @@ The agent-write domains are broad enough to be useful authoring surfaces.
 Content includes the core of a bridge and its cluster membership. Classification
 is the shelf: primary category, membership, subcategory placement, search tags,
 and optional level. Pedagogy includes bridge relationship annotations, lenses,
-related puzzles, and language. Lesson holds the learning introduction and merges
-bibliography entries into `info.citations`. Provenance is a
+related puzzles, and language. Lesson holds the learning introduction — either
+an embedded Markdown orientation (`content.text`), a linked full essay
+(`article`), or both — and stores lesson-authored bibliography entries for
+read-time union into `info.citations`. Provenance is a
 compact document-level record, while system state belongs to the repository
 envelope rather than to authored JSON.
+
+### Why `lesson` is its own domain
+
+Under the stopping rule in [The Integrity Burden](https://github.com/jmajerus/write-domain-scoping),
+a new write domain pays for itself when a pass has a distinct decision, a
+distinct tool and context surface, and distinct failure modes:
+
+- **Different tool loop and cognitive mode.** Assembling a lesson through the
+  Authoring Portal (`holdings`, `corpus`, `quote`, `terminology`, `zotero`,
+  `iasp`) is a multi-step research and composition workflow — searching library
+  holdings, reading surrounding pages, verifying exact runs of words, pinning
+  Zotero citekeys, and structuring long-form exposition (whether distilled into
+  `content.text` or published to Ghost through the full IASP pipeline and linked
+  on `learningIntroduction.article`). Doing that while simultaneously holding
+  cluster seed counts, the 32-node board ceiling, bridge `idealTerms`, and lens
+  distractors forces one session to juggle two unrelated crafts.
+- **Session and model specialization.** Because `lesson` is isolated on both
+  read and write, a session or model configured specifically with the Portal
+  MCP servers and prose skills can work against `domain="lesson"` without write
+  access to the board, shelf, or lenses — and a board or lens session does not
+  need six library and publishing servers in its tool catalog.
+- **Subject-only framing and write-local citations.** `get_puzzle_draft` with
+  `domain="lesson"` hands the writer the *subject* (clusters, facts, bridge
+  relations, and existing board citations) with lenses withheld, matching
+  standalone essay authoring rather than narrating puzzle mechanics, while
+  write-local `info.citations` lets the writing pass file quoted sources in the
+  same single-column save.
 
 An authoring profile is a different axis from a storage domain. For example,
 the `vocabulary-context` profile spans the existing `content` and `pedagogy`
