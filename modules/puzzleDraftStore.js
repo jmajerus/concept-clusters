@@ -14,12 +14,12 @@ import {
   draftContentHash
 } from "./draftRepository.js";
 import {
-  applyAuthoredDomain,
   assertNoWriteOnceDrift,
   assembleAuthoredDocument,
   assembleStoredDomainDocuments,
-  domainColumnsForSave,
+  extractDomainCitations,
   partitionAuthoredDocument,
+  prepareDomainSave,
   storedDomainDocuments
 } from "./authoringDomains.js";
 import {
@@ -110,10 +110,12 @@ export function createPuzzleDraftStore({ directory }) {
         `Draft ${record.draftId || "unknown"} is stale but missing durable content/pedagogy projections`
       );
     }
+    const domainCitations = extractDomainCitations({ content, lesson });
     return {
       ...record,
       layout,
       documentStale,
+      ...(domainCitations ? { domainCitations } : {}),
       document: assembleStoredDomainDocuments({
         document: documentStale ? undefined : record.document,
         content,
@@ -259,14 +261,16 @@ export function createPuzzleDraftStore({ directory }) {
       const stack = historyOf(raw);
       stack.push({
         document: clone(current.document),
+        ...(current.domainCitations ? { domainCitations: clone(current.domainCitations) } : {}),
         contentHash: raw.contentHash,
         savedAt: new Date().toISOString()
       });
       if (stack.length > MAX_WORKING_COPY_HISTORY) {
         stack.splice(0, stack.length - MAX_WORKING_COPY_HISTORY);
       }
+      const { domainCitations: _clearedDomainCitations, ...baseRecord } = raw;
       const record = {
-        ...raw,
+        ...baseRecord,
         revision: raw.revision + 1,
         contentHash,
         updatedAt: new Date().toISOString(),
@@ -295,14 +299,28 @@ export function createPuzzleDraftStore({ directory }) {
         );
       }
       const current = materializeRecord(raw);
-      let nextDocument = applyAuthoredDomain(current.document, domain, projection);
-      if (provenance !== undefined) {
-        nextDocument = { ...nextDocument, provenance };
-      } else if (Object.prototype.hasOwnProperty.call(current.document, "provenance")) {
-        nextDocument = { ...nextDocument, provenance: current.document.provenance };
-      }
-      const materialized = assembleAuthoredDocument(partitionAuthoredDocument(nextDocument));
-      if (JSON.stringify(current.document) === JSON.stringify(materialized)) {
+      const storedDomains = raw.domains && typeof raw.domains === "object"
+        ? raw.domains
+        : null;
+      const prepared = prepareDomainSave(
+        {
+          rawColumns: {
+            content: storedDomains?.content ?? null,
+            pedagogy: storedDomains?.pedagogy ?? null,
+            classification: storedDomains?.classification ?? null,
+            lesson: storedDomains?.lesson ?? null,
+            provenance: storedDomains?.provenance ?? null,
+            administration: storedDomains?.administration ?? null
+          },
+          document: raw.documentStale ? undefined : raw.document
+        },
+        domain,
+        projection,
+        { nextProvenance: provenance }
+      );
+      const { materialized, columns } = prepared;
+      if (JSON.stringify(current.document) === JSON.stringify(materialized)
+          && JSON.stringify(current.domainCitations || null) === JSON.stringify(prepared.domainCitations || null)) {
         return publicRecord(current);
       }
       assertDocumentSize(materialized);
@@ -310,35 +328,19 @@ export function createPuzzleDraftStore({ directory }) {
       const stack = historyOf(raw);
       stack.push({
         document: clone(current.document),
+        ...(current.domainCitations ? { domainCitations: clone(current.domainCitations) } : {}),
         contentHash: raw.contentHash,
         savedAt: new Date().toISOString()
       });
       if (stack.length > MAX_WORKING_COPY_HISTORY) {
         stack.splice(0, stack.length - MAX_WORKING_COPY_HISTORY);
       }
-      // Persist the selected domain column (and provenance). On the first
-      // focused save for a pre-domain row, seed sibling projections from the
-      // assembled document so marking the cache stale does not drop them.
-      // Keep the on-disk document blob unchanged until materializeDraft().
-      const nextDomains = storedDomainDocuments(materialized);
-      const storedDomains = raw.domains && typeof raw.domains === "object"
-        ? raw.domains
-        : null;
-      // Legacy rows keep category inside content and categories inside
-      // pedagogy. The first focused save rewrites every projection together
-      // so those fields are not stored twice. tags and level that still sit
-      // on a sibling projection are moved the same way.
-      const columns = domainColumnsForSave({
-        content: storedDomains?.content ?? null,
-        pedagogy: storedDomains?.pedagogy ?? null,
-        classification: storedDomains?.classification ?? null,
-        lesson: storedDomains?.lesson ?? null
-      }, domain, nextDomains);
       const domains = storedDomains
         ? { ...storedDomains, ...columns }
-        : nextDomains;
+        : columns;
+      const { domainCitations: _staleCitations, ...baseRecord } = raw;
       const record = {
-        ...raw,
+        ...baseRecord,
         revision: raw.revision + 1,
         contentHash,
         updatedAt: new Date().toISOString(),
@@ -356,17 +358,21 @@ export function createPuzzleDraftStore({ directory }) {
     return withDraftMutation(draftId, async () => {
       const raw = await readRawRecord(draftId);
       if (!raw.documentStale) return publicRecord(materializeRecord(raw));
-      const materialized = materializeRecord(raw).document;
+      const materializedRecord = materializeRecord(raw);
+      const materialized = materializedRecord.document;
+      const { domainCitations: _staleCitations, ...baseRecord } = raw;
       const record = {
-        ...raw,
+        ...baseRecord,
         document: clone(materialized),
         documentStale: false,
-        domains: storedDomainDocuments(materialized),
+        domains: storedDomainDocuments(materialized, {
+          domainCitations: materializedRecord.domainCitations ?? null
+        }),
         contentHash: draftContentHash(materialized),
         updatedAt: new Date().toISOString()
       };
       await writeRecord(record);
-      return publicRecord(record);
+      return publicRecord(materializeRecord(record));
     });
   }
 
@@ -382,25 +388,30 @@ export function createPuzzleDraftStore({ directory }) {
       const previous = stack.pop();
       if (!previous) throw new DraftEmptyHistoryError(draftId);
       const current = materializeRecord(raw);
-      const restoredDomains = partitionAuthoredDocument(previous.document);
+      const restoredDomains = partitionAuthoredDocument(previous.document, {
+        domainCitations: previous.domainCitations ?? null
+      });
       // Content undo must not roll back a human's current board settings or
       // a later grant/revocation decision.
       restoredDomains.administration = partitionAuthoredDocument(current.document).administration;
       const materialized = assembleAuthoredDocument(
         restoredDomains
       );
+      const { domainCitations: _staleCitations, ...baseRecord } = raw;
       const record = {
-        ...raw,
+        ...baseRecord,
         revision: raw.revision + 1,
         contentHash: draftContentHash(materialized),
         updatedAt: new Date().toISOString(),
         document: clone(materialized),
         documentStale: false,
-        domains: storedDomainDocuments(materialized),
+        domains: storedDomainDocuments(materialized, {
+          domainCitations: previous.domainCitations ?? null
+        }),
         workingCopyStack: stack
       };
       await writeRecord(record);
-      return publicRecord(record);
+      return publicRecord(materializeRecord(record));
     });
   }
 
@@ -690,6 +701,7 @@ export function createPuzzleDraftStore({ directory }) {
       .map(record => {
         const {
           document,
+          domainCitations,
           workingCopyStack,
           domains,
           layout: _layout,
@@ -701,7 +713,13 @@ export function createPuzzleDraftStore({ directory }) {
           puzzleId: document?.id || null,
           title: document?.title || null,
           workingCopyHistoryCount: historyOf({ workingCopyStack }).length,
-          ...(includeDocument ? { document, layout: _layout ?? null } : {})
+          ...(includeDocument
+            ? {
+              document,
+              layout: _layout ?? null,
+              ...(domainCitations ? { domainCitations } : {})
+            }
+            : {})
         };
       })
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));

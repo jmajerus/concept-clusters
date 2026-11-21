@@ -319,7 +319,7 @@ export async function mapDraftDetail(record, {
           withStorageCanonicalizeFlags(
             record.document,
             await contentService.validatePuzzleDraft(document, { categoryRegistry }),
-            { categoryRegistry }
+            { categoryRegistry, domainCitations: record.domainCitations ?? null }
           )
         )
       )
@@ -2167,7 +2167,8 @@ export function createLocalDraftReviewHandler({
             unpublishedDomains: baseline && workingDocument && !publishedRow.withdrawnAt
               ? timing.measure("compare", () => unpublishedChangeDomains(baseline, workingDocument, {
                 publishedLayout: publishedRow.layout || null,
-                draftLayout: metadata.layout || null
+                draftLayout: metadata.layout || null,
+                draftDomainCitations: metadata.domainCitations ?? null
               }))
               : [],
             // Checked against the working document: an edit outdates a fixed

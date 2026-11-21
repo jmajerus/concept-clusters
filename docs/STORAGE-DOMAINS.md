@@ -135,14 +135,15 @@ when reading or saving a puzzle draft. A focused read contains only the
 selected writable projection. Content and pedagogy responses include the
 classification fields as read-only context. A classification response includes
 id and title as read-only context, and a pedagogy response also includes the
-content projection. A lesson response returns `learningIntroduction` (and
-existing `info.citations`), with the subject as read-only context: id, title,
-`puzzleKind`, primary category, each cluster's name, fact, and terms, and each
-bridge's term, fact, and `relationKind`; lenses are withheld so the prose
-teaches the subject rather than walking through the mechanics. A focused save
-merge-patches the selected domain, preserves the sibling and protected domains,
-and lets the infrastructure reassemble a complete document for validation,
-publication, rendering, and Freeze.
+content projection. A lesson response returns `learningIntroduction` (plus any lesson-authored
+`info.citations`), with the subject as read-only context: id, title,
+`puzzleKind`, primary category, each cluster's name, fact, and terms, each
+bridge's term, fact, and `relationKind`, and any board `info.citations` from
+`content`; lenses are withheld so the prose teaches the subject rather than
+walking through the mechanics. A focused save merge-patches the selected domain,
+preserves the sibling and protected domains, and lets the infrastructure
+reassemble a complete document for validation, publication, rendering, and
+Freeze.
 
 The `complete` path remains available for existing clients and workflows, but
 it does not expose or accept protected attribution, legacy lesson credit, or
@@ -293,7 +294,7 @@ Two counters and a few clocks are involved:
 
 | Domain | Writes land on | Working-copy `revision` | Undo snapshot | Reaches players | Why it differs |
 |---|---|---|---|---|---|
-| `content`, `classification`, `pedagogy`, `lesson` | Working copy, as a merge patch on one domain column (`lesson` also updates `content_json` when `info.citations` changes) | +1 | Yes | Publish | Baseline |
+| `content`, `classification`, `pedagogy`, `lesson` | Working copy, as a merge patch on one domain column | +1 | Yes | Publish | Baseline |
 | `provenance` | Working copy, written by the save it describes (MCP stamps, or the edit page's Save working copy) | +1, as part of that save | Yes | Publish | It records who made a save, so it never saves on its own |
 | `layout` (per-mode layouts and board settings) | Working copy, `layout_json` | Unchanged | No | Publish | Presentation, not content, and edited in a second tab. Bumping the revision would make the edit page's next save fail its `expected_revision` check, and drag-and-save cycles are not content history. `updated_at` guards concurrent layout saves instead |
 | `administration` (legacy `board`) | Nothing writes it | – | – | Lifted into the layout at publish | Read-only compatibility for older puzzles |
@@ -380,20 +381,22 @@ pass's fields and cannot erase another pass's work; `null` is the explicit
 removal. The same rule holds in every domain, so agents carry one write habit.
 
 Lists follow one rule as well. A list of identified items (clusters, bridges,
-lenses, lens options, related-puzzle entries) merges item by item by its id,
-using Kubernetes strategic-merge-patch list semantics: an item left out is
-kept, `"$patch": "delete"` removes one, and a `"$patch": "replace"` entry
-replaces the list. Pedagogy `bridges` is an ordinary keyed list under this
-rule, not an exception. Lists of plain values and ordered reference lists
-(terms, tags, categories, citations, links) replace whole, with one
-cross-domain exception: `info.citations` remains a single puzzle-level
-bibliography on `content`, replaces whole on a content save, and merges by
-entry identity on a lesson save (`url` when both entries have one, otherwise
-`author`, `title`, and `year`) so citing a quote or cluster source during
-lesson writing preserves existing entries. Editing one item is
-far more common than deleting one, so this trades a wiped board for an item
-that survives by mistake, which the save response flags in `kept`. Removals
-are listed in `cleared`.
+lenses, lens options, related-puzzle entries, and `info.citations`) merges item
+by item by its identity, using Kubernetes strategic-merge-patch list semantics:
+an item left out is kept, `"$patch": "delete"` removes one, and a
+`"$patch": "replace"` entry replaces that domain's list. Pedagogy `bridges` is
+an ordinary keyed list under this rule, not an exception. `info.citations`
+matches entries by `url` when both entries have one, otherwise by `author`,
+`title`, and `year`: during draft authoring, `content_json` and `lesson_json`
+each store their own citation entries so every focused save remains single-column,
+and read-time assembly unions them into the single puzzle-level `info.citations`
+list (surfacing `citation-union-conflict` or `citation-union-ambiguity` in
+`validation.flags` when both domains disagree on a field or cite a near-matching
+duplicate, which human review on `/admin/drafts` resolves on save). Lists of
+plain values and ordered link lists (terms, tags, categories, links) replace
+whole. Editing one item is far more common than deleting one, so this trades a
+wiped board for an item that survives by mistake, which the save response flags
+in `kept`. Removals are listed in `cleared`.
 
 The patch is resolved at the MCP boundary (`applyAuthoredDomainPatch` in
 `modules/authoringDomains.js`) into a complete domain projection. Storage and

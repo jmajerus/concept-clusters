@@ -657,8 +657,8 @@ function serverInstructions() {
     "domain=classification, domain=pedagogy, or domain=lesson and " +
     "save_puzzle_draft with the same domain; every focused domain save is a JSON Merge Patch " +
     "(RFC 7396), so send only the fields the pass changes and null to remove one. Lists of clusters, " +
-    "bridges, lenses, lens options, and relatedPuzzles entries merge item by item by id; other lists " +
-    "replace whole. The server preserves " +
+    "bridges, lenses, lens options, and relatedPuzzles entries merge item by item by id, and info.citations " +
+    "merges by url or author+title+year; other lists replace whole. The server preserves " +
     "protected provenance and system state " +
     "and materializes the complete document for validation and publication. Pedagogy responses include " +
     "content and classification as read-only context. Classification owns category, categories, " +
@@ -1618,7 +1618,8 @@ export function createAuthoringMcpServer({
     // that only ever reads a draft (never explicitly validates it) still
     // sees a stale-storage-shape draft worth saving to lock in.
     const { flags } = withStorageCanonicalizeFlags(stored.document, {}, {
-      categoryRegistry: registry
+      categoryRegistry: registry,
+      domainCitations: stored.domainCitations ?? null
     });
     const waiverRequests = await repositorySupports(draftRepository, "listBoardLimitWaiverRequests")
       ? await draftRepository.listBoardLimitWaiverRequests({ draftId: draft_id, actor })
@@ -1713,7 +1714,7 @@ export function createAuthoringMcpServer({
     title: "Save puzzle draft",
     description:
       "Every save requires expected_revision, copied from draft.revision on the latest create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for this draft_id. A draft that has never been created uses create_puzzle_draft. " +
-      "Replace the complete agent-authored document, or write only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. Every focused domain save (domain=content, domain=pedagogy, domain=lesson, domain=classification) is a JSON Merge Patch (RFC 7396) over that domain: send only the fields you change; omitted fields are kept, null removes a field, and objects merge. Lists of identified items merge item by item, as in a Kubernetes strategic merge patch: clusters match by id (or name), bridges by id (or term), and lenses, lens options, and relatedPuzzles entries by id. A list entry patches the item it names, an unknown one is appended, and items left out are kept. Remove an item with {\"id\": \"...\", \"$patch\": \"delete\"}; put {\"$patch\": \"replace\"} in a list to replace it whole, for example to reorder. Every other list (terms, tags, categories, citations, links, lens targets) replaces whole, except info.citations on a lesson save, which merges by url or by author, title, and year. When a patch moves a term off a cluster, that term's termInfo note goes too unless the patch sets it. Every domain save response lists what it removed in `cleared` (fields, list items such as clusters[beta] or clusters[alpha].seeds[two], and fields inside kept items) and, in `kept`, keyed items left in place although the patch named most of their list. With domain=content, domain=classification, domain=pedagogy, or domain=lesson, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. The first save of a draft that predates classification rewrites the content, pedagogy, and classification columns together so category fields are not stored twice. A lesson still stored on the pedagogy column moves to lesson_json on the next save. Pedagogy receives content and classification as read-only context. The lesson receives the subject as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. This tool does not publish a puzzle. A person publishes the working copy, and that publish is what players see. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for classification, pedagogy, or lesson saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently. Content owns a bridge's term, clusters, fact, and info; pedagogy owns relationKind, direction, idealTerms, and conceptId; idealTerms is a map, a merge patch keeps keys the patch does not mention, and after retargeting a bridge a pedagogy save must set each stale cluster id to null. " + WRITE_RECEIPT + " " + RECOVER_AFTER_WRITE_ERROR,
+      "Replace the complete agent-authored document, or write only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. Every focused domain save (domain=content, domain=pedagogy, domain=lesson, domain=classification) is a JSON Merge Patch (RFC 7396) over that domain: send only the fields you change; omitted fields are kept, null removes a field, and objects merge. Lists of identified items merge item by item, as in a Kubernetes strategic merge patch: clusters match by id (or name), bridges by id (or term), lenses, lens options, and relatedPuzzles entries by id, and info.citations by url or by author, title, and year (stored per domain on content_json and lesson_json and unioned at read time). A list entry patches the item it names, an unknown one is appended, and items left out are kept. Remove an item with {\"id\": \"...\", \"$patch\": \"delete\"} (or url / author+title+year on info.citations); put {\"$patch\": \"replace\"} in a list to replace that domain's list whole, for example to reorder. Every other list (terms, tags, categories, links, lens targets) replaces whole. When a patch moves a term off a cluster, that term's termInfo note goes too unless the patch sets it. Every domain save response lists what it removed in `cleared` (fields, list items such as clusters[beta] or clusters[alpha].seeds[two], and fields inside kept items) and, in `kept`, keyed items left in place although the patch named most of their list. With domain=content, domain=classification, domain=pedagogy, or domain=lesson, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. The first save of a draft that predates classification rewrites the content, pedagogy, and classification columns together so category fields are not stored twice. A lesson still stored on the pedagogy column moves to lesson_json on the next save. Pedagogy receives content and classification as read-only context. The lesson receives the subject (plus any board citations) as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. This tool does not publish a puzzle. A person publishes the working copy, and that publish is what players see. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for classification, pedagogy, or lesson saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently. Content owns a bridge's term, clusters, fact, and info; pedagogy owns relationKind, direction, idealTerms, and conceptId; idealTerms is a map, a merge patch keeps keys the patch does not mention, and after retargeting a bridge a pedagogy save must set each stale cluster id to null. " + WRITE_RECEIPT + " " + RECOVER_AFTER_WRITE_ERROR,
     inputSchema: puzzleDraftSaveSchema({
       draft_id: draftIdSchema,
       expected_revision: z.number({ error: EXPECTED_REVISION_CONTRACT }).int().positive().describe(
@@ -1738,6 +1739,7 @@ export function createAuthoringMcpServer({
       );
     }
     let previousDocument = null;
+    let nextDomainCitations = null;
     let cleared = [];
     let kept = [];
     const repairedInput = repair
@@ -1746,10 +1748,11 @@ export function createAuthoringMcpServer({
     if (domain !== "complete") {
       const previous = await draftRepository.get({ draftId: draft_id, actor });
       previousDocument = documentForEditor(previous.document);
-      ({ document, cleared, kept } = applyAuthoredDomainPatch(
+      ({ document, domainCitations: nextDomainCitations, cleared, kept } = applyAuthoredDomainPatch(
         previousDocument,
         domain,
-        repairedInput.document
+        repairedInput.document,
+        { domainCitations: previous.domainCitations ?? null }
       ));
     } else {
       previousDocument = (await draftRepository.get({ draftId: draft_id, actor })).document;
@@ -1807,7 +1810,9 @@ export function createAuthoringMcpServer({
     });
     let draft;
     if (domain !== "complete" && await repositorySupports(draftRepository, "saveDomain")) {
-      const projection = projectAuthoredDocument(stamped, domain).document;
+      const projection = projectAuthoredDocument(stamped, domain, {
+        domainCitations: nextDomainCitations
+      }).document;
       draft = await draftRepository.saveDomain({
         draftId: draft_id,
         domain,
@@ -2021,7 +2026,10 @@ export function createAuthoringMcpServer({
         categoryRegistry: taxonomy.categoryRegistry,
         knownPuzzleIds: taxonomy.puzzleIds
       }),
-      { categoryRegistry: taxonomy.categoryRegistry }
+      {
+        categoryRegistry: taxonomy.categoryRegistry,
+        domainCitations: stored.domainCitations ?? null
+      }
     );
     await draftRepository.recordValidation({
       draftId: draft_id,

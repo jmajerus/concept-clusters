@@ -30,6 +30,7 @@ import {
 } from "../puzzles/categories.js";
 import {
   assertNoRetiredAuthoringFields,
+  citationUnionFlags,
   projectAuthoredDocument,
   stripSystemAuthoredMetadata
 } from "./authoringDomains.js";
@@ -307,7 +308,9 @@ export function documentForMcp(document, options = {}) {
 // protected attribution/editorial and system metadata out of agent context.
 export function documentForMcpDomain(document, domain, options = {}) {
   const authored = documentForEditor(document, options);
-  const projection = projectAuthoredDocument(authored, domain);
+  const projection = projectAuthoredDocument(authored, domain, {
+    domainCitations: options.domainCitations ?? null
+  });
   return {
     domain: projection.domain,
     document: documentForMcp(projection.document, options),
@@ -354,7 +357,10 @@ export function draftForMcp(draft, options = {}) {
 
 export function draftForMcpDomain(draft, domain, options = {}) {
   if (!draft || typeof draft !== "object") return draft;
-  const projection = documentForMcpDomain(draft.document, domain, options);
+  const projection = documentForMcpDomain(draft.document, domain, {
+    ...options,
+    domainCitations: options.domainCitations ?? draft.domainCitations ?? null
+  });
   return {
     ...(draft.draftId !== undefined ? { draftId: draft.draftId } : {}),
     ...(draft.revision !== undefined ? { revision: draft.revision } : {}),
@@ -440,16 +446,20 @@ export function storedDocumentCitesRenamedCategory(document, categoryRegistry) {
 /**
  * @param {any} storedDocument
  * @param {any} validation
- * @param {{ categoryRegistry?: Record<string, any> | null }} options
+ * @param {{ categoryRegistry?: Record<string, any> | null, domainCitations?: { content?: any[], lesson?: any[] } | null }} options
  */
 export function withStorageCanonicalizeFlags(storedDocument, validation, {
-  categoryRegistry = null
+  categoryRegistry = null,
+  domainCitations = null
 } = {}) {
   const flags = Array.isArray(validation?.flags) ? [...validation.flags] : [];
   if (storedDocumentNeedsCanonicalSave(storedDocument)) {
     flags.push({ ...SAVE_TO_CANONICALIZE_FLAG });
   } else if (storedDocumentCitesRenamedCategory(storedDocument, categoryRegistry)) {
     flags.push({ ...SAVE_RENAMED_CATEGORIES_FLAG });
+  }
+  for (const flag of citationUnionFlags(domainCitations)) {
+    flags.push(flag);
   }
   return { ...validation, flags };
 }

@@ -19,6 +19,7 @@ function record(draft) {
       : null,
     validation: draft.validation ?? null,
     layout: draft.layout ?? null,
+    ...(draft.domainCitations ? { domainCitations: draft.domainCitations } : {}),
     document: draft.document
   };
 }

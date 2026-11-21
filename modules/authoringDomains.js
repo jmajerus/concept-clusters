@@ -252,12 +252,181 @@ function assembleBridges(contentBridges, pedagogyBridges) {
   });
 }
 
+export const CITATION_UNION_CONFLICT_FLAG_ID = "citation-union-conflict";
+export const CITATION_UNION_AMBIGUITY_FLAG_ID = "citation-union-ambiguity";
+
+const CITATION_FIELDS = ["title", "author", "publisher", "year", "pages", "url"];
+
+function normalizedCitationText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizedLooseCitationText(value) {
+  return normalizedCitationText(value)
+    .toLowerCase()
+    .replace(/[.,;:!?'"()[\]]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function citationWorkKey(entry) {
+  const title = normalizedCitationText(entry?.title);
+  if (!title) return null;
+  return `${normalizedCitationText(entry?.author)}\0${title}\0${normalizedCitationText(entry?.year)}`;
+}
+
+function citationLabel(entry) {
+  return normalizedCitationText(entry?.url) || citationWorkKey(entry);
+}
+
+function citationsMatch(left, right) {
+  const leftUrl = normalizedCitationText(left?.url);
+  const rightUrl = normalizedCitationText(right?.url);
+  // A URL identifies the entry whenever both sides have one. Different
+  // non-empty URLs are different editions even when author, title, and year
+  // agree. The work key applies only when at least one side has no URL.
+  if (leftUrl && rightUrl) return leftUrl === rightUrl;
+  const leftWork = citationWorkKey(left);
+  const rightWork = citationWorkKey(right);
+  return !!(leftWork && leftWork === rightWork);
+}
+
+function formatCitationHeading(entry) {
+  const title = normalizedCitationText(entry?.title)
+    || normalizedCitationText(entry?.url)
+    || "untitled source";
+  const year = normalizedCitationText(entry?.year);
+  return year ? `"${title}" (${year})` : `"${title}"`;
+}
+
+function citationsNearMatchDiscrepancy(contentEntry, lessonEntry) {
+  const contentTitle = normalizedLooseCitationText(contentEntry?.title);
+  const lessonTitle = normalizedLooseCitationText(lessonEntry?.title);
+  if (!contentTitle || contentTitle !== lessonTitle) return null;
+  const contentYear = normalizedCitationText(contentEntry?.year);
+  const lessonYear = normalizedCitationText(lessonEntry?.year);
+  if (contentYear && lessonYear && contentYear !== lessonYear) return null;
+
+  const differences = [];
+  const contentUrl = normalizedCitationText(contentEntry?.url);
+  const lessonUrl = normalizedCitationText(lessonEntry?.url);
+  if (contentUrl && lessonUrl && contentUrl !== lessonUrl) {
+    differences.push(`url (${JSON.stringify(contentUrl)} vs ${JSON.stringify(lessonUrl)})`);
+  }
+  const contentAuthor = normalizedCitationText(contentEntry?.author);
+  const lessonAuthor = normalizedCitationText(lessonEntry?.author);
+  if (contentAuthor !== lessonAuthor) {
+    differences.push(
+      `author (${JSON.stringify(contentAuthor || "(omitted)")} vs ${JSON.stringify(lessonAuthor || "(omitted)")})`
+    );
+  }
+  if (!differences.length) {
+    const exactContentTitle = normalizedCitationText(contentEntry?.title);
+    const exactLessonTitle = normalizedCitationText(lessonEntry?.title);
+    if (exactContentTitle !== exactLessonTitle) {
+      differences.push(`title (${JSON.stringify(exactContentTitle)} vs ${JSON.stringify(exactLessonTitle)})`);
+    } else if (contentYear !== lessonYear) {
+      differences.push(
+        `year (${JSON.stringify(contentYear || "(omitted)")} vs ${JSON.stringify(lessonYear || "(omitted)")})`
+      );
+    }
+  }
+  return differences.length ? differences.join(", ") : null;
+}
+
+/**
+ * Union content-owned and lesson-owned citations at read/materialization time.
+ * Blank fields on a matched content entry are filled by the lesson entry;
+ * conflicting non-empty fields preserve the content value deterministically
+ * and emit a conflict flag. Near-matching distinct entries stay in the list
+ * and emit an ambiguity flag for human review.
+ */
+export function unionDomainCitations(contentCitations, lessonCitations) {
+  const lessonList = Array.isArray(lessonCitations) ? lessonCitations.filter(isObject) : [];
+  if (!lessonList.length) {
+    return {
+      citations: Array.isArray(contentCitations) ? clone(contentCitations) : [],
+      flags: []
+    };
+  }
+  const merged = Array.isArray(contentCitations) ? clone(contentCitations) : [];
+  const contentCount = merged.length;
+  const flags = [];
+
+  for (const lessonEntry of lessonList) {
+    const matchIndex = merged.findIndex(
+      candidate => isObject(candidate) && citationsMatch(lessonEntry, candidate)
+    );
+    if (matchIndex >= 0) {
+      const target = merged[matchIndex];
+      const disagreements = [];
+      const keys = [...new Set([...CITATION_FIELDS, ...Object.keys(lessonEntry)])];
+      for (const key of keys) {
+        const leftValue = normalizedCitationText(target[key]);
+        const rightValue = normalizedCitationText(lessonEntry[key]);
+        if (!leftValue && rightValue) {
+          target[key] = clone(lessonEntry[key]);
+        } else if (leftValue && rightValue && leftValue !== rightValue && matchIndex < contentCount) {
+          disagreements.push(
+            `${key} (${JSON.stringify(leftValue)} vs ${JSON.stringify(rightValue)})`
+          );
+        }
+      }
+      if (disagreements.length) {
+        flags.push({
+          id: CITATION_UNION_CONFLICT_FLAG_ID,
+          message:
+            `Content and lesson citations for ${formatCitationHeading(target)} disagree on ` +
+            `${disagreements.join(", ")}. Edit puzzle citations and save to reconcile.`
+        });
+      }
+      continue;
+    }
+
+    const discrepancy = merged
+      .slice(0, contentCount)
+      .map(candidate => isObject(candidate) ? citationsNearMatchDiscrepancy(candidate, lessonEntry) : null)
+      .find(Boolean);
+    merged.push(clone(lessonEntry));
+    if (discrepancy) {
+      flags.push({
+        id: CITATION_UNION_AMBIGUITY_FLAG_ID,
+        message:
+          `Content and lesson domains both cite ${formatCitationHeading(lessonEntry)} with differing ` +
+          `${discrepancy}, so both entries appear in info.citations. Edit puzzle citations and save to merge or keep both.`
+      });
+    }
+  }
+
+  return { citations: merged, flags };
+}
+
+export function citationUnionFlags(domainCitations) {
+  if (!domainCitations || !Array.isArray(domainCitations.lesson) || !domainCitations.lesson.length) {
+    return [];
+  }
+  return unionDomainCitations(domainCitations.content, domainCitations.lesson).flags;
+}
+
+function withInfoCitations(info, citations) {
+  const list = Array.isArray(citations) && citations.length ? clone(citations) : null;
+  if (!list) {
+    if (!isObject(info)) return info;
+    const next = { ...info };
+    delete next.citations;
+    return Object.keys(next).length ? next : undefined;
+  }
+  if (isObject(info)) return { ...info, citations: list };
+  if (typeof info === "string" && info) return { text: info, citations: list };
+  return { citations: list };
+}
+
 /**
  * Split a canonical simplified document into logical authoring domains.
  * `system` is supplied by the repository because its values are database
  * metadata rather than fields in the player-facing puzzle document.
  */
-export function partitionAuthoredDocument(document, { system = {} } = {}) {
+export function partitionAuthoredDocument(document, { system = {}, domainCitations = null } = {}) {
   assertCurrentAuthoredDocument(document, "Authored document");
   const authored = stripSystemAuthoredMetadata(document);
   const content = {};
@@ -289,6 +458,15 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
       // Explicitly-known system fields were stripped above and can never be
       // smuggled into a domain projection.
       content[key] = clone(value);
+    }
+  }
+
+  if (domainCitations && typeof domainCitations === "object") {
+    const nextContentInfo = withInfoCitations(content.info, domainCitations.content);
+    if (nextContentInfo === undefined) delete content.info;
+    else content.info = nextContentInfo;
+    if (Array.isArray(domainCitations.lesson) && domainCitations.lesson.length) {
+      lesson.info = { citations: clone(domainCitations.lesson) };
     }
   }
 
@@ -336,7 +514,14 @@ export function assembleAuthoredDocument({
     document[key] = clone(value);
   }
   for (const [key, value] of Object.entries(lesson)) {
+    if (key === "info") continue;
     document[key] = clone(value);
+  }
+  if (Array.isArray(lesson.info?.citations) && lesson.info.citations.length) {
+    const { citations } = unionDomainCitations(content.info?.citations, lesson.info.citations);
+    const nextInfo = withInfoCitations(document.info, citations);
+    if (nextInfo === undefined) delete document.info;
+    else document.info = nextInfo;
   }
   if (administration !== undefined && administration !== null) {
     assertObject(administration, "Administration domain");
@@ -422,6 +607,8 @@ function pickFields(source, keys) {
 
 // The lesson read is the subject, not the play design. relationKind is the
 // one pedagogy annotation the prose needs in order to follow how ideas relate.
+// Board citations from content_json appear in read-only context so the lesson
+// pass sees sources already on the puzzle while writing its own entries.
 function lessonReadContext(domains) {
   const content = domains.content || {};
   const result = {};
@@ -447,16 +634,24 @@ function lessonReadContext(domains) {
       return view;
     });
   }
+  const contentCitations = content.info?.citations;
+  if (Array.isArray(contentCitations) && contentCitations.length) {
+    result.info = { citations: clone(contentCitations) };
+  }
   return result;
 }
 
 function lessonWritableDocument(domains) {
-  const result = publicLessonDomain(domains.lesson);
-  const citations = domains.content?.info?.citations;
-  if (Array.isArray(citations) && citations.length) {
-    result.info = { citations: clone(citations) };
+  return publicLessonDomain(domains.lesson);
+}
+
+function contentReadContext(domains) {
+  const context = publicDomain(domains.classification);
+  const lessonCitations = domains.lesson?.info?.citations;
+  if (Array.isArray(lessonCitations) && lessonCitations.length) {
+    context.info = { citations: clone(lessonCitations) };
   }
-  return result;
+  return context;
 }
 
 function contextForDomain(source, domainName) {
@@ -545,12 +740,20 @@ function parseStoredObject(value) {
   return isObject(value) ? value : null;
 }
 
-function storedCitations(contentValue) {
-  const info = parseStoredObject(contentValue)?.info;
-  if (!isObject(info) || !Array.isArray(info.citations) || !info.citations.length) {
-    return null;
-  }
-  return info.citations;
+export function extractDomainCitations({ content = null, lesson = null } = {}) {
+  const lessonObject = parseStoredObject(lesson);
+  const lessonCitations = Array.isArray(lessonObject?.info?.citations)
+    ? lessonObject.info.citations.filter(isObject)
+    : [];
+  if (!lessonCitations.length) return null;
+  const contentObject = parseStoredObject(content);
+  const contentCitations = Array.isArray(contentObject?.info?.citations)
+    ? contentObject.info.citations.filter(isObject)
+    : [];
+  return {
+    content: clone(contentCitations),
+    lesson: clone(lessonCitations)
+  };
 }
 
 /**
@@ -571,12 +774,8 @@ export function domainColumnsForSave(current, domain, next) {
   const needsLessonMove = projectionHoldsLearningIntroduction(current?.pedagogy)
     || projectionHoldsLearningIntroduction(current?.content);
   const rewriteAll = needsSplit || needsShelfMove || needsLessonMove;
-  // info.citations stays stored on content_json; a lesson save that changes
-  // the bibliography must persist content_json alongside lesson_json.
-  const lessonChangedCitations = domain === "lesson" &&
-    !sameStoredDocument(storedCitations(current?.content), storedCitations(next?.content));
   return {
-    content: domain === "content" || lessonChangedCitations || current?.content == null || rewriteAll
+    content: domain === "content" || current?.content == null || rewriteAll
       ? next.content
       : current.content,
     pedagogy: domain === "pedagogy" || current?.pedagogy == null || rewriteAll
@@ -598,22 +797,24 @@ export function domainColumnsForSave(current, domain, next) {
  * context because annotations reference clusters and bridges. Content and
  * pedagogy also receive classification as read-only context. Classification
  * receives id and title. The lesson receives the subject (clusters, bridge
- * facts, relationKind) and writes the introduction plus the shared
- * bibliography. Only the returned `document` is writable.
+ * facts, relationKind, and any board citations) and writes the introduction
+ * plus its own citations. Only the returned `document` is writable.
  */
-export function projectAuthoredDocument(document, domain = "complete") {
+export function projectAuthoredDocument(document, domain = "complete", {
+  domainCitations = null
+} = {}) {
   if (domain === "complete") {
     return { domain, document: stripSystemAuthoredMetadata(clone(document)) };
   }
   if (!AUTHORING_WRITE_DOMAINS.includes(domain)) {
     throw new Error(`Unknown agent authoring domain: ${domain}`);
   }
-  const domains = partitionAuthoredDocument(document);
+  const domains = partitionAuthoredDocument(document, { domainCitations });
   if (domain === "content") {
     return {
       domain,
       document: publicDomain(domains.content),
-      context: publicDomain(domains.classification)
+      context: contentReadContext(domains)
     };
   }
   if (domain === "classification") {
@@ -630,11 +831,12 @@ export function projectAuthoredDocument(document, domain = "complete") {
       context: lessonReadContext(domains)
     };
   }
+  const assembledDomains = domainCitations ? partitionAuthoredDocument(document) : domains;
   return {
     domain,
     document: publicPedagogyDomain(domains.pedagogy),
     context: {
-      ...publicDomain(domains.content),
+      ...publicDomain(assembledDomains.content),
       ...publicDomain(domains.classification)
     }
   };
@@ -805,34 +1007,27 @@ function assertPedagogyBridgeIdentities(contentBridges, incomingBridges) {
   });
 }
 
-/**
- * Apply one domain replacement to the current canonical document. The
- * protected domains are copied from the current document and can therefore
- * not be erased by a focused agent save.
- */
-export function applyAuthoredDomain(currentDocument, domain, incoming) {
+function applyDomainProjectionToObjects(currentDomains, previousDocument, domain, incoming) {
   if (!AUTHORING_WRITE_DOMAINS.includes(domain)) {
     throw new Error(`Only ${AUTHORING_WRITE_DOMAINS.join(" and ")} are agent-writable domains`);
   }
-  assertObject(currentDocument, "Current authored document");
   assertDomainPayload(domain, incoming);
   assertNoWriteOnceDrift(
-    currentDocument,
+    previousDocument,
     incoming,
     `${domain} domain document`,
     { allowAbsent: true }
   );
-  const current = partitionAuthoredDocument(currentDocument);
   if (domain === "pedagogy") {
-    assertPedagogyBridgeIdentities(current.content.bridges, incoming.bridges);
+    assertPedagogyBridgeIdentities(currentDomains.content.bridges, incoming.bridges);
   }
   const next = {
-    content: current.content,
-    pedagogy: current.pedagogy,
-    classification: current.classification,
-    lesson: current.lesson,
-    administration: current.administration,
-    provenance: current.provenance
+    content: currentDomains.content,
+    pedagogy: currentDomains.pedagogy,
+    classification: currentDomains.classification,
+    lesson: currentDomains.lesson,
+    administration: currentDomains.administration,
+    provenance: currentDomains.provenance
   };
   if (domain === "content") {
     // A focused payload is the complete selected projection. Replacing it
@@ -842,62 +1037,61 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
   } else if (domain === "classification") {
     next.classification = clone(incoming);
   } else if (domain === "lesson") {
-    next.lesson = lessonProjectionFromPayload(current.lesson, incoming);
-    next.content = {
-      ...clone(current.content),
-      ...contentWithLessonCitations(current.content, incoming)
-    };
-    if (next.content.info === undefined) delete next.content.info;
+    next.lesson = lessonProjectionFromPayload(currentDomains.lesson, incoming);
   } else {
     const preservedProtected = Object.fromEntries(
       [...PEDAGOGY_STORED_ROOT_FIELDS]
-        .filter(key => PROTECTED_ROOT_FIELDS.has(key) && hasOwn(current.pedagogy, key))
-        .map(key => [key, clone(current.pedagogy[key])])
+        .filter(key => PROTECTED_ROOT_FIELDS.has(key) && hasOwn(currentDomains.pedagogy, key))
+        .map(key => [key, clone(currentDomains.pedagogy[key])])
     );
     next.pedagogy = { ...clone(incoming), ...preservedProtected };
     if (hasOwn(incoming, "bridges")) {
       next.pedagogy.bridges = splitDomainBridges(incoming.bridges);
     }
   }
+  return next;
+}
+
+/**
+ * Apply one domain replacement to the current canonical document. The
+ * protected domains are copied from the current document and can therefore
+ * not be erased by a focused agent save.
+ */
+export function applyAuthoredDomain(currentDocument, domain, incoming, {
+  domainCitations = null
+} = {}) {
+  assertObject(currentDocument, "Current authored document");
+  const current = partitionAuthoredDocument(currentDocument, { domainCitations });
+  const next = applyDomainProjectionToObjects(current, currentDocument, domain, incoming);
   return assembleAuthoredDocument(next);
 }
 
 function lessonProjectionFromPayload(currentLesson, incoming) {
+  const result = {};
   const currentIntroduction = currentLesson?.learningIntroduction;
-  if (!hasOwn(incoming, "learningIntroduction")) return {};
-  let introduction = clone(incoming.learningIntroduction);
-  if (isObject(currentIntroduction) && hasOwn(currentIntroduction, "credit") &&
-      isObject(introduction)) {
-    introduction = { ...introduction, credit: clone(currentIntroduction.credit) };
+  if (hasOwn(incoming, "learningIntroduction") && incoming.learningIntroduction !== null) {
+    let introduction = clone(incoming.learningIntroduction);
+    if (isObject(currentIntroduction) && hasOwn(currentIntroduction, "credit") &&
+        isObject(introduction)) {
+      introduction = { ...introduction, credit: clone(currentIntroduction.credit) };
+    }
+    result.learningIntroduction = introduction;
   }
-  return { learningIntroduction: introduction };
-}
-
-// The lesson payload carries only the bibliography. Other info fields stay
-// on the content projection. Omitting citations, or sending an empty list,
-// clears the bibliography.
-function contentWithLessonCitations(content, incoming) {
-  const info = content?.info;
-  const provided = hasOwn(incoming, "info") && isObject(incoming.info)
-    && hasOwn(incoming.info, "citations") && incoming.info.citations != null
-    ? incoming.info.citations
+  const citations = hasOwn(incoming, "info") && isObject(incoming.info)
+    && Array.isArray(incoming.info.citations) && incoming.info.citations.length
+    ? clone(incoming.info.citations)
     : null;
-  const citations = Array.isArray(provided) && provided.length ? clone(provided) : null;
-  if (!citations) {
-    if (!isObject(info)) return isObject(content) && hasOwn(content, "info") ? { info } : {};
-    const next = { ...info };
-    delete next.citations;
-    return Object.keys(next).length ? { info: next } : { info: undefined };
+  if (citations) {
+    result.info = { citations };
   }
-  if (isObject(info)) return { info: { ...info, citations } };
-  if (typeof info === "string" && info) return { info: { text: info, citations } };
-  return { info: { citations } };
+  return result;
 }
 
 // Lists of items with a stable identity merge item by item, the way
 // Kubernetes strategic merge patch treats lists with a merge key. The first
 // key is the id; the second is the field an id is derived from when omitted.
-// Every other list (terms, tags, categories, citations, links) replaces
+// info.citations merges by url or author + title + year on both content and
+// lesson saves. Every other list (terms, tags, categories, links) replaces
 // whole, as in RFC 7396.
 const KEYED_LISTS = Object.freeze({
   clusters: ["id", "name"],
@@ -928,43 +1122,18 @@ function withoutDirective(item) {
   return rest;
 }
 
-function normalizedCitationText(value) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function citationWorkKey(entry) {
-  const title = normalizedCitationText(entry?.title);
-  if (!title) return null;
-  return `${normalizedCitationText(entry?.author)}\0${title}\0${normalizedCitationText(entry?.year)}`;
-}
-
-function citationLabel(entry) {
-  return normalizedCitationText(entry?.url) || citationWorkKey(entry);
-}
-
-function citationsMatch(left, right) {
-  const leftUrl = normalizedCitationText(left?.url);
-  const rightUrl = normalizedCitationText(right?.url);
-  // A URL identifies the entry whenever both sides have one. Different
-  // non-empty URLs are different editions even when author, title, and year
-  // agree. The work key applies only when at least one side has no URL.
-  if (leftUrl && rightUrl) return leftUrl === rightUrl;
-  const leftWork = citationWorkKey(left);
-  const rightWork = citationWorkKey(right);
-  return !!(leftWork && leftWork === rightWork);
-}
-
-// Lesson saves share info.citations with content. A content save still
-// replaces the whole list. A lesson save merges: url identifies an entry
-// when both sides have one, otherwise author + title + year. Entries the
-// patch does not mention stay.
-function mergeCitationList(base, patch) {
+// Both content and lesson saves merge info.citations item by item within
+// their own domain projection: url identifies an entry when both sides have
+// one, otherwise author + title + year. Entries the patch does not mention
+// stay; read-time union combines both domains onto the assembled puzzle.
+function mergeCitationList(base, patch, siblingCitations = [], domain = "") {
   if (patch.some(item => isObject(item) && item[PATCH_DIRECTIVE] === "replace")) {
     return patch
       .filter(item => !(isObject(item) && item[PATCH_DIRECTIVE] === "replace"))
       .map(item => withoutDirective(item));
   }
   const result = Array.isArray(base) ? clone(base) : [];
+  const otherDomain = domain === "lesson" ? "content" : "lesson";
   patch.forEach((item, index) => {
     if (!isObject(item) || !citationLabel(item)) {
       throw new Error(`info.citations[${index}] must name a url or a title`);
@@ -977,7 +1146,17 @@ function mergeCitationList(base, patch) {
     }
     const target = result.findIndex(candidate => citationsMatch(item, candidate));
     if (directive === "delete") {
-      if (target >= 0) result.splice(target, 1);
+      if (target >= 0) {
+        result.splice(target, 1);
+      } else if (
+        domain &&
+        Array.isArray(siblingCitations) &&
+        siblingCitations.some(candidate => isObject(candidate) && citationsMatch(item, candidate))
+      ) {
+        throw new Error(
+          `info.citations[${index}] belongs to the ${otherDomain} domain and cannot be deleted from the ${domain} domain`
+        );
+      }
       return;
     }
     const clean = withoutDirective(item);
@@ -993,13 +1172,18 @@ function mergeCitationList(base, patch) {
   return result;
 }
 
-function patchWithMergedCitations(base, patch) {
+function patchWithMergedCitations(base, patch, siblingCitations = [], domain = "") {
   if (!isObject(patch?.info) || !Array.isArray(patch.info.citations)) return patch;
   return {
     ...patch,
     info: {
       ...patch.info,
-      citations: mergeCitationList(base?.info?.citations, patch.info.citations)
+      citations: mergeCitationList(
+        base?.info?.citations,
+        patch.info.citations,
+        siblingCitations,
+        domain
+      )
     }
   };
 }
@@ -1101,7 +1285,24 @@ function keptKeyedItems(base, patch, path = "") {
   if (!isObject(base) || !isObject(patch)) return kept;
   for (const [key, value] of Object.entries(patch)) {
     const childPath = path ? `${path}.${key}` : key;
+    if (childPath === "info.citations" && Array.isArray(value) && Array.isArray(base[key])) {
+      if (!value.some(item => isObject(item) && hasOwn(item, PATCH_DIRECTIVE))) {
+        const omitted = base[key].filter(item =>
+          isObject(item) &&
+          !value.some(candidate => isObject(candidate) && citationsMatch(candidate, item))
+        );
+        const named = base[key].length - omitted.length;
+        if (omitted.length && named > base[key].length / 2) {
+          kept.push(...omitted.map(item => `${childPath}[${citationPathKey(item)}]`));
+        }
+      }
+      continue;
+    }
     const keys = KEYED_LISTS[childPath];
+    if (isObject(value) && isObject(base[key])) {
+      kept.push(...keptKeyedItems(base[key], value, childPath));
+      continue;
+    }
     if (!keys || !Array.isArray(value) || !Array.isArray(base[key])) continue;
     if (value.some(item => isObject(item) && hasOwn(item, PATCH_DIRECTIVE))) continue;
     const omitted = base[key].filter(item =>
@@ -1177,9 +1378,16 @@ function removedPaths(before, after, prefix = "") {
  * response lists them so an agent never has to guess whether a write
  * dropped data, including when it sent a partial array.
  */
-export function clearedDomainFields(previousDocument, nextDocument, domain) {
-  const before = projectAuthoredDocument(previousDocument, domain).document;
-  const after = projectAuthoredDocument(nextDocument, domain).document;
+export function clearedDomainFields(previousDocument, nextDocument, domain, {
+  beforeDomainCitations = null,
+  afterDomainCitations = null
+} = {}) {
+  const before = projectAuthoredDocument(previousDocument, domain, {
+    domainCitations: beforeDomainCitations
+  }).document;
+  const after = projectAuthoredDocument(nextDocument, domain, {
+    domainCitations: afterDomainCitations
+  }).document;
   // Presentational colors are server-settled, never agent-authored.
   const withoutColors = projection => Array.isArray(projection.clusters)
     ? {
@@ -1199,30 +1407,35 @@ export function clearedDomainFields(previousDocument, nextDocument, domain) {
  * JSON Merge Patch (RFC 7396) over that domain's current projection:
  * omitted fields are kept, `null` removes a field, and objects merge. Lists
  * of identified items (clusters, bridges, lenses, lens options, related-
- * puzzle entries) merge item by item by id, as in a Kubernetes strategic
- * merge patch: `{ id, "$patch": "delete" }` removes an item and a
- * `{ "$patch": "replace" }` entry replaces the whole list. Every other list
- * replaces whole.
+ * puzzle entries, and info.citations) merge item by item by identity, as in
+ * a Kubernetes strategic merge patch: `{ ..., "$patch": "delete" }` removes
+ * an item and a `{ "$patch": "replace" }` entry replaces that domain's list.
+ * Every other list replaces whole.
  *
- * Several authoring passes (pedagogy, review, publication) share the pedagogy
- * domain, and agents carry one habit across domains. Under replacement, a
- * pass-shaped payload erased other passes' fields, and a save of one changed
- * cluster erased the rest of the board. Under this patch, a payload that
- * carries only what changed is safe in every domain.
- *
- * Returns the next document, the authored paths the save removed, and keyed
+ * Returns the next document, the updated per-domain citation split (when
+ * lesson owns citations), the authored paths the save removed, and keyed
  * items it kept although the payload named most of their list.
  */
-export function applyAuthoredDomainPatch(currentDocument, domain, patch) {
+export function applyAuthoredDomainPatch(currentDocument, domain, patch, {
+  domainCitations = null
+} = {}) {
   if (!AUTHORING_WRITE_DOMAINS.includes(domain)) {
     throw new Error(`Only ${AUTHORING_WRITE_DOMAINS.join(" and ")} are agent-writable domains`);
   }
   assertObject(currentDocument, "Current authored document");
   assertDomainPayload(domain, patch);
-  const base = projectAuthoredDocument(currentDocument, domain).document;
+  const currentDomains = partitionAuthoredDocument(currentDocument, { domainCitations });
+  const base = projectAuthoredDocument(currentDocument, domain, { domainCitations }).document;
+  const siblingCitations = domain === "content"
+    ? currentDomains.lesson?.info?.citations || []
+    : domain === "lesson"
+      ? currentDomains.content?.info?.citations || []
+      : [];
   const merged = mergePatch(
     base,
-    domain === "lesson" ? patchWithMergedCitations(base, patch) : patch
+    (domain === "content" || domain === "lesson")
+      ? patchWithMergedCitations(base, patch, siblingCitations, domain)
+      : patch
   );
   if (domain === "content") pruneRemovedTermInfo(base, merged, patch);
   // `merged` is the complete projection, so an absent write-once field here
@@ -1230,16 +1443,26 @@ export function applyAuthoredDomainPatch(currentDocument, domain, patch) {
   assertNoWriteOnceDrift(currentDocument, merged, `${domain} domain document`, {
     allowAbsent: domain !== "content"
   });
-  const document = applyAuthoredDomain(currentDocument, domain, merged);
+  const nextDomains = applyDomainProjectionToObjects(
+    currentDomains,
+    currentDocument,
+    domain,
+    merged
+  );
+  const document = assembleAuthoredDocument(nextDomains);
+  const nextDomainCitations = extractDomainCitations(nextDomains);
   return {
     document,
-    cleared: clearedDomainFields(currentDocument, document, domain),
+    domainCitations: nextDomainCitations,
+    cleared: clearedDomainFields(currentDocument, document, domain, {
+      beforeDomainCitations: domainCitations,
+      afterDomainCitations: nextDomainCitations
+    }),
     kept: keptKeyedItems(base, patch)
   };
 }
 
-export function storedDomainDocuments(document) {
-  const domains = partitionAuthoredDocument(document);
+function serializeDomainObjects(domains) {
   return {
     content: JSON.stringify(domains.content),
     pedagogy: JSON.stringify(domains.pedagogy),
@@ -1254,7 +1477,11 @@ export function storedDomainDocuments(document) {
   };
 }
 
-export function assembleStoredDomainDocuments({
+export function storedDomainDocuments(document, { domainCitations = null } = {}) {
+  return serializeDomainObjects(partitionAuthoredDocument(document, { domainCitations }));
+}
+
+function resolveStoredDomainObjects({
   document,
   content = null,
   pedagogy = null,
@@ -1285,7 +1512,7 @@ export function assembleStoredDomainDocuments({
     storedContent = omitLessonField(storedContent);
     storedPedagogy = omitLessonField(storedPedagogy);
   }
-  return assembleAuthoredDocument({
+  return {
     content: storedContent,
     pedagogy: storedPedagogy,
     classification: classificationProvided
@@ -1294,7 +1521,74 @@ export function assembleStoredDomainDocuments({
     lesson: lessonProvided ? lesson : (fallback?.lesson ?? {}),
     provenance: provenance ?? fallback?.provenance,
     administration: administration ?? fallback?.administration
+  };
+}
+
+export function assembleStoredDomainDocuments(parts = {}) {
+  return assembleAuthoredDocument(resolveStoredDomainObjects(parts));
+}
+
+/**
+ * Prepare a single-column focused save against the current stored projections.
+ * Content and lesson each keep their own citation entries in their own column,
+ * while the materialized document unions both lists at read time.
+ */
+export function prepareDomainSave({
+  rawColumns = {},
+  document = undefined,
+  content = null,
+  pedagogy = null,
+  classification = null,
+  lesson = null,
+  provenance = null,
+  administration = null
+} = {}, domain, projection, { nextProvenance = undefined } = {}) {
+  const currentDomains = resolveStoredDomainObjects({
+    document,
+    content: content ?? parseStoredObject(rawColumns.content),
+    pedagogy: pedagogy ?? parseStoredObject(rawColumns.pedagogy),
+    classification: classification ?? parseStoredObject(rawColumns.classification),
+    lesson: lesson ?? parseStoredObject(rawColumns.lesson),
+    provenance: provenance ?? parseStoredObject(rawColumns.provenance),
+    administration: administration ?? parseStoredObject(rawColumns.administration)
   });
+  const previousDocument = assembleAuthoredDocument(currentDomains);
+  const nextDomains = applyDomainProjectionToObjects(
+    currentDomains,
+    previousDocument,
+    domain,
+    projection
+  );
+  if (nextProvenance !== undefined) {
+    nextDomains.provenance = clone(nextProvenance);
+  }
+  const materialized = assembleAuthoredDocument(nextDomains);
+  const serializedNext = serializeDomainObjects(nextDomains);
+  const columns = domainColumnsForSave(rawColumns, domain, serializedNext);
+  return {
+    previousDocument,
+    materialized,
+    columns,
+    domainCitations: extractDomainCitations(nextDomains)
+  };
+}
+
+export function extractDomainCitationsFromDraftRow(row, {
+  parseJson = (text, label) => {
+    try {
+      return JSON.parse(text);
+    } catch (error) {
+      throw new Error(`${label} contains invalid JSON: ${error.message}`);
+    }
+  }
+} = {}) {
+  if (!row || typeof row !== "object") return null;
+  if (row.lesson_json == null) return null;
+  const lesson = parseJson(row.lesson_json, "Stored lesson domain");
+  const content = row.content_json == null
+    ? null
+    : parseJson(row.content_json, "Stored content domain");
+  return extractDomainCitations({ content, lesson });
 }
 
 /**
@@ -1381,8 +1675,14 @@ export default {
   AUTHORING_READ_DOMAINS,
   AUTHORING_WRITE_DOMAINS,
   SYSTEM_ROOT_FIELDS,
+  CITATION_UNION_CONFLICT_FLAG_ID,
+  CITATION_UNION_AMBIGUITY_FLAG_ID,
   assertNoRetiredAuthoringFields,
   assertCurrentAuthoredDocument,
+  unionDomainCitations,
+  citationUnionFlags,
+  extractDomainCitations,
+  extractDomainCitationsFromDraftRow,
   partitionAuthoredDocument,
   assembleAuthoredDocument,
   projectAuthoredDocument,
@@ -1391,6 +1691,7 @@ export default {
   clearedDomainFields,
   storedDomainDocuments,
   assembleStoredDomainDocuments,
+  prepareDomainSave,
   assembleAuthoredDocumentFromDraftRow,
   stripSystemAuthoredMetadata,
   publicationDocument,
