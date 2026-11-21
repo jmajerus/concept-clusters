@@ -108,8 +108,8 @@ boundary, not just prose guidance:
 - `domain: "classification"` returns `category`, `categories`, `subcategories`, `tags`, and `level`, plus id and title as read-only context.
 - `domain: "pedagogy"` returns bridge relationship annotations, lenses, related puzzles, and language, plus a
   read-only `context` containing content and classification.
-- `domain: "lesson"` returns `learningIntroduction` and any existing `info.citations`, plus a
-  subject-only read-only `context` (id, title, `puzzleKind`, category, cluster names/facts/terms, and bridge terms/facts/`relationKind`) with lenses omitted.
+- `domain: "lesson"` returns `learningIntroduction` and any lesson-authored `info.citations`, plus a
+  subject-only read-only `context` (id, title, `puzzleKind`, category, cluster names/facts/terms, bridge terms/facts/`relationKind`, and any board `info.citations`) with lenses omitted.
 - `domain: "complete"` preserves the whole authored-content compatibility
   contract while protected metadata remains hidden and server-preserved.
 
@@ -131,19 +131,22 @@ path. Write semantics differ by domain:
   | `clusters` | `id`, or `name` when the entry has no id |
   | `bridges` (content and pedagogy) | `id`, or `term` when the entry has no id |
   | `lenses`, `lenses[].options`, `relatedPuzzles.entries` | `id` |
+  | `info.citations` (content and lesson) | `url` when both entries have one, else `author` + `title` + `year` |
 
   An entry patches the item it names, an unknown key appends a new item, and
   items the patch leaves out are kept in place. `{ "id": "beta",
-  "$patch": "delete" }` removes an item. A `{ "$patch": "replace" }` entry
-  makes the rest of that list a whole replacement, which is also how to
+  "$patch": "delete" }` (or the matching `url` / `author` + `title` + `year` on
+  `info.citations`) removes an item from that domain. A `{ "$patch": "replace" }` entry
+  makes the rest of that list a whole replacement for that domain, which is also how to
   reorder. A pedagogy `bridges` entry carries only annotation fields; deleting
-  it removes that bridge's annotations, not the bridge.
+  it removes that bridge's annotations, not the bridge. Content and lesson each
+  store their own `info.citations` entries on `content_json` and `lesson_json`,
+  and read-time assembly unions them into the puzzle bibliography (raising
+  `citation-union-conflict` or `citation-union-ambiguity` in `validation.flags`
+  when both domains disagree on a field or cite a near-matching duplicate).
 - Every other list (`seeds`, `floatingTerms`, `terms`, `tags`, `categories`,
-  citations, links, lens `targets`) replaces whole, as in RFC 7396, except
-  `info.citations` on a `lesson` save: there entries merge by `url` when both
-  sides have one, otherwise by `author`, `title`, and `year`, with
-  `"$patch": "delete"` to remove an entry and `"$patch": "replace"` to replace
-  the list. `$patch` is rejected anywhere else outside a keyed list.
+  links, lens `targets`) replaces whole, as in RFC 7396. `$patch` is rejected
+  anywhere else outside a keyed list.
 - When a content patch moves a term off a cluster, that term's `termInfo`
   note is removed too, unless the same patch sets it.
 - A `complete` save replaces the whole agent-authored document.

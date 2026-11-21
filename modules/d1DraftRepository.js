@@ -11,13 +11,13 @@ import {
   serializeDraftDocument
 } from "./draftRepository.js";
 import {
-  applyAuthoredDomain,
   assertNoWriteOnceDrift,
   assembleStoredDomainDocuments,
   assembleAuthoredDocumentFromDraftRow,
   AUTHORING_WRITE_DOMAINS,
-  domainColumnsForSave,
+  extractDomainCitationsFromDraftRow,
   partitionAuthoredDocument,
+  prepareDomainSave,
   storedDomainDocuments
 } from "./authoringDomains.js";
 import {
@@ -107,15 +107,6 @@ async function runDraftWrite(statement) {
   }
 }
 
-function domainColumnValues(current, domain, domains) {
-  return domainColumnsForSave({
-    content: current.content_json,
-    pedagogy: current.pedagogy_json,
-    classification: current.classification_json,
-    lesson: current.lesson_json
-  }, domain, domains);
-}
-
 function reviewStackLoadedFromRow(row) {
   if (!row.review_baseline_json) return false;
   try {
@@ -126,6 +117,7 @@ function reviewStackLoadedFromRow(row) {
 }
 
 function fullDraft(row) {
+  const domainCitations = extractDomainCitationsFromDraftRow(row, { parseJson: parsedJson });
   return {
     ...metadata(row),
     reviewStackLoaded: reviewStackLoadedFromRow(row),
@@ -136,6 +128,7 @@ function fullDraft(row) {
     layout: row.layout_json == null
       ? null
       : parseLayoutDocument(row.layout_json, "Stored layout"),
+    ...(domainCitations ? { domainCitations } : {}),
     document: assembleRowDocument(row)
   };
 }
@@ -209,6 +202,7 @@ function committedDraftView({
   baseCommitSha = null,
   openedFromPublished = false,
   reviewBasePublishedRevision = null,
+  domainCitations = null,
   status = "draft"
 }) {
   const row = {
@@ -239,6 +233,7 @@ function committedDraftView({
     layout: current?.layout_json == null
       ? null
       : parseLayoutDocument(current.layout_json, "Stored layout"),
+    ...(domainCitations ? { domainCitations } : {}),
     document
   };
 }
@@ -1113,26 +1108,36 @@ export class D1DraftRepository extends DraftRepository {
         `Draft revision conflict: expected ${expectedRevision}, current revision is ${Number(current.revision)}`
       );
     }
-    const previousDocument = assembleRowDocument(current);
+    const currentView = fullDraft(current);
+    const prepared = prepareDomainSave(
+      {
+        rawColumns: {
+          content: current.content_json,
+          pedagogy: current.pedagogy_json,
+          classification: current.classification_json,
+          lesson: current.lesson_json,
+          provenance: current.provenance_json,
+          administration: current.administration_json
+        },
+        document: Number(current.document_stale || 0) === 1 || current.document == null
+          ? undefined
+          : (typeof current.document === "string"
+            ? parsedJson(current.document, "Stored draft")
+            : current.document)
+      },
+      domain,
+      projection,
+      { nextProvenance: provenance }
+    );
+    const { previousDocument, materialized, columns, domainCitations } = prepared;
     const previousAssembled = serializeDraftDocument(previousDocument);
-    let nextDocument = applyAuthoredDomain(previousDocument, domain, projection);
-    if (provenance !== undefined) {
-      nextDocument = { ...nextDocument, provenance };
-    } else if (Object.prototype.hasOwnProperty.call(previousDocument, "provenance")) {
-      nextDocument = { ...nextDocument, provenance: previousDocument.provenance };
-    }
-    const materialized = assembleStoredDomainDocuments({ document: nextDocument });
     const nextAssembled = serializeDraftDocument(materialized);
-    if (previousAssembled === nextAssembled) {
-      return fullDraft(current);
+    if (previousAssembled === nextAssembled
+        && JSON.stringify(currentView.domainCitations || null) === JSON.stringify(domainCitations || null)) {
+      return currentView;
     }
-    const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(nextAssembled);
     const now = new Date().toISOString();
-    // Seed any missing domain columns from the assembled snapshot so the first
-    // focused save on a pre-domain row does not drop sibling fields when the
-    // document cache is marked stale.
-    const columns = domainColumnValues(current, domain, domains);
     const draftAt = revision => committedDraftView({
       draftId,
       document: materialized,
@@ -1140,7 +1145,8 @@ export class D1DraftRepository extends DraftRepository {
       contentHash,
       updatedAt: now,
       current: withHistoryCount(current, true),
-      documentStale: true
+      documentStale: true,
+      domainCitations
     });
     const committed = {
       draftId,
@@ -1226,6 +1232,9 @@ export class D1DraftRepository extends DraftRepository {
     `).bind(draftId).first();
     if (!previous) throw new DraftEmptyHistoryError(draftId);
     const restored = historySnapshotDocument(previous);
+    const restoredDomainCitations = extractDomainCitationsFromDraftRow(previous, {
+      parseJson: parsedJson
+    });
     const materialized = assembleStoredDomainDocuments({
       document: restored,
       // Keep the current administration, including none: undefined would
@@ -1233,15 +1242,18 @@ export class D1DraftRepository extends DraftRepository {
       administration: partitionAuthoredDocument(current.document).administration ?? {}
     });
     const documentJson = serializeDraftDocument(materialized);
-    const domains = storedDomainDocuments(materialized);
+    const domains = storedDomainDocuments(materialized, {
+      domainCitations: restoredDomainCitations
+    });
     const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
     const nextRevision = expectedRevision + 1;
     // The restored document is already in hand. Undo returns it, and the
     // history delete travels in the same batch as the update so a lost
     // response cannot leave the popped snapshot in place for a second undo.
+    const { domainCitations: _staleCitations, ...baseCurrent } = current;
     const popped = revision => ({
-      ...current,
+      ...baseCurrent,
       puzzleId: typeof materialized.id === "string" ? materialized.id : null,
       title: typeof materialized.title === "string" ? materialized.title : null,
       revision,
@@ -1250,6 +1262,7 @@ export class D1DraftRepository extends DraftRepository {
       documentStale: true,
       validation: null,
       workingCopyHistoryCount: Math.max(0, Number(current.workingCopyHistoryCount || 0) - 1),
+      ...(restoredDomainCitations ? { domainCitations: restoredDomainCitations } : {}),
       document: materialized
     });
     const committed = {

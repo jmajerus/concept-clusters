@@ -212,7 +212,10 @@
 // 6.23: same review bar. Lessons may use four IASP blocks (epigraph,
 // note.definition, note.insight, sidebar.example); other ::: blocks fail
 // validation.
+// 6.24: same review bar. Both content and lesson saves merge info.citations
+// by url, or by author, title, and year; each domain stores its own draft
+// entries and read-time union flags conflicts or near-match ambiguities.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 23
+  minor: 24
 });
