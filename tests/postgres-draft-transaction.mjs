@@ -193,6 +193,31 @@ export async function run() {
   });
   assert.equal(created.revision, 1);
 
+  // Deferred provenance stamps: listed until a later row replays them.
+  const deferredRow = (stampId, extra = {}) => ({
+    event: "authoring_assistance_stamp",
+    stampId,
+    draftId: "pg-conflict",
+    capturedAt: new Date().toISOString(),
+    client: { unidentified: true, clientName: "codex" },
+    ...extra
+  });
+  await repository.recordAssistanceStamp({
+    record: deferredRow("pg-deferred", { deferred: { creditWorthy: true, frame: {} } }),
+    actor
+  });
+  await repository.recordAssistanceStamp({
+    record: deferredRow("pg-orphan", { draftId: "pg-deleted", deferred: { creditWorthy: true, frame: {} } }),
+    actor
+  });
+  assert.deepEqual(await repository.listDraftsWithDeferredStamps(),
+    [{ draftId: "pg-conflict", ownerSubject: "author-1" }]);
+  await repository.recordAssistanceStamp({
+    record: deferredRow("pg-replay", { replayOf: "pg-deferred", client: { system: "codex" } }),
+    actor
+  });
+  assert.deepEqual(await repository.listDraftsWithDeferredStamps(), []);
+
   const saved = await repository.save({
     draftId: "pg-conflict",
     document: { ...document, title: "Two" },

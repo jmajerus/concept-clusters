@@ -15,6 +15,22 @@ function stringClaim(payload, name) {
   return typeof value === "string" && value.trim() ? value : undefined;
 }
 
+// Access-as-OAuth-server tokens carry an `oauth` claim naming the MCP client
+// that went through the OAuth flow. Access signs it, so its redirect URI is
+// the strongest client identity the provenance stamp gets (claude.ai -> Claude).
+// Client-describing only: the stamp frame never carries sub or email.
+function oauthClient(payload) {
+  const claim = payload?.oauth;
+  if (!claim || typeof claim !== "object" || Array.isArray(claim)) return null;
+  const clientId = stringClaim(claim, "client_id");
+  const redirectUri = stringClaim(claim, "client_redirect_uri");
+  if (!clientId && !redirectUri) return null;
+  return {
+    ...(clientId ? { clientId } : {}),
+    ...(redirectUri ? { redirectUri } : {})
+  };
+}
+
 export function devAccessActor(subject) {
   return {
     actor: { subject },
@@ -43,7 +59,8 @@ export async function verifyAccessToken({
     actor: {
       subject,
       ...(stringClaim(payload, "email") ? { email: stringClaim(payload, "email") } : {}),
-      ...(stringClaim(payload, "name") ? { name: stringClaim(payload, "name") } : {})
+      ...(stringClaim(payload, "name") ? { name: stringClaim(payload, "name") } : {}),
+      ...(oauthClient(payload) ? { oauth: oauthClient(payload) } : {})
     },
     authInfo: {
       token,

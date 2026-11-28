@@ -59,10 +59,12 @@ import {
   emitMcpClientProbe
 } from "./mcpClientProbe.js";
 import {
-  identifyMcpAssistanceClient,
+  identifyMcpClientViaService,
   observedMcpClientLabel,
+  pendingDeferredStamps,
   stampDocumentAssistanceFromMcp
 } from "./mcpClientIdentity.js";
+import { authoringHostLabel } from "./authoringHosts.js";
 import {
   documentKeepingProvenance,
   samePlayablePuzzle
@@ -100,7 +102,6 @@ import {
 } from "./ontologyAuthoringQueries.js";
 import { CC, ONTOLOGY_PUZZLE_GRAPH_PREFIX, ONTOLOGY_TAXONOMY_GRAPH } from "./ontologyGraph.js";
 import { OntologyStoreError } from "./ontologyStore.js";
-import { canonicalModelLabel } from "./authoringModelSuggestions.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
 import { matchReviewIssue, nextReviewIssueId, publishedRowOrNull } from "./contentDocumentRepository.js";
@@ -488,12 +489,28 @@ function clipClientLabel(value) {
   return trimmed ? trimmed.slice(0, 200) : null;
 }
 
-function reviewClientStamp(ctx, mcpServer, settings = AUTHORING_SETTINGS) {
-  const identity = identifyMcpAssistanceClient({ ctx, server: mcpServer, settings });
+// Who filed an agent review, as provenance-mcp identifies the frame. Only the
+// raw client name when the service is unreachable.
+async function reviewClientStamp(ctx, mcpServer, {
+  actor = null,
+  stampService = null,
+  tool = "record_agent_puzzle_review",
+  settings = AUTHORING_SETTINGS
+} = {}) {
+  const client = await identifyMcpClientViaService({
+    ctx,
+    server: mcpServer,
+    actor,
+    tool,
+    stampService
+  });
+  const system = client?.system
+    ? authoringHostLabel(client.system, settings)?.system || client.system
+    : null;
   return {
-    clientSystem: clipClientLabel(identity?.system || null),
-    clientModel: clipClientLabel(canonicalModelLabel(identity?.model || "", settings.modelSuggestions)),
-    clientName: clipClientLabel(identity?.clientName || observedMcpClientLabel({ ctx, server: mcpServer }))
+    clientSystem: clipClientLabel(system),
+    clientModel: clipClientLabel(client?.model || null),
+    clientName: clipClientLabel(client?.clientName || observedMcpClientLabel({ ctx, server: mcpServer }))
   };
 }
 
@@ -716,7 +733,11 @@ export function createAuthoringMcpServer({
   draftReviewBaseUrl = null,
   // LAN-only Oxigraph store ({ store, pending() }, ontologySync.js). The
   // ontology tools register either way and explain themselves when null.
-  ontology = null
+  ontology = null,
+  // provenance-mcp's stamping client (provenanceStampService.js). Null defers
+  // every stamp: provenance is left as it was and the call is logged for
+  // replay.
+  stampService = null
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
@@ -903,6 +924,24 @@ export function createAuthoringMcpServer({
   const recordStamp = typeof draftRepository.recordAssistanceStamp === "function"
     ? record => draftRepository.recordAssistanceStamp({ record, actor })
     : null;
+  // This draft's deferred stamps, for replay on its next write. A draft with
+  // none (or a repository with no stamp log) replays nothing.
+  async function pendingStampsFor(draftId) {
+    if (!stampService || !draftId ||
+        typeof draftRepository.listAssistanceStamps !== "function") return [];
+    try {
+      return pendingDeferredStamps(await draftRepository.listAssistanceStamps({ draftId, actor }));
+    } catch {
+      return [];
+    }
+  }
+
+  async function persistStampRecords(stampRecords, draftId) {
+    for (const record of stampRecords) {
+      await persistAuthoringAssistanceStamp({ ...record, draftId }, { analytics, recordStamp });
+    }
+  }
+
   const stampLog = createMcpStampContext({
     analytics,
     transport: clientProbeTransport,
@@ -1564,11 +1603,13 @@ export function createAuthoringMcpServer({
     }
     const settled = settleAgentPresentationColors(document, null);
     const modelSettings = await provenanceSettings();
-    const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(settled, {
+    const { document: stamped, stampRecords } = await stampDocumentAssistanceFromMcp(settled, {
       ctx,
       server,
+      actor,
       role: "drafted",
       settings: modelSettings,
+      stampService,
       log: stampLog("create_puzzle_draft", args.draft_id || settled?.id, settled)
     });
     const draftId = args.draft_id || stamped.id;
@@ -1578,10 +1619,7 @@ export function createAuthoringMcpServer({
       actor,
       baseCommitSha: args.base_commit_sha || null
     });
-    await persistAuthoringAssistanceStamp(
-      stampRecord && { ...stampRecord, draftId },
-      { analytics, recordStamp }
-    );
+    await persistStampRecords(stampRecords, draftId);
     return success(`Created draft ${draftId}.` + storedInconsistencyNote(normalization), {
       draft: draftWriteReceipt(draft),
       ...(normalization && !normalization.document
@@ -1799,13 +1837,16 @@ export function createAuthoringMcpServer({
       previousDocument
     );
     const modelSettings = await provenanceSettings();
-    const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(retained, {
+    const { document: stamped, stampRecords } = await stampDocumentAssistanceFromMcp(retained, {
       ctx,
       server,
+      actor,
       role: "edited",
       substantial,
       domain,
       settings: modelSettings,
+      stampService,
+      pendingStamps: await pendingStampsFor(draft_id),
       log: stampLog("save_puzzle_draft", draft_id, stored)
     });
     let draft;
@@ -1829,10 +1870,7 @@ export function createAuthoringMcpServer({
         actor
       });
     }
-    await persistAuthoringAssistanceStamp(
-      stampRecord && { ...stampRecord, draftId: draft_id },
-      { analytics, recordStamp }
-    );
+    await persistStampRecords(stampRecords, draft_id);
     const repairNote = repair && repaired.changes.length > 0
       ? ` Repaired ${repaired.changes.length} escaped-quote mistake${repaired.changes.length === 1 ? "" : "s"} (see \`repair.changes\`).`
       : "";
@@ -1912,15 +1950,18 @@ export function createAuthoringMcpServer({
         // A reshelving is never authorship (CREDITED_WRITE_DOMAINS).
         const substantial = isSubstantialChange(creditableChangeScore(previousDocument, nextDocument));
         const modelSettings = await provenanceSettings();
-        const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(
+        const { document: stamped, stampRecords } = await stampDocumentAssistanceFromMcp(
           nextDocument,
           {
             ctx,
             server,
+            actor,
             role: "edited",
             substantial,
             domain: "classification",
             settings: modelSettings,
+            stampService,
+            pendingStamps: await pendingStampsFor(draftId),
             log: stampLog("reassign_puzzle_classifications", draftId, nextDocument)
           }
         );
@@ -1932,10 +1973,7 @@ export function createAuthoringMcpServer({
           expectedRevision: opened.revision,
           actor
         });
-        await persistAuthoringAssistanceStamp(
-          stampRecord && { ...stampRecord, draftId },
-          { analytics, recordStamp }
-        );
+        await persistStampRecords(stampRecords, draftId);
         let published = null;
         let publicationErrors = null;
         if (publish_to_authoring) {
@@ -2419,7 +2457,7 @@ export function createAuthoringMcpServer({
           basePublishedRevision = published.revision;
         }
       }
-      const stamp = reviewClientStamp(ctx, server, await provenanceSettings());
+      const stamp = await reviewClientStamp(ctx, server, { actor, stampService });
       const filed = await contentDocuments.recordPuzzleAgentReview({
         id: puzzleId,
         eventType: "proposed",
@@ -2470,7 +2508,7 @@ export function createAuthoringMcpServer({
         comments: reviewComments,
         draftRevision: stored.revision,
         guidance: AUTHORING_GUIDANCE_VERSION,
-        ...reviewClientStamp(ctx, server, await provenanceSettings())
+        ...await reviewClientStamp(ctx, server, { actor, stampService })
       });
       const issueReminder = reviewComments && OPEN_ISSUE_LANGUAGE.test(reviewComments)
         ? "This completion comment may describe unresolved work. Open a separate action=open issue for each concern that remains."
@@ -2522,7 +2560,7 @@ export function createAuthoringMcpServer({
       guidance: AUTHORING_GUIDANCE_VERSION,
       issueId,
       eventType,
-      ...reviewClientStamp(ctx, server, await provenanceSettings())
+      ...await reviewClientStamp(ctx, server, { actor, stampService })
     });
     issue = await reviewIssueFromHandle(puzzleId, issueId);
     const verb = action === "open" ? "Opened" : action === "resolve" ? "Resolved" : action === "reopen" ? "Reopened" : "Added a note to";

@@ -1518,6 +1518,30 @@ export class D1DraftRepository extends DraftRepository {
 
   // The raw client each stamped MCP call reported, oldest first, so the
   // drafts page can show the editor what the frame said.
+  // Every owner's drafts that still hold a deferred stamp no later row has
+  // replayed (deferredStampSweep.js). Drafts deleted since are skipped.
+  async listDraftsWithDeferredStamps() {
+    const result = await this.database.prepare(`
+      SELECT DISTINCT d.draft_id AS draft_id, d.owner_subject AS owner_subject
+      FROM draft_assistance_stamps d
+      WHERE json_extract(d.record_json, '$.deferred') IS NOT NULL
+        AND EXISTS (
+          SELECT 1 FROM puzzle_drafts p
+          WHERE p.id = d.draft_id AND p.owner_subject = d.owner_subject
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM draft_assistance_stamps r
+          WHERE r.draft_id = d.draft_id AND r.owner_subject = d.owner_subject
+            AND json_extract(r.record_json, '$.replayOf') = json_extract(d.record_json, '$.stampId')
+        )
+      ORDER BY d.draft_id
+    `).all();
+    return (result.results || []).map(row => ({
+      draftId: row.draft_id,
+      ownerSubject: row.owner_subject
+    }));
+  }
+
   async listAssistanceStamps({ draftId, actor }) {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor).subject;
@@ -1539,7 +1563,17 @@ export class D1DraftRepository extends DraftRepository {
         tool: record?.tool || null,
         hostId: client.hostId || null,
         system: client.system || null,
-        clientName: client.clientName || null
+        clientName: client.clientName || null,
+        // What a replay needs: the row's own id, the request it could not
+        // send, and which deferred row a later row replayed.
+        ...(typeof record?.stampId === "string" ? { stampId: record.stampId } : {}),
+        ...(record?.deferred ? {
+          deferred: record.deferred,
+          role: record.role || null,
+          date: record.date || null,
+          scopes: Array.isArray(record.scopes) ? record.scopes : null
+        } : {}),
+        ...(typeof record?.replayOf === "string" ? { replayOf: record.replayOf } : {})
       }];
     });
   }

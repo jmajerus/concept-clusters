@@ -1,212 +1,33 @@
-// Map MCP call-frame identity to provenance contributor labels.
-// Fingerprints stay here; display labels come from authoringHosts.js.
+// Stamp a draft's provenance from the MCP call frame.
+//
+// provenance-mcp's stamping service identifies the client and upserts the
+// contributor (provenanceStampService.js). This module keeps what is Concept
+// Clusters' own: which calls earn credit, the frame it sends, and the
+// draft_assistance_stamps audit, including stamps deferred while the service
+// is unreachable.
 import { AUTHORING_SETTINGS } from "./authoringSettings.js";
-import { canonicalModelLabel } from "./authoringModelSuggestions.js";
 import { CREDITED_WRITE_DOMAINS } from "./authoringChangeScore.js";
-import { authoringHostLabel } from "./authoringHosts.js";
-import {
-  upsertGenerativeProvenance,
-  canonicalizeDocumentProvenance,
-  formatGenerativeContributorLabel,
-  normalizeReasoningLevel,
-  contributorsByKind,
-  isClaudeFamilyContributor,
-  claudeFamilyStampSystem,
-  hasClaudeRow,
-  applyClaudeRowEdits,
-  generativeHostKey,
-  UNIDENTIFIED_GENERATIVE_SYSTEM
-} from "./authoringProvenance.js";
+import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 import {
   assistanceStampScopes,
   buildAssistanceStampRecord
 } from "./authoringAssistanceLog.js";
-
-// Match rules are protocol fingerprints. Client-surface labels are looked up
-// by id from modules/authoringHosts.js (same id keys as labels entries).
-const HOST_FINGERPRINTS = Object.freeze([
-  {
-    id: "cursor",
-    match: ({ name }) => name === "cursor-vscode" || /^cursor\b/i.test(name)
-  },
-  {
-    // claude.ai web also reports itself as claude-code (probed 2026-10-15:
-    // same clientInfo, _meta key, and Claude-User user-agent as a real Claude
-    // Code session), so the frame credits the family name only. The editor
-    // marks "Claude Code" on the drafts page when they know it was.
-    id: "claude-code",
-    creditAs: "claude",
-    match: ({ name }) => name === "claude-code" || /^claude-code\b/i.test(name)
-  },
-  {
-    id: "claude",
-    match: ({ name }) => name === "Anthropic/ClaudeAI" || /ClaudeAI/i.test(name)
-  },
-  {
-    id: "copilot",
-    match: ({ name, meta }) =>
-      name === "Visual Studio Code" ||
-      (typeof name === "string" && /visual studio code/i.test(name)) ||
-      Boolean(meta?.["vscode.conversationId"] || meta?.["vscode.requestId"])
-  },
-  {
-    id: "gemini-cli",
-    match: ({ name }) =>
-      name === "gemini-cli-mcp-client" || /gemini-cli/i.test(name || "")
-  },
-  {
-    // Muse Code is observed under either its contributor-facing client name or
-    // its native TBH runtime frame. `tbh` is Meta's internal Muse Code name;
-    // match that exact name, never a broad prefix.
-    id: "muse-code",
-    match: ({ name }) =>
-      name === "muse-code" ||
-      /^muse-(?:.+-)?contributor(?:\s*·\s*.+)?$/i.test(name || "") ||
-      name === "tbh"
-  },
-  {
-    id: "muse",
-    match: ({ name }) => name === "muse" || /^muse(?:[-/\s]|$)/i.test(name || "")
-  },
-  {
-    id: "codex",
-    match: ({ name, title }) =>
-      name === "codex-mcp-client" ||
-      title === "Codex" ||
-      /^codex\b/i.test(name || "")
-  },
-  {
-    // Kilo Code's native stdio client identifies itself exactly as "kilo"
-    // with its real release version (probed 2026-09-14: `kilo` @ `7.6.2`,
-    // `meta.progressToken`, no model in the frame). Match the exact name,
-    // never a broad prefix. The surface name "kilo-code" remains the match
-    // for CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME=kilo-code on the mcp-call
-    // fallback path, where no native envelope exists.
-    id: "kilo-code",
-    match: ({ name }) =>
-      name === "kilo" || name === "kilo-code" || /^kilo-code\b/i.test(name || "")
-  },
-  {
-    // ZCode native stdio client (probed 2026-09-14, v0.16.5) sends
-    // clientInfo.name "zcode" in the namespaced request envelope.
-    id: "zcode",
-    match: ({ name }) => name === "zcode" || /^zcode\b/i.test(name || "")
-  }
-]);
-
-function clientInfoFrom(ctx, server) {
-  const envelopeInfo =
-    ctx?.mcpReq?.envelope?.["io.modelcontextprotocol/clientInfo"] || null;
-  const version = typeof server?.server?.getClientVersion === "function"
-    ? server.server.getClientVersion()
-    : null;
-  return envelopeInfo || version || null;
-}
-
-function codexModel(meta) {
-  const turn = meta?.["x-codex-turn-metadata"];
-  const model = typeof turn?.model === "string" ? turn.model.trim() : "";
-  return model || null;
-}
-
-function codexReasoning(meta) {
-  return normalizeReasoningLevel(meta?.["x-codex-turn-metadata"]?.reasoning_effort) || null;
-}
+import {
+  buildStampFrame,
+  frameClientName,
+  mcpClientInfo
+} from "./provenanceStampService.js";
 
 /**
- * Muse's observed contributor client puts model and reasoning in clientInfo
- * rather than separate metadata: "muse-spark-1.3-contributor · high".
- * This is deliberately a narrow parser: unknown Muse names still identify
- * the client surface but do not invent model or reasoning details.
- */
-function museContributorDetails(name) {
-  const match = typeof name === "string" && name.match(
-    /^muse-(.+?)-contributor(?:\s*·\s*(.+))?$/i
-  );
-  if (!match) return { model: null, reasoning: null };
-  const rawModel = match[1].trim();
-  const model = rawModel
-    ? rawModel.split(/[-_]+/).filter(Boolean).map(part =>
-      `${part.slice(0, 1).toUpperCase()}${part.slice(1)}`
-    ).join(" ")
-    : null;
-  return {
-    model,
-    reasoning: normalizeReasoningLevel(match[2]) || null
-  };
-}
-
-function labelFor(hostId, settings = AUTHORING_SETTINGS) {
-  return authoringHostLabel(hostId, settings) || {
-    system: hostId
-  };
-}
-
-export function identifyMcpAssistanceClient({
-  ctx = null,
-  server = null,
-  settings = AUTHORING_SETTINGS
-} = {}) {
-  const info = clientInfoFrom(ctx, server);
-  const meta = ctx?.mcpReq?._meta || null;
-  const name = typeof info?.name === "string" ? info.name.trim() : "";
-  const title = typeof info?.title === "string" ? info.title.trim() : "";
-  const httpUa = ctx?.http?.req?.headers?.get?.("user-agent") || null;
-
-  // A caller using the tools/mcp-call.mjs fallback can self-declare its own
-  // model via CONCEPT_CLUSTERS_MCP_CALL_CLIENT_MODEL (or "model" in a forwarded
-  // --client-info envelope) when its protocol frame carries no per-call model
-  // of its own. This is the lowest-trust tier: a live observed model (Codex's
-  // turn metadata, Muse's contributor name) always wins over a self-declared
-  // one, never the reverse.
-  const declaredModel = typeof info?.model === "string" ? info.model.trim() : "";
-
-  for (const host of HOST_FINGERPRINTS) {
-    if (!host.match({ name, title, meta, httpUa })) continue;
-    const labeled = labelFor(host.creditAs || host.id, settings);
-    const museDetails = host.id === "muse-code" ? museContributorDetails(name) : null;
-    const model = host.id === "codex"
-      ? codexModel(meta)
-      : museDetails?.model || declaredModel || null;
-    const reasoning = host.id === "codex"
-      ? codexReasoning(meta)
-      : museDetails?.reasoning || null;
-    return {
-      system: formatGenerativeContributorLabel(labeled.system, model, settings),
-      ...(model ? { model } : {}),
-      ...(reasoning ? { reasoning } : {}),
-      hostId: host.id,
-      clientName: name || title || null
-    };
-  }
-
-  // Claude-User without matching clientInfo still maps to Claude web.
-  if (httpUa === "Claude-User") {
-    const labeled = labelFor("claude", settings);
-    return {
-      system: labeled.system,
-      hostId: "claude",
-      clientName: name || "Claude-User"
-    };
-  }
-
-  return null;
-}
-
-/**
- * The raw client label an unidentified host presented, for the audit trail
- * only. identifyMcpAssistanceClient deliberately returns null for a host it
- * does not recognize, because an unknown system must never be written into a
- * puzzle's provenance as a generative contributor -- that is player-facing
- * byline data. But a write with no attribution at all is worse than one
- * attributed to "something we did not recognize": before this existed, an
- * unrecognized client could create drafts in production leaving no stamp and
- * no provenance, which is exactly why the shadow-draft incident could not be
- * attributed afterwards. See
+ * The raw client label a host presented, for the audit trail only. A write
+ * with no attribution at all is worse than one attributed to "something we
+ * did not recognize": before unidentified rows existed, an unrecognized
+ * client could create drafts leaving no stamp, which is why the shadow-draft
+ * incident could not be attributed afterwards. See
  * docs/dev-briefs/shadow-draft-incident-postmortem.md.
  */
 export function observedMcpClientLabel({ ctx = null, server = null } = {}) {
-  const info = clientInfoFrom(ctx, server);
+  const info = mcpClientInfo(ctx, server);
   const name = typeof info?.name === "string" ? info.name.trim() : "";
   const title = typeof info?.title === "string" ? info.title.trim() : "";
   const httpUa = ctx?.http?.req?.headers?.get?.("user-agent") || null;
@@ -215,157 +36,207 @@ export function observedMcpClientLabel({ ctx = null, server = null } = {}) {
     : null);
 }
 
+/**
+ * Concept Clusters' credit policy. Role "drafted" (create_puzzle_draft)
+ * always earns credit: it is the one unambiguous moment an MCP client
+ * originated a puzzle's content. Role "edited" (save_puzzle_draft) earns it
+ * only for a substantial change -- computed upstream from computeChangeScore /
+ * isSubstantialChange (authoringChangeScore.js) against what was stored --
+ * confined to a credited write domain. A trivial save (a one-field fix, a
+ * metadata tweak) is the same act as a human editing the working copy on
+ * /admin/drafts, which never credits a contributor; a classification or
+ * administration save never does, whatever the caller scored.
+ */
+export function isCreditWorthyStamp({ role = "edited", substantial = false, domain = "complete" } = {}) {
+  const creditedDomain = domain === "complete" || CREDITED_WRITE_DOMAINS.includes(domain);
+  return role === "drafted" || (role === "edited" && substantial === true && creditedDomain);
+}
+
+/**
+ * Deferred stamps on a draft that no later row has replayed, oldest first.
+ * Takes the draft repository's listAssistanceStamps output.
+ */
+export function pendingDeferredStamps(stamps = []) {
+  const rows = Array.isArray(stamps) ? stamps : [];
+  const replayed = new Set(rows.map(row => row?.replayOf).filter(Boolean));
+  return rows.filter(row =>
+    row?.deferred && typeof row.stampId === "string" && !replayed.has(row.stampId)
+  );
+}
+
+function clientFromService(client) {
+  if (!client || typeof client !== "object") return null;
+  if (!client.system) {
+    return { unidentified: true, clientName: client.clientName ?? null };
+  }
+  return {
+    system: client.system,
+    ...(client.matched ? { hostId: client.matched } : {}),
+    ...(client.via ? { via: client.via } : {}),
+    ...(client.model ? { model: client.model } : {}),
+    ...(client.reasoning ? { reasoning: client.reasoning } : {}),
+    ...(client.clientName ? { clientName: client.clientName } : {})
+  };
+}
+
+async function callService(stampService, request, method = "stamp") {
+  if (!stampService || typeof stampService[method] !== "function") return null;
+  try {
+    return await stampService[method](request);
+  } catch (error) {
+    console.warn(JSON.stringify({
+      message: "provenance stamp deferred",
+      tool: request.tool ?? null,
+      error: error instanceof Error ? error.message : String(error)
+    }));
+    return null;
+  }
+}
+
+/**
+ * Who called, as the service identifies the frame, without touching any
+ * provenance. For audit rows that are not a draft write (agent reviews).
+ * Null when the service is unreachable.
+ */
+export async function identifyMcpClientViaService({
+  ctx = null,
+  server = null,
+  actor = null,
+  tool = null,
+  stampService = null
+} = {}) {
+  const result = await callService(stampService, {
+    tool,
+    frame: buildStampFrame({ ctx, server, actor })
+  }, "identify");
+  return result ? clientFromService(result.client) : null;
+}
+
+/**
+ * Replay a draft's deferred stamps, oldest first, each against the provenance
+ * the previous one produced. Stops at the first failure (the service is still
+ * down) and replays nothing further. `recordFor` builds each replay's audit
+ * row, which names the deferred row it replays (`replayOf`).
+ */
+export async function replayDeferredStamps(provenance, pendingStamps, {
+  stampService = null,
+  recordFor = () => null,
+  date = todayStamp()
+} = {}) {
+  let current = provenance ?? null;
+  const stampRecords = [];
+  let reachable = Boolean(stampService);
+  for (const pending of pendingStamps || []) {
+    if (!reachable) break;
+    const result = await callService(stampService, {
+      tool: pending.tool ?? null,
+      creditWorthy: pending.deferred?.creditWorthy === true,
+      provenance: current,
+      frame: pending.deferred?.frame || {}
+    });
+    if (!result) {
+      reachable = false;
+      break;
+    }
+    if (result.changed !== false) current = result.provenance;
+    const replay = recordFor({
+      client: clientFromService(result.client),
+      role: pending.role ?? "edited",
+      date: pending.date ?? date,
+      tool: pending.tool ?? null,
+      replayOf: pending.stampId,
+      provenance: current,
+      scopes: Array.isArray(pending.scopes) ? pending.scopes : ["puzzle"]
+    });
+    if (replay) stampRecords.push(replay);
+  }
+  return { provenance: current, stampRecords, reachable };
+}
+
 function todayStamp() {
   return new Date().toISOString().slice(0, 10);
 }
 
 /**
- * Upsert two-axis provenance from the MCP call frame -- but only when this
- * call is credit-worthy: role "drafted" (create_puzzle_draft) always is, the
- * one unambiguous moment an MCP client originated a puzzle's content. A role
- * "edited" save (save_puzzle_draft) only auto-credits when the caller passes
- * `substantial: true` -- computed upstream from computeChangeScore /
- * isSubstantialChange (authoringChangeScore.js) against what was previously
- * stored. A trivial edited save (a one-field validation fix, a metadata
- * tweak) is functionally the same act as a human editing the working copy on
- * /admin/drafts, which never auto-credits a contributor either -- so it must
- * not auto-credit the calling MCP client just for having touched the
- * document. A substantial edited save (a real drafting/pedagogy pass) does
- * auto-credit, same as "drafted" -- that is the case automated provenance
- * exists for, so an agent doing real authoring through save_puzzle_draft is
- * never required to hand-write its own provenance.contributors entry to get
- * credit (though it still may, e.g. to name a specific model up front).
+ * Stamp one MCP write. Returns the document to store and the audit rows to
+ * persist once the write lands (`stampRecords`, the current call's last).
  *
- * The audit trail (buildAssistanceStampRecord, D1 draft_assistance_stamps /
- * Analytics Engine) is unaffected by this distinction -- every stamped call
- * is still logged there for internal telemetry regardless of role or
- * substantiality, since that log is not player- or contributor-facing.
+ * Whether the call earns credit is decided here (isCreditWorthyStamp); the
+ * service only identifies the client and upserts the contributor. Its
+ * returned provenance is stored as is.
  *
- * Does not author or overwrite learningIntroduction.credit; the shared
- * canonicalizer may fold a parseable legacy byline into provenance. Same host
- * updates in place; a different host becomes an additional contributor.
+ * If the service fails or times out, provenance stays as it was and the call
+ * is recorded as a deferred row carrying its filtered frame. Never "generative
+ * assistance" as a fallback. Deferred rows passed in `pendingStamps` (this
+ * draft's, from pendingDeferredStamps) are replayed first, oldest first, so a
+ * draft catches up on its next write once the service is back. A stamp never
+ * fails the authoring call.
  */
-export function stampDocumentAssistanceFromMcp(document, {
+export async function stampDocumentAssistanceFromMcp(document, {
   ctx = null,
   server = null,
+  actor = null,
   role = "edited",
   substantial = false,
   domain = "complete",
   date = todayStamp(),
   settings = AUTHORING_SETTINGS,
-  log = null
+  log = null,
+  stampService = null,
+  pendingStamps = []
 } = {}) {
   if (!document || typeof document !== "object") {
-    return { document, stampRecord: null };
+    return { document, stampRecord: null, stampRecords: [] };
   }
-  const identified = identifyMcpAssistanceClient({ ctx, server, settings });
-  const identity = identified?.model
-    ? { ...identified, model: canonicalModelLabel(identified.model, settings.modelSuggestions) }
-    : identified;
   const base = canonicalizeDocumentProvenance(document, { settings });
-  let next = base;
-
-  // Only writing the puzzle earns credit: creating it, or a substantial
-  // change to its content or pedagogy. A save confined to another domain
-  // (classification, administration) never does, whatever the caller scored.
-  const creditedDomain = domain === "complete" || CREDITED_WRITE_DOMAINS.includes(domain);
-  const creditWorthy = role === "drafted" || (role === "edited" && substantial && creditedDomain);
-  if (creditWorthy) {
-    // Arriving here at all is the evidence: a human does not hand-call an
-    // authoring tool over MCP. So a credit-worthy write is recorded as
-    // generative whether or not the client could be named -- an unrecognized
-    // one simply gets the unnamed contributor, which renders as "Drafted with
-    // generative assistance". Recording nothing, as this did before, left an
-    // AI-written board asserting human authorship by default and gave the
-    // editor no way to correct it.
-    // Claude rows are the editor's: once a puzzle credits Claude, a Claude
-    // stamp only adds a row for a model the frame named that no row has yet
-    // (Claude frames rarely name one). The stamp log keeps every call.
-    const claudeFamily = Boolean(identity?.system) &&
-      isClaudeFamilyContributor(identity.system, settings);
-    const stampSystem = claudeFamily
-      ? claudeFamilyStampSystem(base.provenance, settings)
-      : identity?.system;
-    const creditsClaude = claudeFamily &&
-      contributorsByKind(base.provenance, "generative", settings)
-        .some(name => isClaudeFamilyContributor(name, settings));
-    const system = claudeFamily
-      ? formatGenerativeContributorLabel(stampSystem, identity.model, settings)
-      : identity?.system;
-    const provenance = creditsClaude
-      ? (identity.model && !hasClaudeRow(base.provenance, system, settings)
-        ? applyClaudeRowEdits({ provenance: base.provenance }, {
-          added: {
-            model: identity.model,
-            claudeCode: generativeHostKey(stampSystem, settings) !==
-              generativeHostKey(identity.system, settings)
-          },
-          settings
-        }).provenance
-        : base.provenance)
-      : system
-      ? upsertGenerativeProvenance(base.provenance, {
-        system,
-        ...(identity.model ? { model: identity.model } : {}),
-        ...(identity.reasoning ? { reasoning: identity.reasoning } : {})
-      })
-      // Only when nothing generative is on record yet. If a named system is
-      // already credited, the board already says an AI made it, and adding an
-      // unnamed second entry would invent a collaborator -- most likely a
-      // phantom of the same system reconnecting through a frame we did not
-      // recognize (the mcp-call wrapper without forwarded identity, say).
-      : contributorsByKind(base.provenance, "generative", settings).length
-        ? base.provenance
-        : upsertGenerativeProvenance(base.provenance, {
-          system: UNIDENTIFIED_GENERATIVE_SYSTEM
-        }, settings);
-    if (provenance) {
-      next = { ...base, provenance };
-    }
-  }
-
-  if (!identity?.system) {
-    // No named contributor -- an unrecognized system is not a product we can
-    // name in a byline -- but the call is audited as unattributed, and the
-    // collaboration mode above still tells the truth about how it was made.
-    return {
-      document: next,
-      stampRecord: log
-        ? buildAssistanceStampRecord({
-          identity: {
-            unidentified: true,
-            clientName: observedMcpClientLabel({ ctx, server })
-          },
-          role,
-          date,
-          draftId: log.draftId ?? null,
-          puzzleId: log.puzzleId ??
-            (typeof next.id === "string" ? next.id : null),
-          tool: log.tool ?? null,
-          transport: log.transport ?? null,
-          actor: log.actor ?? null,
-          provenance: next.provenance ?? null,
-          scopes: assistanceStampScopes(next, { domain })
-        })
-        : null
-    };
-  }
-
-  const stampRecord = log
+  const recordFor = (fields) => log
     ? buildAssistanceStampRecord({
-      identity,
-      role,
-      date,
       draftId: log.draftId ?? null,
-      puzzleId: log.puzzleId ??
-        (typeof next.id === "string" ? next.id : null),
+      puzzleId: log.puzzleId ?? (typeof base.id === "string" ? base.id : null),
       tool: log.tool ?? null,
       transport: log.transport ?? null,
       actor: log.actor ?? null,
-      provenance: next.provenance ?? null,
-      scopes: assistanceStampScopes(next, { domain })
+      ...fields
     })
     : null;
 
-  return { document: next, stampRecord };
+  const replayed = await replayDeferredStamps(base.provenance, pendingStamps, {
+    stampService,
+    recordFor,
+    date
+  });
+  let provenance = replayed.provenance;
+  const reachable = replayed.reachable;
+  const stampRecords = replayed.stampRecords;
+
+  const creditWorthy = isCreditWorthyStamp({ role, substantial, domain });
+  const frame = buildStampFrame({ ctx, server, actor });
+  const result = reachable
+    ? await callService(stampService, {
+      tool: log?.tool ?? null,
+      creditWorthy,
+      provenance,
+      frame
+    })
+    : null;
+  // "changed: false" keeps CC's own copy, so a draft with no provenance does
+  // not gain an empty one.
+  if (result && result.changed !== false) provenance = result.provenance;
+
+  const next = provenance ? { ...base, provenance } : base;
+  const stampRecord = recordFor({
+    client: result
+      ? clientFromService(result.client)
+      : {
+        unidentified: true,
+        clientName: frameClientName(frame) || observedMcpClientLabel({ ctx, server })
+      },
+    ...(result ? {} : { deferred: { creditWorthy, frame } }),
+    role,
+    date,
+    provenance: next.provenance ?? null,
+    scopes: assistanceStampScopes(next, { domain })
+  });
+  if (stampRecord) stampRecords.push(stampRecord);
+  return { document: next, stampRecord, stampRecords };
 }

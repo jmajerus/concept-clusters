@@ -18,6 +18,7 @@ import { createAuthoringMcpServer } from "./hostedMcpAuthoringServer.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
 import { createOntologyService } from "./ontologySync.js";
 import { authoringDatabaseUrl } from "./postgresPool.js";
+import { provenanceStampServiceFromEnv } from "./provenanceStampService.js";
 
 export { LOCAL_AUTHORING_GUIDANCE };
 
@@ -196,6 +197,9 @@ export function createConceptClustersMcpServer({
       ? createReferencePilot(workspace) : null,
     draftReviewBaseUrl: localDraftReviewUrl(),
     ontology: createOntologyService({ env }),
+    // A file-backed draft remnant (tests, offline work) stamps nothing: its
+    // writes are deferred rather than sent to the LAN service.
+    stampService: remnantDraftStore ? null : provenanceStampServiceFromEnv(env),
     // A normal stdio server resolves its D1 adapter lazily from env, so
     // d1Database is usually null here even though content documents are
     // available. A file-backed draft remnant without an explicit D1 content

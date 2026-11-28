@@ -24,8 +24,13 @@ export function assistanceStampScopes(document, { domain = "complete" } = {}) {
   return scopes;
 }
 
+// `client` is what provenance-mcp's stamping service identified: { system
+// (generative-systems slug), hostId (the slug matched before the Claude-family
+// rule), via, model, reasoning, clientName }, or { unidentified, clientName }.
+// A deferred stamp (service unreachable) carries `deferred: { creditWorthy,
+// frame }` for replay; the row that later replays it carries `replayOf`.
 export function buildAssistanceStampRecord({
-  identity,
+  client,
   role,
   date,
   draftId = null,
@@ -34,13 +39,16 @@ export function buildAssistanceStampRecord({
   transport = null,
   actor = null,
   provenance = null,
-  scopes = ["puzzle"]
+  scopes = ["puzzle"],
+  deferred = null,
+  replayOf = null
 }) {
   // An unidentified client still gets a row: no system, no provenance credit,
   // but a durable record that something wrote here and what it called itself.
-  if (!identity?.system && identity?.unidentified !== true) return null;
+  if (!client?.system && client?.unidentified !== true) return null;
   return {
     event: "authoring_assistance_stamp",
+    stampId: crypto.randomUUID(),
     capturedAt: new Date().toISOString(),
     ...(transport ? { transport } : {}),
     ...(tool ? { tool } : {}),
@@ -49,17 +57,21 @@ export function buildAssistanceStampRecord({
     role,
     date,
     scopes,
-    client: identity.system
+    client: client.system
       ? {
-        system: identity.system,
-        ...(identity.model ? { model: identity.model } : {}),
-        ...(identity.hostId ? { hostId: identity.hostId } : {}),
-        ...(identity.clientName ? { clientName: identity.clientName } : {})
+        system: client.system,
+        ...(client.hostId ? { hostId: client.hostId } : {}),
+        ...(client.via ? { via: client.via } : {}),
+        ...(client.model ? { model: client.model } : {}),
+        ...(client.reasoning ? { reasoning: client.reasoning } : {}),
+        ...(client.clientName ? { clientName: client.clientName } : {})
       }
       : {
         unidentified: true,
-        ...(identity.clientName ? { clientName: identity.clientName } : {})
+        ...(client.clientName ? { clientName: client.clientName } : {})
       },
+    ...(deferred ? { deferred } : {}),
+    ...(replayOf ? { replayOf } : {}),
     ...(provenance?.collaboration
       ? { provenance: { collaboration: provenance.collaboration } }
       : {}),
@@ -74,6 +86,7 @@ export function assistanceStampAnalyticsDataPoint(record) {
       "authoring_assistance_stamp",
       String(record.tool || "").slice(0, 64),
       String(record.client?.system
+        || (record.deferred ? "deferred" : "")
         || (record.client?.unidentified ? "unidentified" : "")).slice(0, 128),
       String(record.role || "").slice(0, 16),
       (record.scopes || []).join(",").slice(0, 128),

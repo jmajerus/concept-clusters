@@ -39,6 +39,7 @@ import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { authoringMcpHealth } from "./authoringMcpHealth.js";
 import { handleLocalMcpRequest } from "./localMcpHttp.js";
 import { startWeeklyLinkHealth } from "./linkHealthSchedule.js";
+import { startDeferredStampSweep } from "./deferredStampSweep.js";
 import { loadPublishedReplicaStatus } from "./publishedReplica.js";
 import {
   publishedReplicaDrainStatus,
@@ -567,6 +568,13 @@ export async function startLocalStaticDev({
     enabled: isAllInterfacesHost(host)
   });
   const stopReplicaDrain = startPublishedReplicaDrain({ repositoryRoot, env });
+  // Same gate as link health: only the LAN authoring server, not a dev or
+  // test server bound to a single interface.
+  const stopStampSweep = startDeferredStampSweep({
+    repositoryRoot,
+    env,
+    enabled: isAllInterfacesHost(host)
+  });
   printReady(base, manifest, authoringReadyExtras({ host, port: actualPort, repositoryRoot, env }));
 
   let stopping = false;
@@ -575,6 +583,7 @@ export async function startLocalStaticDev({
     stopping = true;
     stopLinkHealth();
     stopReplicaDrain();
+    stopStampSweep();
     closeHttpServer(server).then(() => {
       removeLocalDevLease({
         repositoryRoot,
@@ -756,6 +765,13 @@ export async function startLocalWorkerDev({
     enabled: isAllInterfacesHost(host)
   });
   const stopReplicaDrain = startPublishedReplicaDrain({ repositoryRoot, env });
+  // Same gate as link health: only the LAN authoring server, not a dev or
+  // test server bound to a single interface.
+  const stopStampSweep = startDeferredStampSweep({
+    repositoryRoot,
+    env,
+    enabled: isAllInterfacesHost(host)
+  });
   printReady(base, manifest, [
     `Worker mode: Wrangler on ${DEFAULT_HOST}:${wranglerPort}`,
     ...authoringReadyExtras({ host, port: actualPort, repositoryRoot, env })
@@ -767,6 +783,7 @@ export async function startLocalWorkerDev({
     stopping = true;
     stopLinkHealth();
     stopReplicaDrain();
+    stopStampSweep();
     await Promise.all([
       closeHttpServer(server),
       stopChildProcess(wrangler)

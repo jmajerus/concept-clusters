@@ -143,33 +143,59 @@ when needed to disambiguate). The native Muse Code runtime uses Meta's exact
 `tbh` codename; match that name, not a broad prefix. Only Codex is known to
 expose a **model** in the call frame today.
 
-On draft create/save, the server stamps a generative contributor in
-`provenance` from that host when it can identify one.
+On draft create/save, the server sends the call frame to provenance-mcp's
+stamping service (`POST http://provenance-mcp.localdomain:8000/api/stamp`,
+from `modules/mcpClientIdentity.js` via `modules/provenanceStampService.js`).
+The service identifies the client against its match table and returns the
+draft's updated `provenance`; Concept Clusters stores it and writes the
+`draft_assistance_stamps` row. Concept Clusters decides only whether the call
+earns credit (`isCreditWorthyStamp`: drafted, or a substantial edit in a
+credited write domain).
+
+The frame carries client-describing fields only: `clientInfo`, the HTTP
+user-agent, the `_meta` key names, Codex's `x-codex-turn-metadata`, and the
+Cloudflare Access token's `oauth` claim (client id and redirect URI). Never the
+Access subject or email. `PROVENANCE_STAMP_URL` overrides the service address;
+`off` turns stamping off.
+
+If the service is unreachable (2 s timeout), provenance is left unchanged and
+the call is logged as a deferred stamp row carrying its frame. The draft's next
+MCP write replays its deferred rows, oldest first, and the LAN authoring server
+sweeps every draft with unreplayed deferred rows at startup and hourly
+(`modules/deferredStampSweep.js`), so a draft nobody touches again still gets
+its provenance. "Generative assistance" is never written as a fallback, and a
+stamp never fails the authoring call.
+
+Agent reviews ask `POST /api/identify` who called; it returns the same client
+shape and writes no stamp.
 
 ### Recognition doctrine (read before adding rules)
 
+- **Rules live in provenance-mcp.** Match rules, host labels, and the
+  sightings queue for unrecognized clients are provenance-mcp's (its
+  `tables/match-table.json` and conformance suite). A new client is added
+  there, not here.
 - **Recognition is live-frame only.** The probe log (`.mcp-client-probes.jsonl`)
   is write-only telemetry; nothing reads it back. Identity is decided per call
-  from `clientInfo` / `_meta` / HTTP headers against the fingerprint table in
-  `modules/mcpClientIdentity.js`. There is no ingestion step, and adding one
-  would promote self-declared labels into identity — do not do this.
-- **Null frame, null stamp.** An unrecognized frame returns no identity and
-  writes no stamp row. That is correct behavior, not a defect: the alternative
-  is silent misattribution. Never add a rule that credits an anonymous or
-  shared-helper frame to a specific agent, not even "temporarily" — the failure
-  mode is invisible by construction (no error, no flag, wrong author).
+  from the frame. There is no ingestion step, and adding one would promote
+  self-declared labels into identity — do not do this.
+- **Unrecognized means unnamed, never guessed.** An unrecognized frame is
+  stamped `unidentified` with the name it presented. Never add a rule that
+  credits an anonymous or shared-helper frame to a specific agent, not even
+  "temporarily" — the failure mode is invisible by construction (no error, no
+  flag, wrong author).
 - **Probe labels name the identified host; they are never matcher input.**
-  A label records, in the matcher's own output vocabulary, which agent the
-  owner verified on the other end of the captured frame. Frames are matched;
-  labels are attached. Nothing may identify a call by its label.
+  A label records which agent the owner verified on the other end of the
+  captured frame. Frames are matched; labels are attached. Nothing may
+  identify a call by its label.
 - **Guidance stays universal; records stay author-originated.** Authoring
   guidance tells every drafting client *to* attribute, never *as whom*. Agents
-  may supply their own `provenance` contributor name; the server stamps the
+  may supply their own `provenance` contributor name; the service stamps the
   identified MCP host. Current writes use the modern `provenance` shape; JSON-LD
   interchange is handled only by the explicit import/export boundary.
 
-**Host registry:** `modules/authoringHosts.js` — add a label entry here, then
-add a matching fingerprint in `modules/mcpClientIdentity.js` (same `id` key).
+**Host labels:** `modules/authoringHosts.js` still supplies picker and review
+labels in Concept Clusters; it no longer drives identification.
 
 **Credit/byline policy:** `modules/authoringSettings.js` — templates, max
 length, default author, preferred render (`directed` / `compact`), and accept

@@ -18,11 +18,12 @@ export async function run() {
   assert.deepEqual(assistanceStampScopes({ id: "demo" }), ["puzzle"]);
 
   const record = buildAssistanceStampRecord({
-    identity: {
-      system: "Codex (GPT-5.6 Sol)",
+    client: {
+      system: "codex",
       provider: "OpenAI",
       model: "GPT-5.6 Sol",
       hostId: "codex",
+      via: "clientInfo",
       clientName: "codex-mcp-client"
     },
     role: "edited",
@@ -36,7 +37,8 @@ export async function run() {
     scopes: ["puzzle", "learningIntroduction"]
   });
   assert.equal(record.event, "authoring_assistance_stamp");
-  assert.equal(record.client.system, "Codex (GPT-5.6 Sol)");
+  assert.equal(record.client.system, "codex");
+  assert.equal(record.client.via, "clientInfo");
   assert.equal(record.client.provider, undefined);
   assert.deepEqual(record.scopes, ["puzzle", "learningIntroduction"]);
 
@@ -44,7 +46,7 @@ export async function run() {
     blobs: [
       "authoring_assistance_stamp",
       "save_puzzle_draft",
-      "Codex (GPT-5.6 Sol)",
+      "codex",
       "edited",
       "puzzle,learningIntroduction",
       "2026-08-27"
@@ -61,7 +63,7 @@ export async function run() {
     actor: { subject: "owner-subject" }
   });
 
-  const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(
+  const { document: stamped, stampRecord } = await stampDocumentAssistanceFromMcp(
     {
       id: "demo-puzzle",
       title: "Demo",
@@ -78,6 +80,18 @@ export async function run() {
         server: {
           getClientVersion: () => ({ name: "cursor-vscode", version: "1.0.0" })
         }
+      },
+      // Stands in for provenance-mcp: identifies, credits nothing on a
+      // trivial edit, and returns the provenance it was given.
+      stampService: {
+        async stamp({ creditWorthy, provenance }) {
+          assert.equal(creditWorthy, false);
+          return {
+            client: { system: "cursor", matched: "cursor", via: "clientInfo", clientName: "cursor-vscode" },
+            provenance: provenance || {},
+            changed: false
+          };
+        }
       }
     }
   );
@@ -85,7 +99,7 @@ export async function run() {
   // not auto-credit the calling MCP client as a puzzle contributor.
   assert.equal(stamped.provenance, undefined);
   assert.equal(stampRecord.tool, "save_puzzle_draft");
-  assert.equal(stampRecord.client.system, "Cursor");
+  assert.equal(stampRecord.client.system, "cursor");
 
   await persistAuthoringAssistanceStamp(
     { ...stampRecord, draftId: "demo-puzzle" },
