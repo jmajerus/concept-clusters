@@ -1,4 +1,5 @@
-// Client for provenance-mcp's stamping service (POST /api/stamp).
+// Client for provenance-mcp's stamping service (POST /api/stamp, and
+// POST /api/identify for a lookup that writes no stamp).
 //
 // provenance-mcp owns client identification (the generative-systems match
 // table) and the contributor upsert. Concept Clusters keeps its own credit
@@ -79,27 +80,41 @@ export function createProvenanceStampService({
   timeoutMs = DEFAULT_TIMEOUT_MS
 } = {}) {
   if (typeof fetchImpl !== "function") throw new Error("fetch is required");
+  const identifyUrl = new URL("./identify", url).href;
+  async function post(target, body) {
+    const response = await fetchImpl(target, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+    if (!response.ok) {
+      throw new Error(`provenance stamp service answered ${response.status}`);
+    }
+    return response.json();
+  }
   return {
     url,
-    async stamp({ tool = null, creditWorthy, provenance = null, frame = {} }) {
-      const response = await fetchImpl(url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          app: PROVENANCE_STAMP_APP,
-          ...(tool ? { tool } : {}),
-          creditWorthy: Boolean(creditWorthy),
-          mixedDefault: "aiPrimary",
-          modelForm: "label",
-          provenance: plainObject(provenance),
-          frame
-        }),
-        signal: AbortSignal.timeout(timeoutMs)
-      });
-      if (!response.ok) {
-        throw new Error(`provenance stamp service answered ${response.status}`);
+    identifyUrl,
+    // Who the frame is, with no provenance and no stamp row. An unrecognized
+    // name still reaches the service's sightings queue.
+    async identify({ frame = {} } = {}) {
+      const result = await post(identifyUrl, { frame });
+      if (!plainObject(result?.client)) {
+        throw new Error("provenance identify returned no client");
       }
-      const result = await response.json();
+      return result;
+    },
+    async stamp({ tool = null, creditWorthy, provenance = null, frame = {} }) {
+      const result = await post(url, {
+        app: PROVENANCE_STAMP_APP,
+        ...(tool ? { tool } : {}),
+        creditWorthy: Boolean(creditWorthy),
+        mixedDefault: "aiPrimary",
+        modelForm: "label",
+        provenance: plainObject(provenance),
+        frame
+      });
       if (!plainObject(result?.client) || !plainObject(result?.provenance)) {
         throw new Error("provenance stamp service returned no client or provenance");
       }

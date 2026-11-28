@@ -27,6 +27,7 @@ import {
   provenanceStampServiceFromEnv
 } from "../modules/provenanceStampService.js";
 import { UNIDENTIFIED_GENERATIVE_SYSTEM } from "../modules/authoringProvenance.js";
+import { sweepDeferredStamps } from "../modules/deferredStampSweep.js";
 import { D1DraftRepository } from "../modules/d1DraftRepository.js";
 import { createSqliteD1 } from "./lib/sqlite-d1.mjs";
 
@@ -287,6 +288,10 @@ export async function run() {
     frame: codexFrame
   });
   assert.ok(posted[0].signal, "the call has a timeout");
+  assert.equal(httpService.identifyUrl, "http://stamp.test/api/identify");
+  await httpService.identify({ frame: codexFrame });
+  assert.equal(posted[1].url, "http://stamp.test/api/identify");
+  assert.deepEqual(posted[1].body, { frame: codexFrame });
   await assert.rejects(
     createProvenanceStampService({ fetch: async () => new Response("down", { status: 503 }) })
       .stamp({ creditWorthy: false }),
@@ -304,7 +309,18 @@ export async function run() {
     const requests = [];
     return {
       requests,
+      identified: [],
       fail,
+      async identify({ frame }) {
+        this.identified.push(structuredClone(frame));
+        if (this.fail) throw new Error("connect ECONNREFUSED");
+        const name = frame?.clientInfo?.name || null;
+        return {
+          client: name
+            ? { system: name, matched: name, via: "clientInfo", clientName: name, model: "GPT-5.6 Sol" }
+            : { unidentified: true, clientName: null }
+        };
+      },
       async stamp(request) {
         requests.push(structuredClone(request));
         if (this.fail) throw new Error("connect ECONNREFUSED");
@@ -471,12 +487,52 @@ export async function run() {
   assert.equal(again.stampRecords.length, 1);
   assert.ok(again.stampRecord.deferred);
 
-  // Agent reviews ask who called without touching provenance.
+  // Agent reviews ask who called through /api/identify: no provenance, no
+  // stamp row on the service.
   const reviewer = fakeService();
   assert.deepEqual(await identifyMcpClientViaService({
     ctx: frameFor("codex"), tool: "record_agent_puzzle_review", stampService: reviewer
   }), { system: "codex", hostId: "codex", via: "clientInfo", model: "GPT-5.6 Sol", clientName: "codex" });
-  assert.equal(reviewer.requests[0].creditWorthy, false);
-  assert.equal(reviewer.requests[0].provenance, null);
+  assert.deepEqual(reviewer.identified, [{ clientInfo: { name: "codex" } }]);
+  assert.equal(reviewer.requests.length, 0);
   assert.equal(await identifyMcpClientViaService({ ctx: frameFor("codex") }), null);
+
+  // The sweep replays deferred stamps on drafts nobody writes to again: a
+  // board created while the service was down gets its provenance anyway.
+  const swept = new D1DraftRepository(createSqliteD1());
+  const owner = { subject: "sweep-owner" };
+  const offline = fakeService({ fail: true });
+  const orphan = await stampDocumentAssistanceFromMcp({ id: "orphan-board", title: "Orphan" }, {
+    ctx: frameFor("codex"), role: "drafted", stampService: offline,
+    log: { tool: "create_puzzle_draft", draftId: "orphan-board" }
+  });
+  const created = await swept.create({ draftId: "orphan-board", document: orphan.document, actor: owner });
+  for (const record of orphan.stampRecords) await swept.recordAssistanceStamp({ record, actor: owner });
+  // A deferred row on a deleted draft is not swept.
+  await swept.recordAssistanceStamp({
+    record: { ...orphan.stampRecord, stampId: "gone-row", draftId: "deleted-board" },
+    actor: owner
+  });
+  assert.deepEqual(await swept.listDraftsWithDeferredStamps(),
+    [{ draftId: "orphan-board", ownerSubject: "sweep-owner" }]);
+
+  // Still down: nothing changes and the draft stays queued.
+  assert.deepEqual(await sweepDeferredStamps({ draftRepository: swept, stampService: offline }),
+    { drafts: 1, replayed: 0, updated: 0, skipped: 0 });
+  assert.equal((await swept.get({ draftId: "orphan-board", actor: owner })).revision, created.revision);
+
+  offline.fail = false;
+  assert.deepEqual(await sweepDeferredStamps({ draftRepository: swept, stampService: offline }),
+    { drafts: 1, replayed: 1, updated: 1, skipped: 0 });
+  const healed = await swept.get({ draftId: "orphan-board", actor: owner });
+  assert.deepEqual(healed.document.provenance, { collaboration: "ai", contributors: [{ name: "codex" }] });
+  assert.equal(healed.document.title, "Orphan");
+  assert.equal(offline.requests.at(-1).creditWorthy, true);
+  assert.deepEqual(await swept.listDraftsWithDeferredStamps(), []);
+  // A second pass has nothing to do.
+  assert.deepEqual(await sweepDeferredStamps({ draftRepository: swept, stampService: offline }),
+    { drafts: 0, replayed: 0, updated: 0, skipped: 0 });
+  // No service, or a store without the query, sweeps nothing.
+  assert.deepEqual(await sweepDeferredStamps({ draftRepository: swept, stampService: null }),
+    { drafts: 0, replayed: 0, updated: 0, skipped: 0 });
 }

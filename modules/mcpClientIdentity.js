@@ -79,10 +79,10 @@ function clientFromService(client) {
   };
 }
 
-async function callService(stampService, request) {
-  if (!stampService || typeof stampService.stamp !== "function") return null;
+async function callService(stampService, request, method = "stamp") {
+  if (!stampService || typeof stampService[method] !== "function") return null;
   try {
-    return await stampService.stamp(request);
+    return await stampService[method](request);
   } catch (error) {
     console.warn(JSON.stringify({
       message: "provenance stamp deferred",
@@ -107,11 +107,50 @@ export async function identifyMcpClientViaService({
 } = {}) {
   const result = await callService(stampService, {
     tool,
-    creditWorthy: false,
-    provenance: null,
     frame: buildStampFrame({ ctx, server, actor })
-  });
+  }, "identify");
   return result ? clientFromService(result.client) : null;
+}
+
+/**
+ * Replay a draft's deferred stamps, oldest first, each against the provenance
+ * the previous one produced. Stops at the first failure (the service is still
+ * down) and replays nothing further. `recordFor` builds each replay's audit
+ * row, which names the deferred row it replays (`replayOf`).
+ */
+export async function replayDeferredStamps(provenance, pendingStamps, {
+  stampService = null,
+  recordFor = () => null,
+  date = todayStamp()
+} = {}) {
+  let current = provenance ?? null;
+  const stampRecords = [];
+  let reachable = Boolean(stampService);
+  for (const pending of pendingStamps || []) {
+    if (!reachable) break;
+    const result = await callService(stampService, {
+      tool: pending.tool ?? null,
+      creditWorthy: pending.deferred?.creditWorthy === true,
+      provenance: current,
+      frame: pending.deferred?.frame || {}
+    });
+    if (!result) {
+      reachable = false;
+      break;
+    }
+    if (result.changed !== false) current = result.provenance;
+    const replay = recordFor({
+      client: clientFromService(result.client),
+      role: pending.role ?? "edited",
+      date: pending.date ?? date,
+      tool: pending.tool ?? null,
+      replayOf: pending.stampId,
+      provenance: current,
+      scopes: Array.isArray(pending.scopes) ? pending.scopes : ["puzzle"]
+    });
+    if (replay) stampRecords.push(replay);
+  }
+  return { provenance: current, stampRecords, reachable };
 }
 
 function todayStamp() {
@@ -150,8 +189,6 @@ export async function stampDocumentAssistanceFromMcp(document, {
     return { document, stampRecord: null, stampRecords: [] };
   }
   const base = canonicalizeDocumentProvenance(document, { settings });
-  let provenance = base.provenance ?? null;
-  const stampRecords = [];
   const recordFor = (fields) => log
     ? buildAssistanceStampRecord({
       draftId: log.draftId ?? null,
@@ -163,31 +200,14 @@ export async function stampDocumentAssistanceFromMcp(document, {
     })
     : null;
 
-  let reachable = Boolean(stampService);
-  for (const pending of pendingStamps) {
-    if (!reachable) break;
-    const result = await callService(stampService, {
-      tool: pending.tool ?? null,
-      creditWorthy: pending.deferred?.creditWorthy === true,
-      provenance,
-      frame: pending.deferred?.frame || {}
-    });
-    if (!result) {
-      reachable = false;
-      break;
-    }
-    if (result.changed !== false) provenance = result.provenance;
-    const replay = recordFor({
-      client: clientFromService(result.client),
-      role: pending.role ?? "edited",
-      date: pending.date ?? date,
-      tool: pending.tool ?? null,
-      replayOf: pending.stampId,
-      provenance,
-      scopes: Array.isArray(pending.scopes) ? pending.scopes : ["puzzle"]
-    });
-    if (replay) stampRecords.push(replay);
-  }
+  const replayed = await replayDeferredStamps(base.provenance, pendingStamps, {
+    stampService,
+    recordFor,
+    date
+  });
+  let provenance = replayed.provenance;
+  const reachable = replayed.reachable;
+  const stampRecords = replayed.stampRecords;
 
   const creditWorthy = isCreditWorthyStamp({ role, substantial, domain });
   const frame = buildStampFrame({ ctx, server, actor });

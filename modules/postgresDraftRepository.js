@@ -980,6 +980,27 @@ export class PostgresDraftRepository extends DraftRepository {
     return { id, draftId, capturedAt };
   }
 
+  // Every owner's drafts that still hold a deferred stamp no later row has
+  // replayed (deferredStampSweep.js). Drafts deleted since are skipped.
+  async listDraftsWithDeferredStamps() {
+    const { rows } = await this.pool.query(`
+      SELECT DISTINCT d.draft_id, d.owner_subject
+      FROM draft_assistance_stamps d
+      WHERE (d.record_json::jsonb -> 'deferred') IS NOT NULL
+        AND EXISTS (
+          SELECT 1 FROM puzzle_drafts p
+          WHERE p.id = d.draft_id AND p.owner_subject = d.owner_subject
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM draft_assistance_stamps r
+          WHERE r.draft_id = d.draft_id AND r.owner_subject = d.owner_subject
+            AND r.record_json::jsonb ->> 'replayOf' = d.record_json::jsonb ->> 'stampId'
+        )
+      ORDER BY d.draft_id
+    `);
+    return rows.map(row => ({ draftId: row.draft_id, ownerSubject: row.owner_subject }));
+  }
+
   async listAssistanceStamps({ draftId, actor }) {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor).subject;

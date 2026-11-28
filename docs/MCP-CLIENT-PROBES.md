@@ -160,8 +160,14 @@ Access subject or email. `PROVENANCE_STAMP_URL` overrides the service address;
 
 If the service is unreachable (2 s timeout), provenance is left unchanged and
 the call is logged as a deferred stamp row carrying its frame. The draft's next
-MCP write replays its deferred rows, oldest first. "Generative assistance" is
-never written as a fallback, and a stamp never fails the authoring call.
+MCP write replays its deferred rows, oldest first, and the LAN authoring server
+sweeps every draft with unreplayed deferred rows at startup and hourly
+(`modules/deferredStampSweep.js`), so a draft nobody touches again still gets
+its provenance. "Generative assistance" is never written as a fallback, and a
+stamp never fails the authoring call.
+
+Agent reviews ask `POST /api/identify` who called; it returns the same client
+shape and writes no stamp.
 
 ### Recognition doctrine (read before adding rules)
 
