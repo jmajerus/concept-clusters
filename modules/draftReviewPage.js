@@ -2548,7 +2548,8 @@ function unidentifiedClientNames(events = [], stamps = []) {
     add(reviewClientName(event));
   }
   for (const stamp of Array.isArray(stamps) ? stamps : []) {
-    if (stamp?.system || stamp?.hostId) continue;
+    // A deferred stamp was never asked about, so it is not unrecognized.
+    if (stamp?.system || stamp?.hostId || stamp?.deferred) continue;
     add(stamp?.clientName);
   }
   return names;

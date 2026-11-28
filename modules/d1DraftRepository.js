@@ -1539,7 +1539,17 @@ export class D1DraftRepository extends DraftRepository {
         tool: record?.tool || null,
         hostId: client.hostId || null,
         system: client.system || null,
-        clientName: client.clientName || null
+        clientName: client.clientName || null,
+        // What a replay needs: the row's own id, the request it could not
+        // send, and which deferred row a later row replayed.
+        ...(typeof record?.stampId === "string" ? { stampId: record.stampId } : {}),
+        ...(record?.deferred ? {
+          deferred: record.deferred,
+          role: record.role || null,
+          date: record.date || null,
+          scopes: Array.isArray(record.scopes) ? record.scopes : null
+        } : {}),
+        ...(typeof record?.replayOf === "string" ? { replayOf: record.replayOf } : {})
       }];
     });
   }

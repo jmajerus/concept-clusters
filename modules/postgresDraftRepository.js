@@ -1001,7 +1001,17 @@ export class PostgresDraftRepository extends DraftRepository {
         tool: stored?.tool || null,
         hostId: client.hostId || null,
         system: client.system || null,
-        clientName: client.clientName || null
+        clientName: client.clientName || null,
+        // What a replay needs: the row's own id, the request it could not
+        // send, and which deferred row a later row replayed.
+        ...(typeof stored?.stampId === "string" ? { stampId: stored.stampId } : {}),
+        ...(stored?.deferred ? {
+          deferred: stored.deferred,
+          role: stored.role || null,
+          date: stored.date || null,
+          scopes: Array.isArray(stored.scopes) ? stored.scopes : null
+        } : {}),
+        ...(typeof stored?.replayOf === "string" ? { replayOf: stored.replayOf } : {})
       }];
     });
   }

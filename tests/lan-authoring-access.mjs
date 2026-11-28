@@ -40,6 +40,26 @@ export async function run() {
   assert.equal(verified.actor.subject, "author-subject");
   assert.equal(verified.actor.email, "author@example.com");
   assert.equal(verified.authInfo.clientId, "author-subject");
+  assert.equal(verified.actor.oauth, undefined);
+
+  // An Access-as-OAuth token names the MCP client that signed in; the actor
+  // carries it for the provenance stamp frame.
+  const oauthToken = await new SignJWT({
+    sub: "author-subject",
+    oauth: {
+      client_id: "mcp-client-123",
+      client_redirect_uri: "https://claude.ai/api/mcp/auth_callback"
+    }
+  })
+    .setProtectedHeader({ alg: "RS256", kid: "test-key" })
+    .setIssuer("https://team.example")
+    .setExpirationTime("2h")
+    .sign(privateKey);
+  const viaOauth = await verifyAccessToken({ token: oauthToken, teamDomain: "https://team.example", keys });
+  assert.deepEqual(viaOauth.actor.oauth, {
+    clientId: "mcp-client-123",
+    redirectUri: "https://claude.ai/api/mcp/auth_callback"
+  });
 
   const request = new Request("https://authoring.example/mcp", {
     headers: { "cf-access-jwt-assertion": token }

@@ -9,6 +9,7 @@ import {
 } from "./authoringMcpHealth.js";
 import { createReferencePilot, resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { createOntologyService } from "./ontologySync.js";
+import { provenanceStampServiceFromEnv } from "./provenanceStampService.js";
 
 function jsonError(status, error) {
   return Response.json({ error }, { status });
@@ -156,6 +157,7 @@ export async function handleLocalMcpRequest(req, res, {
     referencePilot: workspace.zoteroReferences
       ? createReferencePilot(async () => workspace) : null,
     ontology: createOntologyService({ env }),
+    stampService: provenanceStampServiceFromEnv(env),
     actor: authenticated.actor,
     authInfo: authenticated.authInfo
   });

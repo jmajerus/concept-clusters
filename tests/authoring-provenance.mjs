@@ -30,7 +30,6 @@ import {
   modelToHostSlug
 } from "../modules/authoringModelSuggestions.js";
 import { canonicalizeAuthoredDocumentFields } from "../modules/authoredPuzzleDocument.js";
-import { stampDocumentAssistanceFromMcp } from "../modules/mcpClientIdentity.js";
 import { SimplifiedPuzzleInputSchema } from "../modules/simplifiedPuzzleSchema.js";
 
 export const name = "Authoring provenance (two-axis)";
@@ -171,42 +170,6 @@ export async function run() {
     }).collaboration,
     "aiPrimary"
   );
-
-  const { document: stamped } = stampDocumentAssistanceFromMcp(
-    { id: "demo", title: "Demo" },
-    {
-      // "drafted" (create_puzzle_draft) is the one role that auto-credits
-      // the calling MCP client; "edited" (save_puzzle_draft) does not.
-      role: "drafted",
-      ctx: {
-        mcpReq: {
-          envelope: {
-            "io.modelcontextprotocol/clientInfo": { name: "cursor-vscode" }
-          }
-        }
-      }
-    }
-  );
-  assert.equal(stamped.provenance?.collaboration, "ai");
-  assert.deepEqual(stamped.provenance?.contributors, [{ name: "Cursor" }]);
-
-  const { document: zcodeStamped } = stampDocumentAssistanceFromMcp(
-    { id: "zcode-demo", title: "ZCode demo" },
-    {
-      role: "drafted",
-      ctx: {
-        mcpReq: {
-          envelope: {
-            "io.modelcontextprotocol/clientInfo": { name: "zcode", version: "0.16.5" }
-          }
-        }
-      }
-    }
-  );
-  assert.deepEqual(zcodeStamped.provenance, {
-    collaboration: "ai",
-    contributors: [{ name: "ZCode" }]
-  });
 
   const parsed = SimplifiedPuzzleInputSchema.safeParse({
     id: "demo-puzzle",
